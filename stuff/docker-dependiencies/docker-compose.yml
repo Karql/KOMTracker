@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:14.0
+    hostname: "postgres"
+    restart: always
+    environment:
+      POSTGRES_USER: kom
+      POSTGRES_PASSWORD: kom
+      PGDATA: /data
+    volumes:
+      - ./volumes/postgres/data:/data
+    ports:
+      - 5432:5432
+
+  pgadmin:
+    image: dpage/pgadmin4:6.0
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: kom@kom.kom
+      PGADMIN_DEFAULT_PASSWORD: kom
+      PGADMIN_SERVER_JSON_FILE: /app/servers.json
+    volumes:
+      - ./volumes/pgadmin/data:/var/lib/pgadmin # set chown 5050:5050 (pgadmin:pgadmin)
+      - ./servers.json:/app/servers.json:ro    
+    ports:
+      - 8050:80
+    depends_on:
+      - postgres
