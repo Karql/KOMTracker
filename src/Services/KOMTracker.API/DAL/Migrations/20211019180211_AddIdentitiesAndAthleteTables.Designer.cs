@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KOMTracker.API.DAL.Migrations
 {
     [DbContext(typeof(KOMDBContext))]
-    [Migration("20211013224420_AddIdentitiesAndAthleteTables")]
+    [Migration("20211019180211_AddIdentitiesAndAthleteTables")]
     partial class AddIdentitiesAndAthleteTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -143,6 +143,10 @@ namespace KOMTracker.API.DAL.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("access_failed_count");
 
+                    b.Property<int>("AthleteId")
+                        .HasColumnType("integer")
+                        .HasColumnName("athlete_id");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("text")
@@ -201,6 +205,9 @@ namespace KOMTracker.API.DAL.Migrations
                         .HasColumnName("user_name");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AthleteId")
+                        .IsUnique();
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -290,18 +297,11 @@ namespace KOMTracker.API.DAL.Migrations
                         .HasColumnType("text")
                         .HasColumnName("sex");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
                     b.Property<float>("Weight")
                         .HasColumnType("real")
                         .HasColumnName("weight");
 
                     b.HasKey("AthleteId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("strava_athlete");
                 });
@@ -333,6 +333,17 @@ namespace KOMTracker.API.DAL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("KOMTracker.API.Models.Identity.UserModel", b =>
+                {
+                    b.HasOne("KOMTracker.API.Models.Strava.AthleteModel", "Athlete")
+                        .WithOne("User")
+                        .HasForeignKey("KOMTracker.API.Models.Identity.UserModel", "AthleteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Athlete");
+                });
+
             modelBuilder.Entity("KOMTracker.API.Models.Identity.UserRoleModel", b =>
                 {
                     b.HasOne("KOMTracker.API.Models.Identity.RoleModel", null)
@@ -359,16 +370,7 @@ namespace KOMTracker.API.DAL.Migrations
 
             modelBuilder.Entity("KOMTracker.API.Models.Strava.AthleteModel", b =>
                 {
-                    b.HasOne("KOMTracker.API.Models.Identity.UserModel", "User")
-                        .WithOne("Athlete")
-                        .HasForeignKey("KOMTracker.API.Models.Strava.AthleteModel", "UserId");
-
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("KOMTracker.API.Models.Identity.UserModel", b =>
-                {
-                    b.Navigation("Athlete");
                 });
 #pragma warning restore 612, 618
         }

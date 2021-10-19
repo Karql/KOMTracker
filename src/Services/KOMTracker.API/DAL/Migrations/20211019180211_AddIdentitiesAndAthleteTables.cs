@@ -23,28 +23,23 @@ namespace KOMTracker.API.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "identity_user",
+                name: "strava_athlete",
                 columns: table => new
                 {
-                    id = table.Column<string>(type: "text", nullable: false),
-                    user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    normalized_user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    normalized_email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    email_confirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    password_hash = table.Column<string>(type: "text", nullable: true),
-                    security_stamp = table.Column<string>(type: "text", nullable: true),
-                    concurrency_stamp = table.Column<string>(type: "text", nullable: true),
-                    phone_number = table.Column<string>(type: "text", nullable: true),
-                    phone_number_confirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    two_factor_enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    lockout_end = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    lockout_enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    access_failed_count = table.Column<int>(type: "integer", nullable: false)
+                    athlete_id = table.Column<int>(type: "integer", nullable: false),
+                    first_name = table.Column<string>(type: "text", nullable: true),
+                    last_name = table.Column<string>(type: "text", nullable: true),
+                    bio = table.Column<string>(type: "text", nullable: true),
+                    city = table.Column<string>(type: "text", nullable: true),
+                    country = table.Column<string>(type: "text", nullable: true),
+                    sex = table.Column<string>(type: "text", nullable: true),
+                    weight = table.Column<float>(type: "real", nullable: false),
+                    profile = table.Column<string>(type: "text", nullable: true),
+                    profile_medium = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_identity_user", x => x.id);
+                    table.PrimaryKey("PK_strava_athlete", x => x.athlete_id);
                 });
 
             migrationBuilder.CreateTable(
@@ -65,6 +60,38 @@ namespace KOMTracker.API.DAL.Migrations
                         column: x => x.role_id,
                         principalTable: "identity_role",
                         principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "identity_user",
+                columns: table => new
+                {
+                    id = table.Column<string>(type: "text", nullable: false),
+                    athlete_id = table.Column<int>(type: "integer", nullable: false),
+                    user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    normalized_user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    normalized_email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    email_confirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    password_hash = table.Column<string>(type: "text", nullable: true),
+                    security_stamp = table.Column<string>(type: "text", nullable: true),
+                    concurrency_stamp = table.Column<string>(type: "text", nullable: true),
+                    phone_number = table.Column<string>(type: "text", nullable: true),
+                    phone_number_confirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    two_factor_enabled = table.Column<bool>(type: "boolean", nullable: false),
+                    lockout_end = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    lockout_enabled = table.Column<bool>(type: "boolean", nullable: false),
+                    access_failed_count = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_identity_user", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_identity_user_strava_athlete_athlete_id",
+                        column: x => x.athlete_id,
+                        principalTable: "strava_athlete",
+                        principalColumn: "athlete_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -153,33 +180,6 @@ namespace KOMTracker.API.DAL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "strava_athlete",
-                columns: table => new
-                {
-                    athlete_id = table.Column<int>(type: "integer", nullable: false),
-                    user_id = table.Column<string>(type: "text", nullable: true),
-                    first_name = table.Column<string>(type: "text", nullable: true),
-                    last_name = table.Column<string>(type: "text", nullable: true),
-                    bio = table.Column<string>(type: "text", nullable: true),
-                    city = table.Column<string>(type: "text", nullable: true),
-                    country = table.Column<string>(type: "text", nullable: true),
-                    sex = table.Column<string>(type: "text", nullable: true),
-                    weight = table.Column<float>(type: "real", nullable: false),
-                    profile = table.Column<string>(type: "text", nullable: true),
-                    profile_medium = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_strava_athlete", x => x.athlete_id);
-                    table.ForeignKey(
-                        name: "FK_strava_athlete_identity_user_user_id",
-                        column: x => x.user_id,
-                        principalTable: "identity_user",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 table: "identity_role",
@@ -195,6 +195,12 @@ namespace KOMTracker.API.DAL.Migrations
                 name: "EmailIndex",
                 table: "identity_user",
                 column: "normalized_email");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_identity_user_athlete_id",
+                table: "identity_user",
+                column: "athlete_id",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -216,12 +222,6 @@ namespace KOMTracker.API.DAL.Migrations
                 name: "IX_identity_user_role_role_id",
                 table: "identity_user_role",
                 column: "role_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_strava_athlete_user_id",
-                table: "strava_athlete",
-                column: "user_id",
-                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -242,13 +242,13 @@ namespace KOMTracker.API.DAL.Migrations
                 name: "identity_user_token");
 
             migrationBuilder.DropTable(
-                name: "strava_athlete");
-
-            migrationBuilder.DropTable(
                 name: "identity_role");
 
             migrationBuilder.DropTable(
                 name: "identity_user");
+
+            migrationBuilder.DropTable(
+                name: "strava_athlete");
         }
     }
 }

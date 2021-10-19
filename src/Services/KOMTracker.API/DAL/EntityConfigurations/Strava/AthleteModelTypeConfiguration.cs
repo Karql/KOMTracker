@@ -21,9 +21,6 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Strava
                 .HasColumnName("athlete_id")
                 .ValueGeneratedNever(); // id from strava
 
-            builder.Property(x => x.UserId)
-                .HasColumnName("user_id");
-
             builder.Property(x => x.FirstName)
                 .HasColumnName("first_name");
 
@@ -50,10 +47,6 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Strava
 
             builder.Property(x => x.ProfileMedium)
                 .HasColumnName("profile_medium");
-
-            builder.HasOne(x => x.User)
-                .WithOne(x => x.Athlete)
-                .HasForeignKey<AthleteModel>(x => x.UserId);
         }
     }
 }

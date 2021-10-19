@@ -8,7 +8,6 @@ namespace KOMTracker.API.Models.Strava
 {
     public class AthleteModel
     {
-        public string UserId { get; set; }
         public int AthleteId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }

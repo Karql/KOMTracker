@@ -62,6 +62,13 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Identity
 
             builder.Property(x => x.AccessFailedCount)
                 .HasColumnName("access_failed_count");
+
+            builder.Property(x => x.AthleteId)
+                .HasColumnName("athlete_id");
+
+            builder.HasOne(x => x.Athlete)
+                .WithOne(x => x.User)
+                .HasForeignKey<UserModel>(x => x.AthleteId);
         }
     }
 }
