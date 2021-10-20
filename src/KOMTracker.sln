@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{90
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KOMTracker.API", "Services\KOMTracker.API\KOMTracker.API.csproj", "{DD4ABE5E-378A-4976-BC85-420EA27EDE8D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strava.API.Client", "Services\Strava.API.Client\Strava.API.Client.csproj", "{E16029E9-450F-41CE-8AED-9B2CDEA396A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,12 +19,17 @@ Global
 		{DD4ABE5E-378A-4976-BC85-420EA27EDE8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD4ABE5E-378A-4976-BC85-420EA27EDE8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD4ABE5E-378A-4976-BC85-420EA27EDE8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E16029E9-450F-41CE-8AED-9B2CDEA396A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E16029E9-450F-41CE-8AED-9B2CDEA396A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E16029E9-450F-41CE-8AED-9B2CDEA396A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E16029E9-450F-41CE-8AED-9B2CDEA396A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DD4ABE5E-378A-4976-BC85-420EA27EDE8D} = {90E1A68D-E0A9-4BFF-8DBE-4D1D945AE09D}
+		{E16029E9-450F-41CE-8AED-9B2CDEA396A0} = {90E1A68D-E0A9-4BFF-8DBE-4D1D945AE09D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {24328D87-6D63-4EDE-938C-B1CD351245CD}

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Strava.API.Client.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,6 +45,12 @@ namespace KOMTracker.API
             services.AddIdentity<UserModel, IdentityRole>()
                 .AddEntityFrameworkStores<KOMDBContext>()
                 .AddDefaultTokenProviders();
+
+            services.AddStravaApiClient();
+            services.AddTransient<Strava.API.Client.Model.Config.ConfigModel>(sp =>
+            {
+                return _configuration.GetSection("StravaApiClientConfig").Get<Strava.API.Client.Model.Config.ConfigModel>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
