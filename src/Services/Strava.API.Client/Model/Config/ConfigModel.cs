@@ -8,7 +8,7 @@ namespace Strava.API.Client.Model.Config
 {
     public class ConfigModel
     {
-        public string ClientID { get; set; }
+        public int ClientID { get; set; }
         public string ClientSecret { get; set; }
     }
 }

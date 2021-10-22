@@ -1,0 +1,1 @@
+- Change Project FluentResults.Extensions.FluentAssertions to NuGet package when https://github.com/altmann/FluentResults/pull/100 will be realeased.

@@ -9,6 +9,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KOMTracker.API", "Services\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strava.API.Client", "Services\Strava.API.Client\Strava.API.Client.csproj", "{E16029E9-450F-41CE-8AED-9B2CDEA396A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strava.API.Client.Tests", "Services\Strava.API.Client.Tests\Strava.API.Client.Tests.csproj", "{0BF84F3D-B3E7-4F17-A245-AFD07ECD6D4D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{1B65C037-2265-4E75-9128-91AB5DA7EF35}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils.Tests", "Utils\Utils.Tests\Utils.Tests.csproj", "{EE3FB89B-3760-4408-830A-B7599F8ACF99}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentResults.Extensions.FluentAssertions", "Utils\FluentResults.Extensions.FluentAssertions\FluentResults.Extensions.FluentAssertions.csproj", "{C41C5176-2F8A-426F-B4EA-11308F2EE12E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +31,18 @@ Global
 		{E16029E9-450F-41CE-8AED-9B2CDEA396A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E16029E9-450F-41CE-8AED-9B2CDEA396A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E16029E9-450F-41CE-8AED-9B2CDEA396A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BF84F3D-B3E7-4F17-A245-AFD07ECD6D4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BF84F3D-B3E7-4F17-A245-AFD07ECD6D4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BF84F3D-B3E7-4F17-A245-AFD07ECD6D4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BF84F3D-B3E7-4F17-A245-AFD07ECD6D4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE3FB89B-3760-4408-830A-B7599F8ACF99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE3FB89B-3760-4408-830A-B7599F8ACF99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE3FB89B-3760-4408-830A-B7599F8ACF99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE3FB89B-3760-4408-830A-B7599F8ACF99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C41C5176-2F8A-426F-B4EA-11308F2EE12E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C41C5176-2F8A-426F-B4EA-11308F2EE12E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C41C5176-2F8A-426F-B4EA-11308F2EE12E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C41C5176-2F8A-426F-B4EA-11308F2EE12E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,6 +50,9 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{DD4ABE5E-378A-4976-BC85-420EA27EDE8D} = {90E1A68D-E0A9-4BFF-8DBE-4D1D945AE09D}
 		{E16029E9-450F-41CE-8AED-9B2CDEA396A0} = {90E1A68D-E0A9-4BFF-8DBE-4D1D945AE09D}
+		{0BF84F3D-B3E7-4F17-A245-AFD07ECD6D4D} = {90E1A68D-E0A9-4BFF-8DBE-4D1D945AE09D}
+		{EE3FB89B-3760-4408-830A-B7599F8ACF99} = {1B65C037-2265-4E75-9128-91AB5DA7EF35}
+		{C41C5176-2F8A-426F-B4EA-11308F2EE12E} = {1B65C037-2265-4E75-9128-91AB5DA7EF35}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {24328D87-6D63-4EDE-938C-B1CD351245CD}
