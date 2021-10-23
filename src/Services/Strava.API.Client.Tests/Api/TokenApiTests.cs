@@ -14,6 +14,9 @@ using System.Net.Http;
 using FluentAssertions;
 using FluentResults.Extensions.FluentAssertions;
 using System.Net.Mime;
+using Strava.API.Client.Model.Athlete;
+using Strava.API.Client.Model.Token;
+using Strava.API.Client.Tests.Extensions.Model.Athlete;
 
 namespace Strava.API.Client.Tests.Api
 {
@@ -24,39 +27,78 @@ namespace Strava.API.Client.Tests.Api
 
         private readonly TokenApi _tokenApi;
 
+        #region TestData
         private const string TEST_CODE = "code123";
         private const int TEST_CLIENT_ID = 123;
         private const string TEST_CLIENT_SECRET = "xyz";
-        private static ConfigModel Config => new ConfigModel
+        private static ConfigModel TestConfig => new ConfigModel
         {
             ClientID = TEST_CLIENT_ID,
             ClientSecret = TEST_CLIENT_SECRET
-
         };
+
+        private static AthleteModel ExpectedAthlete => new AthleteModel
+        {
+            Id = 1,
+            ResourceState = Client.Model.Base.ResourceStateEnum.Summary,
+            Username = "username",
+            FirstName = "firstname",
+            Lastname = "lastname",
+            Bio = "bio",
+            City = "city",
+            State = "state",
+            Country = "country",
+            Sex = "M",
+            Premium = true,
+            Summit = true,
+            CreatedAt = DateTime.Today.ToUniversalTime(), // Today has no miliseconds etc.
+            UpdatedAt = DateTime.Today.ToUniversalTime(), // Today has no miliseconds etc.
+            BadgeTypeId = 1,
+            Weight = 75,
+            Profile = "http://profile.com",
+            ProfileMedium = "http://profile-medium.com/"
+        };
+
+        private static TokenModel ExpectedToken => new TokenModel
+        {
+            ExpiresAt = DateTime.Today.AddSeconds(10).ToUniversalTime(), // Today has no miliseconds etc.
+            ExpiresIn = 10,
+            AccessToken = "xxx",
+            RefreshToken = "yyy",
+            TokenType = "Bearer"
+        };
+
+        private static TokenWithAthleteModel ExpectedTokenWithAthlete => new TokenWithAthleteModel(ExpectedToken, ExpectedAthlete);
+        #endregion
 
         public TokenApiTests(ITestLogger<TokenApi> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _mockHttp = new MockHttpMessageHandler();
 
-            _tokenApi = new TokenApi(_logger, Config, _mockHttp.ToHttpClientFactory());
+            _tokenApi = new TokenApi(_logger, TestConfig, _mockHttp.ToHttpClientFactory());
         }
 
         #region ExchangeAsync
         [Fact]
-        public async Task ExchangeAsync_Should_CallCorectUrlAndReturnSuccess()
+        public async Task ExchangeAsync_Should_CallCorectUrlAndReturnDeserializedModel()
         {
             // Arrange
             var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
 
+            var expectedTokenWithAthlete = ExpectedTokenWithAthlete;
+
             _mockHttp.Expect(HttpMethod.Post, shouldUrl)
-                .Respond(HttpStatusCode.OK, MediaTypeNames.Application.Json,  "{}");
+                .Respond(HttpStatusCode.OK, MediaTypeNames.Application.Json, ExpectedTokenWithAthlete.ToJson());
 
             // Act
             var res = await _tokenApi.ExchangeAsync(TEST_CODE);
 
             // Assert
             res.Should().BeSuccess();
+            var actualTokenWithAthlete = res.Value;
+            actualTokenWithAthlete.Should().BeEquivalentTo(expectedTokenWithAthlete);
+
             _mockHttp.VerifyNoOutstandingExpectation();
         }
 

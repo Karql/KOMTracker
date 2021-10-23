@@ -5,10 +5,11 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Utils.Extensions;
 
-namespace Strava.API.Client.Utils.Converters
+namespace Utils.Converters
 {
-    sealed class TimeStampDateTimeConverter : JsonConverter<DateTime>
+    public class TimeStampDateTimeConverter : JsonConverter<DateTime>
     {
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -17,7 +18,7 @@ namespace Strava.API.Client.Utils.Converters
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            long unixTime = Convert.ToInt64((value - DateTime.UnixEpoch).TotalSeconds);
+            long unixTime = value.ToTimeStamp();
             writer.WriteStringValue(unixTime.ToString());
         }
     }

@@ -1,4 +1,4 @@
-﻿using Strava.API.Client.Utils.Converters;
+﻿using Utils.Converters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +16,9 @@ namespace Strava.API.Client.Model.Token
         [JsonConverter(typeof(TimeStampDateTimeConverter))]
         [JsonPropertyName("expires_at")]
         public DateTime ExpiresAt { get; set; }
+
+        [JsonPropertyName("expires_in")]
+        public int ExpiresIn { get; set; }
 
         [JsonPropertyName("access_token")]
         public string AccessToken { get; set; }

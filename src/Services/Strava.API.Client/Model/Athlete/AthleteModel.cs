@@ -17,7 +17,7 @@ namespace Strava.API.Client.Model.Athlete
         public int Id { get; set; }
 
         [JsonPropertyName("created_at")]
-        public DateTime CreatedAd { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         [JsonPropertyName("updated_at")]
         public DateTime UpdatedAt { get; set; }
@@ -36,6 +36,9 @@ namespace Strava.API.Client.Model.Athlete
 
         [JsonPropertyName("city")]
         public string City { get; set; }
+
+        [JsonPropertyName("state")]
+        public string State { get; set; }
 
         [JsonPropertyName("country")]
         public string Country { get; set; }
