@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using KOMTracker.API.Infrastructure.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Strava.API.Client.Api;
 using System;
@@ -13,10 +14,12 @@ namespace KOMTracker.API.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly ITokenApi _tokenApi;
+        private readonly IAthleteService _athleteService;
 
-        public AccountsController(ITokenApi tokenApi)
+        public AccountsController(ITokenApi tokenApi, IAthleteService athleteService)
         {
             _tokenApi = tokenApi ?? throw new ArgumentNullException(nameof(tokenApi));
+            _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
         }
 
         [HttpGet("connect")]
@@ -26,15 +29,18 @@ namespace KOMTracker.API.Controllers
             
             // 2. exchange token
             var exchangeResult = await _tokenApi.ExchangeAsync(code);
-
             if (!exchangeResult.IsSuccess)
             {
                 // TODO: 
                 // - better error handling
                 throw new Exception($"{nameof(_tokenApi.ExchangeAsync)} failed!");
             }
-
             var tokenWithAthlete = exchangeResult.Value;
+
+            // 3. check is athlete exists
+            var athlete = await _athleteService.GetAthleteByIdAsync(tokenWithAthlete.Athlete.Id);
+
+            
 
             // 3. add athlete and user when not exists
             // 4. login 
