@@ -27,7 +27,9 @@ namespace KOMTracker.API.Controllers
         {
             await _accountService.Connect(code, scope);
 
-            return new  OkObjectResult(null);
+            // TODO: errors handling and redirects by state
+
+            return new CreatedResult("test", null);
         }
     }
 }

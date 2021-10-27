@@ -3,6 +3,7 @@ using KOMTracker.API.DAL;
 using KOMTracker.API.Models.Identity;
 using KOMTracker.API.Models.Strava;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Strava.API.Client.Api;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,14 @@ namespace KOMTracker.API.Infrastructure.Services
             await _athleteService.AddOrUpdateAthleteAsync(athlete);
             await _athleteService.AddOrUpdateTokenAsync(token);
 
+            if (!await IsUserExistsAsync(athlete.AthleteId))
+            {
+                await AddUser(athlete);
+            }
+            
             await _komUoW.SaveChangesAsync();
+
+            // TODO: Login
         }
 
         protected bool VerifyScope(string scope)
@@ -66,6 +74,20 @@ namespace KOMTracker.API.Infrastructure.Services
             token.Scope = scope;
 
             return (athlete, token);
+        }
+
+        protected Task<bool> IsUserExistsAsync(int athleteId)
+        {
+            return _userManager.Users.AnyAsync(x => x.AthleteId == athleteId);
+        }
+
+        protected Task AddUser(AthleteModel athlete)
+        {
+            return _userManager.CreateAsync(new UserModel
+            {
+                AthleteId = athlete.AthleteId,
+                UserName = athlete.Username
+            });
         }
     }
 }
