@@ -19,10 +19,10 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Identity
                 .HasColumnName("id");
 
             builder.Property(x => x.UserName)
-                .HasColumnName("user_name");
+                .HasColumnName("username");
 
             builder.Property(x => x.NormalizedUserName)
-                .HasColumnName("normalized_user_name");
+                .HasColumnName("normalized_username");
 
             builder.Property(x => x.Email)
                 .HasColumnName("email");

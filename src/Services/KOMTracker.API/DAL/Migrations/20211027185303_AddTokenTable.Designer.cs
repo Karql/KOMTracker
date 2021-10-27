@@ -3,15 +3,17 @@ using System;
 using KOMTracker.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace KOMTracker.API.DAL.Migrations
 {
     [DbContext(typeof(KOMDBContext))]
-    partial class KOMDBContextModelSnapshot : ModelSnapshot
+    [Migration("20211027185303_AddTokenTable")]
+    partial class AddTokenTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -175,7 +177,7 @@ namespace KOMTracker.API.DAL.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
-                        .HasColumnName("normalized_username");
+                        .HasColumnName("normalized_user_name");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text")
@@ -200,7 +202,7 @@ namespace KOMTracker.API.DAL.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
-                        .HasColumnName("username");
+                        .HasColumnName("user_name");
 
                     b.HasKey("Id");
 
@@ -302,11 +304,6 @@ namespace KOMTracker.API.DAL.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)")
                         .HasColumnName("sex");
-
-                    b.Property<string>("Username")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("username");
 
                     b.Property<float>("Weight")
                         .HasColumnType("real")

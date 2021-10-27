@@ -8,6 +8,8 @@ namespace KOMTracker.API.Infrastructure.Services
 {
     public interface IAthleteService
     {
-        Task<AthleteModel> GetAthleteByIdAsync(int id);
+        Task<bool> IsAthleteExistsAsync(int athleteId);
+        Task AddOrUpdateAthleteAsync(AthleteModel athlete);
+        Task AddOrUpdateTokenAsync(TokenModel token);
     }
 }

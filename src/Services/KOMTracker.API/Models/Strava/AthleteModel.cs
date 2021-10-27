@@ -9,6 +9,7 @@ namespace KOMTracker.API.Models.Strava
     public class AthleteModel
     {
         public int AthleteId { get; set; }
+        public string Username { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Bio { get; set; }
@@ -19,5 +20,6 @@ namespace KOMTracker.API.Models.Strava
         public string Profile { get; set; }
         public string ProfileMedium { get; set; }
         public virtual UserModel User { get; set; }
+        public virtual TokenModel Token { get; set; }
     }
 }

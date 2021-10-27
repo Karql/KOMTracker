@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiModel = Strava.API.Client.Model;
 
 namespace KOMTracker.API.Infrastructure.Services
 {
@@ -17,10 +18,25 @@ namespace KOMTracker.API.Infrastructure.Services
             _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
         }
 
-        public async Task<AthleteModel> GetAthleteByIdAsync(int id)
+        public Task<bool> IsAthleteExistsAsync(int athleteId)
         {
-            var athleteRepo = _komUoW.GetRepository<IAthleteRepository>();
-            return await athleteRepo.GetAthleteByIdAsync(id);
+            return _komUoW
+                .GetRepository<IAthleteRepository>()
+                .IsAthleteExistsAsync(athleteId);
+        }
+
+        public Task AddOrUpdateAthleteAsync(AthleteModel athlete)
+        {
+            return _komUoW
+                .GetRepository<IAthleteRepository>()
+                .AddOrUpdateAthleteAsync(athlete);
+        }
+
+        public Task AddOrUpdateTokenAsync(TokenModel token)
+        {
+            return _komUoW
+                .GetRepository<IAthleteRepository>()
+                .AddOrUpdateTokenAsync(token);
         }
     }
 }

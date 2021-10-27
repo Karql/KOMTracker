@@ -16,6 +16,8 @@ namespace KOMTracker.API.DAL
     {
         public virtual DbSet<AthleteModel> Athlete { get; set; }
 
+        public virtual DbSet<TokenModel> Token { get; set; }
+
         public KOMDBContext(DbContextOptions<KOMDBContext> options)
             : base(options)
         {
@@ -36,6 +38,7 @@ namespace KOMTracker.API.DAL
 
             // Strava
             builder.ApplyConfiguration(new AthleteModelTypeConfiguration());
+            builder.ApplyConfiguration(new TokenModelTypeConfiguration());
         }
     }
 }

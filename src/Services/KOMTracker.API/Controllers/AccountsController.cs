@@ -14,36 +14,18 @@ namespace KOMTracker.API.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly ITokenApi _tokenApi;
-        private readonly IAthleteService _athleteService;
+        private readonly IAccountService _accountService;
 
-        public AccountsController(ITokenApi tokenApi, IAthleteService athleteService)
+        public AccountsController(ITokenApi tokenApi, IAccountService athleteService)
         {
             _tokenApi = tokenApi ?? throw new ArgumentNullException(nameof(tokenApi));
-            _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
+            _accountService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
         }
 
         [HttpGet("connect")]
         public async Task<ActionResult> Connect([FromQuery]string code, [FromQuery]string scope, [FromQuery]string state)
         {
-            // 1. verify scope
-            
-            // 2. exchange token
-            var exchangeResult = await _tokenApi.ExchangeAsync(code);
-            if (!exchangeResult.IsSuccess)
-            {
-                // TODO: 
-                // - better error handling
-                throw new Exception($"{nameof(_tokenApi.ExchangeAsync)} failed!");
-            }
-            var tokenWithAthlete = exchangeResult.Value;
-
-            // 3. check is athlete exists
-            var athlete = await _athleteService.GetAthleteByIdAsync(tokenWithAthlete.Athlete.Id);
-
-            
-
-            // 3. add athlete and user when not exists
-            // 4. login 
+            await _accountService.Connect(code, scope);
 
             return new  OkObjectResult(null);
         }

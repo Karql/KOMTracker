@@ -7,6 +7,6 @@ namespace KOMTracker.API.Infrastructure.Services
 {
     public interface IAccountService
     {
-        
+        Task Connect(string code, string scope);
     }
 }

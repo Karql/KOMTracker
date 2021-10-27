@@ -1,6 +1,7 @@
 using KOMTracker.API.DAL;
 using KOMTracker.API.DAL.Repositories;
 using KOMTracker.API.Infrastructure.Services;
+using KOMTracker.API.Mappings;
 using KOMTracker.API.Models.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -43,6 +44,8 @@ namespace KOMTracker.API
                 });
             });
 
+            services.AddAutoMapper(typeof(StravaApiClientProfile));
+
             services.AddDbContext<KOMDBContext>(options => options.UseNpgsql(_configuration.GetConnectionString("DB")));
 
             services.AddScoped<IKOMUnitOfWork, EFKOMUnitOfWork>();
@@ -53,6 +56,7 @@ namespace KOMTracker.API
                 .AddDefaultTokenProviders();
 
             services.AddTransient<IAthleteService, AthleteService>();
+            services.AddTransient<IAccountService, AccountService>();
             services.AddStravaApiClient();
             services.AddTransient<Strava.API.Client.Model.Config.ConfigModel>(sp =>
             {
