@@ -55,6 +55,7 @@ namespace KOMTracker.API
                 .AddEntityFrameworkStores<KOMDBContext>()
                 .AddDefaultTokenProviders();
 
+            services.AddTransient<ITokenService, TokenService>();
             services.AddTransient<IAthleteService, AthleteService>();
             services.AddTransient<IAccountService, AccountService>();
             services.AddStravaApiClient();

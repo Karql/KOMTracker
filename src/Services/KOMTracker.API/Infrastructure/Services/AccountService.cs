@@ -4,7 +4,6 @@ using KOMTracker.API.Models.Identity;
 using KOMTracker.API.Models.Strava;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Strava.API.Client.Api;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,17 +13,24 @@ namespace KOMTracker.API.Infrastructure.Services
 {
     public class AccountService : IAccountService
     {
+        private static readonly HashSet<string> REQUIRED_SCOPES = new()
+        {
+            "read",
+            "activity:read",
+            "profile:read_all"
+        };
+
         private readonly IMapper _mapper;
         private readonly IKOMUnitOfWork _komUoW;
-        private readonly ITokenApi _tokenApi;
+        private readonly ITokenService _tokenService;
         private readonly IAthleteService _athleteService;
         private readonly UserManager<UserModel> _userManager;
 
-        public AccountService(IMapper mapper, IKOMUnitOfWork komUoW, ITokenApi tokenApi, IAthleteService athleteService, UserManager<UserModel> userManager)
+        public AccountService(IMapper mapper, IKOMUnitOfWork komUoW, ITokenService tokenService, IAthleteService athleteService, UserManager<UserModel> userManager)
         {
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
-            _tokenApi = tokenApi ?? throw new ArgumentNullException(nameof(tokenApi));
+            _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
             _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
@@ -34,10 +40,17 @@ namespace KOMTracker.API.Infrastructure.Services
         public async Task Connect(string code, string scope)
         {
             // TODO: transaction
-
             VerifyScope(scope);
 
-            var (athlete, token) = await ExchangeTokenAsync(code, scope);
+            var exchangeResult = await _tokenService.ExchangeTokenAsync(code, scope);
+
+            if (!exchangeResult.IsSuccess)
+            {
+                // TODO: Error
+                return;
+            }
+
+            var (athlete, token) = exchangeResult.Value;
 
             await _athleteService.AddOrUpdateAthleteAsync(athlete);
             await _athleteService.AddOrUpdateTokenAsync(token);
@@ -54,26 +67,9 @@ namespace KOMTracker.API.Infrastructure.Services
 
         protected bool VerifyScope(string scope)
         {
-            // TODO
-            return true;
-        }
+            var scopes = scope?.Split(",") ?? Enumerable.Empty<string>();
 
-        protected async Task<(AthleteModel, TokenModel)> ExchangeTokenAsync(string code, string scope)
-        {
-            var exchangeResult = await _tokenApi.ExchangeAsync(code);
-            if (!exchangeResult.IsSuccess)
-            {
-                // TODO: 
-                // - better error handling
-                throw new Exception($"{nameof(_tokenApi.ExchangeAsync)} failed!");
-            }
-
-            var apiTokenWithAthlete = exchangeResult.Value;
-            var athlete = _mapper.Map<AthleteModel>(apiTokenWithAthlete.Athlete);
-            var token = _mapper.Map<TokenModel>(apiTokenWithAthlete);
-            token.Scope = scope;
-
-            return (athlete, token);
+            return REQUIRED_SCOPES.All(x => scopes.Contains(scope));
         }
 
         protected Task<bool> IsUserExistsAsync(int athleteId)
