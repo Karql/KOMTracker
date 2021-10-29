@@ -53,7 +53,7 @@ namespace Strava.API.Client.Api
                     if (error.Code == "invalid" && error.Field == "code" && error.Resource == "AuthorizationCode")
                     {
                         _logger.LogWarning(logPrefix + "Invalid code!");
-                        return Result.Fail(new InvalidCodeError());
+                        return Result.Fail(new ExchangeError(ExchangeError.InvalidCode));
                     }
                 }
             }
@@ -61,7 +61,7 @@ namespace Strava.API.Client.Api
             _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}", 
                 (int)response.StatusCode, await response.Content.ReadAsStringAsync());
 
-            return Result.Fail("Exchange token failed!");
+            return Result.Fail(new ExchangeError(ExchangeError.UnknownError));
         }
     }
 }

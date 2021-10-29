@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KOMTracker.API.DAL.Migrations
 {
     [DbContext(typeof(KOMDBContext))]
-    [Migration("20211027185303_AddTokenTable")]
-    partial class AddTokenTable
+    [Migration("20211029205552_AddIdentityAndAthleteAndTokenTables")]
+    partial class AddIdentityAndAthleteAndTokenTables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,66 @@ namespace KOMTracker.API.DAL.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.11")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+            modelBuilder.Entity("KOMTracker.API.Models.Athlete.AthleteModel", b =>
+                {
+                    b.Property<int>("AthleteId")
+                        .HasColumnType("integer")
+                        .HasColumnName("athlete_id");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("bio");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("city");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("country");
+
+                    b.Property<string>("FirstName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("first_name");
+
+                    b.Property<string>("LastName")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("last_name");
+
+                    b.Property<string>("Profile")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("profile");
+
+                    b.Property<string>("ProfileMedium")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("profile_medium");
+
+                    b.Property<string>("Sex")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("sex");
+
+                    b.Property<string>("Username")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("username");
+
+                    b.Property<float>("Weight")
+                        .HasColumnType("real")
+                        .HasColumnName("weight");
+
+                    b.HasKey("AthleteId");
+
+                    b.ToTable("athlete");
+                });
 
             modelBuilder.Entity("KOMTracker.API.Models.Identity.RoleClaimModel", b =>
                 {
@@ -46,7 +106,7 @@ namespace KOMTracker.API.DAL.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("identity_role_claim");
+                    b.ToTable("role_claim");
                 });
 
             modelBuilder.Entity("KOMTracker.API.Models.Identity.RoleModel", b =>
@@ -76,7 +136,7 @@ namespace KOMTracker.API.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex");
 
-                    b.ToTable("identity_role");
+                    b.ToTable("role");
                 });
 
             modelBuilder.Entity("KOMTracker.API.Models.Identity.UserClaimModel", b =>
@@ -104,7 +164,7 @@ namespace KOMTracker.API.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("identity_user_claim");
+                    b.ToTable("user_claim");
                 });
 
             modelBuilder.Entity("KOMTracker.API.Models.Identity.UserLoginModel", b =>
@@ -130,7 +190,7 @@ namespace KOMTracker.API.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("identity_user_login");
+                    b.ToTable("user_login");
                 });
 
             modelBuilder.Entity("KOMTracker.API.Models.Identity.UserModel", b =>
@@ -177,7 +237,7 @@ namespace KOMTracker.API.DAL.Migrations
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
-                        .HasColumnName("normalized_user_name");
+                        .HasColumnName("normalized_username");
 
                     b.Property<string>("PasswordHash")
                         .HasColumnType("text")
@@ -202,7 +262,7 @@ namespace KOMTracker.API.DAL.Migrations
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)")
-                        .HasColumnName("user_name");
+                        .HasColumnName("username");
 
                     b.HasKey("Id");
 
@@ -216,7 +276,7 @@ namespace KOMTracker.API.DAL.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
 
-                    b.ToTable("identity_user");
+                    b.ToTable("user");
                 });
 
             modelBuilder.Entity("KOMTracker.API.Models.Identity.UserRoleModel", b =>
@@ -233,7 +293,7 @@ namespace KOMTracker.API.DAL.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("identity_user_role");
+                    b.ToTable("user_role");
                 });
 
             modelBuilder.Entity("KOMTracker.API.Models.Identity.UserTokenModel", b =>
@@ -256,65 +316,10 @@ namespace KOMTracker.API.DAL.Migrations
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.ToTable("identity_user_token");
+                    b.ToTable("user_token");
                 });
 
-            modelBuilder.Entity("KOMTracker.API.Models.Strava.AthleteModel", b =>
-                {
-                    b.Property<int>("AthleteId")
-                        .HasColumnType("integer")
-                        .HasColumnName("athlete_id");
-
-                    b.Property<string>("Bio")
-                        .HasMaxLength(1000)
-                        .HasColumnType("character varying(1000)")
-                        .HasColumnName("bio");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("city");
-
-                    b.Property<string>("Country")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("country");
-
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("first_name");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("last_name");
-
-                    b.Property<string>("Profile")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("profile");
-
-                    b.Property<string>("ProfileMedium")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("profile_medium");
-
-                    b.Property<string>("Sex")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("sex");
-
-                    b.Property<float>("Weight")
-                        .HasColumnType("real")
-                        .HasColumnName("weight");
-
-                    b.HasKey("AthleteId");
-
-                    b.ToTable("strava_athlete");
-                });
-
-            modelBuilder.Entity("KOMTracker.API.Models.Strava.TokenModel", b =>
+            modelBuilder.Entity("KOMTracker.API.Models.Token.TokenModel", b =>
                 {
                     b.Property<int>("AthleteId")
                         .HasColumnType("integer")
@@ -346,7 +351,7 @@ namespace KOMTracker.API.DAL.Migrations
 
                     b.HasKey("AthleteId");
 
-                    b.ToTable("strava_token");
+                    b.ToTable("token");
                 });
 
             modelBuilder.Entity("KOMTracker.API.Models.Identity.RoleClaimModel", b =>
@@ -378,7 +383,7 @@ namespace KOMTracker.API.DAL.Migrations
 
             modelBuilder.Entity("KOMTracker.API.Models.Identity.UserModel", b =>
                 {
-                    b.HasOne("KOMTracker.API.Models.Strava.AthleteModel", "Athlete")
+                    b.HasOne("KOMTracker.API.Models.Athlete.AthleteModel", "Athlete")
                         .WithOne("User")
                         .HasForeignKey("KOMTracker.API.Models.Identity.UserModel", "AthleteId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -411,18 +416,18 @@ namespace KOMTracker.API.DAL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KOMTracker.API.Models.Strava.TokenModel", b =>
+            modelBuilder.Entity("KOMTracker.API.Models.Token.TokenModel", b =>
                 {
-                    b.HasOne("KOMTracker.API.Models.Strava.AthleteModel", "Athlete")
+                    b.HasOne("KOMTracker.API.Models.Athlete.AthleteModel", "Athlete")
                         .WithOne("Token")
-                        .HasForeignKey("KOMTracker.API.Models.Strava.TokenModel", "AthleteId")
+                        .HasForeignKey("KOMTracker.API.Models.Token.TokenModel", "AthleteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Athlete");
                 });
 
-            modelBuilder.Entity("KOMTracker.API.Models.Strava.AthleteModel", b =>
+            modelBuilder.Entity("KOMTracker.API.Models.Athlete.AthleteModel", b =>
                 {
                     b.Navigation("Token");
 

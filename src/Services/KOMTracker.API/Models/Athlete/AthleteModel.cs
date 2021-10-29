@@ -1,10 +1,11 @@
 ﻿using KOMTracker.API.Models.Identity;
+using KOMTracker.API.Models.Token;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KOMTracker.API.Models.Strava
+namespace KOMTracker.API.Models.Athlete
 {
     public class AthleteModel
     {

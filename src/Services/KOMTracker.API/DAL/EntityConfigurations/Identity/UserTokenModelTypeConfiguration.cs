@@ -13,7 +13,7 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Identity
     {
         public void Configure(EntityTypeBuilder<UserTokenModel> builder)
         {
-            builder.ToTable("identity_user_token");
+            builder.ToTable("user_token");
 
             builder.Property(x => x.UserId)
                 .HasColumnName("user_id");

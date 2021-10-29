@@ -13,7 +13,7 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Identity
     {
         public void Configure(EntityTypeBuilder<RoleClaimModel> builder)
         {
-            builder.ToTable("identity_role_claim");
+            builder.ToTable("role_claim");
 
             builder.Property(x => x.Id)
                 .HasColumnName("id");

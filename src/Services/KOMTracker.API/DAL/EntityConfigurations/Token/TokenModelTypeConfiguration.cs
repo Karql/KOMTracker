@@ -1,4 +1,4 @@
-﻿using KOMTracker.API.Models.Strava;
+﻿using KOMTracker.API.Models.Token;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -13,7 +13,7 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Strava
     {
         public void Configure(EntityTypeBuilder<TokenModel> builder)
         {
-            builder.ToTable("strava_token");
+            builder.ToTable("token");
 
             builder.HasKey(x => x.AthleteId);
 

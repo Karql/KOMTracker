@@ -1,4 +1,4 @@
-﻿using KOMTracker.API.Models.Strava;
+﻿using KOMTracker.API.Models.Athlete;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;

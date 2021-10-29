@@ -4,12 +4,33 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace KOMTracker.API.DAL.Migrations
 {
-    public partial class AddIdentitiesAndAthleteTables : Migration
+    public partial class AddIdentityAndAthleteAndTokenTables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "identity_role",
+                name: "athlete",
+                columns: table => new
+                {
+                    athlete_id = table.Column<int>(type: "integer", nullable: false),
+                    username = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    first_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    last_name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    bio = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    city = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    sex = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    weight = table.Column<float>(type: "real", nullable: false),
+                    profile = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    profile_medium = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_athlete", x => x.athlete_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "role",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "text", nullable: false),
@@ -19,58 +40,39 @@ namespace KOMTracker.API.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_identity_role", x => x.id);
+                    table.PrimaryKey("PK_role", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "strava_athlete",
+                name: "token",
                 columns: table => new
                 {
                     athlete_id = table.Column<int>(type: "integer", nullable: false),
-                    first_name = table.Column<string>(type: "text", nullable: true),
-                    last_name = table.Column<string>(type: "text", nullable: true),
-                    bio = table.Column<string>(type: "text", nullable: true),
-                    city = table.Column<string>(type: "text", nullable: true),
-                    country = table.Column<string>(type: "text", nullable: true),
-                    sex = table.Column<string>(type: "text", nullable: true),
-                    weight = table.Column<float>(type: "real", nullable: false),
-                    profile = table.Column<string>(type: "text", nullable: true),
-                    profile_medium = table.Column<string>(type: "text", nullable: true)
+                    token_type = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    expires_at = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    accesstoken = table.Column<string>(name: "access-token", type: "character varying(50)", maxLength: 50, nullable: true),
+                    refreshtoken = table.Column<string>(name: "refresh-token", type: "character varying(50)", maxLength: 50, nullable: true),
+                    scope = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_strava_athlete", x => x.athlete_id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "identity_role_claim",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    role_id = table.Column<string>(type: "text", nullable: false),
-                    claim_type = table.Column<string>(type: "text", nullable: true),
-                    claim_value = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_identity_role_claim", x => x.id);
+                    table.PrimaryKey("PK_token", x => x.athlete_id);
                     table.ForeignKey(
-                        name: "FK_identity_role_claim_identity_role_role_id",
-                        column: x => x.role_id,
-                        principalTable: "identity_role",
-                        principalColumn: "id",
+                        name: "FK_token_athlete_athlete_id",
+                        column: x => x.athlete_id,
+                        principalTable: "athlete",
+                        principalColumn: "athlete_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "identity_user",
+                name: "user",
                 columns: table => new
                 {
                     id = table.Column<string>(type: "text", nullable: false),
                     athlete_id = table.Column<int>(type: "integer", nullable: false),
-                    user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
-                    normalized_user_name = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    username = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
+                    normalized_username = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     normalized_email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     email_confirmed = table.Column<bool>(type: "boolean", nullable: false),
@@ -86,17 +88,38 @@ namespace KOMTracker.API.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_identity_user", x => x.id);
+                    table.PrimaryKey("PK_user", x => x.id);
                     table.ForeignKey(
-                        name: "FK_identity_user_strava_athlete_athlete_id",
+                        name: "FK_user_athlete_athlete_id",
                         column: x => x.athlete_id,
-                        principalTable: "strava_athlete",
+                        principalTable: "athlete",
                         principalColumn: "athlete_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "identity_user_claim",
+                name: "role_claim",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    role_id = table.Column<string>(type: "text", nullable: false),
+                    claim_type = table.Column<string>(type: "text", nullable: true),
+                    claim_value = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_role_claim", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_role_claim_role_role_id",
+                        column: x => x.role_id,
+                        principalTable: "role",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "user_claim",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -107,17 +130,17 @@ namespace KOMTracker.API.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_identity_user_claim", x => x.id);
+                    table.PrimaryKey("PK_user_claim", x => x.id);
                     table.ForeignKey(
-                        name: "FK_identity_user_claim_identity_user_user_id",
+                        name: "FK_user_claim_user_user_id",
                         column: x => x.user_id,
-                        principalTable: "identity_user",
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "identity_user_login",
+                name: "user_login",
                 columns: table => new
                 {
                     login_provider = table.Column<string>(type: "text", nullable: false),
@@ -127,17 +150,17 @@ namespace KOMTracker.API.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_identity_user_login", x => new { x.login_provider, x.provider_key });
+                    table.PrimaryKey("PK_user_login", x => new { x.login_provider, x.provider_key });
                     table.ForeignKey(
-                        name: "FK_identity_user_login_identity_user_user_id",
+                        name: "FK_user_login_user_user_id",
                         column: x => x.user_id,
-                        principalTable: "identity_user",
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "identity_user_role",
+                name: "user_role",
                 columns: table => new
                 {
                     user_id = table.Column<string>(type: "text", nullable: false),
@@ -145,23 +168,23 @@ namespace KOMTracker.API.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_identity_user_role", x => new { x.user_id, x.role_id });
+                    table.PrimaryKey("PK_user_role", x => new { x.user_id, x.role_id });
                     table.ForeignKey(
-                        name: "FK_identity_user_role_identity_role_role_id",
+                        name: "FK_user_role_role_role_id",
                         column: x => x.role_id,
-                        principalTable: "identity_role",
+                        principalTable: "role",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_identity_user_role_identity_user_user_id",
+                        name: "FK_user_role_user_user_id",
                         column: x => x.user_id,
-                        principalTable: "identity_user",
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "identity_user_token",
+                name: "user_token",
                 columns: table => new
                 {
                     user_id = table.Column<string>(type: "text", nullable: false),
@@ -171,84 +194,87 @@ namespace KOMTracker.API.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_identity_user_token", x => new { x.user_id, x.login_provider, x.name });
+                    table.PrimaryKey("PK_user_token", x => new { x.user_id, x.login_provider, x.name });
                     table.ForeignKey(
-                        name: "FK_identity_user_token_identity_user_user_id",
+                        name: "FK_user_token_user_user_id",
                         column: x => x.user_id,
-                        principalTable: "identity_user",
+                        principalTable: "user",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
-                table: "identity_role",
+                table: "role",
                 column: "normalized_name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_identity_role_claim_role_id",
-                table: "identity_role_claim",
+                name: "IX_role_claim_role_id",
+                table: "role_claim",
                 column: "role_id");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
-                table: "identity_user",
+                table: "user",
                 column: "normalized_email");
 
             migrationBuilder.CreateIndex(
-                name: "IX_identity_user_athlete_id",
-                table: "identity_user",
+                name: "IX_user_athlete_id",
+                table: "user",
                 column: "athlete_id",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
-                table: "identity_user",
-                column: "normalized_user_name",
+                table: "user",
+                column: "normalized_username",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_identity_user_claim_user_id",
-                table: "identity_user_claim",
+                name: "IX_user_claim_user_id",
+                table: "user_claim",
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_identity_user_login_user_id",
-                table: "identity_user_login",
+                name: "IX_user_login_user_id",
+                table: "user_login",
                 column: "user_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_identity_user_role_role_id",
-                table: "identity_user_role",
+                name: "IX_user_role_role_id",
+                table: "user_role",
                 column: "role_id");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "identity_role_claim");
+                name: "role_claim");
 
             migrationBuilder.DropTable(
-                name: "identity_user_claim");
+                name: "token");
 
             migrationBuilder.DropTable(
-                name: "identity_user_login");
+                name: "user_claim");
 
             migrationBuilder.DropTable(
-                name: "identity_user_role");
+                name: "user_login");
 
             migrationBuilder.DropTable(
-                name: "identity_user_token");
+                name: "user_role");
 
             migrationBuilder.DropTable(
-                name: "identity_role");
+                name: "user_token");
 
             migrationBuilder.DropTable(
-                name: "identity_user");
+                name: "role");
 
             migrationBuilder.DropTable(
-                name: "strava_athlete");
+                name: "user");
+
+            migrationBuilder.DropTable(
+                name: "athlete");
         }
     }
 }

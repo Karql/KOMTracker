@@ -111,9 +111,9 @@ namespace Strava.API.Client.Tests.Api
             _tokenApi = new TokenApi(_logger, TestConfig, _mockHttp.ToHttpClientFactory());
         }
 
-        #region ExchangeAsync
+        #region Exchange code for token
         [Fact]
-        public async Task ExchangeAsync_Should_CallCorectUrlAndReturnDeserializedModel()
+        public async Task Exchange_for_valid_code_call_api_and_return_token_and_athlete_summary()
         {
             // Arrange
             var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
@@ -135,7 +135,7 @@ namespace Strava.API.Client.Tests.Api
         }
 
         [Fact]
-        public async Task ExchangeAsync_Should_ReturnFailedResultOnInvalidCode()
+        public async Task Exchange_for_invalid_code_return_error()
         {
             // Arrange
             var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
@@ -148,7 +148,7 @@ namespace Strava.API.Client.Tests.Api
 
             // Assert
             res.Should().BeFailure();
-            res.HasError<InvalidCodeError>().Should().BeTrue();
+            res.HasError<ExchangeError>(x => x.Message == ExchangeError.InvalidCode).Should().BeTrue();
 
             _mockHttp.VerifyNoOutstandingExpectation();
 
@@ -156,7 +156,7 @@ namespace Strava.API.Client.Tests.Api
         }
 
         [Fact]
-        public async Task ExchangeAsync_Should_ReturnFailedResultOnOthersFaults()
+        public async Task Exchange_when_failed_return_error()
         {
             // Arrange
             var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
@@ -168,14 +168,28 @@ namespace Strava.API.Client.Tests.Api
             var res = await _tokenApi.ExchangeAsync(TEST_CODE);
 
             // Assert
-            res.Should().BeFailure()
-                .And.Satisfy(result => {
-                    result.Errors.Should().ContainEquivalentOf(new Error("Exchange token failed!"));
-                });
+            res.Should().BeFailure();
+            res.HasError<ExchangeError>(x => x.Message == ExchangeError.UnknownError).Should().BeTrue();
 
             _mockHttp.VerifyNoOutstandingExpectation();
 
             _logger.CheckLogError("failed! SatusCode");
+        }
+
+        [Fact]
+        public void Exchange_throw_exception_when_something_went_wrong()
+        {
+            // Arrange
+            var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
+
+            _mockHttp.Expect(HttpMethod.Post, shouldUrl)
+                .Throw(new Exception("Something went wrong"));
+
+            // Act
+            Func<Task> action = () => _tokenApi.ExchangeAsync(TEST_CODE);
+
+            // Assert
+            action.Should().ThrowAsync<Exception>();
         }
         #endregion
     }

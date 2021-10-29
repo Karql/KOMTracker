@@ -1,9 +1,10 @@
-﻿using System;
+﻿using KOMTracker.API.Models.Athlete;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KOMTracker.API.Models.Strava
+namespace KOMTracker.API.Models.Token
 {
     public class TokenModel
     {

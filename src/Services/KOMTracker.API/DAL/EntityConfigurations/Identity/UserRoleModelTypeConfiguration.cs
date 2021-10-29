@@ -13,7 +13,7 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Identity
     {
         public void Configure(EntityTypeBuilder<UserRoleModel> builder)
         {
-            builder.ToTable("identity_user_role");
+            builder.ToTable("user_role");
 
             builder.Property(x => x.UserId)
                 .HasColumnName("user_id");

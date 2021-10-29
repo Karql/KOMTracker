@@ -1,8 +1,9 @@
 ﻿using KOMTracker.API.DAL.EntityConfigurations;
 using KOMTracker.API.DAL.EntityConfigurations.Identity;
 using KOMTracker.API.DAL.EntityConfigurations.Strava;
+using KOMTracker.API.Models.Athlete;
 using KOMTracker.API.Models.Identity;
-using KOMTracker.API.Models.Strava;
+using KOMTracker.API.Models.Token;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;

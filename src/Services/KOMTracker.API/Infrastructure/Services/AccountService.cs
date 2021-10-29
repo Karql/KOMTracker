@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using KOMTracker.API.DAL;
+using KOMTracker.API.Models.Athlete;
 using KOMTracker.API.Models.Identity;
-using KOMTracker.API.Models.Strava;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -42,7 +42,7 @@ namespace KOMTracker.API.Infrastructure.Services
             // TODO: transaction
             VerifyScope(scope);
 
-            var exchangeResult = await _tokenService.ExchangeTokenAsync(code, scope);
+            var exchangeResult = await _tokenService.ExchangeAsync(code, scope);
 
             if (!exchangeResult.IsSuccess)
             {

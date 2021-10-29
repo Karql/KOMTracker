@@ -1,11 +1,14 @@
 ﻿using AutoMapper;
 using FluentResults;
-using KOMTracker.API.Models.Strava;
+using KOMTracker.API.Models.Athlete;
+using KOMTracker.API.Models.Token;
+using KOMTracker.API.Models.Token.Error;
 using Strava.API.Client.Api;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ApiModel = Strava.API.Client.Model;
 
 namespace KOMTracker.API.Infrastructure.Services
 {
@@ -20,13 +23,16 @@ namespace KOMTracker.API.Infrastructure.Services
             _tokenApi = tokenApi ?? throw new ArgumentNullException(nameof(tokenApi));
         }
 
-        public async Task<Result<(AthleteModel, TokenModel)>> ExchangeTokenAsync(string code, string scope)
+        public async Task<Result<(AthleteModel, TokenModel)>> ExchangeAsync(string code, string scope)
         {
             var exchangeResult = await _tokenApi.ExchangeAsync(code);
             if (!exchangeResult.IsSuccess)
             {
-                // TODO: 
-                // - better error handling
+                if (exchangeResult.HasError<ApiModel.Token.Error.ExchangeError>(x => x.Message == ApiModel.Token.Error.ExchangeError.InvalidCode))
+                {
+                    return Result.Fail(new ExchangeError(ExchangeError.InvalidCode));
+                }
+
                 throw new Exception($"{nameof(_tokenApi.ExchangeAsync)} failed!");
             }
 
