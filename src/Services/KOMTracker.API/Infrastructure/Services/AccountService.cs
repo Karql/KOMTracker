@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using FluentResults;
 using KOMTracker.API.DAL;
+using KOMTracker.API.Models.Account.Error;
 using KOMTracker.API.Models.Athlete;
 using KOMTracker.API.Models.Identity;
 using Microsoft.AspNetCore.Identity;
@@ -35,19 +37,19 @@ namespace KOMTracker.API.Infrastructure.Services
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
-        public IMapper Mapper => _mapper;
-
-        public async Task Connect(string code, string scope)
+        public async Task<Result> Connect(string code, string scope)
         {
             // TODO: transaction
-            VerifyScope(scope);
+            if (!VerifyRequiredScope(scope))
+            {
+                return Result.Fail(new ConnectError(ConnectError.NoRequiredScope));
+            }
 
             var exchangeResult = await _tokenService.ExchangeAsync(code, scope);
 
             if (!exchangeResult.IsSuccess)
             {
-                // TODO: Error
-                return;
+                return Result.Fail(new ConnectError(ConnectError.InvalidCode));
             }
 
             var (athlete, token) = exchangeResult.Value;
@@ -63,13 +65,15 @@ namespace KOMTracker.API.Infrastructure.Services
             await _komUoW.SaveChangesAsync();
 
             // TODO: Login
+
+            return Result.Ok();
         }
 
-        protected bool VerifyScope(string scope)
+        protected bool VerifyRequiredScope(string scope)
         {
             var scopes = scope?.Split(",") ?? Enumerable.Empty<string>();
 
-            return REQUIRED_SCOPES.All(x => scopes.Contains(scope));
+            return REQUIRED_SCOPES.All(x => scopes.Contains(x));
         }
 
         protected Task<bool> IsUserExistsAsync(int athleteId)
