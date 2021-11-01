@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utils.Tests.UserManager;
 using Xunit;
 using ApiModel = Strava.API.Client.Model;
 
@@ -50,7 +51,6 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
         private readonly IKOMUnitOfWork _komUoW;
         private readonly ITokenService _tokenService;
         private readonly IAthleteService _athleteService;
-        private readonly IUserStore<UserModel> _userStore;
         private readonly UserManager<UserModel> _userManager;
 
         private readonly AccountService _accountService;
@@ -62,8 +62,7 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
             _tokenService = Substitute.For<ITokenService>();
             _athleteService = Substitute.For<IAthleteService>();
 
-            _userStore = Substitute.For<IUserStore<UserModel>>();
-            _userManager = Substitute.For<UserManager<UserModel>>(_userStore, null, null, null, null, null, null, null, null);
+            _userManager = TestUserManagerHelper.CreateTestUserManager<UserModel>();
 
             _accountService = new AccountService(_mapper, _komUoW, _tokenService, _athleteService, _userManager);
 
@@ -131,15 +130,14 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
 
         private void PrepareMocks()
         {
-            var users = new List<UserModel> { 
-                new UserModel { 
-                    AthleteId = TestExistingAthlete.AthleteId, 
+            var users = new List<UserModel> {
+                new UserModel {
+                    AthleteId = TestExistingAthlete.AthleteId,
                     UserName = TestExistingAthlete.Username
                 }
-            }
-            .AsQueryable()
-            .BuildMock();
-            _userManager.Users.Returns(users);
+            };
+
+            _userManager.MockUsers(users);
 
             _tokenService.ExchangeAsync(TEST_INVALID_CODE, TEST_VALID_SCOPE).Returns(Result.Fail(new ExchangeError(ExchangeError.InvalidCode)));
 
