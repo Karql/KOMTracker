@@ -10,6 +10,8 @@ namespace Strava.API.Client.Api
 {
     public interface ITokenApi
     {
-        Task<Result<TokenWithAthleteModel>> ExchangeAsync(string code); 
+        Task<Result<TokenWithAthleteModel>> ExchangeAsync(string code);
+
+        Task<Result<TokenModel>> RefreshAsync(string refreshToken);
     }
 }

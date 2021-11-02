@@ -29,7 +29,8 @@ namespace Strava.API.Client.Api
         }
 
         public async Task<Result<TokenWithAthleteModel>> ExchangeAsync(string code)
-        {            
+        {
+            // TODO: change to form data instead of query params
             var url = $"https://www.strava.com/oauth/token?client_id={_config.ClientID}&client_secret={_config.ClientSecret}&code={code}&grant_type=authorization_code";
 
             var logPrefix = $"{nameof(ExchangeAsync)} ";
@@ -62,6 +63,43 @@ namespace Strava.API.Client.Api
                 (int)response.StatusCode, await response.Content.ReadAsStringAsync());
 
             return Result.Fail(new ExchangeError(ExchangeError.UnknownError));
+        }
+
+        public async Task<Result<TokenModel>> RefreshAsync(string refreshToken)
+        {
+            // TODO: change to form data instead of query params
+            var url = $"https://www.strava.com/oauth/token?client_id={_config.ClientID}&client_secret={_config.ClientSecret}&refresh_token={refreshToken}&grant_type=refresh_token";
+
+            var logPrefix = $"{nameof(RefreshAsync)} ";
+            var httpClient = _httpClientFactory.CreateClient();
+            using var response = await httpClient.PostAsync(url, null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadFromJsonAsync<TokenModel>();
+                return Result.Ok(token);
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                var fault = await response.Content.ReadFromJsonAsync<FaultModel>();
+
+                if (fault?.Errors?.Any() ?? false)
+                {
+                    var error = fault.Errors.First();
+
+                    if (error.Code == "invalid" && error.Field == "refresh_token" && error.Resource == "RefreshToken")
+                    {
+                        _logger.LogWarning(logPrefix + "Invalid refresh token!");
+                        return Result.Fail(new RefreshError(RefreshError.InvalidRefreshToken));
+                    }
+                }
+            }
+
+            _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}",
+                (int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
+            return Result.Fail(new RefreshError(RefreshError.UnknownError));
         }
     }
 }

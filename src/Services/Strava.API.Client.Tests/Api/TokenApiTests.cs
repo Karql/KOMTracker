@@ -35,6 +35,7 @@ namespace Strava.API.Client.Tests.Api
         private const string TEST_CODE = "code123";
         private const int TEST_CLIENT_ID = 123;
         private const string TEST_CLIENT_SECRET = "xyz";
+        private const string TEST_REFRESH_TOKEN = "refresh123";
         private static ConfigModel TestConfig => new ConfigModel
         {
             ClientID = TEST_CLIENT_ID,
@@ -83,6 +84,20 @@ namespace Strava.API.Client.Tests.Api
                 {
                     Resource = "AuthorizationCode",
                     Field = "code",
+                    Code = "invalid"
+                }
+            }
+        };
+
+        private static FaultModel InvalidRefreshTokenFault => new FaultModel
+        {
+            Message = "Bad Request",
+            Errors = new[]
+            {
+                new ErrorModel
+                {
+                    Resource = "RefreshToken",
+                    Field = "refresh_token",
                     Code = "invalid"
                 }
             }
@@ -187,6 +202,86 @@ namespace Strava.API.Client.Tests.Api
 
             // Act
             Func<Task> action = () => _tokenApi.ExchangeAsync(TEST_CODE);
+
+            // Assert
+            action.Should().ThrowAsync<Exception>();
+        }
+        #endregion
+
+        #region Refresh token
+        [Fact]
+        public async Task Refresh_for_valid_refresh_token_call_api_and_return_new_token()
+        {
+            // Arrange
+            var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&refresh_token={TEST_REFRESH_TOKEN}&grant_type=refresh_token";
+
+            _mockHttp.Expect(HttpMethod.Post, shouldUrl)
+                .Respond(HttpStatusCode.OK, MediaTypeNames.Application.Json, ExpectedToken.ToJson());
+
+            // Act
+            var res = await _tokenApi.RefreshAsync(TEST_REFRESH_TOKEN);
+
+            // Assert
+            res.Should().BeSuccess();
+            var actualTokenWithAthlete = res.Value;
+            actualTokenWithAthlete.Should().BeEquivalentTo(ExpectedToken);
+
+            _mockHttp.VerifyNoOutstandingExpectation();
+        }
+
+        [Fact]
+        public async Task Refresh_for_invalid_refresh_token_return_error()
+        {
+            // Arrange
+            var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&refresh_token={TEST_REFRESH_TOKEN}&grant_type=refresh_token";
+
+            _mockHttp.Expect(HttpMethod.Post, shouldUrl)
+                .Respond(HttpStatusCode.BadRequest, MediaTypeNames.Application.Json, InvalidRefreshTokenFault.ToJson());
+
+            // Act
+            var res = await _tokenApi.RefreshAsync(TEST_REFRESH_TOKEN);
+
+            // Assert
+            res.Should().BeFailure();
+            res.HasError<RefreshError>(x => x.Message == RefreshError.InvalidRefreshToken).Should().BeTrue();
+
+            _mockHttp.VerifyNoOutstandingExpectation();
+
+            _logger.CheckLogWarning("Invalid refresh token!");
+        }
+
+        [Fact]
+        public async Task Refresh_when_failed_return_error()
+        {
+            // Arrange
+            var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&refresh_token={TEST_REFRESH_TOKEN}&grant_type=refresh_token";
+
+            _mockHttp.Expect(HttpMethod.Post, shouldUrl)
+                .Respond(HttpStatusCode.BadRequest, MediaTypeNames.Application.Json, Fault1.ToJson());
+
+            // Act
+            var res = await _tokenApi.RefreshAsync(TEST_REFRESH_TOKEN);
+
+            // Assert
+            res.Should().BeFailure();
+            res.HasError<RefreshError>(x => x.Message == RefreshError.UnknownError).Should().BeTrue();
+
+            _mockHttp.VerifyNoOutstandingExpectation();
+
+            _logger.CheckLogError("failed! SatusCode");
+        }
+
+        [Fact]
+        public void Refresh_throw_exception_when_something_went_wrong()
+        {
+            // Arrange
+            var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&refresh_token={TEST_REFRESH_TOKEN}&grant_type=refresh_token";
+
+            _mockHttp.Expect(HttpMethod.Post, shouldUrl)
+                .Throw(new Exception("Something went wrong"));
+
+            // Act
+            Func<Task> action = () => _tokenApi.RefreshAsync(TEST_REFRESH_TOKEN);
 
             // Assert
             action.Should().ThrowAsync<Exception>();
