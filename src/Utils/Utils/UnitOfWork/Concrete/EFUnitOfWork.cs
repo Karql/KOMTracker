@@ -22,7 +22,7 @@ namespace Utils.UnitOfWork.Concrete
         }
 
         public TRepository GetRepository<TRepository>() 
-            where TRepository : IRepository
+            where TRepository : class, IRepository
         {
             var repoType = typeof(TRepository);
 

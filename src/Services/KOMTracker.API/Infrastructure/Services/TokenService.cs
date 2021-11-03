@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using FluentResults;
+using KOMTracker.API.DAL;
+using KOMTracker.API.DAL.Repositories;
 using KOMTracker.API.Models.Athlete;
 using KOMTracker.API.Models.Token;
 using KOMTracker.API.Models.Token.Error;
@@ -15,11 +17,13 @@ namespace KOMTracker.API.Infrastructure.Services
     public class TokenService : ITokenService
     {
         private readonly IMapper _mapper;
+        private readonly IKOMUnitOfWork _komUoW;
         private readonly ITokenApi _tokenApi;
 
-        public TokenService(IMapper mapper, ITokenApi tokenApi)
+        public TokenService(IMapper mapper, IKOMUnitOfWork komUoW, ITokenApi tokenApi)
         {
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
             _tokenApi = tokenApi ?? throw new ArgumentNullException(nameof(tokenApi));
         }
 
@@ -42,6 +46,28 @@ namespace KOMTracker.API.Infrastructure.Services
             token.Scope = scope;
 
             return Result.Ok((athlete, token));
+        }
+
+        public async Task<Result<TokenModel>> RefreshAsync(TokenModel token)
+        {
+            var refreshResult = await _tokenApi.RefreshAsync(token.RefreshToken);
+
+            if (!refreshResult.IsSuccess)
+            {
+                if (refreshResult.HasError<ApiModel.Token.Error.RefreshError>(x =>
+                    x.Message == ApiModel.Token.Error.RefreshError.InvalidRefreshToken))
+                {
+                    return Result.Fail(new RefreshError(RefreshError.InvalidRefreshToken));
+                }
+
+                throw new Exception($"{nameof(_tokenApi.RefreshAsync)} failed!");
+            }
+
+            var newToken = _mapper.Map<TokenModel>(refreshResult.Value);
+            newToken.AthleteId = token.AthleteId;
+            newToken.Scope = token.Scope;
+
+            return Result.Ok(newToken);
         }
     }
 }

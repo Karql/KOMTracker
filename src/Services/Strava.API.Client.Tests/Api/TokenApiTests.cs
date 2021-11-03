@@ -192,7 +192,7 @@ namespace Strava.API.Client.Tests.Api
         }
 
         [Fact]
-        public void Exchange_throw_exception_when_something_went_wrong()
+        public async Task Exchange_throw_exception_when_something_went_wrong()
         {
             // Arrange
             var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
@@ -204,7 +204,7 @@ namespace Strava.API.Client.Tests.Api
             Func<Task> action = () => _tokenApi.ExchangeAsync(TEST_CODE);
 
             // Assert
-            action.Should().ThrowAsync<Exception>();
+            await action.Should().ThrowAsync<Exception>();
         }
         #endregion
 
@@ -272,7 +272,7 @@ namespace Strava.API.Client.Tests.Api
         }
 
         [Fact]
-        public void Refresh_throw_exception_when_something_went_wrong()
+        public async Task Refresh_throw_exception_when_something_went_wrong()
         {
             // Arrange
             var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&refresh_token={TEST_REFRESH_TOKEN}&grant_type=refresh_token";
@@ -284,7 +284,7 @@ namespace Strava.API.Client.Tests.Api
             Func<Task> action = () => _tokenApi.RefreshAsync(TEST_REFRESH_TOKEN);
 
             // Assert
-            action.Should().ThrowAsync<Exception>();
+            await action.Should().ThrowAsync<Exception>();
         }
         #endregion
     }

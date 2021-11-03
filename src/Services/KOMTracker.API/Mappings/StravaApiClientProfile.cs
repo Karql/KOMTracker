@@ -16,6 +16,8 @@ namespace KOMTracker.API.Mappings
             CreateMap<ApiModel.Athlete.AthleteModel, AthleteModel>()
                 .ForMember(dest => dest.AthleteId, opt => opt.MapFrom(src => src.Id));
 
+            CreateMap<ApiModel.Token.TokenModel, TokenModel>();
+
             CreateMap<ApiModel.Token.TokenWithAthleteModel, TokenModel>()
                 .ForMember(dest => dest.AthleteId, opt => opt.MapFrom(src => src.Athlete.Id));
         }

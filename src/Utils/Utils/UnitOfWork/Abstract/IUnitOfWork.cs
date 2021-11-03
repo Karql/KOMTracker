@@ -10,6 +10,6 @@ namespace Utils.UnitOfWork.Abstract
     { 
         Task<int> SaveChangesAsync();
 
-        public TRepository GetRepository<TRepository>() where TRepository : IRepository;
+        public TRepository GetRepository<TRepository>() where TRepository : class, IRepository;
     }
 }
