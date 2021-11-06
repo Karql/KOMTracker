@@ -56,7 +56,7 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
             // Arrange
             var apiResult = new ApiModel.Token.TokenWithAthleteModel
             {
-                Athlete = new ApiModel.Athlete.AthleteModel()
+                Athlete = new ApiModel.Athlete.AthleteSummaryModel()
             };
 
             var expectedAthlete = new AthleteModel

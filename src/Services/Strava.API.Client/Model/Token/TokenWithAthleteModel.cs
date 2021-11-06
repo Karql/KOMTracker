@@ -12,7 +12,7 @@ namespace Strava.API.Client.Model.Token
     {
         public TokenWithAthleteModel() { }
 
-        public TokenWithAthleteModel(TokenModel token, AthleteModel athlete)
+        public TokenWithAthleteModel(TokenModel token, AthleteSummaryModel athlete)
         {
             TokenType = token.TokenType;
             ExpiresAt = token.ExpiresAt;
@@ -23,6 +23,6 @@ namespace Strava.API.Client.Model.Token
         }
 
         [JsonPropertyName("athlete")]
-        public AthleteModel Athlete { get; set; }
+        public AthleteSummaryModel Athlete { get; set; }
     }
 }

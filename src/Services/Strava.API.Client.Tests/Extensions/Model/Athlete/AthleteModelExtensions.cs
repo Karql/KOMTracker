@@ -10,7 +10,7 @@ namespace Strava.API.Client.Tests.Extensions.Model.Athlete
 {
     public static class AthleteModelExtensions
     {
-        public static string ToJson(this AthleteModel model)
+        public static string ToJson(this AthleteSummaryModel model)
         {
             /// <summary>
             /// JSON equivalent to API response

@@ -42,7 +42,7 @@ namespace Strava.API.Client.Tests.Api
             ClientSecret = TEST_CLIENT_SECRET
         };
 
-        private static AthleteModel ExpectedAthlete => new AthleteModel
+        private static AthleteSummaryModel ExpectedAthlete => new AthleteSummaryModel
         {
             Id = 1,
             ResourceState = Client.Model.Base.ResourceStateEnum.Summary,

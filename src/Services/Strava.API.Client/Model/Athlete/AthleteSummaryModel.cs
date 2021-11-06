@@ -1,4 +1,5 @@
-﻿using Strava.API.Client.Model.Base;
+﻿using Strava.API.Client.Model.Activity;
+using Strava.API.Client.Model.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,14 +9,8 @@ using System.Threading.Tasks;
 
 namespace Strava.API.Client.Model.Athlete
 {
-    public class AthleteModel
+    public class AthleteSummaryModel : AthleteMetaModel
     {
-        [JsonPropertyName("resource_state")]
-        public ResourceStateEnum ResourceState { get; set; }
-
-        [JsonPropertyName("id")]
-        public int Id { get; set; }
-
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; }
 

@@ -13,7 +13,7 @@ namespace KOMTracker.API.Mappings
     {
         public StravaApiClientProfile()
         {
-            CreateMap<ApiModel.Athlete.AthleteModel, AthleteModel>()
+            CreateMap<ApiModel.Athlete.AthleteSummaryModel, AthleteModel>()
                 .ForMember(dest => dest.AthleteId, opt => opt.MapFrom(src => src.Id));
 
             CreateMap<ApiModel.Token.TokenModel, TokenModel>();
