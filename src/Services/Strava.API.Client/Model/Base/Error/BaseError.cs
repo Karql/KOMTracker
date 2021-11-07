@@ -9,6 +9,7 @@ namespace Strava.API.Client.Model.Base.Error
     public abstract class BaseError : FluentResults.Error
     {
         public const string Unauthorized = "Unauthorized";
+        public const string UnknownError = "UnknownError";
 
         public BaseError(string message)
             : base(message)

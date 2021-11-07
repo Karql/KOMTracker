@@ -73,9 +73,9 @@ namespace Strava.API.Client.Model.Segment
         public float MaxHeartrate { get; set; }
 
         [JsonPropertyName("pr_rank")]
-        public int PrRank { get; set; }
+        public int? PrRank { get; set; }
 
         [JsonPropertyName("kom_rank")]
-        public int KomRank { get; set; }
+        public int? KomRank { get; set; }
     }
 }

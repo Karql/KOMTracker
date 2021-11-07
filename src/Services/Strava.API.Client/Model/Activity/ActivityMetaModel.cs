@@ -14,6 +14,6 @@ namespace Strava.API.Client.Model.Activity
         public ResourceStateEnum ResourceState { get; set; }
 
         [JsonPropertyName("id")]
-        public int Id { get; set; }
+        public long Id { get; set; }
     }
 }

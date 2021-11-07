@@ -15,6 +15,7 @@ namespace Strava.API.Client.Extensions
             services.AddHttpClient();
 
             services.AddTransient<ITokenApi, TokenApi>();
+            services.AddTransient<IAthleteApi, AthleteApi>();
         }
     }
 }
