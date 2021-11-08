@@ -1,4 +1,5 @@
 ﻿using Strava.API.Client.Model.Activity;
+using Strava.API.Client.Model.Athlete;
 using Strava.API.Client.Model.Base;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace Strava.API.Client.Model.Segment
         public AthleteMetaModel Athlete { get; set; }
 
         [JsonPropertyName("segment")]
-        public AthleteMetaModel Segment { get; set; }
+        public SegmentSummaryModel Segment { get; set; }
 
         /// <summary>
         /// Segment name
@@ -45,6 +46,9 @@ namespace Strava.API.Client.Model.Segment
         [JsonPropertyName("start_date")]
         public DateTime StartDate { get; set; }
 
+        /// <remarks>
+        /// Local but returned as UTC...
+        /// </remarks>
         [JsonPropertyName("start_date_local")]
         public DateTime StartDateLocal { get; set; }
 

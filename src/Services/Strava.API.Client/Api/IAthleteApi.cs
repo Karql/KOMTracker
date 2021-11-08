@@ -10,6 +10,6 @@ namespace Strava.API.Client.Api
 {
     public interface IAthleteApi
     {
-        Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(string token);
+        Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token);
     }
 }

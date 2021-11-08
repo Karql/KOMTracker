@@ -10,14 +10,14 @@ namespace Strava.API.Client.Tests.Extensions.Model.Athlete
 {
     public static class TokenWithAthleteModelExtensions
     {
+        /// <summary>
+        /// JSON equivalent to API response
+        /// </summary>
+        /// <remarks>
+        /// Manually created string string for testing deserialization
+        /// </remarks>
         public static string ToJson(this TokenWithAthleteModel model)
         {
-            /// <summary>
-            /// JSON equivalent to API response
-            /// </summary>
-            /// <remarks>
-            /// Manually created string string for testing deserialization
-            /// </remarks>
             return @$"{{
                 ""token_type"": ""{model.TokenType}"",
                 ""expires_at"": {model.ExpiresAt.ToTimeStamp()},

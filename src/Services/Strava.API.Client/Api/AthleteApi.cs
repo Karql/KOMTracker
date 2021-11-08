@@ -26,14 +26,14 @@ namespace Strava.API.Client.Api
             _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
-        public async Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(string token)
+        public async Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token)
         {
             var koms = new List<SegmentEffortDetailedModel>();
             int page = 1;
 
             while (true)
             {
-                var res = await GetKomsAsync(token, page++);
+                var res = await GetKomsAsync(athleteId, token, page++);
 
                 if (res.IsFailed)
                 {
@@ -49,9 +49,9 @@ namespace Strava.API.Client.Api
             }
         }
 
-        private async Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(string token, int page)
+        private async Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token, int page)
         {
-            var url = $"https://www.strava.com/api/v3/athletes/2394302/koms?per_page={MAX_PER_PAGE}&page={page}";
+            var url = $"https://www.strava.com/api/v3/athletes/{athleteId}/koms?per_page={MAX_PER_PAGE}&page={page}";
 
             var logPrefix = $"{nameof(GetKomsAsync)} ";
             var httpClient = _httpClientFactory.CreateClient();

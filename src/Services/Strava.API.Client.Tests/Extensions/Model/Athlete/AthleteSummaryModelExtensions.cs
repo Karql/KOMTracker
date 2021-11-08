@@ -8,16 +8,16 @@ using Utils.Extensions;
 
 namespace Strava.API.Client.Tests.Extensions.Model.Athlete
 {
-    public static class AthleteModelExtensions
+    public static class AthleteSummaryModelExtensions
     {
+        /// <summary>
+        /// JSON equivalent to API response
+        /// </summary>
+        /// <remarks>
+        /// Manually created string string for testing deserialization
+        /// </remarks>
         public static string ToJson(this AthleteSummaryModel model)
         {
-            /// <summary>
-            /// JSON equivalent to API response
-            /// </summary>
-            /// <remarks>
-            /// Manually created string string for testing deserialization
-            /// </remarks>
             return @$"{{
                 ""id"": {model.Id},
                 ""username"": ""{model.Username}"",

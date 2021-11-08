@@ -16,6 +16,9 @@ namespace Strava.API.Client.Model.Segment
         [JsonPropertyName("id")]
         public long Id { get; set; }
 
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
         [JsonPropertyName("activity_type")]
         public string ActivityType { get; set; }
 
