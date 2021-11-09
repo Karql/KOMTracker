@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KOMTracker.API.DAL.EntityConfigurations.Strava
+namespace KOMTracker.API.DAL.EntityConfigurations.Athlete
 {
     public class AthleteModelTypeConfiguration
         : IEntityTypeConfiguration<AthleteModel>

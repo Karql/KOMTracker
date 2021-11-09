@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KOMTracker.API.DAL.EntityConfigurations.Strava
+namespace KOMTracker.API.DAL.EntityConfigurations.Token
 {
     public class TokenModelTypeConfiguration
         : IEntityTypeConfiguration<TokenModel>
@@ -14,6 +14,10 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Strava
         public void Configure(EntityTypeBuilder<TokenModel> builder)
         {
             builder.ToTable("token");
+
+            builder.HasOne(x => x.Athlete)
+                .WithOne(x => x.Token)
+                .HasForeignKey<TokenModel>(x => x.AthleteId);
 
             builder.HasKey(x => x.AthleteId);
 
@@ -39,10 +43,6 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Strava
             builder.Property(x => x.Scope)
                 .HasColumnName("scope")
                 .HasMaxLength(100);
-
-            builder.HasOne(x => x.Athlete)
-                .WithOne(x => x.Token)
-                .HasForeignKey<TokenModel>(x => x.AthleteId);
         }
     }
 }

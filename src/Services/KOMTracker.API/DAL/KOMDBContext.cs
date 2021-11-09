@@ -1,8 +1,11 @@
 ﻿using KOMTracker.API.DAL.EntityConfigurations;
+using KOMTracker.API.DAL.EntityConfigurations.Athlete;
 using KOMTracker.API.DAL.EntityConfigurations.Identity;
-using KOMTracker.API.DAL.EntityConfigurations.Strava;
+using KOMTracker.API.DAL.EntityConfigurations.Segment;
+using KOMTracker.API.DAL.EntityConfigurations.Token;
 using KOMTracker.API.Models.Athlete;
 using KOMTracker.API.Models.Identity;
+using KOMTracker.API.Models.Segment;
 using KOMTracker.API.Models.Token;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +21,10 @@ namespace KOMTracker.API.DAL
         public virtual DbSet<AthleteModel> Athlete { get; set; }
 
         public virtual DbSet<TokenModel> Token { get; set; }
+
+        public virtual DbSet<SegmentModel> Segment { get; set; }
+
+        public virtual DbSet<SegmentEffortModel> SegmentEffort { get; set; }
 
         public KOMDBContext(DbContextOptions<KOMDBContext> options)
             : base(options)
@@ -40,6 +47,8 @@ namespace KOMTracker.API.DAL
             // Strava
             builder.ApplyConfiguration(new AthleteModelTypeConfiguration());
             builder.ApplyConfiguration(new TokenModelTypeConfiguration());
+            builder.ApplyConfiguration(new SegmentModelTypeConfiguration());
+            builder.ApplyConfiguration(new SegmentEffortModelTypeConfiguration());
         }
     }
 }

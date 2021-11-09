@@ -30,6 +30,12 @@ namespace KOMTracker.API.DAL.Repositories
             return _context.Token.FirstOrDefaultAsync(x => x.AthleteId == athleteId);
         }
 
+        public async Task<IEnumerable<AthleteModel>> GetAllAthletesAsync()
+        {
+            // TODO: only active
+            return await _context.Athlete.ToListAsync();
+        }
+
         public Task AddOrUpdateTokenAsync(TokenModel token)
         {
             return _context

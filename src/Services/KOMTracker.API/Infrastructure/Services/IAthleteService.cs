@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using KOMTracker.API.Models.Athlete;
+using KOMTracker.API.Models.Segment;
 using KOMTracker.API.Models.Token;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,19 @@ namespace KOMTracker.API.Infrastructure.Services
         Task AddOrUpdateTokenAsync(TokenModel token);
 
         /// <summary>
+        /// Get all athletes from DB
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<AthleteModel>> GetAllAthletesAsync();
+
+        /// <summary>
         /// Get token from DB and refresh when needed
-        Task<Result<TokenModel>> GetValidToken(int athleteId);
+        /// <summary>
+        Task<TokenModel> GetValidTokenAsync(int athleteId);
+
+        /// <summary>
+        /// Get actual koms from API
+        /// </summary>
+        Task<IEnumerable<(SegmentEffortModel, SegmentModel)>> GetAthleteKomsAsync(int athleteId);
     }
 }

@@ -15,6 +15,10 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Identity
         {
             builder.ToTable("user");
 
+            builder.HasOne(x => x.Athlete)
+                .WithOne(x => x.User)
+                .HasForeignKey<UserModel>(x => x.AthleteId);
+
             builder.Property(x => x.Id)
                 .HasColumnName("id");
 
@@ -65,10 +69,6 @@ namespace KOMTracker.API.DAL.EntityConfigurations.Identity
 
             builder.Property(x => x.AthleteId)
                 .HasColumnName("athlete_id");
-
-            builder.HasOne(x => x.Athlete)
-                .WithOne(x => x.User)
-                .HasForeignKey<UserModel>(x => x.AthleteId);
         }
     }
 }

@@ -14,6 +14,7 @@ namespace KOMTracker.API.DAL.Repositories
         Task<bool> IsAthleteExistsAsync(int athleteId);
         Task AddOrUpdateAthleteAsync(AthleteModel athlete);
         Task<TokenModel> GetTokenAsync(int athleteId);
+        Task<IEnumerable<AthleteModel>> GetAllAthletesAsync();
         Task AddOrUpdateTokenAsync(TokenModel token);
     }
 }

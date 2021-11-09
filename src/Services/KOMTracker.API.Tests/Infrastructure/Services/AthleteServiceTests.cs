@@ -49,8 +49,10 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
 
         #endregion
 
+        private readonly IMapper _mapper;
         private readonly IKOMUnitOfWork _komUoW;
         private readonly ITokenService _tokenService;
+        private readonly IAthleteApi _athleteApi;
         private readonly IAthleteRepository _athleteRepository;
 
         private readonly AthleteService _athleteService;
@@ -63,9 +65,11 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
                 { typeof(IAthleteRepository), _athleteRepository }
             });
 
+            _mapper = Substitute.For<IMapper>();
             _tokenService = Substitute.For<ITokenService>();
+            _athleteApi = Substitute.For<IAthleteApi>();
 
-            _athleteService = new AthleteService(_komUoW, _tokenService);
+            _athleteService = new AthleteService(_mapper, _komUoW, _tokenService, _athleteApi);
         }
 
         #region Get valid token
@@ -76,7 +80,7 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
             _athleteRepository.GetTokenAsync(TestAthleteId).Returns((TokenModel)null);
 
             // Act
-            Func<Task<Result<TokenModel>>> action = () => _athleteService.GetValidToken(TestAthleteId);
+            Func<Task<TokenModel>> action = () => _athleteService.GetValidTokenAsync(TestAthleteId);
 
             // Assert
             await action.Should().ThrowAsync<Exception>();
@@ -92,11 +96,10 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
             _athleteRepository.GetTokenAsync(TestAthleteId).Returns(TestValidToken);
 
             // Act
-            var res = await _athleteService.GetValidToken(TestAthleteId);
+            var res = await _athleteService.GetValidTokenAsync(TestAthleteId);
 
             // Assert
-            res.Should().BeSuccess();
-            res.Value.Should().Be(TestValidToken);
+            res.Should().Be(TestValidToken);
 
             await _tokenService.DidNotReceiveWithAnyArgs().RefreshAsync(null);
             await _athleteRepository.DidNotReceiveWithAnyArgs().AddOrUpdateTokenAsync(null);
@@ -110,11 +113,10 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
             _tokenService.RefreshAsync(TestInvalidToken).Returns(Result.Ok(TestNewToken));
 
             // Act
-            var res = await _athleteService.GetValidToken(TestAthleteId);
+            var res = await _athleteService.GetValidTokenAsync(TestAthleteId);
 
             // Assert
-            res.Should().BeSuccess();
-            res.Value.Should().Be(TestNewToken);
+            res.Should().Be(TestNewToken);
 
             await _athleteRepository.Received().AddOrUpdateTokenAsync(TestNewToken);
         }
@@ -127,7 +129,7 @@ namespace KOMTracker.API.Tests.Infrastructure.Services
             _tokenService.RefreshAsync(TestInvalidToken).Returns(Result.Fail<TokenModel>(new RefreshError(RefreshError.InvalidRefreshToken)));
 
             // Act
-            Func<Task<Result<TokenModel>>> action = () => _athleteService.GetValidToken(TestAthleteId);
+            Func<Task<TokenModel>> action = () => _athleteService.GetValidTokenAsync(TestAthleteId);
 
             // Assert
             await action.Should().ThrowAsync<Exception>();
