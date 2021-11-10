@@ -3,6 +3,7 @@ using FluentResults;
 using KOMTracker.API.DAL;
 using KOMTracker.API.DAL.Repositories;
 using KOMTracker.API.Models.Athlete;
+using KOMTracker.API.Models.Athlete.Error;
 using KOMTracker.API.Models.Segment;
 using KOMTracker.API.Models.Token;
 using Strava.API.Client.Api;
@@ -57,19 +58,19 @@ namespace KOMTracker.API.Infrastructure.Services
                 .GetAllAthletesAsync();
         }
 
-        public async Task<TokenModel> GetValidTokenAsync(int athleteId)
+        public async Task<Result<TokenModel>> GetValidTokenAsync(int athleteId)
         {
             var token = await GetTokenAsync(athleteId);
 
             if (token == null)
             {
-                // TODO: Decativate athlete 
-                throw new Exception($"{nameof(GetValidTokenAsync)} no token in DB!");
+                await DeactivateAthleteAsync(athleteId);
+                return Result.Fail<TokenModel>(new GetValidTokenError(GetValidTokenError.NoTokenInDB));
             }
 
             if (IsValidToken(token))
             {
-                return token;
+                return Result.Ok(token);
             }
 
             var refreshTokenResult = await _tokenService.RefreshAsync(token);
@@ -78,33 +79,36 @@ namespace KOMTracker.API.Infrastructure.Services
             {
                 var newToken = refreshTokenResult.Value;
                 await AddOrUpdateTokenAsync(newToken);
-                return newToken;
+                return Result.Ok(newToken);
             }
 
-            // TODO: Deactivate athlete on Invalid refresh token
-            throw new Exception($"{nameof(GetValidTokenAsync)} falied!");
+            await DeactivateAthleteAsync(athleteId);
+            return Result.Fail<TokenModel>(new GetValidTokenError(GetValidTokenError.RefreshFailed));
         }
 
-        public async Task<IEnumerable<(SegmentEffortModel, SegmentModel)>> GetAthleteKomsAsync(int athleteId)
+        public async Task<Result<IEnumerable<(SegmentEffortModel, SegmentModel)>>> GetAthleteKomsAsync(int athleteId, string token)
         {
-            var token = await GetValidTokenAsync(athleteId);
-
-            var getKomsRes = await _athleteApi.GetKomsAsync(athleteId, token.AccessToken);
-            // TODO: retry on Unauthorized 
-            if (getKomsRes.IsFailed)
+            var getKomsRes = await _athleteApi.GetKomsAsync(athleteId, token);
+            
+            if (getKomsRes.IsSuccess)
             {
-                throw new Exception($"{nameof(GetAthleteKomsAsync)} cannot get KOMs!");
+                return Result.Ok(getKomsRes.Value
+                    .Where(x => !x.Segment.Private)
+                    .Select(x => (
+                        _mapper.Map<SegmentEffortModel>(x),
+                        _mapper.Map<SegmentModel>(x.Segment)
+                    ))
+                    .ToList()
+                    .AsEnumerable()
+                );
             }
 
-            var koms = getKomsRes.Value;
+            if (getKomsRes.HasError<ApiModel.Segment.Error.GetKomsError>(x => x.Message == ApiModel.Segment.Error.GetKomsError.Unauthorized))
+            {
+                return Result.Fail<IEnumerable<(SegmentEffortModel, SegmentModel)>>(new GetAthleteKomsError(GetAthleteKomsError.Unauthorized));
+            }
 
-            return koms
-                .Where(x => !x.Segment.Private)
-                .Select(x => (
-                    _mapper.Map<SegmentEffortModel>(x),
-                    _mapper.Map<SegmentModel>(x.Segment)
-                ))
-                .ToList();
+            return Result.Fail<IEnumerable<(SegmentEffortModel, SegmentModel)>>(new GetAthleteKomsError(GetAthleteKomsError.UnknownError));
         }
 
         protected Task<TokenModel> GetTokenAsync(int athleteId)
@@ -117,6 +121,12 @@ namespace KOMTracker.API.Infrastructure.Services
         protected bool IsValidToken(TokenModel token)
         {
             return token.ExpiresAt > DateTime.UtcNow;
+        }
+
+        protected Task DeactivateAthleteAsync(int athleteId)
+        {
+            return _komUoW.GetRepository<IAthleteRepository>()
+                .DeactivateAthleteAsync(athleteId);
         }
     }
 }

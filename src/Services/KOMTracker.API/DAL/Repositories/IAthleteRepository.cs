@@ -13,6 +13,7 @@ namespace KOMTracker.API.DAL.Repositories
     {        
         Task<bool> IsAthleteExistsAsync(int athleteId);
         Task AddOrUpdateAthleteAsync(AthleteModel athlete);
+        Task DeactivateAthleteAsync(int athleteId);
         Task<TokenModel> GetTokenAsync(int athleteId);
         Task<IEnumerable<AthleteModel>> GetAllAthletesAsync();
         Task AddOrUpdateTokenAsync(TokenModel token);

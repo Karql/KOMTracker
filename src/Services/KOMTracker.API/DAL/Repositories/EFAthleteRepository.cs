@@ -25,6 +25,12 @@ namespace KOMTracker.API.DAL.Repositories
                 .RunAsync();
         }
 
+        public Task DeactivateAthleteAsync(int athleteId)
+        {
+            // TODO
+            return Task.CompletedTask;
+        }
+
         public Task<TokenModel> GetTokenAsync(int athleteId)
         {
             return _context.Token.FirstOrDefaultAsync(x => x.AthleteId == athleteId);

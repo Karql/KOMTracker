@@ -34,11 +34,11 @@ namespace KOMTracker.API.Infrastructure.Services
         /// <summary>
         /// Get token from DB and refresh when needed
         /// <summary>
-        Task<TokenModel> GetValidTokenAsync(int athleteId);
+        Task<Result<TokenModel>> GetValidTokenAsync(int athleteId);
 
         /// <summary>
         /// Get actual koms from API
         /// </summary>
-        Task<IEnumerable<(SegmentEffortModel, SegmentModel)>> GetAthleteKomsAsync(int athleteId);
+        Task<Result<IEnumerable<(SegmentEffortModel, SegmentModel)>>> GetAthleteKomsAsync(int athleteId, string token);
     }
 }

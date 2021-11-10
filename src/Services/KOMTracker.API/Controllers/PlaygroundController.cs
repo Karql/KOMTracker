@@ -29,7 +29,7 @@ namespace KOMTracker.API.Controllers
 
             //var res = await athleteApi.GetKomsAsync(2394302, token);
 
-            var res = await athleteService.GetAthleteKomsAsync(2394302);
+            var res = await athleteService.GetAthleteKomsAsync(2394302, token);
 
             return new NoContentResult();
         }
