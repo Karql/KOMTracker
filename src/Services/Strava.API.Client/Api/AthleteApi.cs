@@ -11,71 +11,70 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Strava.API.Client.Api
+namespace Strava.API.Client.Api;
+
+public class AthleteApi : IAthleteApi
 {
-    public class AthleteApi : IAthleteApi
+    private const int MAX_PER_PAGE = 200;
+
+    private readonly ILogger<AthleteApi> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    public AthleteApi(ILogger<AthleteApi> logger, IHttpClientFactory httpClientFactory)
     {
-        private const int MAX_PER_PAGE = 200;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+    }
 
-        private readonly ILogger<AthleteApi> _logger;
-        private readonly IHttpClientFactory _httpClientFactory;
+    public async Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token)
+    {
+        var koms = new List<SegmentEffortDetailedModel>();
+        int page = 1;
 
-        public AthleteApi(ILogger<AthleteApi> logger, IHttpClientFactory httpClientFactory)
+        while (true)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
-        }
+            var res = await GetKomsAsync(athleteId, token, page++);
 
-        public async Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token)
-        {
-            var koms = new List<SegmentEffortDetailedModel>();
-            int page = 1;
-
-            while (true)
+            if (res.IsFailed)
             {
-                var res = await GetKomsAsync(athleteId, token, page++);
-
-                if (res.IsFailed)
-                {
-                    return res;
-                }
-
-                if (!(res.Value?.Any() ?? false))
-                {
-                    return Result.Ok(koms.AsEnumerable());
-                }
-
-                koms.AddRange(res.Value);
+                return res;
             }
-        }
 
-        private async Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token, int page)
-        {
-            var url = $"https://www.strava.com/api/v3/athletes/{athleteId}/koms?per_page={MAX_PER_PAGE}&page={page}";
-
-            var logPrefix = $"{nameof(GetKomsAsync)} ";
-            var httpClient = _httpClientFactory.CreateClient();
-            httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
-
-            using var response = await httpClient.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
+            if (!(res.Value?.Any() ?? false))
             {
-                var koms = await response.Content.ReadFromJsonAsync<List<SegmentEffortDetailedModel>>();
                 return Result.Ok(koms.AsEnumerable());
             }
 
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                _logger.LogWarning(logPrefix + "Unauthorized!");
-                return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.Unauthorized));
-            }
-
-            _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}",
-                (int)response.StatusCode, await response.Content.ReadAsStringAsync());
-
-            return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.UnknownError));
+            koms.AddRange(res.Value);
         }
+    }
+
+    private async Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token, int page)
+    {
+        var url = $"https://www.strava.com/api/v3/athletes/{athleteId}/koms?per_page={MAX_PER_PAGE}&page={page}";
+
+        var logPrefix = $"{nameof(GetKomsAsync)} ";
+        var httpClient = _httpClientFactory.CreateClient();
+        httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await httpClient.GetAsync(url);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var koms = await response.Content.ReadFromJsonAsync<List<SegmentEffortDetailedModel>>();
+            return Result.Ok(koms.AsEnumerable());
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            _logger.LogWarning(logPrefix + "Unauthorized!");
+            return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.Unauthorized));
+        }
+
+        _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}",
+            (int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
+        return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.UnknownError));
     }
 }

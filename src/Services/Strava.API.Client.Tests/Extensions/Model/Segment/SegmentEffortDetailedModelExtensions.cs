@@ -8,19 +8,19 @@ using Strava.API.Client.Tests.Extensions.Model.Athlete;
 using Strava.API.Client.Tests.Extensions.Model.Activity;
 using Utils.Extensions;
 
-namespace Strava.API.Client.Tests.Extensions.Model.Segment
+namespace Strava.API.Client.Tests.Extensions.Model.Segment;
+
+public static class SegmentEffortDetailedModelExtensions
 {
-    public static class SegmentEffortDetailedModelExtensions
+    /// <summary>
+    /// JSON equivalent to API response
+    /// </summary>
+    /// <remarks>
+    /// Manually created string string for testing deserialization
+    /// </remarks>
+    public static string ToJson(this SegmentEffortDetailedModel model)
     {
-        /// <summary>
-        /// JSON equivalent to API response
-        /// </summary>
-        /// <remarks>
-        /// Manually created string string for testing deserialization
-        /// </remarks>
-        public static string ToJson(this SegmentEffortDetailedModel model)
-        {
-            return @$"{{
+        return @$"{{
                 ""id"": {model.Id},
                 ""resource_state"": {(int)model.ResourceState},
                 ""id"": {model.Id},       
@@ -43,19 +43,18 @@ namespace Strava.API.Client.Tests.Extensions.Model.Segment
                 ""pr_rank"": { model.PrRank},
                 ""kom_rank"": {model.KomRank}
             }}";
-        }
+    }
 
-        /// <summary>
-        /// JSON equivalent to API response
-        /// </summary>
-        /// <remarks>
-        /// Manually created string string for testing deserialization
-        /// </remarks>
-        public static string ToJson(this IEnumerable<SegmentEffortDetailedModel> list)
-        {
-            return @$"[
+    /// <summary>
+    /// JSON equivalent to API response
+    /// </summary>
+    /// <remarks>
+    /// Manually created string string for testing deserialization
+    /// </remarks>
+    public static string ToJson(this IEnumerable<SegmentEffortDetailedModel> list)
+    {
+        return @$"[
                 {string.Join(", ", list.Select(x => x.ToJson()))}
             ]";
-        }
     }
 }

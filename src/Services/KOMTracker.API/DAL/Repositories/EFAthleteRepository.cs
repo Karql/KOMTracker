@@ -8,46 +8,45 @@ using System.Threading.Tasks;
 using Utils.UnitOfWork.Concrete;
 using FlexLabs.EntityFrameworkCore.Upsert;
 
-namespace KOMTracker.API.DAL.Repositories
+namespace KOMTracker.API.DAL.Repositories;
+
+public class EFAthleteRepository : EFRepositoryBase<KOMDBContext>, IAthleteRepository
 {
-    public class EFAthleteRepository : EFRepositoryBase<KOMDBContext>, IAthleteRepository
+    public async Task<bool> IsAthleteExistsAsync(int athleteId)
     {
-        public async Task<bool> IsAthleteExistsAsync(int athleteId)
-        {
-            return await _context.Athlete.AnyAsync(x => x.AthleteId == athleteId);
-        }
+        return await _context.Athlete.AnyAsync(x => x.AthleteId == athleteId);
+    }
 
-        public Task AddOrUpdateAthleteAsync(AthleteModel athlete)
-        {
-            return _context
-                .Athlete
-                .Upsert(athlete)
-                .RunAsync();
-        }
+    public Task AddOrUpdateAthleteAsync(AthleteModel athlete)
+    {
+        return _context
+            .Athlete
+            .Upsert(athlete)
+            .RunAsync();
+    }
 
-        public Task DeactivateAthleteAsync(int athleteId)
-        {
-            // TODO
-            return Task.CompletedTask;
-        }
+    public Task DeactivateAthleteAsync(int athleteId)
+    {
+        // TODO
+        return Task.CompletedTask;
+    }
 
-        public Task<TokenModel> GetTokenAsync(int athleteId)
-        {
-            return _context.Token.FirstOrDefaultAsync(x => x.AthleteId == athleteId);
-        }
+    public Task<TokenModel> GetTokenAsync(int athleteId)
+    {
+        return _context.Token.FirstOrDefaultAsync(x => x.AthleteId == athleteId);
+    }
 
-        public async Task<IEnumerable<AthleteModel>> GetAllAthletesAsync()
-        {
-            // TODO: only active
-            return await _context.Athlete.ToListAsync();
-        }
+    public async Task<IEnumerable<AthleteModel>> GetAllAthletesAsync()
+    {
+        // TODO: only active
+        return await _context.Athlete.ToListAsync();
+    }
 
-        public Task AddOrUpdateTokenAsync(TokenModel token)
-        {
-            return _context
-                .Token
-                .Upsert(token)
-                .RunAsync();
-        }
+    public Task AddOrUpdateTokenAsync(TokenModel token)
+    {
+        return _context
+            .Token
+            .Upsert(token)
+            .RunAsync();
     }
 }

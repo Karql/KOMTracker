@@ -10,126 +10,125 @@ using System.Threading.Tasks;
 using System.IO;
 using Serilog;
 
-namespace Utils.AspNetCore
+namespace Utils.AspNetCore;
+
+public class CommonProgram
 {
-    public class CommonProgram
+    public static readonly string AppName = Assembly.GetEntryAssembly().GetName().Name;
+    public static string[] DefaultAdditionaConfigurationFiles = new[] { "appsettings.local.json" };
+
+    /// <typeparam name="TStartup"></typeparam>
+    /// <param name="args"></param>
+    /// <param name="beforeRun"></param>
+    /// <param name="additionalConfigurationFiles">additional appsetting.xxx.json files. Defaul CommonProgram.DefaultAdditionaConfigurationFiles</param>
+    /// <returns></returns>
+    public static int Main<TStartup>(string[] args,
+        Action<IHost> beforeRun = null,
+        string[] additionalConfigurationFiles = null
+        ) where TStartup : class
     {
-        public static readonly string AppName = Assembly.GetEntryAssembly().GetName().Name;
-        public static string[] DefaultAdditionaConfigurationFiles = new[] { "appsettings.local.json" };
+        var configuration = GetConfiguration(args, additionalConfigurationFiles);
+        Log.Logger = CreateSerilogLogger(configuration);
 
-        /// <typeparam name="TStartup"></typeparam>
-        /// <param name="args"></param>
-        /// <param name="beforeRun"></param>
-        /// <param name="additionalConfigurationFiles">additional appsetting.xxx.json files. Defaul CommonProgram.DefaultAdditionaConfigurationFiles</param>
-        /// <returns></returns>
-        public static int Main<TStartup>(string[] args,
-            Action<IHost> beforeRun = null,
-            string[] additionalConfigurationFiles = null
-            ) where TStartup : class
+        try
         {
-            var configuration = GetConfiguration(args, additionalConfigurationFiles);
-            Log.Logger = CreateSerilogLogger(configuration);
+            Log.Information("Configuring web host ({ApplicationContext})...", AppName);
+            var hostBuilder = CreateHostBuilder<TStartup>(args, configuration);
+            var host = hostBuilder.Build();
 
-            try
-            {
-                Log.Information("Configuring web host ({ApplicationContext})...", AppName);
-                var hostBuilder = CreateHostBuilder<TStartup>(args, configuration);
-                var host = hostBuilder.Build();
+            beforeRun?.Invoke(host);
 
-                beforeRun?.Invoke(host);
+            Log.Information("Starting web host ({ApplicationContext})...", AppName);
+            host.Run();
 
-                Log.Information("Starting web host ({ApplicationContext})...", AppName);
-                host.Run();
-
-                return 0;
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "Program terminated unexpectedly ({ApplicationContext})!", AppName);
-                return 1;
-            }
-            finally
-            {
-                Log.CloseAndFlush();
-            }
+            return 0;
         }
-
-        public static IHostBuilder CreateHostBuilder<TStartup>(string[] args, string[] additionalConfigurationFiles = null)
-            where TStartup : class
+        catch (Exception ex)
         {
-            var configuration = GetConfiguration(args, additionalConfigurationFiles);
-            return CreateHostBuilder<TStartup>(args, configuration);
+            Log.Fatal(ex, "Program terminated unexpectedly ({ApplicationContext})!", AppName);
+            return 1;
         }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
 
-        private static IHostBuilder CreateHostBuilder<TStartup>(string[] args, IConfiguration configuration) where TStartup : class =>
-            Host.CreateDefaultBuilder(args) 
-                .ConfigureWebHostDefaults(webHostBuilder => 
+    public static IHostBuilder CreateHostBuilder<TStartup>(string[] args, string[] additionalConfigurationFiles = null)
+        where TStartup : class
+    {
+        var configuration = GetConfiguration(args, additionalConfigurationFiles);
+        return CreateHostBuilder<TStartup>(args, configuration);
+    }
+
+    private static IHostBuilder CreateHostBuilder<TStartup>(string[] args, IConfiguration configuration) where TStartup : class =>
+        Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(webHostBuilder =>
+            {
+                webHostBuilder
+                .UseConfiguration(configuration)
+                .ConfigureAppConfiguration(builder =>
                 {
-                    webHostBuilder
-                    .UseConfiguration(configuration)
-                    .ConfigureAppConfiguration(builder =>
-                    {
-                        builder.AddConfiguration(configuration);
-                    })
-                    .CaptureStartupErrors(false)
-                    .UseStartup<TStartup>()
-                    .UseSerilog()
-                    .UseKestrel();
-                });
+                    builder.AddConfiguration(configuration);
+                })
+                .CaptureStartupErrors(false)
+                .UseStartup<TStartup>()
+                .UseSerilog()
+                .UseKestrel();
+            });
 
-        /// <remarks>
-        /// Similar as default configuration created by CreateDefaultBuilder
-        /// https://github.com/dotnet/aspnetcore/blob/v5.0.11/src/DefaultBuilder/src/WebHost.cs#L169
-        /// </remarks>
-        private static IConfiguration GetConfiguration(string[] args, string[] additionalConfigurationFiles = null)
+    /// <remarks>
+    /// Similar as default configuration created by CreateDefaultBuilder
+    /// https://github.com/dotnet/aspnetcore/blob/v5.0.11/src/DefaultBuilder/src/WebHost.cs#L169
+    /// </remarks>
+    private static IConfiguration GetConfiguration(string[] args, string[] additionalConfigurationFiles = null)
+    {
+        additionalConfigurationFiles ??= DefaultAdditionaConfigurationFiles;
+        var environment = GetEnvironment();
+
+        // Default
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{environment}.json", optional: true)
+            .AddEnvironmentVariables();
+
+        if (args != null)
         {
-            additionalConfigurationFiles ??= DefaultAdditionaConfigurationFiles;
-            var environment = GetEnvironment();
-
-            // Default
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{environment}.json", optional: true)
-                .AddEnvironmentVariables();
-
-            if (args != null)
-            {
-                builder.AddCommandLine(args);
-            }
-
-            // Custom
-            foreach (var file in additionalConfigurationFiles)
-            {
-                builder.AddJsonFile(file, optional: true);
-            }
-
-            return builder.Build();
+            builder.AddCommandLine(args);
         }
 
-        private static string GetEnvironment()
+        // Custom
+        foreach (var file in additionalConfigurationFiles)
         {
-            // https://stackoverflow.com/a/37468237/11391667
-            // https://github.com/dotnet/aspnetcore/blob/v5.0.11/src/Hosting/Hosting/src/WebHostBuilder.cs
-            var w = new WebHostBuilder();
-            return w.GetSetting(WebHostDefaults.EnvironmentKey);
+            builder.AddJsonFile(file, optional: true);
         }
 
-        private static ILogger CreateSerilogLogger(IConfiguration configuration)
-        {
-            var environment = GetEnvironment();
+        return builder.Build();
+    }
 
-            var builder = new LoggerConfiguration()
-                .MinimumLevel.Verbose()
-                .ReadFrom.Configuration(configuration)
-                .Enrich.WithProperty("ApplicationContext", AppName)
-                .Enrich.WithMachineName()
-                .Enrich.WithEnvironmentUserName()
-                .Enrich.FromLogContext();
+    private static string GetEnvironment()
+    {
+        // https://stackoverflow.com/a/37468237/11391667
+        // https://github.com/dotnet/aspnetcore/blob/v5.0.11/src/Hosting/Hosting/src/WebHostBuilder.cs
+        var w = new WebHostBuilder();
+        return w.GetSetting(WebHostDefaults.EnvironmentKey);
+    }
 
-            builder = builder.WriteTo.Console();
+    private static ILogger CreateSerilogLogger(IConfiguration configuration)
+    {
+        var environment = GetEnvironment();
 
-            return builder.CreateLogger();
-        }
+        var builder = new LoggerConfiguration()
+            .MinimumLevel.Verbose()
+            .ReadFrom.Configuration(configuration)
+            .Enrich.WithProperty("ApplicationContext", AppName)
+            .Enrich.WithMachineName()
+            .Enrich.WithEnvironmentUserName()
+            .Enrich.FromLogContext();
+
+        builder = builder.WriteTo.Console();
+
+        return builder.CreateLogger();
     }
 }

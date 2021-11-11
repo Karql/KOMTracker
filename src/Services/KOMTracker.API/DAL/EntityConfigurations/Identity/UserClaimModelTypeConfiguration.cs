@@ -6,26 +6,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KOMTracker.API.DAL.EntityConfigurations.Identity
+namespace KOMTracker.API.DAL.EntityConfigurations.Identity;
+
+public class UserClaimModelTypeConfiguration
+    : IEntityTypeConfiguration<UserClaimModel>
 {
-    public class UserClaimModelTypeConfiguration
-        : IEntityTypeConfiguration<UserClaimModel>
+    public void Configure(EntityTypeBuilder<UserClaimModel> builder)
     {
-        public void Configure(EntityTypeBuilder<UserClaimModel> builder)
-        {
-            builder.ToTable("user_claim");
+        builder.ToTable("user_claim");
 
-            builder.Property(x => x.Id)
-                .HasColumnName("id");
+        builder.Property(x => x.Id)
+            .HasColumnName("id");
 
-            builder.Property(x => x.UserId)
-                .HasColumnName("user_id");
+        builder.Property(x => x.UserId)
+            .HasColumnName("user_id");
 
-            builder.Property(x => x.ClaimType)
-                .HasColumnName("claim_type");
+        builder.Property(x => x.ClaimType)
+            .HasColumnName("claim_type");
 
-            builder.Property(x => x.ClaimValue)
-                .HasColumnName("claim_value");
-        }
+        builder.Property(x => x.ClaimValue)
+            .HasColumnName("claim_value");
     }
 }

@@ -6,12 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Strava.API.Client.Api
-{
-    public interface ITokenApi
-    {
-        Task<Result<TokenWithAthleteModel>> ExchangeAsync(string code);
+namespace Strava.API.Client.Api;
 
-        Task<Result<TokenModel>> RefreshAsync(string refreshToken);
-    }
+public interface ITokenApi
+{
+    Task<Result<TokenWithAthleteModel>> ExchangeAsync(string code);
+
+    Task<Result<TokenModel>> RefreshAsync(string refreshToken);
 }

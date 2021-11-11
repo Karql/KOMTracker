@@ -5,15 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils.UnitOfWork.Abstract;
 
-namespace Utils.UnitOfWork.Concrete
-{
-    public abstract class EFRepositoryBase<TContext> : IRepository
-    {
-        protected TContext _context;
+namespace Utils.UnitOfWork.Concrete;
 
-        internal void SetContext(TContext context)
-        {
-            _context = context;
-        }
+public abstract class EFRepositoryBase<TContext> : IRepository
+{
+    protected TContext _context;
+
+    internal void SetContext(TContext context)
+    {
+        _context = context;
     }
 }

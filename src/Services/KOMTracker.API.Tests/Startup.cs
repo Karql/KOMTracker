@@ -5,9 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils.Tests;
 
-namespace KOMTracker.API.Tests
+namespace KOMTracker.API.Tests;
+
+public class Startup : BaseTestStartup
 {
-    public class Startup : BaseTestStartup
-    {
-    }
 }

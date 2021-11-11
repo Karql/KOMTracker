@@ -6,19 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils.Extensions;
 
-namespace Strava.API.Client.Tests.Extensions.Model.Segment
+namespace Strava.API.Client.Tests.Extensions.Model.Segment;
+
+public static class SegmentSummaryModelExtensions
 {
-    public static class SegmentSummaryModelExtensions
+    /// <summary>
+    /// JSON equivalent to API response
+    /// </summary>
+    /// <remarks>
+    /// Manually created string string for testing deserialization
+    /// </remarks>
+    public static string ToJson(this SegmentSummaryModel model)
     {
-        /// <summary>
-        /// JSON equivalent to API response
-        /// </summary>
-        /// <remarks>
-        /// Manually created string string for testing deserialization
-        /// </remarks>
-        public static string ToJson(this SegmentSummaryModel model)
-        {
-            return @$"{{
+        return @$"{{
                 ""resource_state"": {(int)model.ResourceState},
                 ""id"": {model.Id},
                 ""name"": ""{model.Name}"",
@@ -39,6 +39,5 @@ namespace Strava.API.Client.Tests.Extensions.Model.Segment
                 ""hazardous"": {model.Hazardous.ToLowerString()},
                 ""starred"": {model.Starred.ToLowerString()}
             }}";
-        }
     }
 }

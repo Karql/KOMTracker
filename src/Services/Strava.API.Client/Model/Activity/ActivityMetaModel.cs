@@ -6,14 +6,13 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace Strava.API.Client.Model.Activity
-{
-    public class ActivityMetaModel
-    {
-        [JsonPropertyName("resource_state")]
-        public ResourceStateEnum ResourceState { get; set; }
+namespace Strava.API.Client.Model.Activity;
 
-        [JsonPropertyName("id")]
-        public long Id { get; set; }
-    }
+public class ActivityMetaModel
+{
+    [JsonPropertyName("resource_state")]
+    public ResourceStateEnum ResourceState { get; set; }
+
+    [JsonPropertyName("id")]
+    public long Id { get; set; }
 }

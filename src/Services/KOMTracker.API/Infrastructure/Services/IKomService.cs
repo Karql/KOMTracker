@@ -1,9 +1,8 @@
 ﻿using System.Threading.Tasks;
 
-namespace KOMTracker.API.Infrastructure.Services
+namespace KOMTracker.API.Infrastructure.Services;
+
+public interface IKomService
 {
-    public interface IKomService
-    {
-        Task TrackKomsAsync();
-    }
+    Task TrackKomsAsync();
 }

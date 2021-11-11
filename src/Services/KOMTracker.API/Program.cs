@@ -8,12 +8,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Utils.AspNetCore;
 
-namespace KOMTracker.API
-{
-    public class Program
-    {
-        public static int Main(string[] args) => CommonProgram.Main<Startup>(args);
+namespace KOMTracker.API;
 
-        public static IHostBuilder CreateHostBuilder(string[] args) => CommonProgram.CreateHostBuilder<Startup>(args);
-    }
+public class Program
+{
+    public static int Main(string[] args) => CommonProgram.Main<Startup>(args);
+
+    public static IHostBuilder CreateHostBuilder(string[] args) => CommonProgram.CreateHostBuilder<Startup>(args);
 }

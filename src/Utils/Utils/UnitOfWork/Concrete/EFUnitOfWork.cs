@@ -7,71 +7,70 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils.UnitOfWork.Abstract;
 
-namespace Utils.UnitOfWork.Concrete
+namespace Utils.UnitOfWork.Concrete;
+
+public class EFUnitOfWork<TContext> : IUnitOfWork
+    where TContext : DbContext
 {
-    public class EFUnitOfWork<TContext> : IUnitOfWork
-        where TContext : DbContext
+    private bool disposed = false;
+    protected TContext _context;
+    protected Dictionary<Type, IRepository> _repositories = new Dictionary<Type, IRepository>();
+
+    public EFUnitOfWork(TContext dbContext)
     {
-        private bool disposed = false;
-        protected TContext _context;
-        protected Dictionary<Type, IRepository> _repositories = new Dictionary<Type, IRepository>();
+        _context = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+    }
 
-        public EFUnitOfWork(TContext dbContext)
+    public TRepository GetRepository<TRepository>()
+        where TRepository : class, IRepository
+    {
+        var repoType = typeof(TRepository);
+
+        if (!_repositories.ContainsKey(repoType))
         {
-            _context = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        }
+            var repo = _context.GetService<TRepository>();
 
-        public TRepository GetRepository<TRepository>() 
-            where TRepository : class, IRepository
-        {
-            var repoType = typeof(TRepository);
-
-            if (!_repositories.ContainsKey(repoType))
+            if (!(repo is EFRepositoryBase<TContext>))
             {
-                var repo = _context.GetService<TRepository>();
-
-                if (!(repo is EFRepositoryBase<TContext>))
-                {
-                    throw new Exception($"{repo.GetType()} is not EFRepositoryBase<TContext>");
-                }
-
-                var repoCasted = repo as EFRepositoryBase<TContext>;
-                repoCasted.SetContext(_context);
-
-                _repositories[repoType] = repo;
-
+                throw new Exception($"{repo.GetType()} is not EFRepositoryBase<TContext>");
             }
 
-            return (TRepository)_repositories[repoType];
+            var repoCasted = repo as EFRepositoryBase<TContext>;
+            repoCasted.SetContext(_context);
+
+            _repositories[repoType] = repo;
+
         }
 
-        public async Task<int> SaveChangesAsync()
-        {
-            return await _context.SaveChangesAsync();
-        }
+        return (TRepository)_repositories[repoType];
+    }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+    public async Task<int> SaveChangesAsync()
+    {
+        return await _context.SaveChangesAsync();
+    }
 
-        protected virtual void Dispose(bool disposing)
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposed)
         {
-            if (!disposed)
+            if (disposing)
             {
-                if (disposing)
+                if (_repositories != null)
                 {
-                    if (_repositories != null)
-                    {
-                        _repositories.Clear();
-                    }
-
-                    _context.Dispose();
+                    _repositories.Clear();
                 }
-            }
 
-            disposed = true;
+                _context.Dispose();
+            }
         }
+
+        disposed = true;
     }
 }

@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Utils.Tests.Logging
+namespace Utils.Tests.Logging;
+
+public interface ITestLogger : ILogger
 {
-    public interface ITestLogger : ILogger
-    {
-        internal IMockLogger MockLoggerSubstitute { get; }
-    }
-    public interface ITestLogger<T> : ITestLogger, ILogger<T> { }
+    internal IMockLogger MockLoggerSubstitute { get; }
 }
+public interface ITestLogger<T> : ITestLogger, ILogger<T> { }

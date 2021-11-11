@@ -6,22 +6,21 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils.Extensions;
 
-namespace Strava.API.Client.Tests.Extensions.Model.Athlete
+namespace Strava.API.Client.Tests.Extensions.Model.Athlete;
+
+public static class AthleteMetaModelExtensions
 {
-    public static class AthleteMetaModelExtensions
+    /// <summary>
+    /// JSON equivalent to API response
+    /// </summary>
+    /// <remarks>
+    /// Manually created string string for testing deserialization
+    /// </remarks>
+    public static string ToJson(this AthleteMetaModel model)
     {
-        /// <summary>
-        /// JSON equivalent to API response
-        /// </summary>
-        /// <remarks>
-        /// Manually created string string for testing deserialization
-        /// </remarks>
-        public static string ToJson(this AthleteMetaModel model)
-        {
-            return @$"{{
+        return @$"{{
                 ""resource_state"": {(int)model.ResourceState},
                 ""id"": {model.Id}              
             }}";
-        }
     }
 }

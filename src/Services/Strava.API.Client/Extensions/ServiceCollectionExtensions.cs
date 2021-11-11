@@ -6,16 +6,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Strava.API.Client.Extensions
-{
-    public static class ServiceCollectionExtensions
-    {
-        public static void AddStravaApiClient(this IServiceCollection services)
-        {
-            services.AddHttpClient();
+namespace Strava.API.Client.Extensions;
 
-            services.AddTransient<ITokenApi, TokenApi>();
-            services.AddTransient<IAthleteApi, AthleteApi>();
-        }
+public static class ServiceCollectionExtensions
+{
+    public static void AddStravaApiClient(this IServiceCollection services)
+    {
+        services.AddHttpClient();
+
+        services.AddTransient<ITokenApi, TokenApi>();
+        services.AddTransient<IAthleteApi, AthleteApi>();
     }
 }

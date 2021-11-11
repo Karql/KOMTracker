@@ -5,9 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils.Tests;
 
-namespace Strava.API.Client.Tests
+namespace Strava.API.Client.Tests;
+
+public class Startup : BaseTestStartup
 {
-    public class Startup : BaseTestStartup
-    {
-    }
 }

@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utils.UnitOfWork.Abstract
-{
-    public interface IUnitOfWork : IDisposable
-    { 
-        Task<int> SaveChangesAsync();
+namespace Utils.UnitOfWork.Abstract;
 
-        public TRepository GetRepository<TRepository>() where TRepository : class, IRepository;
-    }
+public interface IUnitOfWork : IDisposable
+{
+    Task<int> SaveChangesAsync();
+
+    public TRepository GetRepository<TRepository>() where TRepository : class, IRepository;
 }

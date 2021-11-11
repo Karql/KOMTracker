@@ -10,17 +10,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils.AspNetCore.Helpers;
 
-namespace Utils.AspNetCore.Extensions
+namespace Utils.AspNetCore.Extensions;
+
+public static class IServiceProviderExtensions
 {
-    public static class IServiceProviderExtensions
+    /// <summary>
+    /// Based on eShopOnContainers.
+    /// </summary>
+    public static IServiceProvider MigrateDbContext<TContext>(this IServiceProvider services, Action<TContext, IServiceProvider> seeder = null) where TContext : DbContext
     {
-        /// <summary>
-        /// Based on eShopOnContainers.
-        /// </summary>
-        public static IServiceProvider MigrateDbContext<TContext>(this IServiceProvider services, Action<TContext, IServiceProvider> seeder = null) where TContext : DbContext
-        {
-            DbContextHelper.MigrateDbContext<TContext>(services, seeder);
-            return services;
-        }
+        DbContextHelper.MigrateDbContext<TContext>(services, seeder);
+        return services;
     }
 }

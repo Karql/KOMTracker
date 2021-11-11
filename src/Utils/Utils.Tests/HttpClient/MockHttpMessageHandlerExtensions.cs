@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 
-namespace Utils.Tests.HttpClient
+namespace Utils.Tests.HttpClient;
+
+public static class MockHttpMessageHandlerExtensions
 {
-    public static class MockHttpMessageHandlerExtensions
+    public static IHttpClientFactory ToHttpClientFactory(this MockHttpMessageHandler mockHttpMessageHandler)
     {
-        public static IHttpClientFactory ToHttpClientFactory(this MockHttpMessageHandler mockHttpMessageHandler)
-        {
-            return new MockHttpClientFactory(mockHttpMessageHandler);
-        }
+        return new MockHttpClientFactory(mockHttpMessageHandler);
     }
 }

@@ -6,19 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Utils.Extensions;
 
-namespace Strava.API.Client.Tests.Extensions.Model.Athlete
+namespace Strava.API.Client.Tests.Extensions.Model.Athlete;
+
+public static class AthleteSummaryModelExtensions
 {
-    public static class AthleteSummaryModelExtensions
+    /// <summary>
+    /// JSON equivalent to API response
+    /// </summary>
+    /// <remarks>
+    /// Manually created string string for testing deserialization
+    /// </remarks>
+    public static string ToJson(this AthleteSummaryModel model)
     {
-        /// <summary>
-        /// JSON equivalent to API response
-        /// </summary>
-        /// <remarks>
-        /// Manually created string string for testing deserialization
-        /// </remarks>
-        public static string ToJson(this AthleteSummaryModel model)
-        {
-            return @$"{{
+        return @$"{{
                 ""id"": {model.Id},
                 ""username"": ""{model.Username}"",
                 ""resource_state"": {(int)model.ResourceState},
@@ -38,6 +38,5 @@ namespace Strava.API.Client.Tests.Extensions.Model.Athlete
                 ""profile_medium"": ""{model.ProfileMedium}"",
                 ""profile"": ""{model.Profile}""
             }}";
-        }
     }
 }

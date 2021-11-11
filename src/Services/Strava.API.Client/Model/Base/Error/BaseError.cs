@@ -4,16 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Strava.API.Client.Model.Base.Error
-{
-    public abstract class BaseError : FluentResults.Error
-    {
-        public const string Unauthorized = "Unauthorized";
-        public const string UnknownError = "UnknownError";
+namespace Strava.API.Client.Model.Base.Error;
 
-        public BaseError(string message)
-            : base(message)
-        {
-        }
+public abstract class BaseError : FluentResults.Error
+{
+    public const string Unauthorized = "Unauthorized";
+    public const string UnknownError = "UnknownError";
+
+    public BaseError(string message)
+        : base(message)
+    {
     }
 }

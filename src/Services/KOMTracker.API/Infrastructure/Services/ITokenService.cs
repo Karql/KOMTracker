@@ -6,18 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KOMTracker.API.Infrastructure.Services
-{
-    public interface ITokenService
-    {
-        /// <summary>
-        /// Exchange code for token
-        /// </summary>
-        Task<Result<(AthleteModel, TokenModel)>> ExchangeAsync(string code, string scope);
+namespace KOMTracker.API.Infrastructure.Services;
 
-        /// <summary>
-        /// Refresh token
-        /// </summary>
-        Task<Result<TokenModel>> RefreshAsync(TokenModel token);
-    }
+public interface ITokenService
+{
+    /// <summary>
+    /// Exchange code for token
+    /// </summary>
+    Task<Result<(AthleteModel, TokenModel)>> ExchangeAsync(string code, string scope);
+
+    /// <summary>
+    /// Refresh token
+    /// </summary>
+    Task<Result<TokenModel>> RefreshAsync(TokenModel token);
 }

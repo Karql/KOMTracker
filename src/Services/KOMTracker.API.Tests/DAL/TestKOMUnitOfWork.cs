@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 using Utils.Tests.UnitOfWork;
 using Utils.UnitOfWork.Abstract;
 
-namespace KOMTracker.API.Tests.DAL
+namespace KOMTracker.API.Tests.DAL;
+
+public class TestKOMUnitOfWork : TestUnitOfWork, IKOMUnitOfWork
 {
-    public class TestKOMUnitOfWork : TestUnitOfWork, IKOMUnitOfWork
+    public TestKOMUnitOfWork(IDictionary<Type, IRepository> repos) : base(repos)
     {
-        public TestKOMUnitOfWork(IDictionary<Type, IRepository> repos) : base(repos)
-        {
-        }
     }
 }

@@ -4,9 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Utils.UnitOfWork.Abstract
+namespace Utils.UnitOfWork.Abstract;
+
+public interface IRepository
 {
-    public interface IRepository
-    {
-    }
 }

@@ -1,25 +1,30 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31112.23
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{90E1A68D-E0A9-4BFF-8DBE-4D1D945AE09D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KOMTracker.API", "Services\KOMTracker.API\KOMTracker.API.csproj", "{DD4ABE5E-378A-4976-BC85-420EA27EDE8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strava.API.Client", "Services\Strava.API.Client\Strava.API.Client.csproj", "{E16029E9-450F-41CE-8AED-9B2CDEA396A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Strava.API.Client", "Services\Strava.API.Client\Strava.API.Client.csproj", "{E16029E9-450F-41CE-8AED-9B2CDEA396A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Strava.API.Client.Tests", "Services\Strava.API.Client.Tests\Strava.API.Client.Tests.csproj", "{0BF84F3D-B3E7-4F17-A245-AFD07ECD6D4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Strava.API.Client.Tests", "Services\Strava.API.Client.Tests\Strava.API.Client.Tests.csproj", "{0BF84F3D-B3E7-4F17-A245-AFD07ECD6D4D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{1B65C037-2265-4E75-9128-91AB5DA7EF35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils.Tests", "Utils\Utils.Tests\Utils.Tests.csproj", "{EE3FB89B-3760-4408-830A-B7599F8ACF99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils.Tests", "Utils\Utils.Tests\Utils.Tests.csproj", "{EE3FB89B-3760-4408-830A-B7599F8ACF99}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentResults.Extensions.FluentAssertions", "Utils\FluentResults.Extensions.FluentAssertions\FluentResults.Extensions.FluentAssertions.csproj", "{C41C5176-2F8A-426F-B4EA-11308F2EE12E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils", "Utils\Utils\Utils.csproj", "{188F3572-62E2-46F0-A751-E41F760A88CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils", "Utils\Utils\Utils.csproj", "{188F3572-62E2-46F0-A751-E41F760A88CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KOMTracker.API.Tests", "Services\KOMTracker.API.Tests\KOMTracker.API.Tests.csproj", "{377DD2B8-6148-40E4-AD3C-377AB2AA8A5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KOMTracker.API.Tests", "Services\KOMTracker.API.Tests\KOMTracker.API.Tests.csproj", "{377DD2B8-6148-40E4-AD3C-377AB2AA8A5B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29652677-6AFE-4786-A5D9-6611495347B3}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

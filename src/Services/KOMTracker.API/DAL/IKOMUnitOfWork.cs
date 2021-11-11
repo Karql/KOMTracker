@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Utils.UnitOfWork.Abstract;
 
-namespace KOMTracker.API.DAL
+namespace KOMTracker.API.DAL;
+
+public interface IKOMUnitOfWork : IUnitOfWork
 {
-    public interface IKOMUnitOfWork : IUnitOfWork
-    {
-    }
 }

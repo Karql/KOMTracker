@@ -14,41 +14,40 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KOMTracker.API.DAL
+namespace KOMTracker.API.DAL;
+
+public class KOMDBContext : IdentityDbContext<UserModel, RoleModel, string, UserClaimModel, UserRoleModel, UserLoginModel, RoleClaimModel, UserTokenModel>
 {
-    public class KOMDBContext : IdentityDbContext<UserModel, RoleModel, string, UserClaimModel, UserRoleModel, UserLoginModel, RoleClaimModel, UserTokenModel>
+    public virtual DbSet<AthleteModel> Athlete { get; set; }
+
+    public virtual DbSet<TokenModel> Token { get; set; }
+
+    public virtual DbSet<SegmentModel> Segment { get; set; }
+
+    public virtual DbSet<SegmentEffortModel> SegmentEffort { get; set; }
+
+    public KOMDBContext(DbContextOptions<KOMDBContext> options)
+        : base(options)
     {
-        public virtual DbSet<AthleteModel> Athlete { get; set; }
+    }
 
-        public virtual DbSet<TokenModel> Token { get; set; }
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
 
-        public virtual DbSet<SegmentModel> Segment { get; set; }
+        // Identity
+        builder.ApplyConfiguration(new UserModelTypeConfiguration());
+        builder.ApplyConfiguration(new RoleModelTypeConfiguration());
+        builder.ApplyConfiguration(new UserClaimModelTypeConfiguration());
+        builder.ApplyConfiguration(new UserRoleModelTypeConfiguration());
+        builder.ApplyConfiguration(new UserLoginModelTypeConfiguration());
+        builder.ApplyConfiguration(new RoleClaimModelTypeConfiguration());
+        builder.ApplyConfiguration(new UserTokenModelTypeConfiguration());
 
-        public virtual DbSet<SegmentEffortModel> SegmentEffort { get; set; }
-
-        public KOMDBContext(DbContextOptions<KOMDBContext> options)
-            : base(options)
-        {
-        }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-
-            // Identity
-            builder.ApplyConfiguration(new UserModelTypeConfiguration());
-            builder.ApplyConfiguration(new RoleModelTypeConfiguration());
-            builder.ApplyConfiguration(new UserClaimModelTypeConfiguration());
-            builder.ApplyConfiguration(new UserRoleModelTypeConfiguration());
-            builder.ApplyConfiguration(new UserLoginModelTypeConfiguration());
-            builder.ApplyConfiguration(new RoleClaimModelTypeConfiguration());
-            builder.ApplyConfiguration(new UserTokenModelTypeConfiguration());
-
-            // Strava
-            builder.ApplyConfiguration(new AthleteModelTypeConfiguration());
-            builder.ApplyConfiguration(new TokenModelTypeConfiguration());
-            builder.ApplyConfiguration(new SegmentModelTypeConfiguration());
-            builder.ApplyConfiguration(new SegmentEffortModelTypeConfiguration());
-        }
+        // Strava
+        builder.ApplyConfiguration(new AthleteModelTypeConfiguration());
+        builder.ApplyConfiguration(new TokenModelTypeConfiguration());
+        builder.ApplyConfiguration(new SegmentModelTypeConfiguration());
+        builder.ApplyConfiguration(new SegmentEffortModelTypeConfiguration());
     }
 }

@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Strava.API.Client.Model.Config
+namespace Strava.API.Client.Model.Config;
+
+public class ConfigModel
 {
-    public class ConfigModel
-    {
-        public int ClientID { get; set; }
-        public string ClientSecret { get; set; }
-    }
+    public int ClientID { get; set; }
+    public string ClientSecret { get; set; }
 }

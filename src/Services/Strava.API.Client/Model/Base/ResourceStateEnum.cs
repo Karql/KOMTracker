@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Strava.API.Client.Model.Base
+namespace Strava.API.Client.Model.Base;
+
+public enum ResourceStateEnum
 {
-    public enum ResourceStateEnum
-    {
-        Meta = 1,
-        Summary = 2,
-        Detail = 3
-    }
+    Meta = 1,
+    Summary = 2,
+    Detail = 3
 }

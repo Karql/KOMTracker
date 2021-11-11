@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KOMTracker.API.Models.Identity
+namespace KOMTracker.API.Models.Identity;
+
+public class UserLoginModel : IdentityUserLogin<string>
 {
-    public class UserLoginModel : IdentityUserLogin<string>
-    {
-    }
 }

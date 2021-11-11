@@ -6,43 +6,42 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace KOMTracker.API.DAL.EntityConfigurations.Token
+namespace KOMTracker.API.DAL.EntityConfigurations.Token;
+
+public class TokenModelTypeConfiguration
+    : IEntityTypeConfiguration<TokenModel>
 {
-    public class TokenModelTypeConfiguration
-        : IEntityTypeConfiguration<TokenModel>
+    public void Configure(EntityTypeBuilder<TokenModel> builder)
     {
-        public void Configure(EntityTypeBuilder<TokenModel> builder)
-        {
-            builder.ToTable("token");
+        builder.ToTable("token");
 
-            builder.HasOne(x => x.Athlete)
-                .WithOne(x => x.Token)
-                .HasForeignKey<TokenModel>(x => x.AthleteId);
+        builder.HasOne(x => x.Athlete)
+            .WithOne(x => x.Token)
+            .HasForeignKey<TokenModel>(x => x.AthleteId);
 
-            builder.HasKey(x => x.AthleteId);
+        builder.HasKey(x => x.AthleteId);
 
-            builder.Property(x => x.AthleteId)
-                .HasColumnName("athlete_id")
-                .ValueGeneratedNever(); // id from strava
+        builder.Property(x => x.AthleteId)
+            .HasColumnName("athlete_id")
+            .ValueGeneratedNever(); // id from strava
 
-            builder.Property(x => x.TokenType)
-                .HasColumnName("token_type")
-                .HasMaxLength(10);
+        builder.Property(x => x.TokenType)
+            .HasColumnName("token_type")
+            .HasMaxLength(10);
 
-            builder.Property(x => x.ExpiresAt)
-                .HasColumnName("expires_at");
+        builder.Property(x => x.ExpiresAt)
+            .HasColumnName("expires_at");
 
-            builder.Property(x => x.AccessToken)
-                .HasColumnName("access-token")
-                .HasMaxLength(50);
+        builder.Property(x => x.AccessToken)
+            .HasColumnName("access-token")
+            .HasMaxLength(50);
 
-            builder.Property(x => x.RefreshToken)
-                .HasColumnName("refresh-token")
-                .HasMaxLength(50);
+        builder.Property(x => x.RefreshToken)
+            .HasColumnName("refresh-token")
+            .HasMaxLength(50);
 
-            builder.Property(x => x.Scope)
-                .HasColumnName("scope")
-                .HasMaxLength(100);
-        }
+        builder.Property(x => x.Scope)
+            .HasColumnName("scope")
+            .HasMaxLength(100);
     }
 }

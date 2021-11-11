@@ -6,10 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Strava.API.Client.Api
+namespace Strava.API.Client.Api;
+
+public interface IAthleteApi
 {
-    public interface IAthleteApi
-    {
-        Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token);
-    }
+    Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token);
 }
