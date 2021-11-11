@@ -9,8 +9,10 @@ using KOMTracker.API.Models.Segment;
 using KOMTracker.API.Models.Token;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,6 +20,18 @@ namespace KOMTracker.API.DAL;
 
 public class KOMDBContext : IdentityDbContext<UserModel, RoleModel, string, UserClaimModel, UserRoleModel, UserLoginModel, RoleClaimModel, UserTokenModel>
 {
+#if DEBUG
+    public static readonly ILoggerFactory DebugLoggerFactory = LoggerFactory.Create(builder =>
+    {
+        builder.AddDebug();
+        builder.AddConsole();
+    });
+
+
+#endif
+
+    private readonly ILoggerFactory _loggerFactory;
+
     public virtual DbSet<AthleteModel> Athlete { get; set; }
 
     public virtual DbSet<TokenModel> Token { get; set; }
@@ -26,9 +40,21 @@ public class KOMDBContext : IdentityDbContext<UserModel, RoleModel, string, User
 
     public virtual DbSet<SegmentEffortModel> SegmentEffort { get; set; }
 
-    public KOMDBContext(DbContextOptions<KOMDBContext> options)
+    public virtual DbSet<KomsSummaryModel> KomsSummary { get; set; }
+
+    public KOMDBContext(DbContextOptions<KOMDBContext> options, ILoggerFactory loggerFactory)
         : base(options)
     {
+        _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+
+#if DEBUG
+        optionsBuilder.UseLoggerFactory(_loggerFactory);
+#endif
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -49,5 +75,7 @@ public class KOMDBContext : IdentityDbContext<UserModel, RoleModel, string, User
         builder.ApplyConfiguration(new TokenModelTypeConfiguration());
         builder.ApplyConfiguration(new SegmentModelTypeConfiguration());
         builder.ApplyConfiguration(new SegmentEffortModelTypeConfiguration());
+        builder.ApplyConfiguration(new KomsSummaryModelTypeConfiguration());
+        builder.ApplyConfiguration(new KomsSummarySegmentEffortModelTypeConfiguration());
     }
 }

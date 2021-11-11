@@ -50,6 +50,7 @@ public class Startup
 
         services.AddScoped<IKOMUnitOfWork, EFKOMUnitOfWork>();
         services.AddScoped<IAthleteRepository, EFAthleteRepository>();
+        services.AddScoped<ISegmentRepository, EFSegmentRepository>();
 
         services.AddIdentity<UserModel, IdentityRole>()
             .AddEntityFrameworkStores<KOMDBContext>()
@@ -58,6 +59,7 @@ public class Startup
         services.AddTransient<ITokenService, TokenService>();
         services.AddTransient<IAthleteService, AthleteService>();
         services.AddTransient<IAccountService, AccountService>();
+        services.AddTransient<IKomService, KomService>();
         services.AddStravaApiClient();
         services.AddTransient<Strava.API.Client.Model.Config.ConfigModel>(sp =>
         {

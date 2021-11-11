@@ -1,7 +1,9 @@
 ﻿using KOMTracker.API.DAL;
+using KOMTracker.API.DAL.Repositories;
 using Microsoft.Extensions.Logging;
 using MoreLinq;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace KOMTracker.API.Infrastructure.Services;
@@ -31,6 +33,32 @@ public class KomService : IKomService
 
     protected async Task TrackKomsForAthleteAsync(int athleteId)
     {
-        ;
+        var getValidTokenRes = await _athleteService.GetValidTokenAsync(athleteId);
+
+        if (!getValidTokenRes.IsSuccess)
+        {
+            return;
+        }
+
+        var token = getValidTokenRes.Value;
+
+        var segmentRepo = _komUoW.GetRepository<ISegmentRepository>();
+
+        //var getAthleteKomsRes = await _athleteService.GetAthleteKomsAsync(athleteId, token.AccessToken);
+
+        //// TODO: retry on Unauthorized
+        //if (!getAthleteKomsRes.IsSuccess)
+        //{
+        //    return;
+        //}
+
+        //var koms = getAthleteKomsRes.Value;
+
+        // TODO: transaction
+
+        //await _komUoW.GetRepository<ISegmentRepository>()
+        //    .AddSegmentsIfNotExists(koms.Select(x => x.Item2));
+
+        var lastKomsSummaryWithEfforts = await segmentRepo.GetLastKomsSummaryWithEffortsAsync(athleteId);
     }
 }

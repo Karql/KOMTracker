@@ -41,7 +41,8 @@ public class SegmentEffortModelTypeConfiguration
             .HasColumnName("segment_id");
 
         builder.Property(x => x.Name)
-            .HasColumnName("name");
+            .HasColumnName("name")
+            .HasMaxLength(255);
 
         builder.Property(x => x.ElapsedTime)
             .HasColumnName("elapsed_time");

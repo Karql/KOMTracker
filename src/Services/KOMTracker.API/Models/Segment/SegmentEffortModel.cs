@@ -1,5 +1,6 @@
 ﻿using KOMTracker.API.Models.Athlete;
 using System;
+using System.Collections.Generic;
 
 namespace KOMTracker.API.Models.Segment;
 
@@ -27,4 +28,6 @@ public class SegmentEffortModel
     public float MaxHeartrate { get; set; }
     public int? PrRank { get; set; }
     public int? KomRank { get; set; }
+
+    public List<KomsSummaryModel> KomSummaries { get; set; }
 }

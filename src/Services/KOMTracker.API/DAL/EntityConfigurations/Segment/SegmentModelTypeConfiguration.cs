@@ -22,14 +22,13 @@ public class SegmentModelTypeConfiguration
             .HasColumnName("id")
             .ValueGeneratedNever(); // id from strava
 
-        builder.Property(x => x.Id)
-            .HasColumnName("id");
-
         builder.Property(x => x.Name)
-            .HasColumnName("name");
+            .HasColumnName("name")
+            .HasMaxLength(255);
 
         builder.Property(x => x.ActivityType)
-            .HasColumnName("activity_type");
+            .HasColumnName("activity_type")
+            .HasMaxLength(20);
 
         builder.Property(x => x.Distance)
             .HasColumnName("distance");
@@ -62,10 +61,12 @@ public class SegmentModelTypeConfiguration
             .HasColumnName("climb_category");
 
         builder.Property(x => x.City)
-            .HasColumnName("city");
+            .HasColumnName("city")
+            .HasMaxLength(255);
 
         builder.Property(x => x.Country)
-            .HasColumnName("country");
+            .HasColumnName("country")
+            .HasMaxLength(255);
 
         builder.Property(x => x.Private)
             .HasColumnName("private");

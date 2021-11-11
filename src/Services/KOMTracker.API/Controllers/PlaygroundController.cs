@@ -26,10 +26,12 @@ public class PlaygroundController
     {
         var athleteApi = _serviceProvider.GetRequiredService<IAthleteApi>();
         var athleteService = _serviceProvider.GetRequiredService<IAthleteService>();
+        var komService = _serviceProvider.GetRequiredService<IKomService>();
 
         //var res = await athleteApi.GetKomsAsync(2394302, token);
+        //var res = await athleteService.GetAthleteKomsAsync(2394302, token);
 
-        var res = await athleteService.GetAthleteKomsAsync(2394302, token);
+        await komService.TrackKomsAsync();
 
         return new NoContentResult();
     }

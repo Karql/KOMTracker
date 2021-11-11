@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
-    <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="5.0.0" />
+    <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.0-preview5" />
     <PackageReference Include="FluentResults" Version="2.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.0">

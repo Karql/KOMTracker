@@ -3,6 +3,7 @@ using System;
 using KOMTracker.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KOMTracker.API.DAL.Migrations
 {
     [DbContext(typeof(KOMDBContext))]
-    partial class KOMDBContextModelSnapshot : ModelSnapshot
+    [Migration("20211111215026_AddKomsSummaryTable")]
+    partial class AddKomsSummaryTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -358,23 +360,6 @@ namespace KOMTracker.API.DAL.Migrations
                     b.ToTable("koms_summary", (string)null);
                 });
 
-            modelBuilder.Entity("KOMTracker.API.Models.Segment.KomsSummarySegmentEffortModel", b =>
-                {
-                    b.Property<int>("KomSummaryId")
-                        .HasColumnType("integer")
-                        .HasColumnName("koms_summary_id");
-
-                    b.Property<long>("SegmentEffortId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("segment_effort_id");
-
-                    b.HasKey("KomSummaryId", "SegmentEffortId");
-
-                    b.HasIndex("SegmentEffortId");
-
-                    b.ToTable("koms_summary_segment_effort", (string)null);
-                });
-
             modelBuilder.Entity("KOMTracker.API.Models.Segment.SegmentEffortModel", b =>
                 {
                     b.Property<long>("Id")
@@ -639,21 +624,6 @@ namespace KOMTracker.API.DAL.Migrations
                     b.HasOne("KOMTracker.API.Models.Identity.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("KOMTracker.API.Models.Segment.KomsSummarySegmentEffortModel", b =>
-                {
-                    b.HasOne("KOMTracker.API.Models.Segment.KomsSummaryModel", null)
-                        .WithMany()
-                        .HasForeignKey("KomSummaryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KOMTracker.API.Models.Segment.SegmentEffortModel", null)
-                        .WithMany()
-                        .HasForeignKey("SegmentEffortId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

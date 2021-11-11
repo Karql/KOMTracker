@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Utils.UnitOfWork.Concrete;
-using FlexLabs.EntityFrameworkCore.Upsert;
 
 namespace KOMTracker.API.DAL.Repositories;
 

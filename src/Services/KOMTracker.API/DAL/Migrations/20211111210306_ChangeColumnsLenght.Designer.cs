@@ -3,6 +3,7 @@ using System;
 using KOMTracker.API.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KOMTracker.API.DAL.Migrations
 {
     [DbContext(typeof(KOMDBContext))]
-    partial class KOMDBContextModelSnapshot : ModelSnapshot
+    [Migration("20211111210306_ChangeColumnsLenght")]
+    partial class ChangeColumnsLenght
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -322,59 +324,6 @@ namespace KOMTracker.API.DAL.Migrations
                     b.ToTable("user_token", (string)null);
                 });
 
-            modelBuilder.Entity("KOMTracker.API.Models.Segment.KomsSummaryModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AthleteId")
-                        .HasColumnType("integer")
-                        .HasColumnName("athlete_id");
-
-                    b.Property<int>("Koms")
-                        .HasColumnType("integer")
-                        .HasColumnName("koms");
-
-                    b.Property<int>("LostKoms")
-                        .HasColumnType("integer")
-                        .HasColumnName("lost_koms");
-
-                    b.Property<int>("NewKoms")
-                        .HasColumnType("integer")
-                        .HasColumnName("new_koms");
-
-                    b.Property<DateTime>("TrackDate")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("track_date");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AthleteId", "TrackDate");
-
-                    b.ToTable("koms_summary", (string)null);
-                });
-
-            modelBuilder.Entity("KOMTracker.API.Models.Segment.KomsSummarySegmentEffortModel", b =>
-                {
-                    b.Property<int>("KomSummaryId")
-                        .HasColumnType("integer")
-                        .HasColumnName("koms_summary_id");
-
-                    b.Property<long>("SegmentEffortId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("segment_effort_id");
-
-                    b.HasKey("KomSummaryId", "SegmentEffortId");
-
-                    b.HasIndex("SegmentEffortId");
-
-                    b.ToTable("koms_summary_segment_effort", (string)null);
-                });
-
             modelBuilder.Entity("KOMTracker.API.Models.Segment.SegmentEffortModel", b =>
                 {
                     b.Property<long>("Id")
@@ -639,21 +588,6 @@ namespace KOMTracker.API.DAL.Migrations
                     b.HasOne("KOMTracker.API.Models.Identity.UserModel", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("KOMTracker.API.Models.Segment.KomsSummarySegmentEffortModel", b =>
-                {
-                    b.HasOne("KOMTracker.API.Models.Segment.KomsSummaryModel", null)
-                        .WithMany()
-                        .HasForeignKey("KomSummaryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("KOMTracker.API.Models.Segment.SegmentEffortModel", null)
-                        .WithMany()
-                        .HasForeignKey("SegmentEffortId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
