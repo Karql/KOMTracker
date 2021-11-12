@@ -9,5 +9,7 @@ public interface ISegmentRepository : IRepository
 {
     Task AddSegmentsIfNotExists(IEnumerable<SegmentModel> segments);
 
-    Task<KomsSummaryModel> GetLastKomsSummaryWithEffortsAsync(int athleteId);
+    Task<IEnumerable<SegmentEffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId);
+
+    Task AddKomsSummaryWithEffortsAsync(KomsSummaryModel komsSummary);
 }

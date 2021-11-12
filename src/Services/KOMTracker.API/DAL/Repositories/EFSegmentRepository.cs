@@ -19,13 +19,19 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
             .RunAsync();
     }
 
-    public Task<KomsSummaryModel> GetLastKomsSummaryWithEffortsAsync(int athleteId)
+    public async Task<IEnumerable<SegmentEffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId)
     {
-        // TODO: Consider split to two queries
-        return _context
-            .KomsSummary
-            .Include(x => x.SegmentEfforts)
-            .OrderByDescending(x => x.TrackDate)
-            .FirstOrDefaultAsync(x => x.AthleteId == athleteId);
+        return await _context.SegmentEffort
+            .Where(x => x.KomSummaries.Contains(_context
+                .KomsSummary
+                .OrderByDescending(x => x.TrackDate)
+                .FirstOrDefault(x => x.AthleteId == athleteId))
+            )
+            .ToArrayAsync();
+    }
+
+    public async Task AddKomsSummaryWithEffortsAsync(KomsSummaryModel komsSummary)
+    {
+        await _context.KomsSummary.AddAsync(komsSummary);
     }
 }

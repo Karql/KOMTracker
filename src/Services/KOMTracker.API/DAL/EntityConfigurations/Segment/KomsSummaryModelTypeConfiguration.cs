@@ -42,6 +42,9 @@ public class KomsSummaryModelTypeConfiguration
         builder.Property(x => x.NewKoms)
             .HasColumnName("new_koms");
 
+        builder.Property(x => x.ImprovedKoms)
+            .HasColumnName("improved_koms");
+
         builder.Property(x => x.LostKoms)
             .HasColumnName("lost_koms");
     }

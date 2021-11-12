@@ -10,6 +10,7 @@ public class KomsSummaryModel
     public int AthleteId { get; set; }
     public int Koms { get; set; }
     public int NewKoms { get; set; }
+    public int ImprovedKoms { get; set; }
     public int LostKoms { get; set; }
     public List<SegmentEffortModel> SegmentEfforts { get; set; }
 }
