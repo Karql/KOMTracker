@@ -10,3 +10,7 @@ Ranking by:
 Register with code:
 - start from mine.
 - add few after registration
+
+
+Agreement:
+- 7 days means to refresh cache: https://groups.google.com/g/strava-api/c/yP8tV9KapZs

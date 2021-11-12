@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+  kom-tracker-api:
+    image: karql/kom-tracker/kom-tracker-api
+    restart: always
+    environment:
+      ConnectionStrings__DB: ${CONNECTION_STRING}
+      StravaApiClientConfig__ClientID: ${STRAVA_API__CLIENT_ID}
+      StravaApiClientConfig__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
+    ports:
+      - 8888:80
+  
+  
+
+  
