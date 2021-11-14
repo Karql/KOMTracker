@@ -19,6 +19,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
     <PackageReference Include="morelinq" Version="3.3.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.0" />
+    <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.3.3" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.3.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 

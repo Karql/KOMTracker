@@ -1,8 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace KOMTracker.API.Infrastructure.Services;
 
 public interface IKomService
 {
-    Task TrackKomsAsync();
+    Task TrackKomsAsync(CancellationToken cancellationToken);
 }

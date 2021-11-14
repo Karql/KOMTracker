@@ -1,5 +1,6 @@
 using KOMTracker.API.DAL;
 using KOMTracker.API.DAL.Repositories;
+using KOMTracker.API.Infrastructure.Jobs;
 using KOMTracker.API.Infrastructure.Services;
 using KOMTracker.API.Mappings;
 using KOMTracker.API.Models.Identity;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Quartz;
 using Strava.API.Client.Extensions;
 using System;
 using System.Collections.Generic;
@@ -64,6 +66,27 @@ public class Startup
         services.AddTransient<Strava.API.Client.Model.Config.ConfigModel>(sp =>
         {
             return _configuration.GetSection("StravaApiClientConfig").Get<Strava.API.Client.Model.Config.ConfigModel>();
+        });
+
+        // Jobs
+        services.AddTransient<TrackKomsJob>();
+
+        services.AddQuartz(q =>
+        {
+            q.InterruptJobsOnShutdownWithWait = true;
+
+            q.UseMicrosoftDependencyInjectionJobFactory();            
+
+            q.ScheduleJob<TrackKomsJob>(trigger => trigger
+                .WithCronSchedule("0 0 * * * ?")); // every hour
+        });
+
+        services.AddQuartzHostedService(options =>
+        {
+            // when shutting down we want jobs to complete gracefully
+            options.WaitForJobsToComplete = true;
+
+
         });
     }
 

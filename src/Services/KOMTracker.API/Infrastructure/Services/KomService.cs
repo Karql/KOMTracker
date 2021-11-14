@@ -6,6 +6,7 @@ using MoreLinq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using ApiModel = Strava.API.Client.Model;
 
@@ -24,12 +25,14 @@ public class KomService : IKomService
         _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
     }
 
-    public async Task TrackKomsAsync()
+    public async Task TrackKomsAsync(CancellationToken cancellationToken)
     {
         var athlets = await _athleteService.GetAllAthletesAsync();
 
         foreach (var athlete in athlets)
         {
+            if (cancellationToken.IsCancellationRequested) return;
+
             await TrackKomsForAthleteAsync(athlete.AthleteId);
         }
     }

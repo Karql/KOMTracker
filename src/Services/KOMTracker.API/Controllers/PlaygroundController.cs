@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using KOMTracker.API.Infrastructure.Services;
+using System.Threading;
 
 namespace KOMTracker.API.Controllers; 
 
@@ -31,7 +32,9 @@ public class PlaygroundController
         //var res = await athleteApi.GetKomsAsync(2394302, token);
         //var res = await athleteService.GetAthleteKomsAsync(2394302, token);
 
-        await komService.TrackKomsAsync();
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        await komService.TrackKomsAsync(cancellationTokenSource.Token);
 
         return new NoContentResult();
     }
