@@ -54,6 +54,8 @@ public class KOMDBContext : IdentityDbContext<UserModel, RoleModel, string, User
 
 #if DEBUG
         optionsBuilder.UseLoggerFactory(_loggerFactory);
+        optionsBuilder.EnableDetailedErrors();
+        optionsBuilder.EnableSensitiveDataLogging();
 #endif
     }
 

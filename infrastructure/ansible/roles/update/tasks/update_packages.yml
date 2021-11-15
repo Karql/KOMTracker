@@ -1,0 +1,38 @@
+---
+- name: Register list of packages with an update available
+  yum:
+    list: updates
+  register: list_of_packages
+
+- name: Register packages from repos in centos7_repos_list
+  debug:
+    msg: |
+      {%- set package_name_list = [] -%}
+      {%- for package in list_of_packages.results -%}
+        {%- for repos in centos7_repos_list -%}
+          {%- if repos == package.repo -%}
+            {%- set package_name_list = package_name_list.append( package.name ) -%}
+          {%- endif -%}
+        {%- endfor -%} 
+      {%- endfor -%}{{ package_name_list }}
+  register: package_name_list
+
+- name: Update packages from package_name_list
+  yum:
+    name: "{{ package_name_list.msg }}"
+    state: latest  # noqa package-latest
+
+- name: Check to see if we need a reboot
+  command: needs-restarting -r
+  register: result
+  changed_when: "result.rc != 0"
+  failed_when: false
+  tags: notest
+
+- name: Result of reboot check
+  debug:
+    msg:
+      - "1 - needs restarting, 0 - no restart needed"
+      - "result.rc = {{ result.rc }}"
+  changed_when: "result.rc != 0"
+  tags: notest

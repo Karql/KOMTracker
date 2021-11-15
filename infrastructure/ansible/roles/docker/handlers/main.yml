@@ -1,0 +1,26 @@
+---
+- name: Restart docker
+  service:
+    name: docker
+    state: restarted
+  when: molecule_yml is not defined  # disable run task for test
+
+- name: Restart all containers
+  shell: |
+    docker restart $(docker ps -a -q);
+  listen: Restart docker
+  when: molecule_yml is not defined  # disable run task for test
+
+- name: register containers list after restart
+  command: "docker container ls --format '{{ '{{' }} .ID {{ '}}' }} {{ '{{' }} .Names {{ '}}' }} {{ '{{' }} .Image {{ '}}' }}'"
+  register: containers_list_after
+  changed_when: false
+  ignore_errors: yes
+  listen: Restart docker
+
+- name: diff containers before and after restart
+  ansible.utils.fact_diff:
+    before: "{{ containers_list_before.stdout_lines }}"
+    after: "{{ containers_list_after.stdout_lines }}"
+  ignore_errors: yes
+  listen: Restart docker

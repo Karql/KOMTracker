@@ -1,0 +1,22 @@
+---
+- name: Update docker
+  hosts: docker
+  become: yes
+  roles:
+    - role: docker
+      vars:
+        docker_package_state: latest
+        docker_configuration_update: false
+    - role: docker_compose
+      vars:
+        docker_compose_version: latest
+        docker_compose_update: true
+
+- name: apply update to all hosts
+  hosts: all
+  become: yes
+  roles:
+    - role: update
+      vars:
+        system_reboot_if_needed: true
+        only_base_repos: true

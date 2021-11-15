@@ -1,0 +1,7 @@
+---
+
+- include: getlatest.yml
+  when:
+    - docker_compose_version == "latest"
+
+- include: install.yml

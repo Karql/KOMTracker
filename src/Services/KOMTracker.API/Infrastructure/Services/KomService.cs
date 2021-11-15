@@ -98,7 +98,8 @@ public class KomService : IKomService
         {
             if (x.NewEffort != null)
             {
-                comparedEfforts.Koms.Add(x.NewEffort);
+                // x.LastEffort here to prevent inserting new one (the same effort)
+                comparedEfforts.Koms.Add(x.LastEffort ?? x.NewEffort);
 
                 if (x.LastEffort == null)
                 {
@@ -106,8 +107,8 @@ public class KomService : IKomService
                 }
 
                 else if (x.NewEffort.SegmentId != x.LastEffort.SegmentId)
-                {
-                    comparedEfforts.ImprovedKoms.Add(x.NewEffort);
+                {                   
+                    comparedEfforts.ImprovedKoms.Add(x.LastEffort);
                 }
             }
 

@@ -1,0 +1,4 @@
+---
+- name: Reboot the machine
+  reboot:
+  tags: notest

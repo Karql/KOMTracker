@@ -1,0 +1,9 @@
+---
+system_reboot_if_needed: true
+only_base_repos: false
+centos7_repos_list:
+  - base
+  - epel
+  - extras
+  - updates
+  

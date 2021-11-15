@@ -1,0 +1,11 @@
+---
+- name: Install docker and docker-compose
+  hosts: docker
+  become: yes
+
+  roles:
+    - role: docker
+    - role: docker_compose
+      vars:
+        docker_compose_update: false
+        docker_compose_version: "latest"

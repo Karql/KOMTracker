@@ -1,0 +1,32 @@
+---
+- name: Prepare yum
+  yum:
+    name: 
+      - yum-utils
+    state: present
+
+- name: Add Docker repo
+  get_url:
+    url: https://download.docker.com/linux/centos/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+
+- name: Install docker packages
+  yum:
+    name: 
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+  notify: 
+    - Restart docker
+
+- name: Enable boot start
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: register containers list before restart
+  command: "docker container ls --format '{{ '{{' }} .ID {{ '}}' }} {{ '{{' }} .Names {{ '}}' }} {{ '{{' }} .Image {{ '}}' }}'"
+  register: containers_list_before
+  changed_when: false

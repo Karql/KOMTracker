@@ -1,0 +1,20 @@
+---
+
+# Get latest version from github base on: https://github.com/cloudalchemy/ansible-node-exporter/blob/master/tasks/preflight.yml#L74
+- name: Get latest docker compose release
+  uri:
+    url: "https://api.github.com/repos/docker/compose/releases/latest"
+    method: GET
+    return_content: true
+    status_code: 200
+    body_format: json
+    #user: "{{ github_auth.user | default(omit) }}"
+    #headers:
+    #  Authorization: "Bearer {{ github_auth.token | default(omit) }}"
+  become: no
+  delegate_to: localhost
+  register: latest_docker_compose_release
+
+- name: "Set docker compose version to {{ latest_docker_compose_release.json.tag_name }}"
+  set_fact:
+    docker_compose_version: "{{ latest_docker_compose_release.json.tag_name }}"

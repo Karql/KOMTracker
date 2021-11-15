@@ -1,0 +1,26 @@
+---
+- name: Check kernel version before update
+  command: uname -r
+  register: old_kernel
+  changed_when: false
+
+- name: Kernel version before update
+  debug:
+    msg: "{{ old_kernel.stdout }}"
+
+- include: update_packages.yml
+
+- include: reboot.yml
+  when: >
+    result.rc == 1 and
+    system_reboot_if_needed
+
+- name: Check kernel version after update
+  command: uname -r
+  register: new_kernel
+  changed_when: false
+
+- name: Difference between kernel versions after update
+  ansible.utils.fact_diff:
+    before: "{{ old_kernel.stdout }}"
+    after: "{{ new_kernel.stdout }}"
