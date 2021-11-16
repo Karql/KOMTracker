@@ -13,7 +13,7 @@ namespace KOMTracker.API.Controllers;
 #if DEBUG
 [Route("playground")]
 [ApiController]
-public class PlaygroundController
+public class PlaygroundController : ControllerBase
 {
     private readonly IServiceProvider _serviceProvider;
 

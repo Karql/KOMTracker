@@ -7,9 +7,13 @@ namespace KOMTracker.API.DAL.Repositories;
 
 public interface ISegmentRepository : IRepository
 {
-    Task AddSegmentsIfNotExists(IEnumerable<SegmentModel> segments);
+    Task AddSegmentsIfNotExistsAsync(IEnumerable<SegmentModel> segments);
+
+    Task AddSegmentEffortsIfNotExistsAsync(IEnumerable<SegmentEffortModel> segmentEffots);
 
     Task<IEnumerable<SegmentEffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId);
 
-    Task AddKomsSummaryWithEffortsAsync(KomsSummaryModel komsSummary);
+    Task AddKomsSummaryAsync(KomsSummaryModel komsSummary);
+
+    Task AddKomsSummariesSegmentEffortsAsync(IEnumerable<KomsSummarySegmentEffortModel> komsSummariesSegmentEfforts);
 }

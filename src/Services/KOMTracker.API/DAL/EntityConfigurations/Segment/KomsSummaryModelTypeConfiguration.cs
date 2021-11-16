@@ -19,8 +19,8 @@ public class KomsSummaryModelTypeConfiguration
         builder.HasMany(x => x.SegmentEfforts)
             .WithMany(x => x.KomSummaries)
             .UsingEntity<KomsSummarySegmentEffortModel>(
-                x => x.HasOne<SegmentEffortModel>().WithMany().HasForeignKey(x => x.SegmentEffortId),
-                x => x.HasOne<KomsSummaryModel>().WithMany().HasForeignKey(x => x.KomSummaryId)
+                x => x.HasOne(x => x.SegmentEffort).WithMany().HasForeignKey(x => x.SegmentEffortId),
+                x => x.HasOne(x => x.KomsSummary).WithMany().HasForeignKey(x => x.KomSummaryId)
             );
 
         builder.HasIndex(x => new { x.AthleteId, x.TrackDate });

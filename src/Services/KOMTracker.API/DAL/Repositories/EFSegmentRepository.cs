@@ -10,12 +10,21 @@ namespace KOMTracker.API.DAL.Repositories;
 
 public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepository
 {
-    public Task AddSegmentsIfNotExists(IEnumerable<SegmentModel> segments)
+    public Task AddSegmentsIfNotExistsAsync(IEnumerable<SegmentModel> segments)
     {
         return _context
             .Segment
             .UpsertRange(segments)
             .WhenMatched(x => new SegmentModel { }) // No update
+            .RunAsync();
+    }
+
+    public Task AddSegmentEffortsIfNotExistsAsync(IEnumerable<SegmentEffortModel> segmentEffots)
+    {
+        return _context
+            .SegmentEffort
+            .UpsertRange(segmentEffots)
+            .WhenMatched(x => new SegmentEffortModel { }) // No update
             .RunAsync();
     }
 
@@ -30,8 +39,13 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
             .ToArrayAsync();
     }
 
-    public async Task AddKomsSummaryWithEffortsAsync(KomsSummaryModel komsSummary)
+    public async Task AddKomsSummaryAsync(KomsSummaryModel komsSummary)
     {
         await _context.KomsSummary.AddAsync(komsSummary);
+    }
+
+    public async Task AddKomsSummariesSegmentEffortsAsync(IEnumerable<KomsSummarySegmentEffortModel> komsSummariesSegmentEfforts)
+    {
+        await _context.KomsSummarySegmentEffort.AddRangeAsync(komsSummariesSegmentEfforts);
     }
 }

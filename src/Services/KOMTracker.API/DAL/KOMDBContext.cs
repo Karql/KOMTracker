@@ -42,6 +42,8 @@ public class KOMDBContext : IdentityDbContext<UserModel, RoleModel, string, User
 
     public virtual DbSet<KomsSummaryModel> KomsSummary { get; set; }
 
+    public virtual DbSet<KomsSummarySegmentEffortModel> KomsSummarySegmentEffort { get; set; }
+
     public KOMDBContext(DbContextOptions<KOMDBContext> options, ILoggerFactory loggerFactory)
         : base(options)
     {
