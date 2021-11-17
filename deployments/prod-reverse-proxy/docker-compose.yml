@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+
+  nginx-reverse-proxy:
+    image: karql/kom-tracker-nginx:1.21-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./conf/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+      - ./conf/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./conf/nginx/htpasswd:/etc/nginx/htpasswd:ro   
+      - ./conf/nginx/ssl:/etc/nginx/ssl
+
+      # Certbot
+      - /u01/volumes/reverse-proxy/certbot/conf:/etc/letsencrypt
+      - /u01/volumes/reverse-proxy/certbot/www:/var/www/certbot   
+    networks:
+      - kom-tracker-prod_default
+  certbot:
+    image: certbot/certbot
+    #restart: unless-stopped
+    volumes:
+      - /u01/volumes/reverse-proxy/certbot/conf:/etc/letsencrypt
+      - /u01/volumes/reverse-proxy/certbot/www:/var/www/certbot
+
+  # debug:
+  #   image: arunvelsriram/utils
+  #   entrypoint: tail -f /dev/null
+  #   networks:
+  #     - orbico-tsc-pl-uat_default
+  #     - orbico-sfa-pl-uat_default
+
+networks:
+  kom-tracker-prod_default:
+    external: true 

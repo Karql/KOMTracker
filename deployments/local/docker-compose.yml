@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   kom-tracker-api:
-    image: karql/kom-tracker/kom-tracker-api
+    image: karql/kom-tracker-kom-tracker-api:latest
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
