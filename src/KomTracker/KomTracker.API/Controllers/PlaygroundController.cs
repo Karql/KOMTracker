@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using System.Threading;
-using KomTracker.Application.Services;
+using KomTracker.Application.Commands.Tracking;
 using IStravaAthleteService = KomTracker.Application.Interfaces.Services.Strava.IAthleteService;
 
 namespace KomTracker.API.Controllers; 
@@ -14,7 +14,7 @@ namespace KomTracker.API.Controllers;
 #if DEBUG
 [Route("playground")]
 [ApiController]
-public class PlaygroundController : ControllerBase
+public class PlaygroundController : BaseApiController<PlaygroundController>
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -28,14 +28,13 @@ public class PlaygroundController : ControllerBase
     {
         var athleteApi = _serviceProvider.GetRequiredService<IAthleteApi>();
         var stravaAthleteService = _serviceProvider.GetRequiredService<IStravaAthleteService>();
-        var komService = _serviceProvider.GetRequiredService<IKomService>();
 
         //var res = await athleteApi.GetKomsAsync(2394302, token);
         //var res = await athleteService.GetAthleteKomsAsync(2394302, token);
 
         var cancellationTokenSource = new CancellationTokenSource();
 
-        await komService.TrackKomsAsync(cancellationTokenSource.Token);
+        await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
 
         return new NoContentResult();
     }

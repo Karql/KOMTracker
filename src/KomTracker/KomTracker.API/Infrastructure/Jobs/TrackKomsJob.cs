@@ -1,4 +1,5 @@
-﻿using KomTracker.Application.Services;
+﻿using KomTracker.Application.Commands.Tracking;
+using MediatR;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using System;
@@ -10,17 +11,17 @@ namespace KomTracker.API.Infrastructure.Jobs;
 public class TrackKomsJob : IJob
 {
     private readonly ILogger<TrackKomsJob> _logger;
-    private readonly IKomService _komService;
+    private readonly IMediator _mediator;
 
-    public TrackKomsJob(ILogger<TrackKomsJob> logger, IKomService komService)
+    public TrackKomsJob(ILogger<TrackKomsJob> logger, IMediator mediator)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _komService = komService ?? throw new ArgumentNullException(nameof(komService));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task Execute(IJobExecutionContext context)
     {
         _logger.LogDebug("Start job: {job}", nameof(TrackKomsJob));
-        await _komService.TrackKomsAsync(context.CancellationToken);
+        await _mediator.Send(new TrackKomsCommand(), context.CancellationToken);
     }
 }
