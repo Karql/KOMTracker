@@ -3,7 +3,7 @@
 # http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
 
-DOCKER_FILE="Services/KOMTracker.API/Dockerfile"
+DOCKER_FILE="KomTracker/KomTracker.API/Dockerfile"
 NAME="kom-tracker-api"
 VERSION=${1?VERSION parameter is required}
 

@@ -1,0 +1,143 @@
+﻿using FluentAssertions;
+using FluentResults;
+using FluentResults.Extensions.FluentAssertions;
+using KomTracker.Application.Errors.Account;
+using KomTracker.Domain.Entities.Athlete;
+using KomTracker.Domain.Entities.Token;
+using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Xunit;
+using KomTracker.Application.Interfaces.Persistence;
+using KomTracker.Application.Services;
+using IStravaTokenService = KomTracker.Application.Interfaces.Services.Strava.ITokenService;
+using IIdentityUserService = KomTracker.Application.Interfaces.Services.Identity.IUserService;
+using KomTracker.Application.Errors.Strava.Token;
+
+namespace KomTracker.Application.Tests.Infrastructure.Services;
+
+public class AccountServiceTests
+{
+    #region TestData
+    private const string TEST_INVALID_CODE = "invalid";
+    private const string TEST_EXISTING_ATHLETE_CODE = "exist";
+    private const string TEST_NEW_ATHLETE_CODE = "new";
+    private const string TEST_INVALID_SCOPE = "read";
+    private const string TEST_VALID_SCOPE = "read,activity:read,profile:read_all";
+
+    private AthleteEntity TestExistingAthlete = new AthleteEntity
+    {
+        AthleteId = 1,
+        Username = "Athlete1"
+    };
+    private AthleteEntity TestNewAthlete = new AthleteEntity
+    {
+        AthleteId = 2,
+        Username = "Athlete2"
+
+    };
+    private TokenEntity TestToken = new TokenEntity();
+    #endregion
+
+    private readonly IKOMUnitOfWork _komUoW;
+    private readonly IAthleteService _athleteService;
+    private readonly IStravaTokenService _stravaTokenService;
+    private readonly IIdentityUserService _userService;
+
+    private readonly AccountService _accountService;
+
+    public AccountServiceTests()
+    {
+        _komUoW = Substitute.For<IKOMUnitOfWork>();
+        _athleteService = Substitute.For<IAthleteService>();
+        _stravaTokenService = Substitute.For<IStravaTokenService>();
+        _userService = Substitute.For<IIdentityUserService>();
+
+        _accountService = new AccountService(_komUoW, _athleteService, _stravaTokenService, _userService);
+
+        PrepareMocks();
+    }
+
+    #region Connect
+    [Fact]
+    public async Task Connect_check_is_scope_contains_required()
+    {
+        // Act
+        var res = await _accountService.Connect(TEST_INVALID_CODE, TEST_INVALID_SCOPE);
+
+        // Assert
+        res.Should().BeFailure();
+        res.HasError<ConnectError>(x => x.Message == ConnectError.NoRequiredScope).Should().BeTrue();
+
+        await AssertConnectNoUpdate();
+    }
+
+    [Fact]
+    public async Task Connect_failed_when_invalid_code()
+    {
+        // Act
+        var res = await _accountService.Connect(TEST_INVALID_CODE, TEST_VALID_SCOPE);
+
+        // Assert
+        res.Should().BeFailure();
+        res.HasError<ConnectError>(x => x.Message == ConnectError.InvalidCode).Should().BeTrue();
+
+        await AssertConnectNoUpdate();
+    }
+
+    [Fact]
+    public async Task Connect_add_new_athlete()
+    {
+        // Act
+        var res = await _accountService.Connect(TEST_NEW_ATHLETE_CODE, TEST_VALID_SCOPE);
+
+        // Assert
+        await _athleteService.Received().AddOrUpdateAthleteAsync(TestNewAthlete);
+        await _athleteService.Received().AddOrUpdateTokenAsync(TestToken);
+        await _userService.Received().AddUserAsync(Arg.Is<AthleteEntity>(x =>
+            x.AthleteId == TestNewAthlete.AthleteId
+            && x.Username == TestNewAthlete.Username));
+
+        await _komUoW.Received().SaveChangesAsync();
+
+        res.Should().BeSuccess();
+    }
+
+    [Fact]
+    public async Task Connect_update_exsisting_athlete()
+    {
+        // Act
+        var res = await _accountService.Connect(TEST_EXISTING_ATHLETE_CODE, TEST_VALID_SCOPE);
+
+        // Assert
+        await _athleteService.Received().AddOrUpdateAthleteAsync(TestExistingAthlete);
+        await _athleteService.Received().AddOrUpdateTokenAsync(TestToken);
+        await _userService.DidNotReceiveWithAnyArgs().AddUserAsync(null);
+        await _komUoW.Received().SaveChangesAsync();
+
+        res.Should().BeSuccess();
+    }
+
+    private void PrepareMocks()
+    {
+        _userService.IsUserExistsAsync(TestNewAthlete.AthleteId).Returns(false);
+        _userService.IsUserExistsAsync(TestExistingAthlete.AthleteId).Returns(true);
+
+        _stravaTokenService.ExchangeAsync(TEST_INVALID_CODE, TEST_VALID_SCOPE).Returns(Result.Fail(new ExchangeError(ExchangeError.InvalidCode)));
+        _stravaTokenService.ExchangeAsync(TEST_INVALID_CODE, TEST_VALID_SCOPE).Returns(Result.Fail(new ExchangeError(ExchangeError.InvalidCode)));            
+        _stravaTokenService.ExchangeAsync(TEST_EXISTING_ATHLETE_CODE, TEST_VALID_SCOPE).Returns(Result.Ok((TestExistingAthlete, TestToken)));
+        _stravaTokenService.ExchangeAsync(TEST_NEW_ATHLETE_CODE, TEST_VALID_SCOPE).Returns(Result.Ok((TestNewAthlete, TestToken)));
+    }
+
+    private async Task AssertConnectNoUpdate()
+    {
+        await _athleteService.DidNotReceiveWithAnyArgs().AddOrUpdateAthleteAsync(null);
+        await _athleteService.DidNotReceiveWithAnyArgs().AddOrUpdateTokenAsync(null);
+        await _userService.DidNotReceiveWithAnyArgs().AddUserAsync(null);
+        await _komUoW.DidNotReceiveWithAnyArgs().SaveChangesAsync();
+    }
+    #endregion
+}
