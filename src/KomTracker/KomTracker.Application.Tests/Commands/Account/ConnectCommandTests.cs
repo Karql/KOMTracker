@@ -16,10 +16,12 @@ using KomTracker.Application.Services;
 using IStravaTokenService = KomTracker.Application.Interfaces.Services.Strava.ITokenService;
 using IIdentityUserService = KomTracker.Application.Interfaces.Services.Identity.IUserService;
 using KomTracker.Application.Errors.Strava.Token;
+using KomTracker.Application.Commands.Account;
+using System.Threading;
 
-namespace KomTracker.Application.Tests.Infrastructure.Services;
+namespace KomTracker.Application.Tests.Commands.Account;
 
-public class AccountServiceTests
+public class ConnectCommandTests
 {
     #region TestData
     private const string TEST_INVALID_CODE = "invalid";
@@ -47,16 +49,18 @@ public class AccountServiceTests
     private readonly IStravaTokenService _stravaTokenService;
     private readonly IIdentityUserService _userService;
 
-    private readonly AccountService _accountService;
+    private readonly CancellationToken _cancellationToken;
+    private readonly ConnectCommandHandler _connectCommandHandler;
 
-    public AccountServiceTests()
+    public ConnectCommandTests()
     {
         _komUoW = Substitute.For<IKOMUnitOfWork>();
         _athleteService = Substitute.For<IAthleteService>();
         _stravaTokenService = Substitute.For<IStravaTokenService>();
         _userService = Substitute.For<IIdentityUserService>();
+        _cancellationToken = new CancellationTokenSource().Token;
 
-        _accountService = new AccountService(_komUoW, _athleteService, _stravaTokenService, _userService);
+        _connectCommandHandler = new ConnectCommandHandler(_komUoW, _athleteService, _stravaTokenService, _userService);
 
         PrepareMocks();
     }
@@ -66,7 +70,7 @@ public class AccountServiceTests
     public async Task Connect_check_is_scope_contains_required()
     {
         // Act
-        var res = await _accountService.Connect(TEST_INVALID_CODE, TEST_INVALID_SCOPE);
+        var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_INVALID_CODE, TEST_INVALID_SCOPE), _cancellationToken);
 
         // Assert
         res.Should().BeFailure();
@@ -79,7 +83,7 @@ public class AccountServiceTests
     public async Task Connect_failed_when_invalid_code()
     {
         // Act
-        var res = await _accountService.Connect(TEST_INVALID_CODE, TEST_VALID_SCOPE);
+        var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_INVALID_CODE, TEST_VALID_SCOPE), _cancellationToken);
 
         // Assert
         res.Should().BeFailure();
@@ -92,7 +96,7 @@ public class AccountServiceTests
     public async Task Connect_add_new_athlete()
     {
         // Act
-        var res = await _accountService.Connect(TEST_NEW_ATHLETE_CODE, TEST_VALID_SCOPE);
+        var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_NEW_ATHLETE_CODE, TEST_VALID_SCOPE), _cancellationToken);
 
         // Assert
         await _athleteService.Received().AddOrUpdateAthleteAsync(TestNewAthlete);
@@ -110,7 +114,7 @@ public class AccountServiceTests
     public async Task Connect_update_exsisting_athlete()
     {
         // Act
-        var res = await _accountService.Connect(TEST_EXISTING_ATHLETE_CODE, TEST_VALID_SCOPE);
+        var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_EXISTING_ATHLETE_CODE, TEST_VALID_SCOPE), _cancellationToken);
 
         // Assert
         await _athleteService.Received().AddOrUpdateAthleteAsync(TestExistingAthlete);
@@ -127,7 +131,7 @@ public class AccountServiceTests
         _userService.IsUserExistsAsync(TestExistingAthlete.AthleteId).Returns(true);
 
         _stravaTokenService.ExchangeAsync(TEST_INVALID_CODE, TEST_VALID_SCOPE).Returns(Result.Fail(new ExchangeError(ExchangeError.InvalidCode)));
-        _stravaTokenService.ExchangeAsync(TEST_INVALID_CODE, TEST_VALID_SCOPE).Returns(Result.Fail(new ExchangeError(ExchangeError.InvalidCode)));            
+        _stravaTokenService.ExchangeAsync(TEST_INVALID_CODE, TEST_VALID_SCOPE).Returns(Result.Fail(new ExchangeError(ExchangeError.InvalidCode)));
         _stravaTokenService.ExchangeAsync(TEST_EXISTING_ATHLETE_CODE, TEST_VALID_SCOPE).Returns(Result.Ok((TestExistingAthlete, TestToken)));
         _stravaTokenService.ExchangeAsync(TEST_NEW_ATHLETE_CODE, TEST_VALID_SCOPE).Returns(Result.Ok((TestNewAthlete, TestToken)));
     }

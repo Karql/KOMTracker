@@ -1,34 +1,22 @@
 using KomTracker.API.Infrastructure.Jobs;
-using KomTracker.Application.Interfaces.Persistence;
-using KomTracker.Application.Interfaces.Persistence.Repositories;
-using KomTracker.Infrastructure.Entities.Identity;
-using KomTracker.Infrastructure.Mappings;
-using KomTracker.Infrastructure.Persistence;
-using KomTracker.Infrastructure.Persistence.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Quartz;
-using Strava.API.Client.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Utils.AspNetCore.Extensions;
 
-using IStravaTokenService = KomTracker.Application.Interfaces.Services.Strava.ITokenService;
-using IStravaAthleteService = KomTracker.Application.Interfaces.Services.Strava.IAthleteService;
-using IIdentityUserService = KomTracker.Application.Interfaces.Services.Identity.IUserService;
-using StravaTokenService = KomTracker.Infrastructure.Services.Strava.TokenService;
-using StravaAthleteService = KomTracker.Infrastructure.Services.Strava.AthleteService;
-using IdentityUserService = KomTracker.Infrastructure.Services.Identity.UserService;
+
 using KomTracker.Application.Services;
+using KomTracker.Application;
+using KomTracker.Infrastructure;
+using KomTracker.Infrastructure.Persistence;
 
 namespace KomTracker.API;
 
@@ -55,31 +43,8 @@ public class Startup
             });
         });
 
-        // KomTracker.Application
-        services.AddTransient<IAccountService, AccountService>();
-        services.AddTransient<IAthleteService, AthleteService>();        
-        services.AddTransient<IKomService, KomService>();
-
-        // KomTracker.Infrastructure
-        services.AddAutoMapper(typeof(StravaApiClientProfile));
-        services.AddScoped<IKOMUnitOfWork, EFKOMUnitOfWork>();
-        services.AddScoped<IAthleteRepository, EFAthleteRepository>();
-        services.AddScoped<ISegmentRepository, EFSegmentRepository>();
-        services.AddTransient<IStravaTokenService, StravaTokenService>();
-        services.AddTransient<IStravaAthleteService, StravaAthleteService>();
-        services.AddTransient<IIdentityUserService, IdentityUserService>();
-
-        services.AddDbContext<KOMDBContext>(options => options.UseNpgsql(_configuration.GetConnectionString("DB")));
-        services.AddIdentity<UserEntity, IdentityRole>()
-            .AddEntityFrameworkStores<KOMDBContext>()
-            .AddDefaultTokenProviders();
-
-        // Strava.API.Client
-        services.AddStravaApiClient();
-        services.AddTransient<Strava.API.Client.Model.Config.ConfigModel>(sp =>
-        {
-            return _configuration.GetSection("StravaApiClientConfig").Get<Strava.API.Client.Model.Config.ConfigModel>();
-        });
+        services.AddApplication();
+        services.AddInfrastructure(_configuration);
 
         // Jobs
         services.AddTransient<TrackKomsJob>();
@@ -98,8 +63,6 @@ public class Startup
         {
             // when shutting down we want jobs to complete gracefully
             options.WaitForJobsToComplete = true;
-
-
         });
     }
 

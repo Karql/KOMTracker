@@ -1,17 +1,32 @@
 ﻿using FluentResults;
-using KomTracker.Application.Errors.Account;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Services;
+using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
+using KomTracker.Application.Errors.Account;
 using IStravaTokenService = KomTracker.Application.Interfaces.Services.Strava.ITokenService;
 using IIdentityUserService = KomTracker.Application.Interfaces.Services.Identity.IUserService;
 
-namespace KomTracker.Application.Services;
+namespace KomTracker.Application.Commands.Account;
 
-public class AccountService : IAccountService
+public class ConnectCommand : IRequest<Result>
+{
+    public string Code { get; set; }
+    public string Scope { get; set; }
+
+    public ConnectCommand(string code, string scope)
+    {
+        Code = code ?? throw new ArgumentNullException(nameof(code));
+        Scope = scope ?? throw new ArgumentNullException(nameof(scope));
+    }
+}
+
+public class ConnectCommandHandler : IRequestHandler<ConnectCommand, Result>
 {
     private static readonly HashSet<string> REQUIRED_SCOPES = new()
     {
@@ -25,7 +40,7 @@ public class AccountService : IAccountService
     private readonly IStravaTokenService _stravaTokenService;
     private readonly IIdentityUserService _userService;
 
-    public AccountService(IKOMUnitOfWork komUoW, IAthleteService athleteService, IStravaTokenService stravaTokenService, IIdentityUserService userService)
+    public ConnectCommandHandler(IKOMUnitOfWork komUoW, IAthleteService athleteService, IStravaTokenService stravaTokenService, IIdentityUserService userService)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
         _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
@@ -33,8 +48,11 @@ public class AccountService : IAccountService
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
     }
 
-    public async Task<Result> Connect(string code, string scope)
+    public async Task<Result> Handle(ConnectCommand request, CancellationToken cancellationToken)
     {
+        var code = request.Code;
+        var scope = request.Scope;
+
         // TODO: transaction
         if (!VerifyRequiredScope(scope))
         {
