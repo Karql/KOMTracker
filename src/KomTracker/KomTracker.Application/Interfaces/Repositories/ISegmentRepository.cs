@@ -1,4 +1,5 @@
-﻿using KomTracker.Domain.Entities.Segment;
+﻿using KomTracker.Application.Models.Segment;
+using KomTracker.Domain.Entities.Segment;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Utils.UnitOfWork.Abstract;
@@ -11,7 +12,7 @@ public interface ISegmentRepository : IRepository
 
     Task AddSegmentEffortsIfNotExistsAsync(IEnumerable<SegmentEffortEntity> segmentEffots);
 
-    Task<IEnumerable<SegmentEffortEntity>> GetLastKomsSummaryEffortsAsync(int athleteId);
+    Task<IEnumerable<SegmentEffortWithLinkToKomsSummaryModel>> GetLastKomsSummaryEffortsWithLinksAsync(int athleteId);
 
     Task AddKomsSummaryAsync(KomsSummaryEntity komsSummary);
 

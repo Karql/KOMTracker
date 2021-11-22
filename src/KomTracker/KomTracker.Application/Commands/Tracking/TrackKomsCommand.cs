@@ -61,15 +61,18 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
         var actualKoms = await _segmentService.GetActualKomsAsync(athleteId, token);
         if (actualKoms == null) return;
 
-        var lastEfforts = await _segmentService.GetLastKomsSummaryEffortsAsync(athleteId);
+        var lastKomsSummaryEfforts = await _segmentService.GetLastKomsSummaryEffortsAsync(athleteId);
+        var lastKomsEfforts = lastKomsSummaryEfforts.Where(x => x.Link.Kom).Select(x => x.SegmentEffort);
 
-        var comparedEfforts = _segmentService.CompareEfforts(actualKoms.Select(x => x.Item1), lastEfforts);
+        var comparedEfforts = _segmentService.CompareEfforts(actualKoms.Select(x => x.Item1), lastKomsEfforts);
 
         if (comparedEfforts.AnyChanges)
         {
+            var newKomsEfforts = comparedEfforts.EffortsWithLinks.Where(x => x.Link.NewKom).Select(x => x.SegmentEffort);
+
             // TODO: transaction
             await _segmentService.AddSegmentsIfNotExistsAsync(actualKoms.Select(x => x.Item2));
-            await _segmentService.AddSegmentEffortsIfNotExistsAsync(comparedEfforts.NewKoms);
+            await _segmentService.AddSegmentEffortsIfNotExistsAsync(newKomsEfforts);
             await _segmentService.AddNewKomsSummaryWithEffortsAsync(athleteId, comparedEfforts);
 
             await _komUoW.SaveChangesAsync();

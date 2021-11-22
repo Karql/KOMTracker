@@ -10,9 +10,9 @@ public interface ISegmentService
 {
     Task<IEnumerable<(SegmentEffortEntity, SegmentEntity)>> GetActualKomsAsync(int athleteId, string token);
 
-    Task<IEnumerable<SegmentEffortEntity>> GetLastKomsSummaryEffortsAsync(int athleteId);
+    Task<IEnumerable<SegmentEffortWithLinkToKomsSummaryModel>> GetLastKomsSummaryEffortsAsync(int athleteId);
 
-    ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualEfforts, IEnumerable<SegmentEffortEntity> lastEfforts);
+    ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualKomsEfforts, IEnumerable<SegmentEffortEntity> lastKomsEfforts);
 
     Task AddSegmentsIfNotExistsAsync(IEnumerable<SegmentEntity> segments);
 

@@ -39,44 +39,59 @@ public class SegmentService : ISegmentService
             : null;
     }
 
-    public async Task<IEnumerable<SegmentEffortEntity>> GetLastKomsSummaryEffortsAsync(int athleteId)
+    public async Task<IEnumerable<SegmentEffortWithLinkToKomsSummaryModel>> GetLastKomsSummaryEffortsAsync(int athleteId)
     {
         return (await _komUoW
             .GetRepository<ISegmentRepository>()
-            .GetLastKomsSummaryEffortsAsync(athleteId))
-            ?? Enumerable.Empty<SegmentEffortEntity>();
+            .GetLastKomsSummaryEffortsWithLinksAsync(athleteId))
+            ?? Enumerable.Empty<SegmentEffortWithLinkToKomsSummaryModel>();
     }
 
-    public ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualEfforts, IEnumerable<SegmentEffortEntity> lastEfforts)
+    public ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualKomsEfforts, IEnumerable<SegmentEffortEntity> lastKomsEfforts)
     {
         var comparedEfforts = new ComparedEffortsModel();
 
-        actualEfforts.FullGroupJoin(lastEfforts,
+        actualKomsEfforts.FullGroupJoin(lastKomsEfforts,
             x => x.SegmentId,
             x => x.SegmentId,
             (key, newEfforts, lastEfforts) => new { NewEffort = newEfforts.FirstOrDefault(), LastEffort = lastEfforts.FirstOrDefault() }
         ).ForEach(x =>
         {
+            SegmentEffortEntity effort = x.NewEffort ?? x.LastEffort;           
+            KomsSummarySegmentEffortEntity link = new()
+            { 
+                SegmentEffortId = effort.Id // by id to prevent add effort
+            };
+
             if (x.NewEffort != null)
             {
-                // x.LastEffort here to prevent inserting new one (the same effort)
-                comparedEfforts.Koms.Add(x.LastEffort ?? x.NewEffort);
+                comparedEfforts.KomsCount++;
+                link.Kom = true;
 
                 if (x.LastEffort == null)
                 {
-                    comparedEfforts.NewKoms.Add(x.NewEffort);
+                    comparedEfforts.NewKomsCount++;
+                    link.NewKom = true;
                 }
 
                 else if (x.NewEffort.SegmentId != x.LastEffort.SegmentId)
-                {                   
-                    comparedEfforts.ImprovedKoms.Add(x.LastEffort);
+                {
+                    comparedEfforts.ImprovedKomsCount++;
+                    link.ImprovedKom = true;
                 }
             }
 
             else
             {
-                comparedEfforts.LostKoms.Add(x.LastEffort);
+                comparedEfforts.LostKomsCount++;
+                link.LostKom = true;
             }
+
+            comparedEfforts.EffortsWithLinks.Add(new SegmentEffortWithLinkToKomsSummaryModel
+            {
+                SegmentEffort = effort,
+                Link = link
+            });
         });
 
         return comparedEfforts;
@@ -102,20 +117,16 @@ public class SegmentService : ISegmentService
         {
             AthleteId = athleteId,
             TrackDate = DateTime.UtcNow,
-            Koms = comparedEfforts.Koms.Count,
-            NewKoms = comparedEfforts.NewKoms.Count,
-            ImprovedKoms = comparedEfforts.ImprovedKoms.Count,
-            LostKoms = comparedEfforts.LostKoms.Count,
+            Koms = comparedEfforts.KomsCount,
+            NewKoms = comparedEfforts.NewKomsCount,
+            ImprovedKoms = comparedEfforts.ImprovedKomsCount,
+            LostKoms = comparedEfforts.LostKomsCount,
         };
 
         await segmentRepo.AddKomsSummaryAsync(komsSummary);
 
-        var komsSummariesSegmentEfforts = comparedEfforts.Koms.Select(x => new KomsSummarySegmentEffortEntity
-        {
-            KomsSummary = komsSummary,
-            SegmentEffortId = x.Id // by id to prevent add
-        });
-
+        var komsSummariesSegmentEfforts = comparedEfforts.EffortsWithLinks.Select(x => x.Link);
+        komsSummariesSegmentEfforts.ForEach(x => x.KomsSummary = komsSummary);
         await segmentRepo.AddKomsSummariesSegmentEffortsAsync(komsSummariesSegmentEfforts);
     }
 }

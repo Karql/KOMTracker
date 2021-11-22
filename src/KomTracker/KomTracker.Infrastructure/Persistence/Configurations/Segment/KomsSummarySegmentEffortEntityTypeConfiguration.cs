@@ -21,5 +21,21 @@ public class KomsSummarySegmentEffortEntityTypeConfiguration
 
         builder.Property(x => x.SegmentEffortId)
             .HasColumnName("segment_effort_id");
+
+        builder.Property(x => x.Kom)
+            .HasColumnName("kom")
+            .IsRequired(true);
+
+        builder.Property(x => x.NewKom)
+            .HasColumnName("new_kom")
+            .IsRequired(true);
+
+        builder.Property(x => x.ImprovedKom)
+            .HasColumnName("improved_kom")
+            .IsRequired(true);
+
+        builder.Property(x => x.LostKom)
+            .HasColumnName("lost_kom")
+            .IsRequired(true);
     }
 }

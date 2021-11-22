@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Utils.UnitOfWork.Concrete;
 using System.Linq;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Models.Segment;
 
 namespace KomTracker.Infrastructure.Persistence.Repositories;
 
@@ -28,15 +29,21 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
             .RunAsync();
     }
 
-    public async Task<IEnumerable<SegmentEffortEntity>> GetLastKomsSummaryEffortsAsync(int athleteId)
+    public async Task<IEnumerable<SegmentEffortWithLinkToKomsSummaryModel>> GetLastKomsSummaryEffortsWithLinksAsync(int athleteId)
     {
-        return await _context.SegmentEffort
-            .Where(x => x.KomSummaries.Contains(_context
-                .KomsSummary
-                .OrderByDescending(x => x.TrackDate)
-                .FirstOrDefault(x => x.AthleteId == athleteId))
-            )
-            .ToArrayAsync();
+        return await (
+            from ksse in _context.KomsSummarySegmentEffort
+            join se in _context.SegmentEffort on ksse.SegmentEffortId equals se.Id
+            where ksse.KomSummaryId == _context
+                    .KomsSummary
+                    .OrderByDescending(x => x.TrackDate)
+                    .FirstOrDefault(x => x.AthleteId == athleteId).Id
+            select new SegmentEffortWithLinkToKomsSummaryModel
+            {
+                SegmentEffort = se,
+                Link = ksse
+            }
+        ).ToListAsync();
     }
 
     public async Task AddKomsSummaryAsync(KomsSummaryEntity komsSummary)
