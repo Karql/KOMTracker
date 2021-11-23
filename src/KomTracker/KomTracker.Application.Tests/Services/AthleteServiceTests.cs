@@ -27,7 +27,7 @@ namespace KomTracker.Application.Tests.Infrastructure.Services;
 public class AthleteServiceTests
 {
     #region TestData
-    private int TestAthleteId = 1;
+    private const int TestAthleteId = 1;
 
     private TokenEntity TestValidToken => new TokenEntity
     {

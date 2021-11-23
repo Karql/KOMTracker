@@ -18,14 +18,12 @@ public class SegmentService : ISegmentService
 {
     private readonly IKOMUnitOfWork _komUoW;
     private readonly ILogger<SegmentService> _logger;
-    private readonly IAthleteService _athleteService;
     private readonly IStravaAthleteService _stravaAthleteService;
 
-    public SegmentService(IKOMUnitOfWork komUoW, ILogger<SegmentService> logger, IAthleteService athleteService, IStravaAthleteService stravaAthleteService)
+    public SegmentService(IKOMUnitOfWork komUoW, ILogger<SegmentService> logger, IStravaAthleteService stravaAthleteService)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
         _stravaAthleteService = stravaAthleteService ?? throw new ArgumentNullException(nameof(stravaAthleteService));
     }
 
@@ -74,7 +72,7 @@ public class SegmentService : ISegmentService
                     link.NewKom = true;
                 }
 
-                else if (x.NewEffort.SegmentId != x.LastEffort.SegmentId)
+                else if (x.NewEffort.Id != x.LastEffort.Id)
                 {
                     comparedEfforts.ImprovedKomsCount++;
                     link.ImprovedKom = true;
