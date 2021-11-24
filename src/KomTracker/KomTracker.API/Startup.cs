@@ -17,6 +17,8 @@ using KomTracker.Application.Services;
 using KomTracker.Application;
 using KomTracker.Infrastructure;
 using KomTracker.Infrastructure.Persistence;
+using IdentityServer4.Models;
+using KomTracker.Infrastructure.Entities.Identity;
 
 namespace KomTracker.API;
 
@@ -64,6 +66,39 @@ public class Startup
             // when shutting down we want jobs to complete gracefully
             options.WaitForJobsToComplete = true;
         });
+
+        // -----------------------
+        var apiScopes = new List<ApiScope>
+        {
+            new ApiScope("api", "KOM Tracker API")
+        };
+        var clients = new List<Client>
+        {
+            new Client
+            {
+                ClientId = "www",
+                ClientName = "KOM Tracker WWW",
+
+                AllowedGrantTypes = GrantTypes.Code,
+                RequireClientSecret = false,
+                RequirePkce = true,
+                RequireConsent = false,
+                AllowOfflineAccess = true,
+                UpdateAccessTokenClaimsOnRefresh = true,
+
+                AllowedScopes = { "api" },
+                RedirectUris = { "http://localhost"}
+            }
+        };
+
+        var builder = services.AddIdentityServer(options =>
+            {
+                options.UserInteraction.LoginUrl = "/accounts/login";
+            })
+            .AddDeveloperSigningCredential()        //This is for dev only scenarios when you don’t have a certificate to use.
+            .AddInMemoryApiScopes(apiScopes)
+            .AddInMemoryClients(clients)
+            .AddAspNetIdentity<UserEntity>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,5 +122,9 @@ public class Startup
         {
             endpoints.MapDefaultControllerRoute();
         });
+
+
+        // ------
+        app.UseIdentityServer();
     }
 }
