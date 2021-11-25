@@ -72,6 +72,13 @@ public class Startup
         {
             new ApiScope("api", "KOM Tracker API")
         };
+
+        var identityResource = new IdentityResource[] {
+            new IdentityResources.OpenId(),
+            new IdentityResources.Profile(),
+            new IdentityResource("roles", new[] { "role" }) //Add this line
+        };
+
         var clients = new List<Client>
         {
             new Client
@@ -85,8 +92,9 @@ public class Startup
                 RequireConsent = false,
                 AllowOfflineAccess = true,
                 UpdateAccessTokenClaimsOnRefresh = true,
+                AlwaysIncludeUserClaimsInIdToken = true,
 
-                AllowedScopes = { "api" },
+                AllowedScopes = { "openid", "profile", "roles", "api" },
                 RedirectUris = { "http://localhost"}
             }
         };
@@ -96,6 +104,7 @@ public class Startup
                 options.UserInteraction.LoginUrl = "/accounts/login";
             })
             .AddDeveloperSigningCredential()        //This is for dev only scenarios when you don’t have a certificate to use.
+            .AddInMemoryIdentityResources(identityResource)
             .AddInMemoryApiScopes(apiScopes)
             .AddInMemoryClients(clients)
             .AddAspNetIdentity<UserEntity>();
