@@ -55,7 +55,7 @@ public class Startup
         {
             q.InterruptJobsOnShutdownWithWait = true;
 
-            q.UseMicrosoftDependencyInjectionJobFactory();            
+            q.UseMicrosoftDependencyInjectionJobFactory();
 
             q.ScheduleJob<TrackKomsJob>(trigger => trigger
                 .WithCronSchedule("0 0 * * * ?")); // every hour
@@ -70,7 +70,13 @@ public class Startup
         // -----------------------
         var apiScopes = new List<ApiScope>
         {
-            new ApiScope("api", "KOM Tracker API")
+            new ApiScope("api", "KOM Tracker API", new [] { "role", "name" })
+        };
+
+        var apiResources = new ApiResource[]
+        {
+            new ApiResource("roles", new [] { "role", "name" })// { Scopes = new [] {"api" } },
+            //new ApiResource("api", new [] { "role" })
         };
 
         var identityResource = new IdentityResource[] {
@@ -105,6 +111,7 @@ public class Startup
             })
             .AddDeveloperSigningCredential()        //This is for dev only scenarios when you don’t have a certificate to use.
             .AddInMemoryIdentityResources(identityResource)
+            //.AddInMemoryApiResources(apiResources)
             .AddInMemoryApiScopes(apiScopes)
             .AddInMemoryClients(clients)
             .AddAspNetIdentity<UserEntity>();

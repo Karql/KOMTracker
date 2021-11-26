@@ -21,6 +21,7 @@ using Microsoft.EntityFrameworkCore;
 using KomTracker.Infrastructure.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Strava.API.Client.Extensions;
+using KomTracker.Infrastructure.Services.Identity;
 
 namespace KomTracker.Infrastructure;
 
@@ -39,7 +40,8 @@ public static class DependencyInjection
         services.AddDbContext<KOMDBContext>(options => options.UseNpgsql(configuration.GetConnectionString("DB")));
         services.AddIdentity<UserEntity, RoleEntity>()
             .AddEntityFrameworkStores<KOMDBContext>()
-            .AddDefaultTokenProviders();
+            .AddDefaultTokenProviders()
+            .AddClaimsPrincipalFactory<ClaimsFactory<UserEntity>>();
 
         // Strava.API.Client
         services.AddStravaApiClient();
