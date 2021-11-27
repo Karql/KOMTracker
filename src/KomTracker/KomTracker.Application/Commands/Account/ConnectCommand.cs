@@ -14,7 +14,7 @@ using IIdentityUserService = KomTracker.Application.Interfaces.Services.Identity
 
 namespace KomTracker.Application.Commands.Account;
 
-public class ConnectCommand : IRequest<Result>
+public class ConnectCommand : IRequest<Result<ConnectCommandResult>>
 {
     public string Code { get; set; }
     public string Scope { get; set; }
@@ -26,15 +26,13 @@ public class ConnectCommand : IRequest<Result>
     }
 }
 
-public class ConnectCommandHandler : IRequestHandler<ConnectCommand, Result>
+public class ConnectCommandResult
 {
-    private static readonly HashSet<string> REQUIRED_SCOPES = new()
-    {
-        "read",
-        "activity:read",
-        "profile:read_all"
-    };
+    public int AthleteId { get; set; }
+}
 
+public class ConnectCommandHandler : IRequestHandler<ConnectCommand, Result<ConnectCommandResult>>
+{
     private readonly IKOMUnitOfWork _komUoW;
     private readonly IAthleteService _athleteService;
     private readonly IStravaTokenService _stravaTokenService;
@@ -48,7 +46,7 @@ public class ConnectCommandHandler : IRequestHandler<ConnectCommand, Result>
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
     }
 
-    public async Task<Result> Handle(ConnectCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ConnectCommandResult>> Handle(ConnectCommand request, CancellationToken cancellationToken)
     {
         var code = request.Code;
         var scope = request.Scope;
@@ -78,15 +76,16 @@ public class ConnectCommandHandler : IRequestHandler<ConnectCommand, Result>
 
         await _komUoW.SaveChangesAsync();
 
-        // TODO: Login
-
-        return Result.Ok();
+        return Result.Ok(new ConnectCommandResult
+        {
+            AthleteId = athlete.AthleteId,
+        });
     }
 
     protected bool VerifyRequiredScope(string scope)
     {
         var scopes = scope?.Split(",") ?? Enumerable.Empty<string>();
 
-        return REQUIRED_SCOPES.All(x => scopes.Contains(x));
+        return Constants.Strava.RequiredScopes.All(x => scopes.Contains(x));
     }
 }

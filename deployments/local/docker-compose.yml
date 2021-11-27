@@ -6,8 +6,8 @@ services:
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
-      StravaApiClientConfig__ClientID: ${STRAVA_API__CLIENT_ID}
-      StravaApiClientConfig__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
+      StravaApiClientConfiguration__ClientID: ${STRAVA_API__CLIENT_ID}
+      StravaApiClientConfiguration__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
     ports:
       - 8888:80
   

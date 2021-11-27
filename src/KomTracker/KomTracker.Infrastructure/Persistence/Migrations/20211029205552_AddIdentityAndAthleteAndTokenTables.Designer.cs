@@ -80,7 +80,7 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("athlete");
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.RoleClaimEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.RoleClaimEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -108,7 +108,7 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("role_claim");
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.RoleEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.RoleEntity", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text")
@@ -138,7 +138,7 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("role");
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserClaimEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserClaimEntity", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -166,7 +166,7 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("user_claim");
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserLoginEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserLoginEntity", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text")
@@ -192,7 +192,7 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("user_login");
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserEntity", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text")
@@ -278,7 +278,7 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("user");
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserRoleEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserRoleEntity", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("text")
@@ -295,7 +295,7 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("user_role");
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserTokenEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserTokenEntity", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("text")
@@ -353,62 +353,62 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("token");
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.RoleClaimEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.RoleClaimEntity", b =>
                 {
-                    b.HasOne("KomTracker.Infrastructure.Entities.Identity.RoleEntity", null)
+                    b.HasOne("KomTracker.Infrastructure.Identity.Entities.RoleEntity", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserClaimEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserClaimEntity", b =>
                 {
-                    b.HasOne("KomTracker.Infrastructure.Entities.Identity.UserEntity", null)
+                    b.HasOne("KomTracker.Infrastructure.Identity.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserLoginEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserLoginEntity", b =>
                 {
-                    b.HasOne("KomTracker.Infrastructure.Entities.Identity.UserEntity", null)
+                    b.HasOne("KomTracker.Infrastructure.Identity.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserEntity", b =>
                 {
                     b.HasOne("KomTracker.Domain.Entities.Athlete.AthleteEntity", "Athlete")
                         .WithOne("User")
-                        .HasForeignKey("KomTracker.Infrastructure.Entities.Identity.UserEntity", "AthleteId")
+                        .HasForeignKey("KomTracker.Infrastructure.Identity.Entities.UserEntity", "AthleteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Athlete");
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserRoleEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserRoleEntity", b =>
                 {
-                    b.HasOne("KomTracker.Infrastructure.Entities.Identity.RoleEntity", null)
+                    b.HasOne("KomTracker.Infrastructure.Identity.Entities.RoleEntity", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("KomTracker.Infrastructure.Entities.Identity.UserEntity", null)
+                    b.HasOne("KomTracker.Infrastructure.Identity.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KomTracker.Infrastructure.Entities.Identity.UserTokenEntity", b =>
+            modelBuilder.Entity("KomTracker.Infrastructure.Identity.Entities.UserTokenEntity", b =>
                 {
-                    b.HasOne("KomTracker.Infrastructure.Entities.Identity.UserEntity", null)
+                    b.HasOne("KomTracker.Infrastructure.Identity.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

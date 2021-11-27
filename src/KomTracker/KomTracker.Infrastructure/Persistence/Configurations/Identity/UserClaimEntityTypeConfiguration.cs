@@ -1,4 +1,4 @@
-﻿using KomTracker.Infrastructure.Entities.Identity;
+﻿using KomTracker.Infrastructure.Identity.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;

@@ -11,14 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Utils.AspNetCore.Extensions;
-
-
-using KomTracker.Application.Services;
 using KomTracker.Application;
 using KomTracker.Infrastructure;
 using KomTracker.Infrastructure.Persistence;
-using IdentityServer4.Models;
-using KomTracker.Infrastructure.Entities.Identity;
+
 
 namespace KomTracker.API;
 
@@ -66,55 +62,6 @@ public class Startup
             // when shutting down we want jobs to complete gracefully
             options.WaitForJobsToComplete = true;
         });
-
-        // -----------------------
-        var apiScopes = new List<ApiScope>
-        {
-            new ApiScope("api", "KOM Tracker API", new [] { "role", "name" })
-        };
-
-        var apiResources = new ApiResource[]
-        {
-            new ApiResource("roles", new [] { "role", "name" })// { Scopes = new [] {"api" } },
-            //new ApiResource("api", new [] { "role" })
-        };
-
-        var identityResource = new IdentityResource[] {
-            new IdentityResources.OpenId(),
-            new IdentityResources.Profile(),
-            new IdentityResource("roles", new[] { "role" }) //Add this line
-        };
-
-        var clients = new List<Client>
-        {
-            new Client
-            {
-                ClientId = "www",
-                ClientName = "KOM Tracker WWW",
-
-                AllowedGrantTypes = GrantTypes.Code,
-                RequireClientSecret = false,
-                RequirePkce = true,
-                RequireConsent = false,
-                AllowOfflineAccess = true,
-                UpdateAccessTokenClaimsOnRefresh = true,
-                AlwaysIncludeUserClaimsInIdToken = true,
-
-                AllowedScopes = { "openid", "profile", "roles", "api" },
-                RedirectUris = { "http://localhost"}
-            }
-        };
-
-        var builder = services.AddIdentityServer(options =>
-            {
-                options.UserInteraction.LoginUrl = "/accounts/login";
-            })
-            .AddDeveloperSigningCredential()        //This is for dev only scenarios when you don’t have a certificate to use.
-            .AddInMemoryIdentityResources(identityResource)
-            //.AddInMemoryApiResources(apiResources)
-            .AddInMemoryApiScopes(apiScopes)
-            .AddInMemoryClients(clients)
-            .AddAspNetIdentity<UserEntity>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -141,6 +88,6 @@ public class Startup
 
 
         // ------
-        app.UseIdentityServer();
+        app.UseInfrastructure();
     }
 }

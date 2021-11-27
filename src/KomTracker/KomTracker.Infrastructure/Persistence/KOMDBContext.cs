@@ -3,7 +3,7 @@ using KomTracker.Infrastructure.Persistence.Configurations.Identity;
 using KomTracker.Infrastructure.Persistence.Configurations.Segment;
 using KomTracker.Infrastructure.Persistence.Configurations.Token;
 using KomTracker.Domain.Entities.Athlete;
-using KomTracker.Infrastructure.Entities.Identity;
+using KomTracker.Infrastructure.Identity.Entities;
 using KomTracker.Domain.Entities.Segment;
 using KomTracker.Domain.Entities.Token;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;

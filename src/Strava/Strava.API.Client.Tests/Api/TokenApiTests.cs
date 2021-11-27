@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Utils.Tests.Logging;
 using Utils.Tests.HttpClient;
 using RichardSzalay.MockHttp;
-using Strava.API.Client.Model.Config;
+using Strava.API.Client.Configurations;
 using Xunit;
 using System.Net;
 using System.Net.Http;
@@ -36,7 +36,7 @@ public class TokenApiTests
     private const int TEST_CLIENT_ID = 123;
     private const string TEST_CLIENT_SECRET = "xyz";
     private const string TEST_REFRESH_TOKEN = "refresh123";
-    private static ConfigModel TestConfig => new ConfigModel
+    private static StravaApiClientConfiguration TestConfig => new StravaApiClientConfiguration
     {
         ClientID = TEST_CLIENT_ID,
         ClientSecret = TEST_CLIENT_SECRET

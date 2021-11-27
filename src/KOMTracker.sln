@@ -31,7 +31,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.WEB", "KomTracke
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.Application", "KomTracker\KomTracker.Application\KomTracker.Application.csproj", "{7045D1D2-2D8C-484A-A64B-DE139E6CEA89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomTracker.Domain", "KomTracker\KomTracker.Domain\KomTracker.Domain.csproj", "{403AD3DD-FFF2-416C-9889-8F3777368869}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.Domain", "KomTracker\KomTracker.Domain\KomTracker.Domain.csproj", "{403AD3DD-FFF2-416C-9889-8F3777368869}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.Infrastructure", "KomTracker\KomTracker.Infrastructure\KomTracker.Infrastructure.csproj", "{042DAF55-A131-4623-AD7C-E271BB5B5F48}"
 EndProject

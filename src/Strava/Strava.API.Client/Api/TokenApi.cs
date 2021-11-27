@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
 using Strava.API.Client.Model.Base;
-using Strava.API.Client.Model.Config;
+using Strava.API.Client.Configurations;
 using Strava.API.Client.Model.Token;
 using Strava.API.Client.Model.Token.Error;
 using System;
@@ -18,10 +18,10 @@ namespace Strava.API.Client.Api;
 public class TokenApi : ITokenApi
 {
     private readonly ILogger<TokenApi> _logger;
-    private readonly ConfigModel _config;
+    private readonly StravaApiClientConfiguration _config;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public TokenApi(ILogger<TokenApi> logger, ConfigModel config, IHttpClientFactory httpClientFactory)
+    public TokenApi(ILogger<TokenApi> logger, StravaApiClientConfiguration config, IHttpClientFactory httpClientFactory)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _config = config ?? throw new ArgumentNullException(nameof(config));
