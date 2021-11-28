@@ -68,7 +68,11 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
 
         if (comparedEfforts.AnyChanges)
         {
-            var newKomsEfforts = comparedEfforts.EffortsWithLinks.Where(x => x.Link.NewKom).Select(x => x.SegmentEffort);
+            var newKomsEfforts = comparedEfforts
+                .EffortsWithLinks
+                .Where(x => x.Link.NewKom
+                    || x.Link.ImprovedKom)
+                .Select(x => x.SegmentEffort);
 
             // TODO: transaction
             await _segmentService.AddSegmentsIfNotExistsAsync(actualKoms.Select(x => x.Item2));
