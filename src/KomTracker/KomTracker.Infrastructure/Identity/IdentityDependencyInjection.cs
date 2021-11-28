@@ -74,7 +74,7 @@ public static class IdentityDependencyInjection
     {
         return new []
         {
-            new ApiScope("api", "KOM Tracker API", new [] { JwtClaimTypes.Role, Claims.AthleteId })
+            new ApiScope(OAuth2.ScopeApi, "KOM Tracker API", new [] { JwtClaimTypes.Role, Claims.AthleteId })
         };
     }
 
@@ -86,8 +86,8 @@ public static class IdentityDependencyInjection
         {
             new Client
             {
-                ClientId = "www",
-                ClientName = "KOM Tracker WWW",
+                ClientId = OAuth2.ClientId,
+                ClientName = "KOM Tracker",
 
                 AllowedGrantTypes = GrantTypes.Code,
                 RequireClientSecret = false,
@@ -97,7 +97,7 @@ public static class IdentityDependencyInjection
                 UpdateAccessTokenClaimsOnRefresh = true,
                 AlwaysIncludeUserClaimsInIdToken = true,
 
-                AllowedScopes = { "openid", "profile", "api" },
+                AllowedScopes = { "openid", "profile", OAuth2.ScopeApi },
                 RedirectUris = identityConfiguration.RedirectUris
             }
         };

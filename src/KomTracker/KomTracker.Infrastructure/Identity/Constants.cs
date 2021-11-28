@@ -29,4 +29,10 @@ public static class Constants
     {
         public const string AthleteId = "athlete_id";
     }
+
+    public static class OAuth2
+    {
+        public const string ClientId = "kom-tracker";
+        public const string ScopeApi = "api";
+    }
 }

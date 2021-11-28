@@ -8,5 +8,6 @@ namespace KomTracker.Infrastructure.Identity.Configurations;
 
 public class IdentityConfiguration
 {
+    public string IdentityUrl { get; set; }
     public List<string> RedirectUris { get; set; }
 }

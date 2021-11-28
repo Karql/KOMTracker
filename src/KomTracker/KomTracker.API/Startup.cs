@@ -14,7 +14,7 @@ using Utils.AspNetCore.Extensions;
 using KomTracker.Application;
 using KomTracker.Infrastructure;
 using KomTracker.Infrastructure.Persistence;
-
+using KomTracker.Infrastructure.Identity.Configurations;
 
 namespace KomTracker.API;
 
@@ -32,14 +32,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
-        services.AddSwaggerGen(options =>
-        {
-            options.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = AppName,
-                Version = "1.0.0"
-            });
-        });
+        AddSwagger(services);
 
         services.AddApplication();
         services.AddInfrastructure(_configuration);
@@ -74,11 +67,7 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
-        app.UseSwagger();
-        app.UseSwaggerUI(c =>
-        {
-            c.SwaggerEndpoint($"v1/swagger.json", AppName);
-        });
+        
 
         app.UseRouting();
         app.UseEndpoints(endpoints =>
@@ -86,8 +75,63 @@ public class Startup
             endpoints.MapDefaultControllerRoute();
         });
 
+        ConfigureSwagger(app);
 
         // ------
         app.UseInfrastructure();
+    }
+
+    private void AddSwagger(IServiceCollection services)
+    {
+        var identityConfiguration = _configuration.GetIdentityConfiguration();
+
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = AppName,
+                Version = "1.0.0"
+            });
+
+            var securityScheme = new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.OAuth2
+            };
+
+            var identityUrl = identityConfiguration.IdentityUrl;
+
+            var flow = new OpenApiOAuthFlow
+            {
+                AuthorizationUrl = new Uri($"{identityUrl}/connect/authorize"),
+                TokenUrl = new Uri($"{identityUrl}/connect/token"),
+                RefreshUrl = new Uri($"{identityUrl}/connect/token"),
+
+                Scopes = new Dictionary<string, string>
+                {
+                    {
+                        KomTracker.Infrastructure.Identity.Constants.OAuth2.ScopeApi,
+                        KomTracker.Infrastructure.Identity.Constants.OAuth2.ScopeApi
+                    }
+                }
+            };
+
+            securityScheme.Flows = new OpenApiOAuthFlows
+            {
+                AuthorizationCode = flow
+            };
+
+            options.AddSecurityDefinition("OAuth2", securityScheme);
+        });
+    }
+
+    private void ConfigureSwagger(IApplicationBuilder app)
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint($"v1/swagger.json", AppName); // relative to swagger-ui (for reverse-proxy etc.)
+            c.OAuthClientId(KomTracker.Infrastructure.Identity.Constants.OAuth2.ClientId);
+            c.OAuthUsePkce();
+        });
     }
 }
