@@ -8,12 +8,16 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Threading;
 using KomTracker.Application.Commands.Tracking;
 using IStravaAthleteService = KomTracker.Application.Interfaces.Services.Strava.IAthleteService;
+using Microsoft.AspNetCore.Authorization;
+using static KomTracker.Application.Constants;
+using KomTracker.API.Attributes;
 
 namespace KomTracker.API.Controllers; 
 
 #if DEBUG
 [Route("playground")]
 [ApiController]
+[BearerAuthorize(Roles = Roles.Admin)]
 public class PlaygroundController : BaseApiController<PlaygroundController>
 {
     private readonly IServiceProvider _serviceProvider;

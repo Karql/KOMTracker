@@ -53,7 +53,12 @@ public static class IdentityDependencyInjection
 
     public static IApplicationBuilder UseIdentity(this IApplicationBuilder app)
     {
-        app.UseIdentityServer();
+        // Add IdentityServer as Area identity
+        // https://stackoverflow.com/a/51197799/11391667
+        app.Map("/identity", builder =>
+        {
+            builder.UseIdentityServer();
+        });
 
         return app;
     }

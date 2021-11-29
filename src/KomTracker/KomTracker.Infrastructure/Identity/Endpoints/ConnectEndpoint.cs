@@ -26,9 +26,9 @@ internal class ConnectEndpoint : IEndpointHandler
 
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
-        var code = context.Request.Query["code"];
-        var scope = context.Request.Query["scope"];
-        var state = context.Request.Query["state"];
+        string code = context.Request.Query["code"];
+        string scope = context.Request.Query["scope"];
+        string state = context.Request.Query["state"];
 
         if (string.IsNullOrEmpty(code)) return new BadRequestResult($"No {nameof(code)} parameter!");
         if (string.IsNullOrEmpty(scope)) return new BadRequestResult($"No {nameof(scope)} parameter!");

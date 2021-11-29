@@ -18,6 +18,14 @@ internal class IdentityService : IIdentityService
     private readonly IIdentityServerInteractionService _interaction;
     private IEventService _events;
 
+    public IdentityService(UserManager<UserEntity> userManager, SignInManager<UserEntity> signInManager, IIdentityServerInteractionService interaction, IEventService events)
+    {
+        _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+        _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
+        _interaction = interaction ?? throw new ArgumentNullException(nameof(interaction));
+        _events = events ?? throw new ArgumentNullException(nameof(events));
+    }
+
     public async Task<string> LoginAsync(int athleteId, string state)
     {
         var returnUrl = Encoding.UTF8.GetString(Convert.FromBase64String(state));

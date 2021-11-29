@@ -15,6 +15,8 @@ using KomTracker.Application;
 using KomTracker.Infrastructure;
 using KomTracker.Infrastructure.Persistence;
 using KomTracker.Infrastructure.Identity.Configurations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace KomTracker.API;
 
@@ -32,6 +34,8 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
+        AddAuthentication(services);
+        AddAuthorization(services);
         AddSwagger(services);
 
         services.AddApplication();
@@ -67,18 +71,58 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
-        
-
         app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapDefaultControllerRoute();
         });
-
+        
         ConfigureSwagger(app);
 
         // ------
         app.UseInfrastructure();
+    }
+
+    private void AddAuthentication(IServiceCollection services)
+    {
+        var identityConfiguration = _configuration.GetIdentityConfiguration();
+
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.Authority = identityConfiguration.IdentityUrl;
+                options.RequireHttpsMetadata = true;
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidIssuers = new[] { identityConfiguration.IdentityUrl },
+                    AudienceValidator = (audiences, securityToken, validationParameters) => true // allow all aud
+                };
+#if DEBUG
+                options.Events = new JwtBearerEvents
+                {
+                    OnTokenValidated = (ctx) =>
+                    {
+                        return Task.CompletedTask;
+                    },
+                    OnAuthenticationFailed = (err) =>
+                    {
+                        return Task.CompletedTask;
+                    }
+                };
+#endif
+            });
+    }
+
+    private void AddAuthorization(IServiceCollection services)
+    {
+        services.AddAuthorization(options =>
+        {
+            
+        });
     }
 
     private void AddSwagger(IServiceCollection services)
@@ -120,7 +164,10 @@ public class Startup
                 AuthorizationCode = flow
             };
 
-            options.AddSecurityDefinition("OAuth2", securityScheme);
+            options.AddSecurityDefinition("oauth2", securityScheme);
+
+            // https://mattfrear.com/2018/07/21/add-an-authorization-header-to-your-swagger-ui-with-swashbuckle-revisited/
+            options.OperationFilter<SecurityRequirementsOperationFilter>();
         });
     }
 

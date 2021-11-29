@@ -8,6 +8,11 @@ namespace KomTracker.Infrastructure.Identity;
 
 public static class Constants
 {
+    public static class IdentityServer
+    {
+        public static string Area = "/identity";
+    }
+
     public static class EndpointNames
     {
         public const string Login = "Login";

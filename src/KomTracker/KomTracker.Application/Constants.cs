@@ -17,4 +17,9 @@ public class Constants
             "profile:read_all"
         };
     }
+
+    public class Roles
+    {
+        public const string Admin = "admin";
+    }
 }

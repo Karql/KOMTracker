@@ -22,7 +22,7 @@ internal class LoginEndpoint : IEndpointHandler
 
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
-        var returnUrl = context.Request.Query["returnUrl"];
+        string returnUrl = context.Request.Query["returnUrl"];
 
         if (string.IsNullOrEmpty(returnUrl)) return new BadRequestResult($"No {nameof(returnUrl)} parameter!");
 
@@ -35,7 +35,7 @@ internal class LoginEndpoint : IEndpointHandler
 
         var clientId = _stravaApiClientConfiguration.ClientID;
         var scope = string.Join(",", KomTracker.Application.Constants.Strava.RequiredScopes);
-        var connectRedirectUri = $"{request.Scheme}://{request.Host}{ProtocolRoutePaths.Connect}";
+        var connectRedirectUri = $"{request.Scheme}://{request.Host}{IdentityServer.Area}{ProtocolRoutePaths.Connect}";
         var appReturnUrlBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(returnUrl));
 
         return $"https://www.strava.com/oauth/authorize?approval_prompt=auto&scope={scope}&client_id={clientId}&response_type=code&redirect_uri={connectRedirectUri}&state={appReturnUrlBase64}";
