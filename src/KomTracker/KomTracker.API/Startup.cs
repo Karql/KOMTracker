@@ -17,6 +17,9 @@ using KomTracker.Infrastructure.Persistence;
 using KomTracker.Infrastructure.Identity.Configurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Swashbuckle.AspNetCore.Filters;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Primitives;
+using Microsoft.AspNetCore.Http;
 
 namespace KomTracker.API;
 
@@ -78,7 +81,8 @@ public class Startup
         {
             endpoints.MapDefaultControllerRoute();
         });
-        
+
+        ConfigureForReverseProxy(app);
         ConfigureSwagger(app);
 
         // ------
@@ -179,6 +183,32 @@ public class Startup
             c.SwaggerEndpoint($"v1/swagger.json", AppName); // relative to swagger-ui (for reverse-proxy etc.)
             c.OAuthClientId(KomTracker.Infrastructure.Identity.Constants.OAuth2.ClientId);
             c.OAuthUsePkce();
+        });
+    }
+
+    private void ConfigureForReverseProxy(IApplicationBuilder app)
+    {
+        var forwardingOptions = new ForwardedHeadersOptions()
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+        };
+
+        // https://stackoverflow.com/questions/43749236/net-core-x-forwarded-proto-not-working
+        // Clear those collections for accept all proxies
+        forwardingOptions.KnownNetworks.Clear(); //its loopback by default
+        forwardingOptions.KnownProxies.Clear();
+
+        app.UseForwardedHeaders(forwardingOptions);
+
+        app.Use(async (context, next) =>
+        {
+            var forwardedPrefix = context.Request.Headers["x-forwarded-prefix"];
+            if (!StringValues.IsNullOrEmpty(forwardedPrefix))
+            {
+                context.Request.PathBase = new PathString(forwardedPrefix);
+            }
+
+            await next();
         });
     }
 }

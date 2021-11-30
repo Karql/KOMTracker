@@ -29,6 +29,8 @@ public static class IdentityDependencyInjection
         services.AddTransient<IUserService, UserService>();
         services.AddTransient<IIdentityService, IdentityService>();
 
+        services.AddSingleton<IdentityConfiguration>(configuration.GetIdentityConfiguration());
+
         services.AddIdentity<UserEntity, RoleEntity>()
             .AddEntityFrameworkStores<KOMDBContext>()
             .AddDefaultTokenProviders()
@@ -47,6 +49,14 @@ public static class IdentityDependencyInjection
             .AddAspNetIdentity<UserEntity>()
             .AddEndpoint<LoginEndpoint>(EndpointNames.Login, ProtocolRoutePaths.Loing)
             .AddEndpoint<ConnectEndpoint>(EndpointNames.Connect, ProtocolRoutePaths.Connect);
+
+        // Remove BasicAuthenticationSecretParser
+        // With this swagger protected by basic auth not working.
+        var basicAuthenticationSecretParser = services.FirstOrDefault(x => x.ImplementationType == typeof(BasicAuthenticationSecretParser));
+        if (basicAuthenticationSecretParser != null)
+        {
+            services.Remove(basicAuthenticationSecretParser);
+        }
 
         return services;
     }
