@@ -1,5 +1,6 @@
 ﻿@page "/login"
 @layout LoginLayout
+@inject NavigationManager Navigation
 
 <MudList Clickable="false" Class="mb-5">
     <MudListItem Text="Uh oh all the way!" Icon="@Icons.Material.Filled.NotificationsActive" />
@@ -9,13 +10,16 @@
 </MudList>
 
 <div class="d-flex justify-center">
-    <a href="@ConnectUrl"><img src="/img/btn_strava_connectwith_orange.svg" alt="" /></a>
+    <a @onclick="Authenticate"><img src="/img/btn_strava_connectwith_orange.svg" alt="" /></a>
 </div>
 <div class="d-flex justify-center">
     <MudCheckBox T="bool" Label="Remember me?" Color="Color.Primary" Class="ml-n1"></MudCheckBox>
 </div>
 
-@code {
-    string ConnectUrl => "https://www.strava.com/oauth/authorize?approval_prompt=auto&scope=read,activity:read,profile:read_all&client_id=17585&response_type=code&redirect_uri=https://komtracker.karkula.pl/kom-tracker-api/accounts/connect";
-}
 
+@code{
+    private async Task Authenticate(MouseEventArgs args)
+    {
+        Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.BaseUri)}");
+    }
+}
