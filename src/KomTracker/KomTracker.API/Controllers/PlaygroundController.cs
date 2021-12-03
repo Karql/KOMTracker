@@ -11,13 +11,20 @@ using IStravaAthleteService = KomTracker.Application.Interfaces.Services.Strava.
 using Microsoft.AspNetCore.Authorization;
 using static KomTracker.Application.Constants;
 using KomTracker.API.Attributes;
+using KomTracker.Application.Interfaces.Persistence;
+using Utils.UnitOfWork.Concrete;
+using KomTracker.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using KomTracker.Application.Models.Segment;
+using KomTracker.Application.Services;
+using MoreLinq;
+using KomTracker.Domain.Entities.Segment;
 
 namespace KomTracker.API.Controllers; 
 
-#if DEBUG
 [Route("playground")]
 [ApiController]
-[BearerAuthorize(Roles = Roles.Admin)]
+//[BearerAuthorize(Roles = Roles.Admin)]
 public class PlaygroundController : BaseApiController<PlaygroundController>
 {
     private readonly IServiceProvider _serviceProvider;
@@ -42,5 +49,70 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
 
         return new NoContentResult();
     }
+
+    [HttpGet("migrate-links-to-new-structure")]
+    public async Task<ActionResult> MigrateLinksToNewStructure()
+    {
+        var _komUoW = _serviceProvider.GetRequiredService<IKOMUnitOfWork>();
+        var segmentService = _serviceProvider.GetRequiredService<ISegmentService>();
+
+        var migrateLinksRepo = _komUoW.GetRepository<MigrateLinksRepo>();
+        
+
+        await migrateLinksRepo.MigrateLinks(segmentService);
+
+
+        return new NoContentResult();
+    }
 }
-#endif
+
+public class MigrateLinksRepo : EFRepositoryBase<KOMDBContext>
+{
+    public async Task MigrateLinks(ISegmentService segmentService)
+    {
+        var athleteIds = await _context.Athlete.Select(x => x.AthleteId).ToArrayAsync();
+
+        foreach (var athleteId in athleteIds)
+        {
+
+            var komsSummariesIds = await _context.KomsSummary.Where(x => x.AthleteId == athleteId).Select(x => x.Id).ToArrayAsync();
+
+            for (int i = 0; i < komsSummariesIds.Length; i++)
+            {
+                var lastKomSummaryId = i == 0 ? -1 : komsSummariesIds[i - 1];                               
+                var actualKomSummaryId = komsSummariesIds[i];
+
+                var lastKomsSummaryEfforts = await (
+                    from ksse in _context.KomsSummarySegmentEffort
+                    join se in _context.SegmentEffort on ksse.SegmentEffortId equals se.Id
+                    where ksse.KomSummaryId == lastKomSummaryId
+                    select new SegmentEffortWithLinkToKomsSummaryModel
+                    {
+                        SegmentEffort = se,
+                        Link = ksse
+                    }
+                ).ToListAsync();
+                var lastKomsEfforts = lastKomsSummaryEfforts.Where(x => x.Link.Kom).Select(x => x.SegmentEffort);
+
+                var actualKoms = await (
+                    from ksse in _context.KomsSummarySegmentEffort
+                    join se in _context.SegmentEffort on ksse.SegmentEffortId equals se.Id
+                    where ksse.KomSummaryId == actualKomSummaryId
+                    select se
+                ).ToListAsync();
+
+                var comparedEfforts = segmentService.CompareEfforts(actualKoms, lastKomsEfforts);
+
+                var linksToUpdate = comparedEfforts.EffortsWithLinks.Select(x => x.Link);
+
+                linksToUpdate.ForEach(x => x.KomSummaryId = actualKomSummaryId);
+
+                await _context
+                    .KomsSummarySegmentEffort
+                    .UpsertRange(linksToUpdate)
+                    .On(x => new { x.KomSummaryId, x.SegmentEffortId })
+                    .RunAsync();
+            }
+        }
+    }
+}

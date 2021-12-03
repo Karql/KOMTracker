@@ -20,6 +20,7 @@ using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Primitives;
 using Microsoft.AspNetCore.Http;
+using KomTracker.API.Controllers;
 
 namespace KomTracker.API;
 
@@ -45,6 +46,8 @@ public class Startup
 
         services.AddApplication();
         services.AddInfrastructure(_configuration);
+
+        services.AddTransient<MigrateLinksRepo>();
 
         // Jobs
         services.AddTransient<TrackKomsJob>();
