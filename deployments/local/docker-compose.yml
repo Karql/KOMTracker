@@ -35,5 +35,6 @@ services:
       StravaApiClientConfiguration__ClientID: ${STRAVA_API__CLIENT_ID}
       StravaApiClientConfiguration__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
       IdentityConfiguration__IdentityUrl: https://localhost:8888/kom-tracker-api/identity
-      IdentityConfiguration__RedirectUris__0: https://localhost:8888
+      IdentityConfiguration__RedirectUris__0: https://localhost
       Serilog__MinimumLevel__Default: Debug
+      ASPNETCORE_ENVIRONMENT: Development

@@ -28,10 +28,12 @@ public class Startup
     private static readonly string AppName = "KOM Tracker";
 
     private readonly IConfiguration _configuration;
+    private readonly IWebHostEnvironment _environment;
 
-    public Startup(IConfiguration configuration)
+    public Startup(IConfiguration configuration, IWebHostEnvironment environment)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
     }
 
     public void ConfigureServices(IServiceCollection services)
@@ -82,8 +84,10 @@ public class Startup
             endpoints.MapDefaultControllerRoute();
         });
 
+
         ConfigureForReverseProxy(app);
         ConfigureSwagger(app);
+        ConfigureCors(app);
 
         // ------
         app.UseInfrastructure();
@@ -210,5 +214,17 @@ public class Startup
 
             await next();
         });
+    }
+
+    private void ConfigureCors(IApplicationBuilder app)
+    {
+        if (_environment.IsDevelopment())
+        {
+            app.UseCors(x => x
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .SetIsOriginAllowed(origin => true)
+            .AllowCredentials());
+        }
     }
 }

@@ -11,11 +11,13 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 builder.Services.AddOidcAuthentication(options =>
 {
-    builder.Configuration.Bind("Local", options.ProviderOptions);
+    builder.Configuration.Bind("IdentityConfiguration", options.ProviderOptions);
+
     options.ProviderOptions.ResponseType = "code";
     options.ProviderOptions.DefaultScopes.Add("openid");
     options.ProviderOptions.DefaultScopes.Add("profile");
     options.ProviderOptions.DefaultScopes.Add("api");
+    options.ProviderOptions.DefaultScopes.Add("offline_access");
 });
 
 builder.Services.AddMudServices();
