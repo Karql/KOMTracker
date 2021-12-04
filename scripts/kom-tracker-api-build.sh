@@ -9,4 +9,4 @@ VERSION=${1?VERSION parameter is required}
 
 # Use paths relative to script dir
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
-"${SCRIPT_DIR}/api-build.sh" $DOCKER_FILE $NAME $VERSION
+"${SCRIPT_DIR}/docker-build.sh" $DOCKER_FILE $NAME $VERSION

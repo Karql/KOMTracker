@@ -11,7 +11,7 @@ VERSION=${3?VERSION parameter is required}
 # Use paths relative to script dir
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
 
-TAG="karql/kom-tracker-${NAME}:${VERSION}"
+TAG="karql/${NAME}:${VERSION}"
 
 echo "Build: ${TAG}"
 docker build \

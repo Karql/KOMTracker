@@ -2,12 +2,14 @@ version: "3.9"
 
 services:
   kom-tracker-api:
-    image: karql/kom-tracker-kom-tracker-api:prod
+    image: karql/kom-tracker-api:prod
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
       StravaApiClientConfiguration__ClientID: ${STRAVA_API__CLIENT_ID}
       StravaApiClientConfiguration__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
+      IdentityConfiguration__IdentityUrl: https://komtracker.karkula.pl/kom-tracker-api/identity
+      IdentityConfiguration__RedirectUris__0: https://komtracker.karkula.pl
 
   postgres:
     image: postgres:14.0

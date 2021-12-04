@@ -28,7 +28,7 @@ services:
       - ./volumes/reverse-proxy/certbot/www:/var/www/certbot   
 
   kom-tracker-api:
-    image: karql/kom-tracker-kom-tracker-api:latest
+    image: karql/kom-tracker-api:latest
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
