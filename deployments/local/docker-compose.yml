@@ -38,3 +38,7 @@ services:
       IdentityConfiguration__RedirectUris__0: https://localhost
       Serilog__MinimumLevel__Default: Debug
       ASPNETCORE_ENVIRONMENT: Development
+
+  kom-tracker-web:
+    image: karql/kom-tracker-web:latest
+    restart: always
