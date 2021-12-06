@@ -1,0 +1,15 @@
+﻿<MudCard Elevation="0" Square="true" Class="@Class" Style="@Style">
+    <MudCardHeader>
+        <CardHeaderAvatar>
+            <MudAvatar Image="https://dgalywyr863hv.cloudfront.net/pictures/athletes/2394302/743571/2/medium.jpg" />
+        </CardHeaderAvatar>
+        <CardHeaderContent>
+            <MudText Typo="Typo.body2">Mateusz Karkula</MudText> @*TODO*@
+        </CardHeaderContent>
+    </MudCardHeader>
+</MudCard>
+
+@code {
+    [Parameter] public string Class { get; set; }
+    [Parameter] public string Style { get; set; }
+}
