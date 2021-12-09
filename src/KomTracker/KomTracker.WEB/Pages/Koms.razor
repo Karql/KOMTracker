@@ -1,0 +1,30 @@
+﻿@page "/koms"
+@attribute [Authorize]
+
+@*TODO: Bread crumbs*@
+
+@if (!_loaded)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudTable Hover="true" Elevation="25" Items="_koms" Dense="true" Bordered="false" Striped="true" Filter="new Func<KomViewModel, bool>(Search)" @bind-kom="_kom">
+        <ToolBarContent>
+            <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for koms" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<KomViewModel, object>(x => x.SegmentId)">Segment ID</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<KomViewModel, object>(x => x.Name)">Segment name</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="SegmentId">@context.SegmentId</MudTd>
+            <MudTd DataLabel="Name">
+                <MudHighlighter Text="@context.Name" HighlightedText="@_searchString" />
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>    
+}

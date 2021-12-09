@@ -6,7 +6,7 @@ services:
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
-      StravaApiClientConfiguration__ClientID: ${STRAVA_API__CLIENT_ID}
+      StravaApiClientConfiguration__ClientID: ${STRAVA_API_CLIENT_ID}
       StravaApiClientConfiguration__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
       IdentityConfiguration__IdentityUrl: https://komtracker.karkula.pl/kom-tracker-api/identity
       IdentityConfiguration__RedirectUris__0: https://komtracker.karkula.pl
