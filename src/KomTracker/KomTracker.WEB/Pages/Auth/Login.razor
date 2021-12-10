@@ -1,10 +1,11 @@
 ﻿@page "/login"
 @layout EmptyLayout
 @inject NavigationManager Navigation
+@using KomTracker.WEB.Settings;
 
 <AuthorizeView>
     <NotAuthorized>
-        <MudThemeProvider Theme="MyCustomTheme" />
+        <MudThemeProvider Theme="Theme.DefaultTheme" />
         <MudSnackbarProvider />
 
         <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: 100vh;">
@@ -36,14 +37,6 @@
 </AuthorizeView> 
 
 @code {
-    MudTheme MyCustomTheme = new MudTheme()
-    {
-        Palette = new Palette()
-        {
-            Primary = new MudBlazor.Utilities.MudColor("#FC4C02"),
-        }
-    };
-
     private async Task Authenticate(MouseEventArgs args)
     {
         Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.BaseUri)}");
