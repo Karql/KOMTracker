@@ -1,16 +1,21 @@
-﻿using KomTracker.WEB.Settings;
+﻿using KomTracker.WEB.Services.Preference;
+using KomTracker.WEB.Settings;
+using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
 namespace KomTracker.WEB.Shared;
 
 public partial class MainLayout
 {
-    bool _drawerOpen = true;
-    MudTheme _currentTheme = Theme.DefaultTheme;
+    private bool _drawerOpen = true;
+    private MudTheme _currentTheme = Theme.DefaultTheme;
+
+    [Inject]
+    private IPreferenceService PreferenceService { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        _currentTheme = Theme.DefaultTheme;
+        _currentTheme = await PreferenceService.GetCurrentThemeAsync();
     }
 
     void DrawerToggle()
@@ -23,8 +28,9 @@ public partial class MainLayout
         new BreadcrumbItem("Dashboard", href: "#"),
     };
 
-    private async Task DarkMode()
+    private async Task ToggleDarkModeAsync()
     {
-        _currentTheme = _currentTheme == Theme.DefaultTheme ? Theme.DarkTheme : Theme.DefaultTheme;
+        await PreferenceService.ToggleDarkModeAsync();
+        _currentTheme = await PreferenceService.GetCurrentThemeAsync();
     }
 }
