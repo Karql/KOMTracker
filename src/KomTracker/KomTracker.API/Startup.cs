@@ -20,6 +20,7 @@ using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Primitives;
 using Microsoft.AspNetCore.Http;
+using System.Reflection;
 
 namespace KomTracker.API;
 
@@ -42,6 +43,7 @@ public class Startup
         AddAuthentication(services);
         AddAuthorization(services);
         AddSwagger(services);
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
         services.AddApplication();
         services.AddInfrastructure(_configuration);

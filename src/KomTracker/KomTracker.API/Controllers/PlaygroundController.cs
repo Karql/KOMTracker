@@ -1,14 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Strava.API.Client.Api;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
 using KomTracker.Application.Commands.Tracking;
 using IStravaAthleteService = KomTracker.Application.Interfaces.Services.Strava.IAthleteService;
-using Microsoft.AspNetCore.Authorization;
 using static KomTracker.Application.Constants;
 using KomTracker.API.Attributes;
 
