@@ -7,6 +7,7 @@ set -euo pipefail
 DOCKER_FILE=${1?DOCKER_FILE parameter is required - path relative to src folder}
 NAME=${2?NAME prameter is required}
 VERSION=${3?VERSION parameter is required}
+PUBLISH=${4:-true}
 
 # Use paths relative to script dir
 SCRIPT_DIR="$(dirname "$(readlink -f "$0")")"
@@ -20,6 +21,9 @@ docker build \
     -t $TAG \
     -f "${SCRIPT_DIR}/../src/${DOCKER_FILE}" \
     "${SCRIPT_DIR}/../src"
-
-echo "Publish: ${TAG}"
-docker push $TAG
+    
+if [ "$PUBLISH" = true ]
+then
+    echo "Publish: ${TAG}"
+    docker push $TAG
+fi
