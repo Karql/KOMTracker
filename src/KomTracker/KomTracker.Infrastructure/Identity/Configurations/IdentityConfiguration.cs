@@ -9,5 +9,7 @@ namespace KomTracker.Infrastructure.Identity.Configurations;
 public class IdentityConfiguration
 {
     public string IdentityUrl { get; set; }
+    public string Authority { get; set; }
+    public bool RequireHttpsMetadata { get; set; } = true;
     public List<string> RedirectUris { get; set; }
 }
