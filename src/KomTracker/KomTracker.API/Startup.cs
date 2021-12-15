@@ -39,6 +39,7 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddCors();
         services.AddControllers();
         AddAuthentication(services);
         AddAuthorization(services);
@@ -78,7 +79,8 @@ public class Startup
             app.UseDeveloperExceptionPage();
         }
 
-        app.UseRouting();
+        ConfigureCors(app);
+        app.UseRouting();        
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseEndpoints(endpoints =>
@@ -88,8 +90,7 @@ public class Startup
 
 
         ConfigureForReverseProxy(app);
-        ConfigureSwagger(app);
-        ConfigureCors(app);
+        ConfigureSwagger(app);        
 
         // ------
         app.UseInfrastructure();
@@ -102,8 +103,8 @@ public class Startup
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = identityConfiguration.IdentityUrl;
-                options.RequireHttpsMetadata = true;
+                options.Authority = identityConfiguration.Authority ?? identityConfiguration.IdentityUrl;
+                options.RequireHttpsMetadata = identityConfiguration.RequireHttpsMetadata;
                 options.SaveToken = true;
 
                 options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters

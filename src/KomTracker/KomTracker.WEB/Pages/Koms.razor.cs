@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using KomTracker.API.Shared.ViewModels.Segment;
+using Microsoft.AspNetCore.Components;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace KomTracker.WEB.Pages;
@@ -7,20 +9,20 @@ public partial class Koms
 {
     private bool _loaded = false;
     private string _searchString = "";
-    private IEnumerable<KomViewModel> _koms;
-    private KomViewModel _kom;
+    private IEnumerable<SegmentEffortViewModel> _koms = Enumerable.Empty<SegmentEffortViewModel>();
+    private SegmentEffortViewModel _kom;
+
+    [Inject]
+    private HttpClient Http { get; set; } 
     protected override async Task OnInitializedAsync()
     {
-        _koms = Enumerable.Range(1, 100).Select(x => new KomViewModel
-        {
-            SegmentId = x,
-            Name = $"Segment{x}"
-        }).ToList();          
+        _koms = await Http.GetFromJsonAsync<SegmentEffortViewModel[]>("athletes/2394302/koms")
+            ?? Enumerable.Empty<SegmentEffortViewModel>();
 
         _loaded = true;
     }
 
-    private bool Search(KomViewModel kom)
+    private bool Search(SegmentEffortViewModel kom)
     {
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
         if (kom.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
@@ -29,11 +31,4 @@ public partial class Koms
         }
         return false;
     }
-}
-
-public class KomViewModel
-{
-    public long SegmentId { get; set; }
-
-    public string Name { get; set; }
 }

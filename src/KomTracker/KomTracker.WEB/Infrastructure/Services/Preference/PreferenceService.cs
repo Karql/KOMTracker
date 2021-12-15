@@ -3,7 +3,7 @@ using KomTracker.WEB.Models.Preference;
 using KomTracker.WEB.Settings;
 using MudBlazor;
 
-namespace KomTracker.WEB.Services.Preference;
+namespace KomTracker.WEB.Infrastructure.Services.Preference;
 
 public class PreferenceService : IPreferenceService
 {

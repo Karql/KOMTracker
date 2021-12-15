@@ -1,5 +1,5 @@
 ﻿using KomTracker.API.Attributes;
-using KomTracker.API.ViewModels.Segment;
+using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.Application.Queries.Athlete;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;

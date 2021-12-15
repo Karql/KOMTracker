@@ -1,4 +1,4 @@
-﻿namespace KomTracker.API.ViewModels.Segment;
+﻿namespace KomTracker.API.Shared.ViewModels.Segment;
 
 public class SegmentEffortViewModel
 {

@@ -9,18 +9,23 @@
 }
 else
 {
-    <MudTable Hover="true" Elevation="25" Items="_koms" Dense="false" Bordered="false" Striped="true" Filter="new Func<KomViewModel, bool>(Search)" @bind-kom="_kom">
+    <MudTable Hover="true" Elevation="25" Items="_koms" Dense="false" Bordered="false" Striped="true" Filter="new Func<SegmentEffortViewModel, bool>(Search)" @bind-kom="_kom">
         <ToolBarContent>
             <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for koms" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
         </ToolBarContent>
         <HeaderContent>
-            <MudTh><MudTableSortLabel SortBy="new Func<KomViewModel, object>(x => x.SegmentId)">Segment ID</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<KomViewModel, object>(x => x.Name)">Segment name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<SegmentEffortViewModel, object>(x => x.SegmentId)">Segment ID</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<SegmentEffortViewModel, object>(x => x.Name)">Segment name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<SegmentEffortViewModel, object>(x => x.StartDate)">Date</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="SegmentId">@context.SegmentId</MudTd>
             <MudTd DataLabel="Name">
-                <MudHighlighter Text="@context.Name" HighlightedText="@_searchString" />
+                <MudHighlighter Text="@context.Name" HighlightedText="@_searchString" /><br />
+                @((context.Distance / 1000).ToString("F2")) km
+            </MudTd>
+            <MudTd DataLabel="Date">
+                @context.StartDate.ToString("yyyy-MM-dd")
             </MudTd>
         </RowTemplate>
         <PagerContent>

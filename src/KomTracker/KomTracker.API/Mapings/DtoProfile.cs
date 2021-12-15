@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using KomTracker.API.ViewModels.Segment;
+using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.Domain.Entities.Segment;
 
 namespace KomTracker.API.Mapings;

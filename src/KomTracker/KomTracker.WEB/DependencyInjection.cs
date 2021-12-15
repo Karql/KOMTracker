@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
-using KomTracker.WEB.Services.Preference;
+using KomTracker.WEB.Infrastructure.Services.Preference;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 
@@ -7,11 +8,11 @@ namespace KomTracker.WEB;
 
 public static class DependencyInjection
 {
+    private const string ClientName = "KomTracker.API";
+
     public static WebAssemblyHostBuilder AddClientServices(this WebAssemblyHostBuilder builder)
     {
         var services = builder.Services;
-
-        services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
         services.AddScoped<IPreferenceService, PreferenceService>();
 
@@ -27,6 +28,23 @@ public static class DependencyInjection
             options.ProviderOptions.DefaultScopes.Add("api");
             options.ProviderOptions.DefaultScopes.Add("offline_access");
         });
+
+        services.AddHttpClient(ClientName, client =>
+        {
+            client.BaseAddress = new Uri("https://localhost:9999/kom-tracker-api/");
+        })
+        .AddHttpMessageHandler(sp =>
+        {
+            var handler = sp.GetService<AuthorizationMessageHandler>()!
+            .ConfigureHandler(
+                authorizedUrls: new[] { "https://localhost:9999/kom-tracker-api/identity" },
+                scopes: new[] { "api" }
+            );
+
+            return handler;
+        });
+
+        services.AddScoped(sp => sp.GetService<IHttpClientFactory>()!.CreateClient(ClientName));
 
         services.AddMudServices();
 

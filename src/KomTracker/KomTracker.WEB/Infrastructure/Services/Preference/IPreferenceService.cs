@@ -1,6 +1,6 @@
 ﻿using MudBlazor;
 
-namespace KomTracker.WEB.Services.Preference;
+namespace KomTracker.WEB.Infrastructure.Services.Preference;
 
 public interface IPreferenceService
 {
