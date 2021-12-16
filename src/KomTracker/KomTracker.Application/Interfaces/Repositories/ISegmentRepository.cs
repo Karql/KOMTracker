@@ -12,7 +12,7 @@ public interface ISegmentRepository : IRepository
 
     Task AddSegmentEffortsIfNotExistsAsync(IEnumerable<SegmentEffortEntity> segmentEffots);
 
-    Task<IEnumerable<SegmentEffortWithLinkToKomsSummaryModel>> GetLastKomsSummaryEffortsWithLinksAsync(int athleteId);
+    Task<IEnumerable<EffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId);
 
     Task AddKomsSummaryAsync(KomsSummaryEntity komsSummary);
 

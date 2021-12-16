@@ -1,5 +1,9 @@
 kom_rank in segment effort could be null - that means segment has been created after activity has been recorded - nice information to show
 
+Agreement:
+- 7 days means to refresh cache: https://groups.google.com/g/strava-api/c/yP8tV9KapZs
+
+# Features
 
 Ranking by:
 - total koms lenght
@@ -19,5 +23,4 @@ King of Cracow etc.
 - top x segment in area
 - who has the most of them
 
-Agreement:
-- 7 days means to refresh cache: https://groups.google.com/g/strava-api/c/yP8tV9KapZs
+Koms map

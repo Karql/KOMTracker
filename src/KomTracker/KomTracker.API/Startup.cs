@@ -103,7 +103,8 @@ public class Startup
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
             {
-                options.Authority = identityConfiguration.Authority ?? identityConfiguration.IdentityUrl;
+                options.Authority = !string.IsNullOrWhiteSpace(identityConfiguration.Authority) ?
+                    identityConfiguration.Authority : identityConfiguration.IdentityUrl;
                 options.RequireHttpsMetadata = identityConfiguration.RequireHttpsMetadata;
                 options.SaveToken = true;
 

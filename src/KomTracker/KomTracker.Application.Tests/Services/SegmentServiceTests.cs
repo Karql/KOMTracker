@@ -103,8 +103,8 @@ public class SegmentServiceTests
     {
         // Arrange
         var fixture = GetTestFixture();
-        var lastEfforts = fixture.CreateMany<SegmentEffortWithLinkToKomsSummaryModel>(2);
-        _segmentRepository.GetLastKomsSummaryEffortsWithLinksAsync(TestAthleteId).Returns(lastEfforts);
+        var lastEfforts = fixture.CreateMany<EffortModel>(2);
+        _segmentRepository.GetLastKomsSummaryEffortsAsync(TestAthleteId).Returns(lastEfforts);
 
         // Act
         var res = await _segmentService.GetLastKomsSummaryEffortsAsync(TestAthleteId);
@@ -117,7 +117,7 @@ public class SegmentServiceTests
     public async Task Get_last_koms_summary_efforts_returns_empty_list_when_no_data_in_db()
     {
         // Arrange
-        _segmentRepository.GetLastKomsSummaryEffortsWithLinksAsync(TestAthleteId).Returns((IEnumerable<SegmentEffortWithLinkToKomsSummaryModel>)null);
+        _segmentRepository.GetLastKomsSummaryEffortsAsync(TestAthleteId).Returns((IEnumerable<EffortModel>)null);
 
         // Act
         var res = await _segmentService.GetLastKomsSummaryEffortsAsync(TestAthleteId);
@@ -159,7 +159,7 @@ public class SegmentServiceTests
         comparedEffots.LostKomsCount.Should().Be(1);
         comparedEffots.AnyChanges.Should().BeTrue();
 
-        var efforts = comparedEffots.EffortsWithLinks;
+        var efforts = comparedEffots.Efforts;
         efforts.Should().NotBeNull();
         efforts.Count.Should().Be(4); // 3 kom + 1 lost kom
 
@@ -203,9 +203,9 @@ public class SegmentServiceTests
         comparedEffots.AnyChanges.Should().BeFalse();
     }
 
-    private void AssertComparedEffortLink(SegmentEffortWithLinkToKomsSummaryModel model, bool lostKom, bool kom, bool newKom, bool improvedKom)
+    private void AssertComparedEffortLink(EffortModel model, bool lostKom, bool kom, bool newKom, bool improvedKom)
     {
-        var (effort, link) = (model.SegmentEffort, model.Link);
+        var (effort, link) = (model.SegmentEffort, model.SummarySegmentEffort);
 
         link.SegmentEffortId.Should().Be(effort.Id);
 
@@ -223,27 +223,27 @@ public class SegmentServiceTests
         //Arrange
         var comparedEfforts = new ComparedEffortsModel
         {
-            EffortsWithLinks = new List<SegmentEffortWithLinkToKomsSummaryModel>()
+            Efforts = new List<EffortModel>()
             {
                 new()
                 {
                     SegmentEffort = new(),
-                    Link = new() { LostKom = true }
+                    SummarySegmentEffort = new() { LostKom = true }
                 },
                 new()
                 {
                     SegmentEffort = new(),
-                    Link = new() { Kom = true }
+                    SummarySegmentEffort = new() { Kom = true }
                 },
                 new()
                 {
                     SegmentEffort = new(),
-                    Link = new() { Kom = true, NewKom = true }
+                    SummarySegmentEffort = new() { Kom = true, NewKom = true }
                 },
                 new()
                 {
                     SegmentEffort = new(),
-                    Link = new() { Kom = true, ImprovedKom = true }
+                    SummarySegmentEffort = new() { Kom = true, ImprovedKom = true }
                 },
             },
             KomsCount = 3,
@@ -272,7 +272,7 @@ public class SegmentServiceTests
         var addKomsSummariesSegmentEffortsAsyncCall = addKomsSummariesSegmentEffortsAsyncCalls.First();
         var komsSummariesSegmentEffortsArgs = addKomsSummariesSegmentEffortsAsyncCall.GetArgument<IEnumerable<KomsSummarySegmentEffortEntity>>();
 
-        komsSummariesSegmentEffortsArgs.Should().BeEquivalentTo(comparedEfforts.EffortsWithLinks.Select(x => x.Link));
+        komsSummariesSegmentEffortsArgs.Should().BeEquivalentTo(comparedEfforts.Efforts.Select(x => x.SummarySegmentEffort));
         komsSummariesSegmentEffortsArgs.All(x => x.KomsSummary == komsSummaryArg).Should().BeTrue();
     }
     #endregion

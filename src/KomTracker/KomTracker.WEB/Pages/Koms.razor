@@ -9,14 +9,14 @@
 }
 else
 {
-    <MudTable Hover="true" Elevation="25" Items="_koms" Dense="false" Bordered="false" Striped="true" Filter="new Func<SegmentEffortViewModel, bool>(Search)" @bind-kom="_kom">
+    <MudTable Hover="true" Elevation="25" Items="_koms" Dense="false" Bordered="false" Striped="true" Filter="new Func<EffortViewModel, bool>(Search)" @bind-kom="_kom">
         <ToolBarContent>
             <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for koms" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
         </ToolBarContent>
         <HeaderContent>
-            <MudTh><MudTableSortLabel SortBy="new Func<SegmentEffortViewModel, object>(x => x.SegmentId)">Segment ID</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<SegmentEffortViewModel, object>(x => x.Name)">Segment name</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<SegmentEffortViewModel, object>(x => x.StartDate)">Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentId)">Segment ID</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Name)">Segment name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.StartDate)">Date</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="SegmentId">@context.SegmentId</MudTd>

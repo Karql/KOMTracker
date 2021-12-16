@@ -37,12 +37,12 @@ public class SegmentService : ISegmentService
             : null;
     }
 
-    public async Task<IEnumerable<SegmentEffortWithLinkToKomsSummaryModel>> GetLastKomsSummaryEffortsAsync(int athleteId)
+    public async Task<IEnumerable<EffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId)
     {
         return (await _komUoW
             .GetRepository<ISegmentRepository>()
-            .GetLastKomsSummaryEffortsWithLinksAsync(athleteId))
-            ?? Enumerable.Empty<SegmentEffortWithLinkToKomsSummaryModel>();
+            .GetLastKomsSummaryEffortsAsync(athleteId))
+            ?? Enumerable.Empty<EffortModel>();
     }
 
     public ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualKomsEfforts, IEnumerable<SegmentEffortEntity> lastKomsEfforts)
@@ -55,7 +55,7 @@ public class SegmentService : ISegmentService
             (key, newEfforts, lastEfforts) => new { NewEffort = newEfforts.FirstOrDefault(), LastEffort = lastEfforts.FirstOrDefault() }
         ).ForEach(x =>
         {
-            SegmentEffortEntity effort = x.NewEffort ?? x.LastEffort;           
+            SegmentEffortEntity effort = x.NewEffort ?? x.LastEffort!;           
             KomsSummarySegmentEffortEntity link = new()
             { 
                 SegmentEffortId = effort.Id // by id to prevent add effort
@@ -85,10 +85,10 @@ public class SegmentService : ISegmentService
                 link.LostKom = true;
             }
 
-            comparedEfforts.EffortsWithLinks.Add(new SegmentEffortWithLinkToKomsSummaryModel
+            comparedEfforts.Efforts.Add(new EffortModel
             {
                 SegmentEffort = effort,
-                Link = link
+                SummarySegmentEffort = link
             });
         });
 
@@ -123,7 +123,7 @@ public class SegmentService : ISegmentService
 
         await segmentRepo.AddKomsSummaryAsync(komsSummary);
 
-        var komsSummariesSegmentEfforts = comparedEfforts.EffortsWithLinks.Select(x => x.Link);
+        var komsSummariesSegmentEfforts = comparedEfforts.Efforts.Select(x => x.SummarySegmentEffort);
         komsSummariesSegmentEfforts.ForEach(x => x.KomsSummary = komsSummary);
         await segmentRepo.AddKomsSummariesSegmentEffortsAsync(komsSummariesSegmentEfforts);
     }

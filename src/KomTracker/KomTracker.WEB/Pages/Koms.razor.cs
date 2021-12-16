@@ -9,20 +9,20 @@ public partial class Koms
 {
     private bool _loaded = false;
     private string _searchString = "";
-    private IEnumerable<SegmentEffortViewModel> _koms = Enumerable.Empty<SegmentEffortViewModel>();
-    private SegmentEffortViewModel _kom;
+    private IEnumerable<EffortViewModel> _koms = Enumerable.Empty<EffortViewModel>();
+    private EffortViewModel _kom;
 
     [Inject]
     private HttpClient Http { get; set; } 
     protected override async Task OnInitializedAsync()
     {
-        _koms = await Http.GetFromJsonAsync<SegmentEffortViewModel[]>("athletes/2394302/koms")
-            ?? Enumerable.Empty<SegmentEffortViewModel>();
+        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>("athletes/2394302/koms")
+            ?? Enumerable.Empty<EffortViewModel>();
 
         _loaded = true;
     }
 
-    private bool Search(SegmentEffortViewModel kom)
+    private bool Search(EffortViewModel kom)
     {
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
         if (kom.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)

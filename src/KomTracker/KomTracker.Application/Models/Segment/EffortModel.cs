@@ -7,9 +7,11 @@ using System.Threading.Tasks;
 
 namespace KomTracker.Application.Models.Segment;
 
-public class SegmentEffortWithLinkToKomsSummaryModel
+public class EffortModel
 {
     public SegmentEffortEntity SegmentEffort { get; set; }
 
-    public KomsSummarySegmentEffortEntity Link { get; set; }
+    public KomsSummarySegmentEffortEntity SummarySegmentEffort { get; set; }
+
+    public SegmentEntity? Segment { get; set; }
 }

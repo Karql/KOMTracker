@@ -29,19 +29,21 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
             .RunAsync();
     }
 
-    public async Task<IEnumerable<SegmentEffortWithLinkToKomsSummaryModel>> GetLastKomsSummaryEffortsWithLinksAsync(int athleteId)
+    public async Task<IEnumerable<EffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId)
     {
         return await (
             from ksse in _context.KomsSummarySegmentEffort
             join se in _context.SegmentEffort on ksse.SegmentEffortId equals se.Id
+            join s in _context.Segment on se.SegmentId equals s.Id
             where ksse.KomSummaryId == _context
                     .KomsSummary
                     .OrderByDescending(x => x.TrackDate)
                     .FirstOrDefault(x => x.AthleteId == athleteId).Id
-            select new SegmentEffortWithLinkToKomsSummaryModel
+            select new EffortModel
             {
                 SegmentEffort = se,
-                Link = ksse
+                SummarySegmentEffort = ksse,
+                Segment = s
             }
         ).ToListAsync();
     }

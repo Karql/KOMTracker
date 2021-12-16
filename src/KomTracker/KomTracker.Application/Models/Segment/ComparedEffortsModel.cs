@@ -11,7 +11,7 @@ public class ComparedEffortsModel
     public int ImprovedKomsCount { get; set; } = 0;
     public int LostKomsCount { get; set; } = 0;
 
-    public List<SegmentEffortWithLinkToKomsSummaryModel> EffortsWithLinks { get; set; } = new List<SegmentEffortWithLinkToKomsSummaryModel>();
+    public List<EffortModel> Efforts { get; set; } = new List<EffortModel>();
 
     public bool AnyChanges => NewKomsCount > 0 || ImprovedKomsCount > 0 || LostKomsCount > 0;
 }
