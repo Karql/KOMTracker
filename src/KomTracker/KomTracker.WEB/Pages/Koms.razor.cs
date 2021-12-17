@@ -13,7 +13,7 @@ public partial class Koms
     private EffortViewModel _kom;
 
     [Inject]
-    private HttpClient Http { get; set; } 
+    private HttpClient Http { get; set; } = default!;
     protected override async Task OnInitializedAsync()
     {
         _koms = await Http.GetFromJsonAsync<EffortViewModel[]>("athletes/2394302/koms")
@@ -25,7 +25,7 @@ public partial class Koms
     private bool Search(EffortViewModel kom)
     {
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
-        if (kom.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
+        if (kom.Segment.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
         {
             return true;
         }

@@ -14,18 +14,18 @@ else
             <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for koms" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
         </ToolBarContent>
         <HeaderContent>
-            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentId)">Segment ID</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Name)">Segment name</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.StartDate)">Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.Name)">Segment name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>            
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="SegmentId">@context.SegmentId</MudTd>
             <MudTd DataLabel="Name">
-                <MudHighlighter Text="@context.Name" HighlightedText="@_searchString" /><br />
-                @((context.Distance / 1000).ToString("F2")) km
+                <MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /><br />
+                @((context.Segment.Distance / 1000).ToString("F2")) km
+                @((context.Segment.ElevationHigh - context.Segment.ElevationLow).ToString("F0")) m
+                @context.Segment.AverageGrade.ToString("F1")%
             </MudTd>
             <MudTd DataLabel="Date">
-                @context.StartDate.ToString("yyyy-MM-dd")
+                @context.SegmentEffort.StartDate.ToString("yyyy-MM-dd")
             </MudTd>
         </RowTemplate>
         <PagerContent>
