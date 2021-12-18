@@ -1,4 +1,6 @@
-﻿namespace KomTracker.API.Shared.ViewModels.Segment;
+﻿using System.Text.Json.Serialization;
+
+namespace KomTracker.API.Shared.ViewModels.Segment;
 
 public class SegmentEffortViewModel
 {
@@ -12,9 +14,15 @@ public class SegmentEffortViewModel
     public float Distance { get; set; }
     public int StartIndex { get; set; }
     public int EndIndex { get; set; }
-    public float AverageCadence { get; set; }
+    public float? AverageCadence { get; set; }
     public bool DeviceWatts { get; set; }
-    public float AverageWatts { get; set; }
-    public float AverageHeartrate { get; set; }
-    public float MaxHeartrate { get; set; }
+    public float? AverageWatts { get; set; }
+    public float? AverageHeartrate { get; set; }
+    public float? MaxHeartrate { get; set; }
+
+    /// <summary>
+    /// Speed in km/h
+    /// </summary>
+    [JsonIgnore]
+    public float Speed => (Distance / ElapsedTime) * 3.6f; 
 }

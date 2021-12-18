@@ -15,17 +15,39 @@ else
         </ToolBarContent>
         <HeaderContent>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.Name)">Segment name</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>            
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.Speed)">Speed</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageHeartrate ?? 0)">HR</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Name">
-                <MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /><br />
+                <MudLink Target="_blank" Href="@($"https://strava.com/segments/{context.Segment.Id}")"><MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /></MudLink>
+                <br />
                 @((context.Segment.Distance / 1000).ToString("F2")) km
                 @((context.Segment.ElevationHigh - context.Segment.ElevationLow).ToString("F0")) m
                 @context.Segment.AverageGrade.ToString("F1")%
             </MudTd>
             <MudTd DataLabel="Date">
                 @context.SegmentEffort.StartDate.ToString("yyyy-MM-dd")
+            </MudTd>
+            <MudTd DataLabel="Speed">
+                @context.SegmentEffort.Speed.ToString("F1")km/h
+            </MudTd>
+            <MudTd DataLabel="HR">
+                @((context.SegmentEffort.AverageHeartrate ?? 0) == 0 ? "-" : context.SegmentEffort.AverageHeartrate!.Value.ToString("F0"))
+            </MudTd>
+            <MudTd DataLabel="Power" >
+                @((context.SegmentEffort.AverageWatts ?? 0) == 0 ? "-" : context.SegmentEffort.AverageWatts!.Value.ToString("F0") + "W")
+                @if (context.SegmentEffort.DeviceWatts)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Bolt"></MudIcon>
+                }
+            </MudTd>
+            <MudTd DataLabel="Time">
+                @*TODO: Readable time*@
+                @(TimeSpan.FromSeconds(context.SegmentEffort.ElapsedTime).ToString())                
             </MudTd>
         </RowTemplate>
         <PagerContent>
