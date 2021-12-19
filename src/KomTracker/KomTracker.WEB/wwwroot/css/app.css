@@ -1,0 +1,13 @@
+﻿.climb-category {
+    color: #fff;
+    border-radius: 13px;
+    width: 65px;
+    height: 26px;
+    padding-left: 9px;
+    padding-right: 9px;
+}
+
+.climb-category > span {
+    width: 20px;
+    text-align: center
+}

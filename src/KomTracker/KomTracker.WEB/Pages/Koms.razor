@@ -15,18 +15,32 @@ else
         </ToolBarContent>
         <HeaderContent>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.Name)">Segment name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.Distance)">Distance</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ElevationHigh - x.Segment.ElevationLow)">Elev diff</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.AverageGrade)">Grade</MudTableSortLabel></MudTh>            
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.Speed)">Speed</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageHeartrate ?? 0)">HR</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ClimbCategoryExtended)">Cat</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ActivityType)">Type</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Name">
                 <MudLink Target="_blank" Href="@($"https://strava.com/segments/{context.Segment.Id}")"><MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /></MudLink>
-                <br />
+                @*<br />
                 @((context.Segment.Distance / 1000).ToString("F2")) km
                 @((context.Segment.ElevationHigh - context.Segment.ElevationLow).ToString("F0")) m
+                @context.Segment.AverageGrade.ToString("F1")%*@
+            </MudTd>
+            <MudTd DataLabel="Distnce">
+                @((context.Segment.Distance / 1000).ToString("F2")) km
+            </MudTd>
+             <MudTd DataLabel="Elev diff">
+                @((context.Segment.ElevationHigh - context.Segment.ElevationLow).ToString("F0")) m
+            </MudTd>
+            <MudTd DataLabel="Grade">
                 @context.Segment.AverageGrade.ToString("F1")%
             </MudTd>
             <MudTd DataLabel="Date">
@@ -39,15 +53,27 @@ else
                 @((context.SegmentEffort.AverageHeartrate ?? 0) == 0 ? "-" : context.SegmentEffort.AverageHeartrate!.Value.ToString("F0"))
             </MudTd>
             <MudTd DataLabel="Power" >
+                <span class="d-flex align-center">
                 @((context.SegmentEffort.AverageWatts ?? 0) == 0 ? "-" : context.SegmentEffort.AverageWatts!.Value.ToString("F0") + "W")
                 @if (context.SegmentEffort.DeviceWatts)
                 {
                     <MudIcon Icon="@Icons.Material.Filled.Bolt"></MudIcon>
                 }
+                </span>
             </MudTd>
             <MudTd DataLabel="Time">
-                @*TODO: Readable time*@
                 @(TimeSpan.FromSeconds(context.SegmentEffort.ElapsedTime).ToString())                
+            </MudTd>
+            <MudTd DataLabel="Type">
+                <div class="d-flex align-center justify-space-between climb-category" style="background-color: @GetClimbCategoryColor(context.Segment.ClimbCategoryExtended)">
+                    <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
+                    <span>@context.Segment.ClimbCategoryExtendedText</span>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Type">
+                <MudTooltip Text="@context.Segment.ActivityType">
+                    <MudIcon Icon="@GetActivityTypeIcon(context.Segment.ActivityType)"></MudIcon>
+                </MudTooltip>
             </MudTd>
         </RowTemplate>
         <PagerContent>

@@ -25,7 +25,7 @@ public partial class MainLayout
 
     private List<BreadcrumbItem> _items = new List<BreadcrumbItem>
     {
-        new BreadcrumbItem("Dashboard", href: "#"),
+        new BreadcrumbItem("Koms", href: "#"),
     };
 
     private async Task ToggleDarkModeAsync()
