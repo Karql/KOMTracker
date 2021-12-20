@@ -1,4 +1,6 @@
 ﻿using KomTracker.API.Shared.ViewModels.Segment;
+using KomTracker.WEB.Infrastructure.Services.User;
+using KomTracker.WEB.Models.User;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using System.Net.Http.Json;
@@ -9,15 +11,21 @@ namespace KomTracker.WEB.Pages;
 public partial class Koms
 {
     private bool _loaded = false;
+    private UserModel _user = default!;
     private string _searchString = "";
     private IEnumerable<EffortViewModel> _koms = Enumerable.Empty<EffortViewModel>();
     private EffortViewModel _kom;
 
     [Inject]
     private HttpClient Http { get; set; } = default!;
+
+    [Inject]
+    private IUserService UserService { get; set; } = default!;
     protected override async Task OnInitializedAsync()
     {
-        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>("athletes/2394302/koms")
+        _user = await UserService.GetCurrentUser();
+
+        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{_user.AthleteId}/koms")
             ?? Enumerable.Empty<EffortViewModel>();
 
         _loaded = true;

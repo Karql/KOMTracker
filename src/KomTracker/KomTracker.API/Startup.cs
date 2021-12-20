@@ -165,8 +165,8 @@ public class Startup
                 Scopes = new Dictionary<string, string>
                 {
                     {
-                        KomTracker.Infrastructure.Identity.Constants.OAuth2.ScopeApi,
-                        KomTracker.Infrastructure.Identity.Constants.OAuth2.ScopeApi
+                        KomTracker.Infrastructure.Shared.Identity.Constants.OAuth2.ScopeApi,
+                        KomTracker.Infrastructure.Shared.Identity.Constants.OAuth2.ScopeApi
                     }
                 }
             };
@@ -189,7 +189,7 @@ public class Startup
         app.UseSwaggerUI(c =>
         {
             c.SwaggerEndpoint($"v1/swagger.json", AppName); // relative to swagger-ui (for reverse-proxy etc.)
-            c.OAuthClientId(KomTracker.Infrastructure.Identity.Constants.OAuth2.ClientId);
+            c.OAuthClientId(KomTracker.Infrastructure.Shared.Identity.Constants.OAuth2.ClientId);
             c.OAuthUsePkce();
         });
     }

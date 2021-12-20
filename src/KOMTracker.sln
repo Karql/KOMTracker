@@ -39,7 +39,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.Infrastructure.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.Application.Tests", "KomTracker\KomTracker.Application.Tests\KomTracker.Application.Tests.csproj", "{B2E7B75D-3A12-4DE1-8643-82359A9638C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomTracker.API.Shared", "KomTracker\KomTracker.API.Shared\KomTracker.API.Shared.csproj", "{62955CFB-030D-4223-95BC-EBAC1FB5069C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.API.Shared", "KomTracker\KomTracker.API.Shared\KomTracker.API.Shared.csproj", "{62955CFB-030D-4223-95BC-EBAC1FB5069C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomTracker.Infrastructure.Shared", "KomTracker\KomTracker.Infrastructure.Shared\KomTracker.Infrastructure.Shared.csproj", "{5F7427DF-E6A2-4647-89ED-957F49279224}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -99,6 +101,10 @@ Global
 		{62955CFB-030D-4223-95BC-EBAC1FB5069C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62955CFB-030D-4223-95BC-EBAC1FB5069C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62955CFB-030D-4223-95BC-EBAC1FB5069C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F7427DF-E6A2-4647-89ED-957F49279224}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F7427DF-E6A2-4647-89ED-957F49279224}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F7427DF-E6A2-4647-89ED-957F49279224}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F7427DF-E6A2-4647-89ED-957F49279224}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -117,6 +123,7 @@ Global
 		{4BF8135E-AA89-4059-BFFD-122C241BB196} = {39D474F2-075E-4219-97AF-AA40BC033D98}
 		{B2E7B75D-3A12-4DE1-8643-82359A9638C9} = {39D474F2-075E-4219-97AF-AA40BC033D98}
 		{62955CFB-030D-4223-95BC-EBAC1FB5069C} = {39D474F2-075E-4219-97AF-AA40BC033D98}
+		{5F7427DF-E6A2-4647-89ED-957F49279224} = {39D474F2-075E-4219-97AF-AA40BC033D98}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {24328D87-6D63-4EDE-938C-B1CD351245CD}

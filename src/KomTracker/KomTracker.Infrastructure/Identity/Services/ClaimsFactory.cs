@@ -1,5 +1,6 @@
 ﻿using IdentityModel;
 using KomTracker.Infrastructure.Identity.Entities;
+using KomTracker.Infrastructure.Shared.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System;

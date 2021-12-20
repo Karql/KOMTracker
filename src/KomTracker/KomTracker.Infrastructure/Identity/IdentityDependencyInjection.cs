@@ -18,7 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Utils.Helpers;
-using static KomTracker.Infrastructure.Identity.Constants;
+using static KomTracker.Infrastructure.Shared.Identity.Constants;
 
 namespace KomTracker.Infrastructure.Identity;
 

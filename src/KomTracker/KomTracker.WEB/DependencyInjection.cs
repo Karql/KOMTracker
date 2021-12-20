@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using KomTracker.WEB.Infrastructure.Services.Preference;
+using KomTracker.WEB.Infrastructure.Services.User;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
@@ -15,6 +16,7 @@ public static class DependencyInjection
         var services = builder.Services;
 
         services.AddScoped<IPreferenceService, PreferenceService>();
+        services.AddScoped<IUserService, UserService>();
 
         services.AddBlazoredLocalStorage();
 

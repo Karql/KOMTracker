@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KomTracker.API.Shared\KomTracker.API.Shared.csproj" />
+    <ProjectReference Include="..\KomTracker.Infrastructure.Shared\KomTracker.Infrastructure.Shared.csproj" />
   </ItemGroup>
 
 </Project>

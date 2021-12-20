@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static KomTracker.Infrastructure.Identity.Constants;
+using static KomTracker.Infrastructure.Shared.Identity.Constants;
 
 namespace KomTracker.Infrastructure.Identity.Endpoints;
 
