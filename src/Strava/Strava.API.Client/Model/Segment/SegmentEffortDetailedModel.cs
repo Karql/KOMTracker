@@ -68,13 +68,13 @@ public class SegmentEffortDetailedModel
     public bool DeviceWatts { get; set; }
 
     [JsonPropertyName("average_watts")]
-    public float AverageWatts { get; set; }
+    public float? AverageWatts { get; set; }
 
     [JsonPropertyName("average_heartrate")]
-    public float AverageHeartrate { get; set; }
+    public float? AverageHeartrate { get; set; }
 
     [JsonPropertyName("max_heartrate")]
-    public float MaxHeartrate { get; set; }
+    public float? MaxHeartrate { get; set; }
 
     [JsonPropertyName("pr_rank")]
     public int? PrRank { get; set; }
