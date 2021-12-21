@@ -44,3 +44,5 @@ services:
   kom-tracker-web:
     image: karql/kom-tracker-web:latest
     restart: always
+    volumes:
+      - ./conf/kom-tracker-web/appsettings.json:/app/appsettings.json

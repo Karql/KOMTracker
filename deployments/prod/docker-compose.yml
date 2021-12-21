@@ -9,7 +9,16 @@ services:
       StravaApiClientConfiguration__ClientID: ${STRAVA_API_CLIENT_ID}
       StravaApiClientConfiguration__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
       IdentityConfiguration__IdentityUrl: https://komtracker.karkula.pl/kom-tracker-api/identity
+      IdentityConfiguration__Authority: https://komtracker.karkula.pl/kom-tracker-api/identity
+      IdentityConfiguration__RequireHttpsMetadata: "true"
       IdentityConfiguration__RedirectUris__0: https://komtracker.karkula.pl
+      IdentityConfiguration__RedirectUris__1: https://localhost
+
+  kom-tracker-web:
+    image: karql/kom-tracker-web:prod
+    restart: always
+    volumes:
+      - ./conf/kom-tracker-web/appsettings.json:/app/appsettings.json
 
   postgres:
     image: postgres:14.0
