@@ -10,7 +10,8 @@ namespace KomTracker.WEB;
 
 public static class DependencyInjection
 {
-    private const string ClientName = "KomTracker.API";
+    private const string HttpClientName = "KomTracker.API";
+    private const string ConfigurationKey_IdentityCOnfiguration = "IdentityConfiguration";
     private const string ConfigurationKey_KomTrackerApiUrl = "KomTrackerApiUrl";
 
     public static WebAssemblyHostBuilder AddClientServices(this WebAssemblyHostBuilder builder)
@@ -32,16 +33,16 @@ public static class DependencyInjection
 
         services.AddOidcAuthentication(options =>
         {
-            builder.Configuration.Bind("IdentityConfiguration", options.ProviderOptions);
+            builder.Configuration.Bind(ConfigurationKey_IdentityCOnfiguration, options.ProviderOptions);
 
-            options.ProviderOptions.ResponseType = "code";
-            options.ProviderOptions.DefaultScopes.Add("openid");
-            options.ProviderOptions.DefaultScopes.Add("profile");
-            options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.ScopeApi);
-            options.ProviderOptions.DefaultScopes.Add("offline_access");
+            options.ProviderOptions.ResponseType = IdentityConstants.OAuth2.CodeFlow;
+            options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.Scopes.OpenId);
+            options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.Scopes.Profile);
+            options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.Scopes.Api);
+            options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.Scopes.OfflineAccess);
         });
 
-        services.AddHttpClient(ClientName, client =>
+        services.AddHttpClient(HttpClientName, client =>
         {
             client.BaseAddress = new Uri(komTrackerApiUrl);
         })
@@ -50,13 +51,13 @@ public static class DependencyInjection
             var handler = sp.GetService<AuthorizationMessageHandler>()!
             .ConfigureHandler(
                 authorizedUrls: new[] { komTrackerApiUrl },
-                scopes: new[] { IdentityConstants.OAuth2.ScopeApi }
+                scopes: new[] { IdentityConstants.OAuth2.Scopes.Api }
             );
 
             return handler;
         });
 
-        services.AddScoped(sp => sp.GetService<IHttpClientFactory>()!.CreateClient(ClientName));
+        services.AddScoped(sp => sp.GetService<IHttpClientFactory>()!.CreateClient(HttpClientName));
 
         services.AddMudServices();
 

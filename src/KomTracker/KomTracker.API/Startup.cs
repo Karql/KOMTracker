@@ -165,8 +165,8 @@ public class Startup
                 Scopes = new Dictionary<string, string>
                 {
                     {
-                        KomTracker.Infrastructure.Shared.Identity.Constants.OAuth2.ScopeApi,
-                        KomTracker.Infrastructure.Shared.Identity.Constants.OAuth2.ScopeApi
+                        KomTracker.Infrastructure.Shared.Identity.Constants.OAuth2.Scopes.Api,
+                        KomTracker.Infrastructure.Shared.Identity.Constants.OAuth2.Scopes.Api
                     }
                 }
             };

@@ -38,6 +38,14 @@ public static class Constants
     public static class OAuth2
     {
         public const string ClientId = "kom-tracker";
-        public const string ScopeApi = "api";
+        public const string ClientName = "KOM Tracker";
+        public const string CodeFlow = "code";
+        public static class Scopes
+        {
+            public const string OpenId = "openid";
+            public const string Profile = "profile";
+            public const string OfflineAccess = "offline_access";
+            public const string Api = "api";
+        }
     }
 }
