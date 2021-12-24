@@ -31,6 +31,13 @@ public class AthleteService : IAthleteService
             .IsAthleteExistsAsync(athleteId);
     }
 
+    public Task<AthleteEntity> GetAthleteAsync(int athleteId)
+    {
+        return _komUoW
+            .GetRepository<IAthleteRepository>()
+            .GetAthleteAsync(athleteId);
+    }
+
     public Task AddOrUpdateAthleteAsync(AthleteEntity athlete)
     {
         return _komUoW

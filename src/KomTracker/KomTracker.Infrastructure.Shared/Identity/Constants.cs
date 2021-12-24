@@ -33,6 +33,9 @@ public static class Constants
     public static class Claims
     {
         public const string AthleteId = "athlete_id";
+        public const string FirstName = "first_name";
+        public const string LastName = "last_name";
+        public const string Avatar = "avatar";
     }
 
     public static class OAuth2

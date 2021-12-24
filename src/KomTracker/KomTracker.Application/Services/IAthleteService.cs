@@ -11,13 +11,19 @@ namespace KomTracker.Application.Services;
 
 public interface IAthleteService
 {
+    /// <summary>
+    /// Check if athlete exists in DB
+    /// </summary>
     Task<bool> IsAthleteExistsAsync(int athleteId);
+
+    /// <summary>
+    /// Get athlete from DB
+    /// </summary>
+    Task<AthleteEntity> GetAthleteAsync(int athleteId);
 
     /// <summary>
     /// Add or update athlete in DB
     /// </summary>
-    /// <param name="athlete"></param>
-    /// <returns></returns>
     Task AddOrUpdateAthleteAsync(AthleteEntity athlete);
 
     /// <summary>
@@ -28,7 +34,6 @@ public interface IAthleteService
     /// <summary>
     /// Get all athletes from DB
     /// </summary>
-    /// <returns></returns>
     Task<IEnumerable<AthleteEntity>> GetAllAthletesAsync();
 
     /// <summary>

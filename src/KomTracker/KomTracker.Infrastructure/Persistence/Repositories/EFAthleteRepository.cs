@@ -17,6 +17,11 @@ public class EFAthleteRepository : EFRepositoryBase<KOMDBContext>, IAthleteRepos
         return await _context.Athlete.AnyAsync(x => x.AthleteId == athleteId);
     }
 
+    public async Task<AthleteEntity> GetAthleteAsync(int athleteId)
+    {
+        return await _context.Athlete.FirstOrDefaultAsync(x => x.AthleteId == athleteId);
+    }
+
     public Task AddOrUpdateAthleteAsync(AthleteEntity athlete)
     {
         return _context

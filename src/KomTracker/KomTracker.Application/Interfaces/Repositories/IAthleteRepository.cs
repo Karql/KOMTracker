@@ -11,6 +11,7 @@ namespace KomTracker.Application.Interfaces.Persistence.Repositories;
 public interface IAthleteRepository : IRepository
 {
     Task<bool> IsAthleteExistsAsync(int athleteId);
+    Task<AthleteEntity> GetAthleteAsync(int athleteId);
     Task AddOrUpdateAthleteAsync(AthleteEntity athlete);
     Task DeactivateAthleteAsync(int athleteId);
     Task<TokenEntity> GetTokenAsync(int athleteId);
