@@ -21,7 +21,10 @@ public class UserService : IUserService
 
         return new()
         {
-            AthleteId = Convert.ToInt32(user.FindFirst(IdentityConstants.Claims.AthleteId)?.Value)
+            AthleteId = Convert.ToInt32(user.FindFirst(IdentityConstants.Claims.AthleteId)?.Value),
+            FirstName = user.FindFirst(IdentityConstants.Claims.FirstName)?.Value!,
+            LastName = user.FindFirst(IdentityConstants.Claims.LastName)?.Value!,
+            Avatar = user.FindFirst(IdentityConstants.Claims.Avatar)?.Value!
         };
     }
 }
