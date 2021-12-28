@@ -12,6 +12,8 @@ public interface ISegmentService
 
     Task<IEnumerable<EffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId);
 
+    Task<IEnumerable<KomsSummaryEntity>> GetKomsSummariesAsync(int athleteId, DateTime dateFrom);
+
     ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualKomsEfforts, IEnumerable<SegmentEffortEntity> lastKomsEfforts);
 
     Task AddSegmentsIfNotExistsAsync(IEnumerable<SegmentEntity> segments);

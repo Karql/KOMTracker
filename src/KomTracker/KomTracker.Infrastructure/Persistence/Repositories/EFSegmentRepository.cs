@@ -6,6 +6,7 @@ using Utils.UnitOfWork.Concrete;
 using System.Linq;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Application.Models.Segment;
+using System;
 
 namespace KomTracker.Infrastructure.Persistence.Repositories;
 
@@ -46,6 +47,13 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
                 Segment = s
             }
         ).ToListAsync();
+    }
+
+    public async Task<IEnumerable<KomsSummaryEntity>> GetKomsSummariesAsync(int athleteId, DateTime dateFrom)
+    {
+        return await _context.KomsSummary
+            .Where(x => x.AthleteId == athleteId && x.TrackDate >= dateFrom)
+            .ToListAsync();
     }
 
     public async Task AddKomsSummaryAsync(KomsSummaryEntity komsSummary)

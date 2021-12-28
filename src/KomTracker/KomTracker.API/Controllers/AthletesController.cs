@@ -9,7 +9,7 @@ namespace KomTracker.API.Controllers;
 [ApiController]
 [BearerAuthorize()]
 public class AthletesController : BaseApiController<AthletesController>
-{ 
+{
     [HttpGet]
     [Route("{athleteId}/koms")]
     [SwaggerResponse(StatusCodes.Status200OK, type: typeof(IEnumerable<EffortViewModel>))]
@@ -18,5 +18,15 @@ public class AthletesController : BaseApiController<AthletesController>
         var koms = await _mediator.Send(new GetAllKomsQuery { AthleteId = athleteId });
 
         return Ok(_mapper.Map<IEnumerable<EffortViewModel>>(koms));
+    }
+
+    [HttpGet]
+    [Route("{athleteId}/summaries")]
+    [SwaggerResponse(StatusCodes.Status200OK, type: typeof(IEnumerable<KomsSummaryViewModel>))]
+    public async Task<IActionResult> GetSummaries([FromRoute]int athleteId)
+    {
+        var komsSummaries = await _mediator.Send(new GetKomsSummariesQuery { AthleteId = athleteId });
+
+        return Ok(_mapper.Map<IEnumerable<KomsSummaryViewModel>>(komsSummaries));
     }
 }

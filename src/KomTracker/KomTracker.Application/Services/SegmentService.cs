@@ -45,6 +45,14 @@ public class SegmentService : ISegmentService
             ?? Enumerable.Empty<EffortModel>();
     }
 
+    public async Task<IEnumerable<KomsSummaryEntity>> GetKomsSummariesAsync(int athleteId, DateTime dateFrom)
+    {
+        return (await _komUoW
+            .GetRepository<ISegmentRepository>()
+            .GetKomsSummariesAsync(athleteId, dateFrom))
+            ?? Enumerable.Empty<KomsSummaryEntity>();
+    }
+
     public ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualKomsEfforts, IEnumerable<SegmentEffortEntity> lastKomsEfforts)
     {
         var comparedEfforts = new ComparedEffortsModel();

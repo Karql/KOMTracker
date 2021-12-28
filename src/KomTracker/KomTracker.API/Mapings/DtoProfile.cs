@@ -13,5 +13,6 @@ public class DtoProfile : Profile
         CreateMap<SegmentEntity, SegmentViewModel>();
         CreateMap<KomsSummarySegmentEffortEntity, SummarySegmentEffortViewModel>();
         CreateMap<EffortModel, EffortViewModel>();
+        CreateMap<KomsSummaryEntity, KomsSummaryViewModel>();
     }
 }
