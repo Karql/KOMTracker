@@ -31,4 +31,27 @@
             </div>
         </MudPaper>
     </MudItem>
+
+    <MudItem xs="12">
+        <MudPaper  Class="pa-4" >
+            <PlotlyChart @bind-Config="config" @bind-Layout="layout" @bind-Data="data" @ref="chart"/>
+        </MudPaper>
+    </MudItem>
 </MudGrid>
+
+@code {
+    PlotlyChart chart;
+    Config config = new Config() { Responsive = true, StaticPlot = true };
+    Layout layout = new Layout();
+    // Using of the interface IList is important for the event callback!
+    IList<ITrace> data = new List<ITrace>
+    {
+        new Scatter
+        {
+            Name = "ScatterTrace",
+            Mode = Plotly.Blazor.Traces.ScatterLib.ModeFlag.Lines | Plotly.Blazor.Traces.ScatterLib.ModeFlag.Markers,
+            X = new List<object>{"2021-11-26", "2021-12-02", "2021-12-03", "2021-12-04", "2021-12-05", "2021-12-06"},
+            Y = new List<object>{590, 591, 593, 597, 599, 600}
+        }
+    };
+}
