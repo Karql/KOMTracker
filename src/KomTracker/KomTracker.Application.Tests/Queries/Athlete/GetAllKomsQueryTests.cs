@@ -1,0 +1,45 @@
+﻿using FluentAssertions;
+using KomTracker.Application.Models.Segment;
+using KomTracker.Application.Queries.Athlete;
+using KomTracker.Application.Services;
+using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace KomTracker.Application.Tests.Queries.Athlete;
+
+public class GetAllKomsQueryTests
+{
+    private const int TestAthleteId = 1;
+
+    private readonly ISegmentService _segmentService;
+    private readonly CancellationToken _cancellationToken;
+    private readonly GetAllKomsQueryHandler _getAllKomsQueryHandler;
+
+    public GetAllKomsQueryTests()
+    {
+        _segmentService = Substitute.For<ISegmentService>();
+        _cancellationToken = new CancellationTokenSource().Token;
+
+        _getAllKomsQueryHandler = new GetAllKomsQueryHandler(_segmentService);
+    }
+
+    [Fact]
+    public async Task Get_all_koms_query_call_segment_service()
+    {
+        // Arrange
+        var efforts = new EffortModel[10];
+        _segmentService.GetLastKomsSummaryEffortsAsync(TestAthleteId).Returns(efforts);
+
+        // Act
+        var res = await _getAllKomsQueryHandler.Handle(new GetAllKomsQuery { AthleteId = TestAthleteId }, _cancellationToken);
+
+        // Assert
+        res.Should().BeEquivalentTo(efforts);
+    }
+}
