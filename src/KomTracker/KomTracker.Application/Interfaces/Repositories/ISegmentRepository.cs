@@ -14,6 +14,8 @@ public interface ISegmentRepository : IRepository
 
     Task<IEnumerable<EffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId);
 
+    Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(int athleteId, DateTime dateFrom);
+
     Task<IEnumerable<KomsSummaryEntity>> GetKomsSummariesAsync(int athleteId, DateTime dateFrom);
 
     Task AddKomsSummaryAsync(KomsSummaryEntity komsSummary);

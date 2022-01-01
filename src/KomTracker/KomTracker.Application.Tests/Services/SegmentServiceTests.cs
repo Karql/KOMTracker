@@ -128,6 +128,83 @@ public class SegmentServiceTests
     }
     #endregion
 
+    #region Get last koms changes
+    [Fact]
+    public async Task Get_last_koms_changes_calls_repo()
+    {
+        // Arrange
+        var dateFrom = DateTime.Today;
+        var fixture = GetTestFixture();
+        var lastChanges = fixture.CreateMany<EffortModel>(2);
+        _segmentRepository.GetLastKomsChangesAsync(TestAthleteId, dateFrom).Returns(lastChanges);
+
+        // Act
+        var res = await _segmentService.GetLastKomsChangesAsync(TestAthleteId, dateFrom);
+
+        // Assert
+        res.Should().BeEquivalentTo(lastChanges);
+    }
+
+    [Fact]
+    public async Task Get_last_koms_changes_returns_empty_list_when_no_data_in_db()
+    {
+        // Arrange
+        var dateFrom = DateTime.Today;
+        _segmentRepository.GetLastKomsChangesAsync(TestAthleteId, dateFrom).Returns((IEnumerable<EffortModel>)null);
+
+        // Act
+        var res = await _segmentService.GetLastKomsChangesAsync(TestAthleteId, dateFrom);
+
+        // Assert
+        res.Should().NotBeNull();
+        res.Any().Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Get_last_koms_changes_returns_last_change_per_segment()
+    {
+        // Arrange
+        var dateFrom = DateTime.Today;
+        var lastChanges = new EffortModel[]
+        {
+            new EffortModel
+            {
+                SegmentEffort = new() { SegmentId = 1, StartDate = DateTime.Today.AddMinutes(20) },
+                SummarySegmentEffort = new() { }
+            },
+            new EffortModel
+            {
+                SegmentEffort = new() { SegmentId = 1, StartDate = DateTime.Today.AddMinutes(15) },
+                SummarySegmentEffort = new() { }
+            },
+            new EffortModel
+            {
+                SegmentEffort = new() { SegmentId = 2, StartDate = DateTime.Today.AddMinutes(10) },
+                SummarySegmentEffort = new() { }
+            },
+            new EffortModel
+            {
+                SegmentEffort = new() { SegmentId = 2, StartDate = DateTime.Today.AddMinutes(15) },
+                SummarySegmentEffort = new() { }
+            },
+        };
+
+        _segmentRepository.GetLastKomsChangesAsync(TestAthleteId, dateFrom).Returns(lastChanges);
+
+        var expectedChanges = new EffortModel[]
+        {
+            lastChanges[0],
+            lastChanges[3]
+        };
+
+        // Act
+        var res = await _segmentService.GetLastKomsChangesAsync(TestAthleteId, dateFrom);
+
+        // Assert
+        res.Should().BeEquivalentTo(expectedChanges);
+    }
+    #endregion
+
     #region Compare efforts
     [Fact]
     public void Compare_efforts_returns_correct_compared_model()

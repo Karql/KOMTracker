@@ -29,6 +29,7 @@ public class GetAllKomsQueryTests
         _getAllKomsQueryHandler = new GetAllKomsQueryHandler(_segmentService);
     }
 
+    #region GetLastKomsSummaryEffortsAsync
     [Fact]
     public async Task Get_all_koms_query_call_segment_service()
     {
@@ -42,4 +43,5 @@ public class GetAllKomsQueryTests
         // Assert
         res.Should().BeEquivalentTo(efforts);
     }
+    #endregion
 }

@@ -45,6 +45,18 @@ public class SegmentService : ISegmentService
             ?? Enumerable.Empty<EffortModel>();
     }
 
+    public async Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(int athleteId, DateTime dateFrom)
+    {
+        var changes = (await _komUoW
+            .GetRepository<ISegmentRepository>()
+            .GetLastKomsChangesAsync(athleteId, dateFrom))
+            ?? Enumerable.Empty<EffortModel>();
+
+        return changes.GroupBy(x => x.SegmentEffort.SegmentId)
+            .Select(x => x.OrderByDescending(x => x.SegmentEffort.StartDate).First())
+            .ToList();
+    }
+
     public async Task<IEnumerable<KomsSummaryEntity>> GetKomsSummariesAsync(int athleteId, DateTime dateFrom)
     {
         return (await _komUoW
