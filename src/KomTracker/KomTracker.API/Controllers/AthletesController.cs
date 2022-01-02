@@ -21,6 +21,16 @@ public class AthletesController : BaseApiController<AthletesController>
     }
 
     [HttpGet]
+    [Route("{athleteId}/koms-changes")]
+    [SwaggerResponse(StatusCodes.Status200OK, type: typeof(IEnumerable<EffortViewModel>))]
+    public async Task<IActionResult> GetLastKomsChangesAsync(int athleteId)
+    {
+        var koms = await _mediator.Send(new GetLastKomsChangesQuery { AthleteId = athleteId });
+
+        return Ok(_mapper.Map<IEnumerable<EffortViewModel>>(koms));
+    }
+
+    [HttpGet]
     [Route("{athleteId}/summaries")]
     [SwaggerResponse(StatusCodes.Status200OK, type: typeof(IEnumerable<KomsSummaryViewModel>))]
     public async Task<IActionResult> GetSummaries([FromRoute]int athleteId)

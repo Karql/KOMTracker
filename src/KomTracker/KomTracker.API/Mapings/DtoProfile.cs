@@ -11,7 +11,7 @@ public class DtoProfile : Profile
     {
         CreateMap<SegmentEffortEntity, SegmentEffortViewModel>();
         CreateMap<SegmentEntity, SegmentViewModel>();
-        CreateMap<KomsSummarySegmentEffortEntity, SummarySegmentEffortViewModel>();
+        CreateMap<KomsSummarySegmentEffortEntity, KomsSummarySegmentEffortViewModel>();
         CreateMap<EffortModel, EffortViewModel>();
         CreateMap<KomsSummaryEntity, KomsSummaryViewModel>();
     }
