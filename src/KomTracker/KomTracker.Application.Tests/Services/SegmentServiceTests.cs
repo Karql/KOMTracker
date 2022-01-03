@@ -26,6 +26,7 @@ using Utils.UnitOfWork.Abstract;
 using Xunit;
 using Utils.Tests.Extensions;
 using IStravaAthleteService = KomTracker.Application.Interfaces.Services.Strava.IAthleteService;
+using KomTracker.Application.Tests.Common;
 
 namespace KomTracker.Application.Tests.Infrastructure.Services;
 
@@ -34,15 +35,6 @@ public class SegmentServiceTests
     #region TestData
     private const int TestAthleteId = 1;
     private const string TestToken = "token123";
-
-    private Fixture GetTestFixture()
-    {
-        var fixture = new Fixture();
-
-        fixture.Customize<SegmentEffortEntity>(x => x.Without(p => p.KomSummaries));
-
-        return fixture;
-    }
     #endregion
 
     private readonly IKOMUnitOfWork _komUoW;
@@ -70,7 +62,7 @@ public class SegmentServiceTests
     public async Task Get_actual_koms_calls_strava_service()
     {
         // Arange
-        var fixture = GetTestFixture();
+        var fixture = FixtureHelper.GetTestFixture();
         var koms = fixture.CreateMany<(SegmentEffortEntity, SegmentEntity)>(2);
 
         _stravaAthleteService.GetAthleteKomsAsync(TestAthleteId, TestToken).Returns(Result.Ok(koms));
@@ -102,7 +94,7 @@ public class SegmentServiceTests
     public async Task Get_last_koms_summary_efforts_calls_repo()
     {
         // Arrange
-        var fixture = GetTestFixture();
+        var fixture = FixtureHelper.GetTestFixture();
         var lastEfforts = fixture.CreateMany<EffortModel>(2);
         _segmentRepository.GetLastKomsSummaryEffortsAsync(TestAthleteId).Returns(lastEfforts);
 
@@ -134,7 +126,7 @@ public class SegmentServiceTests
     {
         // Arrange
         var dateFrom = DateTime.Today;
-        var fixture = GetTestFixture();
+        var fixture = FixtureHelper.GetTestFixture();
         var lastChanges = fixture.CreateMany<EffortModel>(2);
         _segmentRepository.GetLastKomsChangesAsync(TestAthleteId, dateFrom).Returns(lastChanges);
 

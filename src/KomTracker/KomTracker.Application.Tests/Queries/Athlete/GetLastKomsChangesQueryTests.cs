@@ -15,20 +15,20 @@ using Xunit;
 
 namespace KomTracker.Application.Tests.Queries.Athlete;
 
-public class GetAllKomsQueryTests
+public class GetLastKomsChangesQueryTests
 {
     private const int TestAthleteId = 1;
 
     private readonly ISegmentService _segmentService;
     private readonly CancellationToken _cancellationToken;
-    private readonly GetAllKomsQueryHandler _getAllKomsQueryHandler;
+    private readonly GetLastKomsChangesQueryHandler _getLastKomsChangesQueryHandler;
 
-    public GetAllKomsQueryTests()
+    public GetLastKomsChangesQueryTests()
     {
         _segmentService = Substitute.For<ISegmentService>();
         _cancellationToken = new CancellationTokenSource().Token;
 
-        _getAllKomsQueryHandler = new GetAllKomsQueryHandler(_segmentService);
+        _getLastKomsChangesQueryHandler = new GetLastKomsChangesQueryHandler(_segmentService);
     }
 
     [Fact]
@@ -36,11 +36,12 @@ public class GetAllKomsQueryTests
     {
         // Arrange
         var fixture = FixtureHelper.GetTestFixture();
+        var dateFrom = DateTime.Today;
         var efforts = fixture.CreateMany<EffortModel>(5);
-        _segmentService.GetLastKomsSummaryEffortsAsync(TestAthleteId).Returns(efforts);
+        _segmentService.GetLastKomsChangesAsync(TestAthleteId, dateFrom).Returns(efforts);
 
         // Act
-        var res = await _getAllKomsQueryHandler.Handle(new GetAllKomsQuery { AthleteId = TestAthleteId }, _cancellationToken);
+        var res = await _getLastKomsChangesQueryHandler.Handle(new GetLastKomsChangesQuery { AthleteId = TestAthleteId, DateFrom = dateFrom }, _cancellationToken);
 
         // Assert
         res.Should().BeEquivalentTo(efforts);
