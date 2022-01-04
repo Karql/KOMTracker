@@ -1,45 +1,50 @@
 ﻿@page "/"
 @attribute [Authorize]
-@*
-<MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">Dashboard</MudText>*@
 
-<MudGrid>
-    <MudItem xs="12" sm="4">
-        <MudPaper  Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
-            <MudIcon Icon="@Icons.Material.Filled.Functions" Color="Color.Primary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
-            <div>
-                <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">Total KOMs</MudText>
-                <MudText Typo="Typo.h5">600</MudText>
-            </div>
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12" sm="4">
-        <MudPaper  Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
-            <MudIcon Icon="@Icons.Material.Filled.Add" Color="Color.Success" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
-            <div>
-                <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1"><MudTooltip Text="In last 30 days">New KOMs</MudTooltip></MudText>
-                <MudText Typo="Typo.h5">10</MudText>
-            </div>
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12" sm="4">
-        <MudPaper  Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
-            <MudIcon Icon="@Icons.Material.Filled.Remove" Color="Color.Error" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
-            <div>
-                <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1"><MudTooltip Text="In last 30 days">Lost KOMs</MudTooltip></MudText>
-                <MudText Typo="Typo.h5">5</MudText>
-            </div>
-        </MudPaper>
-    </MudItem>
+@if (!_loaded)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudPaper  Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
+                <MudIcon Icon="@Icons.Material.Filled.Functions" Color="Color.Primary" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
+                <div>
+                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">Total KOMs</MudText>
+                    <MudText Typo="Typo.h5">600</MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudPaper  Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
+                <MudIcon Icon="@Icons.Material.Filled.Add" Color="Color.Success" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
+                <div>
+                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1"><MudTooltip Text="In last 30 days">New KOMs</MudTooltip></MudText>
+                    <MudText Typo="Typo.h5">@_newKoms</MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudPaper  Class="d-flex flex-row pt-6 pb-4" Style="height:100px;">
+                <MudIcon Icon="@Icons.Material.Filled.Remove" Color="Color.Error" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
+                <div>
+                    <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1"><MudTooltip Text="In last 30 days">Lost KOMs</MudTooltip></MudText>
+                    <MudText Typo="Typo.h5">@_lostKoms</MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
 
-    <MudItem xs="12">
-        <MudPaper  Class="pa-4" >
-            <PlotlyChart @bind-Config="config" @bind-Layout="layout" @bind-Data="data" @ref="chart"/>
-        </MudPaper>
-    </MudItem>
-</MudGrid>
+    @*    <MudItem xs="12">
+            <MudPaper  Class="pa-4" >
+                <PlotlyChart @bind-Config="config" @bind-Layout="layout" @bind-Data="data" @ref="chart"/>
+            </MudPaper>
+        </MudItem>*@
+    </MudGrid>
+}
 
-@code {
+@*@code {
     PlotlyChart chart;
     Config config = new Config() { Responsive = true, StaticPlot = true };
     Layout layout = new Layout();
@@ -54,4 +59,4 @@
             Y = new List<object>{590, 591, 593, 597, 599, 600}
         }
     };
-}
+}*@

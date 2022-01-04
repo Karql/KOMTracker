@@ -21,6 +21,7 @@ public partial class Koms
 
     [Inject]
     private IUserService UserService { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         _user = await UserService.GetCurrentUser();
