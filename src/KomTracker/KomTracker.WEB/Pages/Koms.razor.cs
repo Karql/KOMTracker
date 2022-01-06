@@ -26,10 +26,15 @@ public partial class Koms
     {
         _user = await UserService.GetCurrentUser();
 
-        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{_user.AthleteId}/koms")
-            ?? Enumerable.Empty<EffortViewModel>();
+        await GetAllKoms();
 
         _loaded = true;
+    }
+
+    private async Task GetAllKoms()
+    {
+        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{_user.AthleteId}/koms")
+            ?? Enumerable.Empty<EffortViewModel>();
     }
 
     private bool Search(EffortViewModel kom)
