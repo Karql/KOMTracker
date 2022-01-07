@@ -1,6 +1,7 @@
 ﻿using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.WEB.Infrastructure.Services.User;
 using KomTracker.WEB.Models.User;
+using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 using System.Net.Http.Json;
@@ -16,6 +17,9 @@ public partial class Koms
     private IEnumerable<EffortViewModel> _koms = Enumerable.Empty<EffortViewModel>();
     private EffortViewModel _kom;
 
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
+
     [Inject]
     private HttpClient Http { get; set; } = default!;
 
@@ -24,6 +28,11 @@ public partial class Koms
 
     protected override async Task OnInitializedAsync()
     {
+        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Koms", href: "/koms"),
+        };
+
         _user = await UserService.GetCurrentUser();
 
         await GetAllKoms();

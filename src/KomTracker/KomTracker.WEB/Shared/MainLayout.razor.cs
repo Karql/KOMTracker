@@ -19,6 +19,8 @@ public partial class MainLayout
     [Inject]
     private IUserService UserService { get; set; } = default!;
 
+    public List<BreadcrumbItem> BreadCrumbs = new List<BreadcrumbItem>();
+
     protected override async Task OnInitializedAsync()
     {
         _currentTheme = await PreferenceService.GetCurrentThemeAsync();
@@ -29,11 +31,6 @@ public partial class MainLayout
     {
         _drawerOpen = !_drawerOpen;
     }
-
-    private List<BreadcrumbItem> _items = new List<BreadcrumbItem>
-    {
-        new BreadcrumbItem("Koms", href: "#"),
-    };
 
     private async Task ToggleDarkModeAsync()
     {

@@ -1,7 +1,9 @@
 ﻿using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.WEB.Infrastructure.Services.User;
 using KomTracker.WEB.Models.User;
+using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using System.Net.Http.Json;
 
 namespace KomTracker.WEB.Pages;
@@ -17,6 +19,9 @@ public partial class Dashboard
     private int _newKoms = 0;
     private int _lostKoms = 0;
 
+    [CascadingParameter]
+    public MainLayout Layout { get; set; }
+
     [Inject]
     private HttpClient Http { get; set; } = default!;
 
@@ -25,6 +30,11 @@ public partial class Dashboard
 
     protected override async Task OnInitializedAsync()
     {
+        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Dashboard", href: ""),
+        };
+
         _user = await UserService.GetCurrentUser();
 
         await Task.WhenAll(
