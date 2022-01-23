@@ -7,14 +7,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{1B65C037
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils.Tests", "Utils\Utils.Tests\Utils.Tests.csproj", "{EE3FB89B-3760-4408-830A-B7599F8ACF99}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentResults.Extensions.FluentAssertions", "Utils\FluentResults.Extensions.FluentAssertions\FluentResults.Extensions.FluentAssertions.csproj", "{C41C5176-2F8A-426F-B4EA-11308F2EE12E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Utils", "Utils\Utils\Utils.csproj", "{188F3572-62E2-46F0-A751-E41F760A88CD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29652677-6AFE-4786-A5D9-6611495347B3}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		..\DEV.md = ..\DEV.md
 		..\NOTES.md = ..\NOTES.md
+		..\README.md = ..\README.md
+		..\TODO.md = ..\TODO.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Strava", "Strava", "{89778B61-FF5E-4D02-BB44-64AFC1885233}"
@@ -41,7 +42,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.Application.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.API.Shared", "KomTracker\KomTracker.API.Shared\KomTracker.API.Shared.csproj", "{62955CFB-030D-4223-95BC-EBAC1FB5069C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomTracker.Infrastructure.Shared", "KomTracker\KomTracker.Infrastructure.Shared\KomTracker.Infrastructure.Shared.csproj", "{5F7427DF-E6A2-4647-89ED-957F49279224}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.Infrastructure.Shared", "KomTracker\KomTracker.Infrastructure.Shared\KomTracker.Infrastructure.Shared.csproj", "{5F7427DF-E6A2-4647-89ED-957F49279224}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,10 +54,6 @@ Global
 		{EE3FB89B-3760-4408-830A-B7599F8ACF99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE3FB89B-3760-4408-830A-B7599F8ACF99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE3FB89B-3760-4408-830A-B7599F8ACF99}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C41C5176-2F8A-426F-B4EA-11308F2EE12E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C41C5176-2F8A-426F-B4EA-11308F2EE12E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C41C5176-2F8A-426F-B4EA-11308F2EE12E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C41C5176-2F8A-426F-B4EA-11308F2EE12E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{188F3572-62E2-46F0-A751-E41F760A88CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{188F3572-62E2-46F0-A751-E41F760A88CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{188F3572-62E2-46F0-A751-E41F760A88CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -111,7 +108,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EE3FB89B-3760-4408-830A-B7599F8ACF99} = {1B65C037-2265-4E75-9128-91AB5DA7EF35}
-		{C41C5176-2F8A-426F-B4EA-11308F2EE12E} = {1B65C037-2265-4E75-9128-91AB5DA7EF35}
 		{188F3572-62E2-46F0-A751-E41F760A88CD} = {1B65C037-2265-4E75-9128-91AB5DA7EF35}
 		{EF365787-6B29-4D59-8471-9D6E2D52BCBA} = {89778B61-FF5E-4D02-BB44-64AFC1885233}
 		{E9180B09-9E0F-4D0D-BE8F-F762C9EB7EF8} = {89778B61-FF5E-4D02-BB44-64AFC1885233}
