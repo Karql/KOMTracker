@@ -24,14 +24,17 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
     public async Task<ActionResult> Test(string token)
     {
         var athleteApi = _serviceProvider.GetRequiredService<IAthleteApi>();
+        var segmentApi = _serviceProvider.GetRequiredService<ISegmentApi>();
         var stravaAthleteService = _serviceProvider.GetRequiredService<IStravaAthleteService>();
 
         //var res = await athleteApi.GetKomsAsync(2394302, token);
         //var res = await athleteService.GetAthleteKomsAsync(2394302, token);
 
-        var cancellationTokenSource = new CancellationTokenSource();
+        var res = await segmentApi.GetSegmentAsync(30393774, token);
 
-        await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
+        //var cancellationTokenSource = new CancellationTokenSource();
+
+        //await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
 
         return new NoContentResult();
     }
