@@ -19,25 +19,32 @@ public static class SegmentSummaryModelExtensions
     public static string ToJson(this SegmentSummaryModel model)
     {
         return @$"{{
-                ""resource_state"": {(int)model.ResourceState},
-                ""id"": {model.Id},
-                ""name"": ""{model.Name}"",
-                ""activity_type"": ""{model.ActivityType}"",
-                ""distance"": {model.Distance},
-                ""average_grade"": {model.AverageGrade},
-                ""maximum_grade"": {model.MaximumGrade},
-                ""elevation_high"": {model.ElevationHigh},
-                ""elevation_low"": {model.ElevationLow},
-                ""start_latitude"": {model.StartLatitude},
-                ""start_longitude"": {model.StartLongitude},
-                ""end_latitude"": {model.EndLatitude},
-                ""end_longitude"": {model.EndLongitude},
-                ""climb_category"": {model.ClimbCategory},
-                ""city"": ""{model.City}"",
-                ""country"": ""{model.Country}"",
-                ""private"": {model.Private.ToLowerString()},
-                ""hazardous"": {model.Hazardous.ToLowerString()},
-                ""starred"": {model.Starred.ToLowerString()}
-            }}";
+            {GetPropertiesJson(model)}
+        }}";
+    }
+
+    internal static string GetPropertiesJson(SegmentSummaryModel model)
+    {
+        return @$"
+            ""resource_state"": {(int)model.ResourceState},
+            ""id"": {model.Id},
+            ""name"": ""{model.Name}"",
+            ""activity_type"": ""{model.ActivityType}"",
+            ""distance"": {model.Distance},
+            ""average_grade"": {model.AverageGrade},
+            ""maximum_grade"": {model.MaximumGrade},
+            ""elevation_high"": {model.ElevationHigh},
+            ""elevation_low"": {model.ElevationLow},
+            ""start_latitude"": {model.StartLatitude},
+            ""start_longitude"": {model.StartLongitude},
+            ""end_latitude"": {model.EndLatitude},
+            ""end_longitude"": {model.EndLongitude},
+            ""climb_category"": {model.ClimbCategory},
+            ""city"": ""{model.City}"",
+            ""country"": ""{model.Country}"",
+            ""private"": {model.Private.ToLowerString()},
+            ""hazardous"": {model.Hazardous.ToLowerString()},
+            ""starred"": {model.Starred.ToLowerString()}
+        ";
     }
 }
