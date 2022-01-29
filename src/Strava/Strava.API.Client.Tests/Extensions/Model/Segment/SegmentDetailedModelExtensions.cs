@@ -25,7 +25,7 @@ public static class SegmentDetailedModelExtensions
             ""total_elevation_gain"": {model.TotalElevationGain},
             ""effort_count"": {model.EffortCount},
             ""athlete_count"": {model.AthleteCount},
-            ""star_count"": {model.StarCount},
+            ""star_count"": {model.StarCount}
         }}";
     }
 }
