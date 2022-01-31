@@ -30,7 +30,8 @@ public class SegmentApiTests
     #region TestData
     private const int TEST_SEGMENT_ID = 1;
     private const int TEST_SEGMENT_NOT_EXISTS_ID = 404;
-    private const string TEST_VALID_TOKEN = "token123";
+    private const string TEST_TOKEN_VALID = "token123";
+    private const string TEST_TOKEN_INVALID = "tokeninvalid123";
     #endregion
 
     public SegmentApiTests(ITestLogger<SegmentApi> logger)
@@ -51,11 +52,11 @@ public class SegmentApiTests
         var expectedSegment = fixture.Create<SegmentDetailedModel>();
 
         _mockHttp.Expect(HttpMethod.Get, GetSegmentUrl(TEST_SEGMENT_ID))
-            .WithHeaders("Authorization", $"Bearer {TEST_VALID_TOKEN}")
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_VALID}")
             .Respond(HttpStatusCode.OK, MediaTypeNames.Application.Json, expectedSegment.ToJson());
 
         // Act
-        var res = await _segmentApi.GetSegmentAsync(TEST_SEGMENT_ID, TEST_VALID_TOKEN);
+        var res = await _segmentApi.GetSegmentAsync(TEST_SEGMENT_ID, TEST_TOKEN_VALID);
 
         // Assert
         res.Should().BeSuccess();
@@ -71,11 +72,11 @@ public class SegmentApiTests
     {
         // Arrange
         _mockHttp.Expect(HttpMethod.Get, GetSegmentUrl(TEST_SEGMENT_NOT_EXISTS_ID))
-            .WithHeaders("Authorization", $"Bearer {TEST_VALID_TOKEN}")
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_VALID}")
             .Respond(HttpStatusCode.NotFound);
 
         // Act
-        var res = await _segmentApi.GetSegmentAsync(TEST_SEGMENT_NOT_EXISTS_ID, TEST_VALID_TOKEN);
+        var res = await _segmentApi.GetSegmentAsync(TEST_SEGMENT_NOT_EXISTS_ID, TEST_TOKEN_VALID);
 
         // Assert
         res.Should().BeFailure();
@@ -83,6 +84,25 @@ public class SegmentApiTests
 
         _mockHttp.VerifyNoOutstandingExpectation();
         _logger.CheckLogWarning("Not found!");
+    }
+
+    [Fact]
+    public async Task Get_segment_returns_unauthorized_on_401()
+    {
+        // Arrange
+        _mockHttp.Expect(HttpMethod.Get, GetSegmentUrl(TEST_SEGMENT_ID))
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_INVALID}")
+            .Respond(HttpStatusCode.Unauthorized);
+
+        // Act
+        var res = await _segmentApi.GetSegmentAsync(TEST_SEGMENT_ID, TEST_TOKEN_INVALID);
+
+        // Assert
+        res.Should().BeFailure();
+        res.HasError<GetSegmentError>(x => x.Message == GetSegmentError.Unauthorized).Should().BeTrue();
+
+        _mockHttp.VerifyNoOutstandingExpectation();
+        _logger.CheckLogWarning("Unauthorized!");
     }
 
     private string GetSegmentUrl(long segmentId)

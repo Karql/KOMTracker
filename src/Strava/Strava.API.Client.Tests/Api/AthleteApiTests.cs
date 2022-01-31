@@ -30,8 +30,8 @@ public class AthleteApiTests
 
     #region TestData
     private const int TEST_ATHLETE_ID = 666;
-    private const string TEST_VALID_TOKEN = "token123";
-    private const string TEST_INVALID_TOKEN = "tokeninvalid123";
+    private const string TEST_TOKEN_VALID = "token123";
+    private const string TEST_TOKEN_INVALID = "tokeninvalid123";
     #endregion
 
     public AthleteApiTests(ITestLogger<AthleteApi> logger)
@@ -61,7 +61,7 @@ public class AthleteApiTests
             var pageEfforts = fixture.CreateMany<SegmentEffortDetailedModel>(5);
 
             _mockHttp.Expect(HttpMethod.Get, GetKomsUrl(pageNumber))
-                .WithHeaders("Authorization", $"Bearer {TEST_VALID_TOKEN}")
+                .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_VALID}")
                 .Respond(HttpStatusCode.OK, MediaTypeNames.Application.Json, pageEfforts.ToJson());
 
             expectedEfforts.AddRange(pageEfforts);
@@ -69,11 +69,11 @@ public class AthleteApiTests
 
         // empty page at the end
         _mockHttp.Expect(HttpMethod.Get, GetKomsUrl(pageCount + 1))
-            .WithHeaders("Authorization", $"Bearer {TEST_VALID_TOKEN}")
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_VALID}")
             .Respond(HttpStatusCode.OK, MediaTypeNames.Application.Json, Enumerable.Empty<SegmentEffortDetailedModel>().ToJson());
 
         // Act
-        var res = await _athleteApi.GetKomsAsync(TEST_ATHLETE_ID, TEST_VALID_TOKEN);
+        var res = await _athleteApi.GetKomsAsync(TEST_ATHLETE_ID, TEST_TOKEN_VALID);
 
         // Assert
         res.Should().BeSuccess();
@@ -106,7 +106,7 @@ public class AthleteApiTests
             .Respond(HttpStatusCode.BadRequest);
 
         // Act
-        var res = await _athleteApi.GetKomsAsync(TEST_ATHLETE_ID, TEST_VALID_TOKEN);
+        var res = await _athleteApi.GetKomsAsync(TEST_ATHLETE_ID, TEST_TOKEN_VALID);
 
         // Assert
         res.Should().BeFailure();
@@ -119,11 +119,11 @@ public class AthleteApiTests
     {
         // Arrange
         _mockHttp.Expect(HttpMethod.Get, GetKomsUrl(1))
-            .WithHeaders("Authorization", $"Bearer {TEST_INVALID_TOKEN}")
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_INVALID}")
             .Respond(HttpStatusCode.Unauthorized);
 
         // Act
-        var res = await _athleteApi.GetKomsAsync(TEST_ATHLETE_ID, TEST_INVALID_TOKEN);
+        var res = await _athleteApi.GetKomsAsync(TEST_ATHLETE_ID, TEST_TOKEN_INVALID);
 
         // Arrange
         res.Should().BeFailure();
@@ -139,7 +139,7 @@ public class AthleteApiTests
             .Throw(new Exception("Something went wrong"));
 
         // Act
-        Func<Task> action = () => _athleteApi.GetKomsAsync(TEST_ATHLETE_ID, TEST_VALID_TOKEN);
+        Func<Task> action = () => _athleteApi.GetKomsAsync(TEST_ATHLETE_ID, TEST_TOKEN_VALID);
 
         // Assert
         await action.Should().ThrowAsync<Exception>();
