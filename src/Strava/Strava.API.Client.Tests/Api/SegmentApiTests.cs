@@ -105,6 +105,21 @@ public class SegmentApiTests
         _logger.CheckLogWarning("Unauthorized!");
     }
 
+    [Fact]
+    public async Task Get_segment_throws_exception_when_something_went_wrong()
+    {
+        // Arrange
+        _mockHttp.Expect(HttpMethod.Get, GetSegmentUrl(TEST_SEGMENT_ID))
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_VALID}")
+            .Throw(new Exception("Something went wrong"));
+
+        // Act
+        Func<Task> action = () => _segmentApi.GetSegmentAsync(TEST_SEGMENT_ID, TEST_TOKEN_VALID);
+
+        // Assert
+        await action.Should().ThrowAsync<Exception>();
+    }
+
     private string GetSegmentUrl(long segmentId)
     {
         return $"https://www.strava.com/api/v3/segments/{segmentId}";
