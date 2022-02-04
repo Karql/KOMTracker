@@ -48,7 +48,7 @@ public class AthleteApiTests
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
-    public async Task Get_koms_iterate_through_all_pages_and_return_list(int pageCount)
+    public async Task Get_koms_iterate_through_all_pages_and_returns_list(int pageCount)
     {
         // Arrange
         var expectedEfforts = new List<SegmentEffortDetailedModel>();
@@ -88,7 +88,7 @@ public class AthleteApiTests
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
-    public async Task Get_koms_stop_iterate_and_return_error(int errorOnPage)
+    public async Task Get_koms_stops_iterating_and_returns_error(int errorOnPage)
     {
         // Arrange
         var fixture = new Fixture();
@@ -115,7 +115,7 @@ public class AthleteApiTests
     }
 
     [Fact]
-    public async Task Get_koms_return_unauthorized_on_401()
+    public async Task Get_koms_returns_unauthorized_on_401()
     {
         // Arrange
         _mockHttp.Expect(HttpMethod.Get, GetKomsUrl(1))
@@ -132,7 +132,7 @@ public class AthleteApiTests
     }
 
     [Fact]
-    public async Task Get_koms_throw_exception_when_something_went_wrong()
+    public async Task Get_koms_throws_exception_when_something_went_wrong()
     {
         // Arrange
         _mockHttp.Expect(HttpMethod.Get, GetKomsUrl(1))

@@ -128,7 +128,7 @@ public class TokenApiTests
 
     #region Exchange code for token
     [Fact]
-    public async Task Exchange_for_valid_code_call_api_and_return_token_and_athlete_summary()
+    public async Task Exchange_for_valid_code_calls_api_and_returns_token_and_athlete_summary()
     {
         // Arrange
         var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
@@ -150,7 +150,7 @@ public class TokenApiTests
     }
 
     [Fact]
-    public async Task Exchange_for_invalid_code_return_error()
+    public async Task Exchange_for_invalid_code_returns_error()
     {
         // Arrange
         var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
@@ -171,7 +171,7 @@ public class TokenApiTests
     }
 
     [Fact]
-    public async Task Exchange_when_failed_return_error()
+    public async Task Exchange_when_failed_returns_error()
     {
         // Arrange
         var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
@@ -192,7 +192,7 @@ public class TokenApiTests
     }
 
     [Fact]
-    public async Task Exchange_throw_exception_when_something_went_wrong()
+    public async Task Exchange_throws_exception_when_something_went_wrong()
     {
         // Arrange
         var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&code={TEST_CODE}&grant_type=authorization_code";
@@ -210,7 +210,7 @@ public class TokenApiTests
 
     #region Refresh token
     [Fact]
-    public async Task Refresh_for_valid_refresh_token_call_api_and_return_new_token()
+    public async Task Refresh_for_valid_refreshes_token_calls_api_and_returns_new_token()
     {
         // Arrange
         var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&refresh_token={TEST_REFRESH_TOKEN}&grant_type=refresh_token";
@@ -230,7 +230,7 @@ public class TokenApiTests
     }
 
     [Fact]
-    public async Task Refresh_for_invalid_refresh_token_return_error()
+    public async Task Refresh_for_invalid_refreshes_token_returns_error()
     {
         // Arrange
         var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&refresh_token={TEST_REFRESH_TOKEN}&grant_type=refresh_token";
@@ -251,7 +251,7 @@ public class TokenApiTests
     }
 
     [Fact]
-    public async Task Refresh_when_failed_return_error()
+    public async Task Refresh_when_failed_returns_error()
     {
         // Arrange
         var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&refresh_token={TEST_REFRESH_TOKEN}&grant_type=refresh_token";
@@ -272,7 +272,7 @@ public class TokenApiTests
     }
 
     [Fact]
-    public async Task Refresh_throw_exception_when_something_went_wrong()
+    public async Task Refresh_throws_exception_when_something_went_wrong()
     {
         // Arrange
         var shouldUrl = $"https://www.strava.com/oauth/token?client_id={TEST_CLIENT_ID}&client_secret={TEST_CLIENT_SECRET}&refresh_token={TEST_REFRESH_TOKEN}&grant_type=refresh_token";
