@@ -22,6 +22,10 @@ public class SegmentEntity
     public bool Private { get; set; }
     public bool Hazardous { get; set; }
     public bool Starred { get; set; }
-
-    // TODO: Detailed fields
+    #region Detailed fields
+    public float? TotalElevationGain { get; set; }
+    public int? EffortCount { get; set; }
+    public int? AthleteCount { get; set; }
+    public int? StarCount { get; set; }
+    #endregion
 }
