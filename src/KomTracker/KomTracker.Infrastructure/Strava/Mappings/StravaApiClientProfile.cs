@@ -28,5 +28,6 @@ public class StravaApiClientProfile : Profile
             .ForMember(dest => dest.ActivityId, opt => opt.MapFrom(src => src.Activity.Id));
 
         CreateMap<ApiModel.Segment.SegmentSummaryModel, SegmentEntity>();
+        CreateMap<ApiModel.Segment.SegmentDetailedModel, SegmentEntity>();
     }
 }

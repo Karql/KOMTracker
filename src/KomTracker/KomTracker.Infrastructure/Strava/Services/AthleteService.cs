@@ -16,13 +16,11 @@ namespace KomTracker.Infrastructure.Strava.Services;
 public class AthleteService : IAthleteService
 {
     private readonly IMapper _mapper;
-    private readonly ITokenService _tokenService;
     private readonly IAthleteApi _athleteApi;
 
     public AthleteService(IMapper mapper, ITokenService tokenService, IAthleteApi athleteApi)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
         _athleteApi = athleteApi ?? throw new ArgumentNullException(nameof(athleteApi));
     }
 
