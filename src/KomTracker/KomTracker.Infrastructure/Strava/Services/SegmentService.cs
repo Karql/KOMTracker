@@ -24,7 +24,7 @@ public class SegmentService : ISegmentService
         { ApiModel.Segment.Error.GetSegmentError.NotFound,  GetSegmentError.NotFound },
     };
 
-    public SegmentService(IMapper mapper, ITokenService tokenService, ISegmentApi segmentApi)
+    public SegmentService(IMapper mapper, ISegmentApi segmentApi)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _segmentApi = segmentApi ?? throw new ArgumentNullException(nameof(segmentApi));

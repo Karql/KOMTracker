@@ -18,7 +18,7 @@ public class AthleteService : IAthleteService
     private readonly IMapper _mapper;
     private readonly IAthleteApi _athleteApi;
 
-    public AthleteService(IMapper mapper, ITokenService tokenService, IAthleteApi athleteApi)
+    public AthleteService(IMapper mapper, IAthleteApi athleteApi)
     {
         _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _athleteApi = athleteApi ?? throw new ArgumentNullException(nameof(athleteApi));

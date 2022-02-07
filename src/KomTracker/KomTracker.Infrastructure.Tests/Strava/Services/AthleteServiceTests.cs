@@ -38,7 +38,6 @@ public class AthleteServiceTests
     #endregion
 
     private readonly IMapper _mapper;
-    private readonly ITokenService _tokenService;
     private readonly IAthleteApi _athleteApi;
 
     private readonly AthleteService _athleteService;
@@ -46,10 +45,9 @@ public class AthleteServiceTests
     public AthleteServiceTests()
     {
         _mapper = Substitute.For<IMapper>();
-        _tokenService = Substitute.For<ITokenService>();
         _athleteApi = Substitute.For<IAthleteApi>();
 
-        _athleteService = new AthleteService(_mapper, _tokenService, _athleteApi);
+        _athleteService = new AthleteService(_mapper, _athleteApi);
     }
 
     #region Get athlete koms
