@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KomTracker.Application.Errors.Strava.Strava;
+namespace KomTracker.Application.Errors.Strava.Segment;
 
 public class GetSegmentError : FluentResults.Error
 {

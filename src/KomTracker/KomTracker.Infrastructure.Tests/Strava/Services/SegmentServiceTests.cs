@@ -17,7 +17,7 @@ using MoreLinq;
 using KomTracker.Domain.Entities.Segment;
 using KomTracker.Application.Interfaces.Services.Strava;
 using KomTracker.Infrastructure.Strava.Services;
-using KomTracker.Application.Errors.Strava.Athlete;
+using KomTracker.Application.Errors.Strava.Segment;
 
 namespace KomTracker.Infrastructure.Tests.Strava.Services;
 
@@ -62,6 +62,23 @@ public class SegmentServiceTests
         res.Should().BeSuccess();
         var actualSegment = res.Value;
         actualSegment.Should().Be(expectedSegment);
+    }
+
+    [Theory]
+    [InlineData(ApiModel.Segment.Error.GetSegmentError.Unauthorized, GetSegmentError.Unauthorized)]
+    [InlineData(ApiModel.Segment.Error.GetSegmentError.NotFound, GetSegmentError.NotFound)]
+    [InlineData(ApiModel.Segment.Error.GetSegmentError.UnknownError, GetSegmentError.UnknownError)]
+    public async Task Get_segment_pass_error(string apiError, string serviceError)
+    {
+        // Arrange
+        _segmentApi.GetSegmentAsync(TEST_SEGMENT_ID, TEST_TOKEN_VALID).Returns(Result.Fail<ApiModel.Segment.SegmentDetailedModel>(new ApiModel.Segment.Error.GetSegmentError(apiError)));
+
+        // Act
+        var res = await _segmentService.GetSegmentAsync(TEST_SEGMENT_ID, TEST_TOKEN_VALID);
+
+        // Assert
+        res.Should().BeFailure();
+        res.HasError<GetSegmentError>(x => x.Message == serviceError).Should().BeTrue();
     }
     #endregion
 }
