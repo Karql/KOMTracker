@@ -24,3 +24,5 @@ King of Cracow etc.
 - who has the most of them
 
 Koms map
+
+Koms by type on dashboard
