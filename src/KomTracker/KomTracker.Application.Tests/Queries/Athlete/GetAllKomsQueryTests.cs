@@ -33,7 +33,7 @@ public class GetAllKomsQueryTests
     }
 
     [Fact]
-    public async Task Get_all_koms_query_call_segment_service_and_return_only_koms()
+    public async Task Get_all_koms_query_calls_segment_service_and_returns_only_koms()
     {
         // Arrange
         var fixture = FixtureHelper.GetTestFixture();
