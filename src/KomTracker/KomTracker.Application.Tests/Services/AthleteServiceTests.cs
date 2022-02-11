@@ -67,7 +67,7 @@ public class AthleteServiceTests
 
     #region Get valid token
     [Fact]
-    public async Task Get_valid_return_error_and_decativate_athlete_when_no_token_in_db()
+    public async Task Get_valid_returns_error_and_decativates_athlete_when_no_token_in_db()
     {
         // Arrange
         _athleteRepository.GetTokenAsync(TestAthleteId).Returns((TokenEntity)null);
@@ -85,7 +85,7 @@ public class AthleteServiceTests
     }
 
     [Fact]
-    public async Task Get_valid_token_return_token_directly_from_db_when_valid()
+    public async Task Get_valid_token_returns_token_directly_from_db_when_valid()
     {
         // Arrange
         var testValidToken = TestValidToken;
@@ -103,7 +103,7 @@ public class AthleteServiceTests
     }
 
     [Fact]
-    public async Task Get_valid_token_try_refresh_when_invalid()
+    public async Task Get_valid_token_try_refreshes_when_invalid()
     {
         // Arrange
         var testInvalidToken = TestInvalidToken;
@@ -122,7 +122,7 @@ public class AthleteServiceTests
     }
 
     [Fact]
-    public async Task Get_valid_token_return_error_and_decativate_athlete_when_refresh_fail()
+    public async Task Get_valid_token_returns_error_and_decativates_athlete_when_refresh_fail()
     {
         // Arrange
         var testInvalidToken = TestInvalidToken;
