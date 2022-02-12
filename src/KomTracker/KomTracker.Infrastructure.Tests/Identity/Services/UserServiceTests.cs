@@ -43,7 +43,7 @@ public class UserServiceTests
     }
 
     #region IsUserExistsAsync
-    public async Task Is_user_exists_return_true_when_exists()
+    public async Task Is_user_exists_returns_true_when_exists()
     {
         // Act
         var res = await _userService.IsUserExistsAsync(TestExistingAthlete.AthleteId);
@@ -52,7 +52,7 @@ public class UserServiceTests
         res.Should().Be(true);
     }
 
-    public async Task Is_user_exists_return_false_when_not_exists()
+    public async Task Is_user_exists_returns_false_when_not_exists()
     {
         // Act
         var res = await _userService.IsUserExistsAsync(TestNewAthlete.AthleteId);
@@ -63,7 +63,7 @@ public class UserServiceTests
     #endregion
 
     #region AddUserAsync
-    public async Task Add_user_call_UserManager()
+    public async Task Add_user_calls_UserManager()
     {
         // Act
         await _userService.AddUserAsync(TestNewAthlete);
