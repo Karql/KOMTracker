@@ -51,7 +51,7 @@ public class TokenServiceTests
 
     #region Exchange code for token
     [Fact]
-    public async Task Exchange_for_valid_code_return_token_and_athlete_summary()
+    public async Task Exchange_for_valid_code_returns_token_and_athlete_summary()
     {
         // Arrange
         var apiResult = new ApiModel.Token.TokenWithAthleteModel
@@ -85,7 +85,7 @@ public class TokenServiceTests
     }
 
     [Fact]
-    public async Task Exchange_for_invalid_code_return_error()
+    public async Task Exchange_for_invalid_code_returns_error()
     {
         // Arrange
         _tokenApi.ExchangeAsync(TEST_CODE).Returns(Result.Fail(new ApiModel.Token.Error.ExchangeError(ApiModel.Token.Error.ExchangeError.InvalidCode)));
@@ -99,7 +99,7 @@ public class TokenServiceTests
     }
 
     [Fact]
-    public async Task Exchange_when_failed_throw_error()
+    public async Task Exchange_when_failed_throws_error()
     {
         // Arrange
         _tokenApi.ExchangeAsync(TEST_CODE).Returns(Result.Fail(new ApiModel.Token.Error.ExchangeError(ApiModel.Token.Error.ExchangeError.UnknownError)));
@@ -114,7 +114,7 @@ public class TokenServiceTests
 
     #region Refresh token
     [Fact]
-    public async Task Exchange_for_valid_refresh_token_return_new_token()
+    public async Task Exchange_for_valid_refreshes_token_returns_new_token()
     {
         // Arrange
         var apiResult = new ApiModel.Token.TokenModel
@@ -151,7 +151,7 @@ public class TokenServiceTests
     }
 
     [Fact]
-    public async Task Refresh_for_invalid_refresh_token_return_error()
+    public async Task Refresh_for_invalid_refreshes_token_returns_error()
     {
         // Arrange
         _tokenApi.RefreshAsync(CurrentToken.RefreshToken).Returns(Result.Fail(new ApiModel.Token.Error.RefreshError(ApiModel.Token.Error.RefreshError.InvalidRefreshToken)));
@@ -165,7 +165,7 @@ public class TokenServiceTests
     }
 
     [Fact]
-    public async Task Refresh_when_failed_throw_error()
+    public async Task Refresh_when_failed_throws_error()
     {
         // Arrange
         _tokenApi.RefreshAsync(CurrentToken.RefreshToken).Returns(Result.Fail(new ApiModel.Token.Error.RefreshError(ApiModel.Token.Error.RefreshError.UnknownError)));

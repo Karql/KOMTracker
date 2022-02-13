@@ -122,7 +122,7 @@ public class AthleteServiceTests
     }
 
     [Fact]
-    public async Task Get_valid_token_returns_error_and_decativates_athlete_when_refresh_fail()
+    public async Task Get_valid_token_returns_error_and_decativates_athlete_when_refresh_failed()
     {
         // Arrange
         var testInvalidToken = TestInvalidToken;
