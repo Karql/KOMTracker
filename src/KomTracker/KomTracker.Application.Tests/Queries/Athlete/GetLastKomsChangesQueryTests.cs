@@ -32,7 +32,7 @@ public class GetLastKomsChangesQueryTests
     }
 
     [Fact]
-    public async Task Get_all_koms_query_call_segment_service()
+    public async Task Get_all_koms_query_calls_segment_service()
     {
         // Arrange
         var fixture = FixtureHelper.GetTestFixture();
