@@ -45,7 +45,7 @@ public class SegmentServiceTests
 
     #region Get segment
     [Fact]
-    public async Task Get_segment_call_api_and_returns_mapped_segment()
+    public async Task Get_segment_calls_api_and_returns_mapped_segment()
     {
         // Arrange
         var fixture = new Fixture();
@@ -68,7 +68,7 @@ public class SegmentServiceTests
     [InlineData(ApiModel.Segment.Error.GetSegmentError.Unauthorized, GetSegmentError.Unauthorized)]
     [InlineData(ApiModel.Segment.Error.GetSegmentError.NotFound, GetSegmentError.NotFound)]
     [InlineData(ApiModel.Segment.Error.GetSegmentError.UnknownError, GetSegmentError.UnknownError)]
-    public async Task Get_segment_pass_error(string apiError, string serviceError)
+    public async Task Get_segment_passes_error(string apiError, string serviceError)
     {
         // Arrange
         _segmentApi.GetSegmentAsync(TEST_SEGMENT_ID, TEST_TOKEN_VALID).Returns(Result.Fail<ApiModel.Segment.SegmentDetailedModel>(new ApiModel.Segment.Error.GetSegmentError(apiError)));
