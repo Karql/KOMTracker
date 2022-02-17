@@ -67,7 +67,7 @@ public class ConnectCommandTests
 
     #region Connect
     [Fact]
-    public async Task Connect_check_is_scope_contains_required()
+    public async Task Connect_checks_is_scope_contains_required()
     {
         // Act
         var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_INVALID_CODE, TEST_INVALID_SCOPE), _cancellationToken);
@@ -80,7 +80,7 @@ public class ConnectCommandTests
     }
 
     [Fact]
-    public async Task Connect_failed_when_invalid_code()
+    public async Task Connect_fails_when_invalid_code()
     {
         // Act
         var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_INVALID_CODE, TEST_VALID_SCOPE), _cancellationToken);
@@ -93,7 +93,7 @@ public class ConnectCommandTests
     }
 
     [Fact]
-    public async Task Connect_add_new_athlete()
+    public async Task Connect_adds_new_athlete()
     {
         // Act
         var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_NEW_ATHLETE_CODE, TEST_VALID_SCOPE), _cancellationToken);
@@ -111,7 +111,7 @@ public class ConnectCommandTests
     }
 
     [Fact]
-    public async Task Connect_update_exsisting_athlete()
+    public async Task Connect_updates_exsisting_athlete()
     {
         // Act
         var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_EXISTING_ATHLETE_CODE, TEST_VALID_SCOPE), _cancellationToken);
