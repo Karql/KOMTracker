@@ -48,7 +48,7 @@ public class AthleteApiTests
     [InlineData(1)]
     [InlineData(2)]
     [InlineData(3)]
-    public async Task Get_koms_iterate_through_all_pages_and_returns_list(int pageCount)
+    public async Task Get_koms_iterates_through_all_pages_and_returns_list(int pageCount)
     {
         // Arrange
         var expectedEfforts = new List<SegmentEffortDetailedModel>();
