@@ -1,4 +1,5 @@
-﻿using KomTracker.Domain.Entities.Token;
+﻿using KomTracker.Domain.Contracts;
+using KomTracker.Domain.Entities.Token;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace KomTracker.Domain.Entities.Athlete;
 
-public class AthleteEntity
+public class AthleteEntity : BaseEntity
 {
     public int AthleteId { get; set; }
     public string Username { get; set; }

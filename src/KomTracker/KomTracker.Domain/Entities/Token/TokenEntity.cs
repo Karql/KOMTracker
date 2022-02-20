@@ -1,12 +1,10 @@
-﻿using KomTracker.Domain.Entities.Athlete;
+﻿using KomTracker.Domain.Contracts;
+using KomTracker.Domain.Entities.Athlete;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace KomTracker.Domain.Entities.Token;
 
-public class TokenEntity
+public class TokenEntity : BaseEntity
 {
     public int AthleteId { get; set; }
     public string TokenType { get; set; }

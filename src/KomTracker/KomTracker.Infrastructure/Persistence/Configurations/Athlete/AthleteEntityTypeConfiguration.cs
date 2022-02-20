@@ -1,4 +1,5 @@
 ﻿using KomTracker.Domain.Entities.Athlete;
+using KomTracker.Infrastructure.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -14,6 +15,8 @@ public class AthleteEntityTypeConfiguration
     public void Configure(EntityTypeBuilder<AthleteEntity> builder)
     {
         builder.ToTable("athlete");
+
+        builder.PrepareBaseColumns();
 
         builder.HasKey(x => x.AthleteId);
 

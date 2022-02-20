@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using KomTracker.Domain.Contracts;
 
 namespace KomTracker.Domain.Entities.Segment;
 
-public class SegmentEntity
+public class SegmentEntity : BaseEntity
 {
     public long Id { get; set; }
     public string Name { get; set; }

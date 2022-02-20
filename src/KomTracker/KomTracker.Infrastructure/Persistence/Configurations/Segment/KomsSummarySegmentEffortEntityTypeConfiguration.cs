@@ -1,5 +1,6 @@
 ﻿using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Domain.Entities.Segment;
+using KomTracker.Infrastructure.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -15,6 +16,8 @@ public class KomsSummarySegmentEffortEntityTypeConfiguration
     public void Configure(EntityTypeBuilder<KomsSummarySegmentEffortEntity> builder)
     {
         builder.ToTable("koms_summary_segment_effort");
+
+        builder.PrepareBaseColumns();
 
         builder.Property(x => x.KomSummaryId)
             .HasColumnName("koms_summary_id");

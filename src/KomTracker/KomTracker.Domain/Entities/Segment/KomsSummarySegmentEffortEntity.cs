@@ -1,6 +1,7 @@
-﻿namespace KomTracker.Domain.Entities.Segment;
+﻿using KomTracker.Domain.Contracts;
+namespace KomTracker.Domain.Entities.Segment;
 
-public class KomsSummarySegmentEffortEntity
+public class KomsSummarySegmentEffortEntity : BaseEntity
 {
     public int KomSummaryId { get; set; }
     public long SegmentEffortId { get; set; }

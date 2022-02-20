@@ -1,5 +1,6 @@
 ﻿using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Domain.Entities.Segment;
+using KomTracker.Infrastructure.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -15,6 +16,8 @@ public class SegmentEntityTypeConfiguration
     public void Configure(EntityTypeBuilder<SegmentEntity> builder)
     {
         builder.ToTable("segment");
+
+        builder.PrepareBaseColumns();
 
         builder.HasKey(x => x.Id);
 

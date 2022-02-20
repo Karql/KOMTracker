@@ -1,9 +1,10 @@
-﻿using System;
+﻿using KomTracker.Domain.Contracts;
+using System;
 using System.Collections.Generic;
 
 namespace KomTracker.Domain.Entities.Segment;
 
-public class KomsSummaryEntity
+public class KomsSummaryEntity : BaseEntity
 {
     public int Id { get; set; }
     public DateTime TrackDate { get; set; }

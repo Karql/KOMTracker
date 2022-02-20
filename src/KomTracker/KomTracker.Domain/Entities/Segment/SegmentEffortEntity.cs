@@ -1,10 +1,10 @@
-﻿using KomTracker.Domain.Entities.Athlete;
+﻿using KomTracker.Domain.Contracts;
 using System;
 using System.Collections.Generic;
 
 namespace KomTracker.Domain.Entities.Segment;
 
-public class SegmentEffortEntity
+public class SegmentEffortEntity : BaseEntity
 {
     public long Id { get; set; }
     /// <summary>

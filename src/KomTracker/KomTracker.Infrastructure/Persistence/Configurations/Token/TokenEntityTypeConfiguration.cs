@@ -1,4 +1,5 @@
 ﻿using KomTracker.Domain.Entities.Token;
+using KomTracker.Infrastructure.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
@@ -14,6 +15,8 @@ public class TokenEntityTypeConfiguration
     public void Configure(EntityTypeBuilder<TokenEntity> builder)
     {
         builder.ToTable("token");
+
+        builder.PrepareBaseColumns();
 
         builder.HasOne(x => x.Athlete)
             .WithOne(x => x.Token)
