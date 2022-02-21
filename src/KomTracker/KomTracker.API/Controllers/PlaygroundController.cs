@@ -30,11 +30,10 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
         //var res = await athleteApi.GetKomsAsync(2394302, token);
         //var res = await athleteService.GetAthleteKomsAsync(2394302, token);
 
-        var res = await segmentApi.GetSegmentAsync(30393774, token);
+        //var res = await segmentApi.GetSegmentAsync(30393774, token);
 
-        //var cancellationTokenSource = new CancellationTokenSource();
-
-        //await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
+        var cancellationTokenSource = new CancellationTokenSource();
+        await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
 
         return new NoContentResult();
     }

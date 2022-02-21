@@ -45,7 +45,7 @@ public class EFUnitOfWork<TContext> : IUnitOfWork
         return (TRepository)_repositories[repoType];
     }
 
-    public async Task<int> SaveChangesAsync()
+    public virtual async Task<int> SaveChangesAsync()
     {
         return await _context.SaveChangesAsync();
     }
