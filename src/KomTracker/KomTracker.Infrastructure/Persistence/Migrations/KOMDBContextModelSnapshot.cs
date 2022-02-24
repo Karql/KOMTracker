@@ -43,10 +43,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("country");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
                     b.Property<string>("FirstName")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
@@ -71,10 +67,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)")
                         .HasColumnName("sex");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
 
                     b.Property<string>("Username")
                         .HasMaxLength(100)
@@ -103,10 +95,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("athlete_id");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
                     b.Property<int>("ImprovedKoms")
                         .HasColumnType("integer")
                         .HasColumnName("improved_koms");
@@ -127,10 +115,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("track_date");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AthleteId", "TrackDate");
@@ -148,10 +132,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("segment_effort_id");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
                     b.Property<bool>("ImprovedKom")
                         .HasColumnType("boolean")
                         .HasColumnName("improved_kom");
@@ -167,10 +147,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.Property<bool>("NewKom")
                         .HasColumnType("boolean")
                         .HasColumnName("new_kom");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
 
                     b.HasKey("KomSummaryId", "SegmentEffortId");
 
@@ -204,10 +180,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.Property<float?>("AverageWatts")
                         .HasColumnType("real")
                         .HasColumnName("average_watts");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
 
                     b.Property<bool>("DeviceWatts")
                         .HasColumnType("boolean")
@@ -262,10 +234,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("start_index");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AthleteId");
@@ -306,10 +274,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("country");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
 
                     b.Property<float>("Distance")
                         .HasColumnType("real")
@@ -369,10 +333,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.Property<float?>("TotalElevationGain")
                         .HasColumnType("real");
 
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
-
                     b.HasKey("Id");
 
                     b.ToTable("segment", (string)null);
@@ -388,10 +348,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("access-token");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
 
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("timestamp with time zone")
@@ -411,10 +367,6 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)")
                         .HasColumnName("token_type");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at");
 
                     b.HasKey("AthleteId");
 
