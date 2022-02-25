@@ -19,12 +19,12 @@ public class EFKOMUnitOfWork : EFUnitOfWork<KOMDBContext>, IKOMUnitOfWork
         {
             if (entry.State == EntityState.Added)
             {
-                entry.Entity.CreatedAt = DateTime.UtcNow;
+                entry.Entity.AuditCD = DateTime.UtcNow;
             }
 
             else if (entry.State == EntityState.Modified)
             {
-                entry.Entity.UpdatedAt = DateTime.UtcNow;
+                entry.Entity.AuditMD = DateTime.UtcNow;
             }
         }
 
