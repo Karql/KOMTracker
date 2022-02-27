@@ -21,4 +21,6 @@ public interface ISegmentRepository : IRepository
     Task AddKomsSummaryAsync(KomsSummaryEntity komsSummary);
 
     Task AddKomsSummariesSegmentEffortsAsync(IEnumerable<KomsSummarySegmentEffortEntity> komsSummariesSegmentEfforts);
+
+    Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100);
 }

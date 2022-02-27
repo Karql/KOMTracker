@@ -83,4 +83,12 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
     {
         await _context.KomsSummarySegmentEffort.AddRangeAsync(komsSummariesSegmentEfforts);
     }
+
+    public async Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100)
+    {
+        return await _context.Segment
+            .OrderByDescending(x => x.AuditMD)
+            .Take(top)
+            .ToListAsync();
+    }
 }
