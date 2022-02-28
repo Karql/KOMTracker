@@ -147,4 +147,10 @@ public class SegmentService : ISegmentService
         komsSummariesSegmentEfforts.ForEach(x => x.KomsSummary = komsSummary);
         await segmentRepo.AddKomsSummariesSegmentEffortsAsync(komsSummariesSegmentEfforts);
     }
+
+    public async Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100)
+    {
+        return await _komUoW.GetRepository<ISegmentRepository>()
+            .GetSegmentsToRefreshAsync(top);
+    }
 }

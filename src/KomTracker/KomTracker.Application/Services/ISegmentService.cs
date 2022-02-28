@@ -23,4 +23,6 @@ public interface ISegmentService
     Task AddSegmentEffortsIfNotExistsAsync(IEnumerable<SegmentEffortEntity> segmentEfforts);
 
     Task AddNewKomsSummaryWithEffortsAsync(int athleteId, ComparedEffortsModel comparedEfforts);
+
+    Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100);
 }
