@@ -1,1 +1,2 @@
 - Number segment effors on Kom list
+- Add configuration for master athlete id to query segments etc.
