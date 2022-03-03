@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Primitives;
 using Microsoft.AspNetCore.Http;
 using System.Reflection;
+using KomTracker.API.Extensions;
 
 namespace KomTracker.API;
 
@@ -45,6 +46,8 @@ public class Startup
         AddAuthorization(services);
         AddSwagger(services);
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+        services.AddSingleton(_configuration.GetApplicationConfiguration());
 
         services.AddApplication();
         services.AddInfrastructure(_configuration);
