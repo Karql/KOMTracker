@@ -83,7 +83,7 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
         }
     }
 
-    protected async Task<string> GetTokenAsync(int athleteId)
+    protected async Task<string?> GetTokenAsync(int athleteId)
     {
         var getValidTokenRes = await _athleteService.GetValidTokenAsync(athleteId);
 
