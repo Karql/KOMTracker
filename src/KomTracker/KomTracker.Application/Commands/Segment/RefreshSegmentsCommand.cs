@@ -36,15 +36,16 @@ public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsComm
         if (token == null)
             throw new ArgumentNullException(nameof(token), "Invalid token"); // TODO: better handling
 
-        var refreshedSegments = new List<SegmentEntity>();
-
         foreach (var segment in segments)
         {
             var getSegmentRes = await _stravaSegmentService.GetSegmentAsync(segment.Id, token);
 
             if (getSegmentRes.IsSuccess)
             {
-                refreshedSegments.Add(getSegmentRes.Value);
+                var refreshedSegment = getSegmentRes.Value;
+
+                segment.AthleteCount = refreshedSegment.AthleteCount;
+                segment.EffortCount = refreshedSegment.EffortCount;
             }
         }
 
