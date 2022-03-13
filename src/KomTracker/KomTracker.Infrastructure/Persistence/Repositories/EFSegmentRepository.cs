@@ -91,4 +91,9 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
             .Take(top)
             .ToListAsync();
     }
+
+    public Task UpdateSegmentsAsync(IEnumerable<SegmentEntity> segments)
+    {
+        throw new NotImplementedException();
+    }
 }
