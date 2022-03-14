@@ -7,6 +7,8 @@ using System.Linq;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Application.Models.Segment;
 using System;
+using EFCore.BulkExtensions;
+using static MoreLinq.Extensions.ForEachExtension;
 
 namespace KomTracker.Infrastructure.Persistence.Repositories;
 
@@ -94,6 +96,19 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
 
     public Task UpdateSegmentsAsync(IEnumerable<SegmentEntity> segments)
     {
-        throw new NotImplementedException();
+        segments.ForEach(x => x.AuditMD = DateTime.UtcNow);
+
+        return _context.BulkUpdateAsync(segments.ToList(), new BulkConfig
+        {
+            CalculateStats = false,
+            PreserveInsertOrder = false,
+            TrackingEntities = false,
+            PropertiesToInclude = new List<string>
+            {
+                nameof(SegmentEntity.AuditMD),
+                nameof(SegmentEntity.AthleteCount),
+                nameof(SegmentEntity.EffortCount),                
+            }
+        });
     }
 }
