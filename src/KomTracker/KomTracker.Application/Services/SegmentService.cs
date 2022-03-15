@@ -153,4 +153,10 @@ public class SegmentService : ISegmentService
         return await _komUoW.GetRepository<ISegmentRepository>()
             .GetSegmentsToRefreshAsync(top);
     }
+
+    public async Task UpdateSegmentsAsync(IEnumerable<SegmentEntity> segments)
+    {
+        await _komUoW.GetRepository<ISegmentRepository>()
+            .UpdateSegmentsAsync(segments);
+    }
 }
