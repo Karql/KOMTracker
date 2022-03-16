@@ -11,8 +11,10 @@ using System.Threading.Tasks;
 
 using IStravaTokenService = KomTracker.Application.Interfaces.Services.Strava.ITokenService;
 using IStravaAthleteService = KomTracker.Application.Interfaces.Services.Strava.IAthleteService;
+using IStravaSegmentService = KomTracker.Application.Interfaces.Services.Strava.ISegmentService;
 using StravaTokenService = KomTracker.Infrastructure.Strava.Services.TokenService;
 using StravaAthleteService = KomTracker.Infrastructure.Strava.Services.AthleteService;
+using StravaSegmentService = KomTracker.Infrastructure.Strava.Services.SegmentService;
 using static KomTracker.Infrastructure.Strava.Constants;
 
 namespace KomTracker.Infrastructure.Strava;
@@ -25,6 +27,7 @@ public static class StravaDependencyInjection
         
         services.AddTransient<IStravaTokenService, StravaTokenService>();
         services.AddTransient<IStravaAthleteService, StravaAthleteService>();
+        services.AddTransient<IStravaSegmentService, StravaSegmentService>();
 
         // Strava.API.Client
         services.AddStravaApiClient();

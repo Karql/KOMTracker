@@ -91,6 +91,7 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
         return await _context.Segment
             .OrderByDescending(x => x.AuditMD)
             .Take(top)
+            .AsNoTracking()
             .ToListAsync();
     }
 
@@ -103,12 +104,13 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
             CalculateStats = false,
             PreserveInsertOrder = false,
             TrackingEntities = false,
-            PropertiesToInclude = new List<string>
+            PropertiesToIncludeOnUpdate = new List<string>
             {
                 nameof(SegmentEntity.AuditMD),
                 nameof(SegmentEntity.AthleteCount),
                 nameof(SegmentEntity.EffortCount),                
-            }
+            },
+            
         });
     }
 }

@@ -1,26 +1,32 @@
 ﻿using FluentResults;
+using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Models.Configuration;
 using KomTracker.Application.Services;
 using KomTracker.Domain.Entities.Segment;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using IStravaSegmentService = KomTracker.Application.Interfaces.Services.Strava.ISegmentService;
 
 namespace KomTracker.Application.Commands.Tracking;
 
 public class RefreshSegmentsCommand : IRequest<Result>
 {
-
+    public int SegmentsToRefresh { get; set; } = 100;
 }
 
 public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsCommand, Result>
 {
+    private readonly IKOMUnitOfWork _komUoW;
+    private readonly ILogger<RefreshSegmentsCommandHandler> _logger;
     private readonly ApplicationConfiguration _applicationConfiguration;
     private readonly ISegmentService _segmentService;
     private readonly IAthleteService _athleteService;
     private readonly IStravaSegmentService _stravaSegmentService;
 
-    public RefreshSegmentsCommandHandler(ApplicationConfiguration applicationConfiguration, ISegmentService segmentService, IAthleteService athleteService, IStravaSegmentService stravaSegmentService)
+    public RefreshSegmentsCommandHandler(IKOMUnitOfWork komUoW, ILogger<RefreshSegmentsCommandHandler> logger, ApplicationConfiguration applicationConfiguration, ISegmentService segmentService, IAthleteService athleteService, IStravaSegmentService stravaSegmentService)
     {
+        _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _applicationConfiguration = applicationConfiguration ?? throw new ArgumentNullException(nameof(applicationConfiguration));
         _segmentService = segmentService ?? throw new ArgumentNullException(nameof(segmentService));
         _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
@@ -30,7 +36,7 @@ public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsComm
     public async Task<Result> Handle(RefreshSegmentsCommand request, CancellationToken cancellationToken)
     {
         var masterStravaAthleteId = _applicationConfiguration.MasterStravaAthleteId;
-        var segments = await _segmentService.GetSegmentsToRefreshAsync();
+        var segments = await _segmentService.GetSegmentsToRefreshAsync(request.SegmentsToRefresh);
 
         var token = await GetTokenAsync(masterStravaAthleteId);
         if (token == null)
@@ -49,7 +55,10 @@ public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsComm
             }
         }
 
-        throw new NotImplementedException();
+        await _segmentService.UpdateSegmentsAsync(segments);
+        await _komUoW.SaveChangesAsync();
+
+        return Result.Ok();
     }
 
     protected async Task<string?> GetTokenAsync(int athleteId)
