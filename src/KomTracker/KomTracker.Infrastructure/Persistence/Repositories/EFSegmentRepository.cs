@@ -86,9 +86,13 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
         await _context.KomsSummarySegmentEffort.AddRangeAsync(komsSummariesSegmentEfforts);
     }
 
-    public async Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100)
+    public async Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100, TimeSpan? minTimeFromLastRefresh = null)
     {
+        minTimeFromLastRefresh ??= TimeSpan.FromHours(24);
+        var maxAuditMD = DateTime.UtcNow - minTimeFromLastRefresh;
+
         return await _context.Segment
+            .Where(x => !x.AuditMD.HasValue || x.AuditMD < maxAuditMD)
             .OrderByDescending(x => x.AuditMD)
             .Take(top)
             .AsNoTracking()

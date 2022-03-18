@@ -148,10 +148,10 @@ public class SegmentService : ISegmentService
         await segmentRepo.AddKomsSummariesSegmentEffortsAsync(komsSummariesSegmentEfforts);
     }
 
-    public async Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100)
+    public async Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100, TimeSpan? minTimeFromLastRefresh = null)
     {
         return await _komUoW.GetRepository<ISegmentRepository>()
-            .GetSegmentsToRefreshAsync(top);
+            .GetSegmentsToRefreshAsync(top, minTimeFromLastRefresh);
     }
 
     public async Task UpdateSegmentsAsync(IEnumerable<SegmentEntity> segments)

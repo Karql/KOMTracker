@@ -12,6 +12,8 @@ namespace KomTracker.Application.Commands.Tracking;
 public class RefreshSegmentsCommand : IRequest<Result>
 {
     public int SegmentsToRefresh { get; set; } = 100;
+
+    public TimeSpan? MinimumTimeFromLastRefresh { get; set; }
 }
 
 public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsCommand, Result>
@@ -36,7 +38,7 @@ public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsComm
     public async Task<Result> Handle(RefreshSegmentsCommand request, CancellationToken cancellationToken)
     {
         var masterStravaAthleteId = _applicationConfiguration.MasterStravaAthleteId;
-        var segments = await _segmentService.GetSegmentsToRefreshAsync(request.SegmentsToRefresh);
+        var segments = await _segmentService.GetSegmentsToRefreshAsync(request.SegmentsToRefresh, request.MinimumTimeFromLastRefresh);
 
         var token = await GetTokenAsync(masterStravaAthleteId);
         if (token == null)

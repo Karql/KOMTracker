@@ -22,7 +22,13 @@ public interface ISegmentRepository : IRepository
 
     Task AddKomsSummariesSegmentEffortsAsync(IEnumerable<KomsSummarySegmentEffortEntity> komsSummariesSegmentEfforts);
 
-    Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100);
+    /// <summary>
+    /// Get segments to refresh
+    /// </summary>
+    /// <param name="top">Number of segment to refresh (default: 100)</param>
+    /// <param name="minTimeFromLastRefresh">Minimum time from last refresh (default: 24 hours)</param>
+    /// <returns></returns>
+    Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100, TimeSpan? minTimeFromLastRefresh = null);
 
     Task UpdateSegmentsAsync(IEnumerable<SegmentEntity> segments);
 }
