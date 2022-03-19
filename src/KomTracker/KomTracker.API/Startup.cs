@@ -54,6 +54,7 @@ public class Startup
 
         // Jobs
         services.AddTransient<TrackKomsJob>();
+        services.AddTransient<RefreshSegmentsJob>();
 
         services.AddQuartz(q =>
         {
@@ -63,6 +64,9 @@ public class Startup
 
             q.ScheduleJob<TrackKomsJob>(trigger => trigger
                 .WithCronSchedule("0 0 * * * ?")); // every hour
+
+            q.ScheduleJob<RefreshSegmentsJob>(trigger => trigger
+                .WithCronSchedule("0 30 * * * ?")); // half past every hour
         });
 
         services.AddQuartzHostedService(options =>
