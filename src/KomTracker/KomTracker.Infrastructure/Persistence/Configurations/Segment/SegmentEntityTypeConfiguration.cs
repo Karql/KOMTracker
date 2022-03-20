@@ -79,5 +79,17 @@ public class SegmentEntityTypeConfiguration
 
         builder.Property(x => x.Starred)
             .HasColumnName("starred");
+
+        builder.Property(x => x.TotalElevationGain)
+            .HasColumnName("total_elevation_gain");
+
+        builder.Property(x => x.EffortCount)
+            .HasColumnName("effort_count");
+
+        builder.Property(x => x.AthleteCount)
+            .HasColumnName("athlete_count");
+
+        builder.Property(x => x.StarCount)
+            .HasColumnName("star_count");
     }
 }
