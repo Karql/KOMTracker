@@ -52,8 +52,10 @@ public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsComm
             {
                 var refreshedSegment = getSegmentRes.Value;
 
-                segment.AthleteCount = refreshedSegment.AthleteCount;
+                segment.TotalElevationGain = refreshedSegment.TotalElevationGain;
                 segment.EffortCount = refreshedSegment.EffortCount;
+                segment.AthleteCount = refreshedSegment.AthleteCount;
+                segment.StarCount = refreshedSegment.StarCount;
             }
         }
 
