@@ -16,6 +16,13 @@ public class SegmentViewModel
     public string City { get; set; }
     public string Country { get; set; }
 
+    #region Detailed fields
+    public float? TotalElevationGain { get; set; }
+    public int? EffortCount { get; set; }
+    public int? AthleteCount { get; set; }
+    public int? StarCount { get; set; }
+    #endregion
+
     [JsonIgnore]
     public int ClimbCategoryExtended
     {
