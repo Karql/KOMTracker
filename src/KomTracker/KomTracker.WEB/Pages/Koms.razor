@@ -21,6 +21,8 @@ else
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageHeartrate ?? 0)">HR</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.EffortCount ?? 0)">Attempts</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.AthleteCount ?? 0)">Athletes</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ClimbCategoryExtended)">Cat</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ActivityType)">Type</MudTableSortLabel></MudTh>
         </HeaderContent>
@@ -61,6 +63,12 @@ else
             </MudTd>
             <MudTd DataLabel="Time">
                 @(TimeSpan.FromSeconds(context.SegmentEffort.ElapsedTime).ToString())                
+            </MudTd>
+            <MudTd DataLabel="Attempts">
+                @(context.Segment.EffortCount ?? 0)
+            </MudTd>
+            <MudTd DataLabel="Athletes">
+                @(context.Segment.AthleteCount ?? 0)
             </MudTd>
             <MudTd DataLabel="Type">
                 <div class="d-flex align-center justify-space-between climb-category" style="background-color: @GetClimbCategoryColor(context.Segment.ClimbCategoryExtended)">
