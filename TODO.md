@@ -1,2 +1,1 @@
-- Number segment effors on Kom list
 - Fix change tracking & auditing for upsert etc.
