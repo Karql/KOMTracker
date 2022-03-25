@@ -345,4 +345,21 @@ public class SegmentServiceTests
         komsSummariesSegmentEffortsArgs.All(x => x.KomsSummary == komsSummaryArg).Should().BeTrue();
     }
     #endregion
+
+    #region Get segments to refresh
+    [Fact]
+    public async Task Get_segments_to_refresh_calls_repo()
+    {
+        // Arrange
+        var fixture = FixtureHelper.GetTestFixture();
+        var segments = fixture.CreateMany<SegmentEntity>(2);
+        _segmentRepository.GetSegmentsToRefreshAsync(Arg.Any<int>(), Arg.Any<TimeSpan?>()).Returns(segments);
+
+        // Act
+        var res = await _segmentService.GetSegmentsToRefreshAsync();
+
+        // Assert
+        res.Should().BeEquivalentTo(segments);
+    }
+    #endregion
 }
