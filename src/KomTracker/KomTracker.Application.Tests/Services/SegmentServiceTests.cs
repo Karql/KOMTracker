@@ -362,4 +362,22 @@ public class SegmentServiceTests
         res.Should().BeEquivalentTo(segments);
     }
     #endregion
+
+    #region Update segments
+    [Fact]
+    public async Task Update_segments_calls_repo()
+    {
+        // Arrange
+        var fixture = FixtureHelper.GetTestFixture();
+        var segments = fixture.CreateMany<SegmentEntity>(2);
+
+        // Act
+        await _segmentService.UpdateSegmentsAsync(segments);
+
+        // Assert
+        await _segmentRepository.Received().UpdateSegmentsAsync(Arg.Is<IEnumerable<SegmentEntity>>(x =>
+            x.SequenceEqual(segments)
+        ));
+    }
+    #endregion
 }
