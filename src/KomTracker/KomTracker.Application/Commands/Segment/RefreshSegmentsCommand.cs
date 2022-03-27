@@ -38,11 +38,12 @@ public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsComm
     public async Task<Result> Handle(RefreshSegmentsCommand request, CancellationToken cancellationToken)
     {
         var masterStravaAthleteId = _applicationConfiguration.MasterStravaAthleteId;
-        var segments = await _segmentService.GetSegmentsToRefreshAsync(request.SegmentsToRefresh, request.MinimumTimeFromLastRefresh);
 
         var token = await GetTokenAsync(masterStravaAthleteId);
         if (token == null)
             throw new ArgumentNullException(nameof(token), "Invalid token"); // TODO: better handling
+
+        var segments = await _segmentService.GetSegmentsToRefreshAsync(request.SegmentsToRefresh, request.MinimumTimeFromLastRefresh);
 
         foreach (var segment in segments)
         {
