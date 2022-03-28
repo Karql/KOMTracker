@@ -105,10 +105,10 @@ public class TokenServiceTests
         _tokenApi.ExchangeAsync(TEST_CODE).Returns(Result.Fail(new ApiModel.Token.Error.ExchangeError(ApiModel.Token.Error.ExchangeError.UnknownError)));
 
         // Act
-        Func<Task<Result<(AthleteEntity, TokenEntity)>>> action = () => _tokenService.ExchangeAsync(TEST_CODE, TEST_SCOPE);
+        var action = () => _tokenService.ExchangeAsync(TEST_CODE, TEST_SCOPE);
 
         // Assert
-        await action .Should().ThrowAsync<Exception>();
+        await action.Should().ThrowAsync<Exception>();
     }
     #endregion
 
@@ -171,7 +171,7 @@ public class TokenServiceTests
         _tokenApi.RefreshAsync(CurrentToken.RefreshToken).Returns(Result.Fail(new ApiModel.Token.Error.RefreshError(ApiModel.Token.Error.RefreshError.UnknownError)));
 
         // Act
-        Func<Task<Result<TokenEntity>>> action = () => _tokenService.RefreshAsync(CurrentToken);
+        var action = () => _tokenService.RefreshAsync(CurrentToken);
 
         // Assert
         await action.Should().ThrowAsync<Exception>();

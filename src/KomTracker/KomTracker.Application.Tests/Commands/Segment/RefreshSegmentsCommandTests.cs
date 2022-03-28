@@ -1,9 +1,11 @@
-﻿using FluentResults;
+﻿using FluentAssertions;
+using FluentResults;
 using KomTracker.Application.Commands.Tracking;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Models.Configuration;
 using KomTracker.Application.Services;
 using KomTracker.Domain.Entities.Token;
+using KomTracker.Domain.Errors.Athlete;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;
@@ -68,5 +70,18 @@ public class RefreshSegmentsCommandTests
 
         // Assert
         await _athleteService.Received().GetValidTokenAsync(TEST_MASTER_STRAVA_ATHLETE_ID);
+    }
+
+    [Fact]
+    public async Task Refresh_segments_throws_when_no_token()
+    {
+        // Arrange
+        _athleteService.GetValidTokenAsync(TEST_MASTER_STRAVA_ATHLETE_ID).Returns(Result.Fail<TokenEntity>(new GetValidTokenError(GetValidTokenError.NoTokenInDB)));
+
+        // Act 
+        var action = async () => await _refreshSegmentsCommandHandler.Handle(new RefreshSegmentsCommand(), _cancellationToken);
+
+        // Assert
+        await action.Should().ThrowAsync<ArgumentNullException>();
     }
 }
