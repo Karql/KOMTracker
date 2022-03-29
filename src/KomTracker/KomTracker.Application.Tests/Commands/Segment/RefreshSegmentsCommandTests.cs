@@ -84,4 +84,24 @@ public class RefreshSegmentsCommandTests
         // Assert
         await action.Should().ThrowAsync<ArgumentNullException>();
     }
+
+    [Theory]
+    [InlineData(1, 1)]
+    [InlineData(10, 10)]
+    [InlineData(100, 100)]
+    public async Task Refresh_segments_passes_parameters_to_service(int segmentsToRefersh, int hours)
+    {
+        // Arrange
+        var minimumTimeFromLastRefresh = TimeSpan.FromHours(hours);
+
+        // Act
+        await _refreshSegmentsCommandHandler.Handle(new RefreshSegmentsCommand
+        {
+            SegmentsToRefresh = segmentsToRefersh,
+            MinimumTimeFromLastRefresh = minimumTimeFromLastRefresh
+        }, _cancellationToken);
+
+        // Assert
+        await _segmentService.Received().GetSegmentsToRefreshAsync(segmentsToRefersh, minimumTimeFromLastRefresh);
+    }
 }
