@@ -2,6 +2,7 @@
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Application.Models.Segment;
+using KomTracker.Application.Notifications.Tracking;
 using KomTracker.Application.Services;
 using KomTracker.Domain.Entities.Segment;
 using MediatR;
@@ -24,14 +25,16 @@ public class TrackKomsCommand : IRequest<Result>
 
 public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
 {
+    private readonly IMediator _mediator;
     private readonly IKOMUnitOfWork _komUoW;
     private readonly ILogger<TrackKomsCommandHandler> _logger;
     private readonly ISegmentService _segmentService;
     private readonly IAthleteService _athleteService;
     private readonly IStravaAthleteService _stravaAthleteService;
 
-    public TrackKomsCommandHandler(IKOMUnitOfWork komUoW, ILogger<TrackKomsCommandHandler> logger, ISegmentService segmentService, IAthleteService athleteService, IStravaAthleteService stravaAthleteService)
+    public TrackKomsCommandHandler(IMediator mediator, IKOMUnitOfWork komUoW, ILogger<TrackKomsCommandHandler> logger, ISegmentService segmentService, IAthleteService athleteService, IStravaAthleteService stravaAthleteService)
     {
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _segmentService = segmentService ?? throw new ArgumentNullException(nameof(segmentService));
@@ -80,6 +83,12 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
             await _segmentService.AddNewKomsSummaryWithEffortsAsync(athleteId, comparedEfforts);
 
             await _komUoW.SaveChangesAsync();
+
+            await _mediator.Publish(new TrackKomsCompletedNotification
+            {
+                AthleteId = athleteId,
+                ComparedEfforts = comparedEfforts
+            });
         }
     }
 
