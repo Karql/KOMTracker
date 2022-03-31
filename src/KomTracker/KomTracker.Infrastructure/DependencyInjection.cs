@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using KomTracker.Infrastructure.Identity;
 using KomTracker.Infrastructure.Strava;
 using Microsoft.AspNetCore.Builder;
+using KomTracker.Infrastructure.Mail;
 
 namespace KomTracker.Infrastructure;
 
@@ -14,6 +15,7 @@ public static class DependencyInjection
         services.AddPersistence(configuration);
         services.AddIdentity(configuration);
         services.AddStrava(configuration);
+        services.AddMail(configuration);
 
         return services;
     }
