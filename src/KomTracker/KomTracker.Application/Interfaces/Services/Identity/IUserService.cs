@@ -1,4 +1,5 @@
-﻿using KomTracker.Domain.Entities.Athlete;
+﻿using KomTracker.Application.Models.Identity;
+using KomTracker.Domain.Entities.Athlete;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,6 @@ namespace KomTracker.Application.Interfaces.Services.Identity;
 public interface IUserService
 {
     Task<bool> IsUserExistsAsync(int athleteId);
-
+    Task<UserModel?> GetUserAsync(int athleteId);
     Task AddUserAsync(AthleteEntity athlete);
 }

@@ -1,4 +1,6 @@
-﻿using KomTracker.Application.Interfaces.Services.Identity;
+﻿using AutoMapper;
+using KomTracker.Application.Interfaces.Services.Identity;
+using KomTracker.Application.Models.Identity;
 using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -13,16 +15,30 @@ namespace KomTracker.Infrastructure.Identity.Services;
 
 public class UserService : IUserService
 {
+    private readonly IMapper _mapper;
     private readonly UserManager<UserEntity> _userManager;
 
-    public UserService(UserManager<UserEntity> userManager)
+    public UserService(IMapper mapper, UserManager<UserEntity> userManager)
     {
+        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
     }
 
     public Task<bool> IsUserExistsAsync(int athleteId)
     {
         return _userManager.Users.AnyAsync(x => x.AthleteId == athleteId);
+    }
+
+    public async Task<UserModel?> GetUserAsync(int athleteId)
+    {
+        var user = await _userManager.Users.FirstOrDefaultAsync(x => x.AthleteId == athleteId);
+
+        if (user != null)
+        {
+            return _mapper.Map<UserModel>(user);
+        }
+
+        return null;
     }
 
     public Task AddUserAsync(AthleteEntity athlete)
