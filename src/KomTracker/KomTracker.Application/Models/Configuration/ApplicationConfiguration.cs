@@ -9,6 +9,7 @@ namespace KomTracker.Application.Models.Configuration;
 public class SendinBlueConfiguration
 {
     public string? ApiKey { get; set; }
+    public int KomChangesTemplateId { get; set; }
 }
 
 public class ApplicationConfiguration
