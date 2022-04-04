@@ -4,6 +4,7 @@ using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Application.Models.Segment;
 using KomTracker.Application.Notifications.Tracking;
 using KomTracker.Application.Services;
+using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Domain.Entities.Segment;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -50,14 +51,15 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
         {
             if (cancellationToken.IsCancellationRequested) return Result.Ok(); // TODO: OK?
 
-            await TrackKomsForAthleteAsync(athlete.AthleteId);
+            await TrackKomsForAthleteAsync(athlete);
         }
 
         return Result.Ok();
     }
 
-    protected async Task TrackKomsForAthleteAsync(int athleteId)
+    protected async Task TrackKomsForAthleteAsync(AthleteEntity athlete)
     {
+        var athleteId = athlete.AthleteId;
         var token = await GetTokenAsync(athleteId);
         if (token == null) return;
 
@@ -86,7 +88,7 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
 
             await _mediator.Publish(new TrackKomsCompletedNotification
             {
-                AthleteId = athleteId,
+                Athlete = athlete,
                 ComparedEfforts = comparedEfforts
             });
         }
