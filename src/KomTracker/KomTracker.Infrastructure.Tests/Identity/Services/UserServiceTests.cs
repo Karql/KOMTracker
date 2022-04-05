@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using AutoMapper;
+using FluentAssertions;
 using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Infrastructure.Identity.Entities;
 using KomTracker.Infrastructure.Identity.Services;
@@ -30,14 +31,16 @@ public class UserServiceTests
     };
     #endregion
 
+    private readonly IMapper _mapper;
     private readonly UserManager<UserEntity> _userManager;
     private readonly UserService _userService;
 
     public UserServiceTests()
     {
+        _mapper = Substitute.For<IMapper>();
         _userManager = TestUserManagerHelper.CreateTestUserManager<UserEntity>();
 
-        _userService = new UserService(_userManager);
+        _userService = new UserService(_mapper, _userManager);
 
         PrepareMocks();
     }
