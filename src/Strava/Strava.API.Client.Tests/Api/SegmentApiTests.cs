@@ -5,6 +5,7 @@ using RichardSzalay.MockHttp;
 using Strava.API.Client.Api;
 using Strava.API.Client.Model.Segment;
 using Strava.API.Client.Model.Segment.Error;
+using Strava.API.Client.Tests.Common;
 using Strava.API.Client.Tests.Extensions.Model.Segment;
 using System;
 using System.Collections.Generic;
@@ -47,8 +48,7 @@ public class SegmentApiTests
     public async Task Get_segment_returns_detailed_segment()
     {
         // Arrange
-        var fixture = new Fixture();
-        fixture.Register<DateTime>(() => DateTime.Today.ToUniversalTime()); // Today has no miliseconds etc.
+        var fixture = FixtureHelper.GetTestFixture();
         var expectedSegment = fixture.Create<SegmentDetailedModel>();
 
         _mockHttp.Expect(HttpMethod.Get, GetSegmentUrl(TEST_SEGMENT_ID))

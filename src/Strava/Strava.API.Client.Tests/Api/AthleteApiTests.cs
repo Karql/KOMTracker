@@ -18,6 +18,7 @@ using Xunit;
 using FluentResults.Extensions.FluentAssertions;
 using Strava.API.Client.Model.Base;
 using Strava.API.Client.Tests.Extensions.Model.Base;
+using Strava.API.Client.Tests.Common;
 
 namespace Strava.API.Client.Tests.Api;
 
@@ -53,8 +54,7 @@ public class AthleteApiTests
         // Arrange
         var expectedEfforts = new List<SegmentEffortDetailedModel>();
 
-        var fixture = new Fixture();
-        fixture.Register<DateTime>(() => DateTime.Today.ToUniversalTime()); // Today has no miliseconds etc.
+        var fixture = FixtureHelper.GetTestFixture();
 
         for (int pageNumber = 1; pageNumber <= pageCount; ++pageNumber)
         {
@@ -91,8 +91,7 @@ public class AthleteApiTests
     public async Task Get_koms_stops_iterating_and_returns_error(int errorOnPage)
     {
         // Arrange
-        var fixture = new Fixture();
-        fixture.Register<DateTime>(() => DateTime.Today.ToUniversalTime()); // Today has no miliseconds etc.
+        var fixture = FixtureHelper.GetTestFixture();
 
         for (int pageNumber = 1; pageNumber < errorOnPage; ++pageNumber)
         {

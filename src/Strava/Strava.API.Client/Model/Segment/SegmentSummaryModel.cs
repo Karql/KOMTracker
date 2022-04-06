@@ -37,19 +37,70 @@ public class SegmentSummaryModel
     [JsonPropertyName("elevation_low")]
     public float ElevationLow { get; set; }
 
+    [JsonPropertyName("start_latlng")]
+    public float[] StartLatLng { get; set; } = new float[2];
+
+    [JsonPropertyName("end_latlng")]
+    public float[] EndLatLng { get; set; } = new float[2];
+
     // Those fields are not documented
     // but it's easier to convert from them
-    [JsonPropertyName("start_latitude")]
-    public float StartLatitude { get; set; }
+    // Edit 2022-04-04: Strava has started send nulls...
+    //[JsonPropertyName("start_latitude")]
+    [JsonIgnore]
+    public float StartLatitude
+    {
+        get
+        {
+            return StartLatLng[0];
+        }
+        set
+        {
+            StartLatLng[0] = value;
+        }
+    }
 
-    [JsonPropertyName("start_longitude")]
-    public float StartLongitude { get; set; }
+    //[JsonPropertyName("start_longitude")]
+    [JsonIgnore]
+    public float StartLongitude
+    {
+        get
+        {
+            return StartLatLng[1];
+        }
+        set
+        {
+            StartLatLng[1] = value;
+        }
+    }
 
-    [JsonPropertyName("end_latitude")]
-    public float EndLatitude { get; set; }
+    //[JsonPropertyName("end_latitude")]
+    [JsonIgnore]
+    public float EndLatitude
+    {
+        get
+        {
+            return EndLatLng[0];
+        }
+        set
+        {
+            EndLatLng[0] = value;
+        }
+    }
 
-    [JsonPropertyName("end_longitude")]
-    public float EndLongitude { get; set; }
+    //[JsonPropertyName("end_longitude")]
+    [JsonIgnore]
+    public float EndLongitude
+    {
+        get
+        {
+            return EndLatLng[1];
+        }
+        set
+        {
+            EndLatLng[1] = value;
+        }
+    }
 
     [JsonPropertyName("climb_category")]
     public int ClimbCategory { get; set; }
