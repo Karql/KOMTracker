@@ -65,6 +65,7 @@ public class SegmentService : ISegmentService
             ?? Enumerable.Empty<KomsSummaryEntity>();
     }
 
+    // TODO: CompareEfforts not assigns segment
     public ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualKomsEfforts, IEnumerable<SegmentEffortEntity> lastKomsEfforts)
     {
         var comparedEfforts = new ComparedEffortsModel();

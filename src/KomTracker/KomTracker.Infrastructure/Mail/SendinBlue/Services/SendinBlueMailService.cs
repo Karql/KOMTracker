@@ -67,18 +67,19 @@ public class SendinBlueMailService : IMailService
             lostKomsCount = comparedEfforts.LostKomsCount,
             newKoms = comparedEfforts.Efforts.Where(x => x.SummarySegmentEffort.NewKom).Select(x => new KomChangesTemplateParamsSegmentModel
             {
-                segmentId = x.Segment.Id,
-                segmentName = x.Segment.Name
+                // TOOD: change to x.Segment after fixing CompareEfforts
+                segmentId = x.SegmentEffort.SegmentId,
+                segmentName = x.SegmentEffort.Name
             }).ToArray(),
             improvedKoms = comparedEfforts.Efforts.Where(x => x.SummarySegmentEffort.ImprovedKom).Select(x => new KomChangesTemplateParamsSegmentModel
             {
-                segmentId = x.Segment.Id,
-                segmentName = x.Segment.Name
+                segmentId = x.SegmentEffort.SegmentId,
+                segmentName = x.SegmentEffort.Name
             }).ToArray(),
             lostKoms = comparedEfforts.Efforts.Where(x => x.SummarySegmentEffort.LostKom).Select(x => new KomChangesTemplateParamsSegmentModel
             {
-                segmentId = x.Segment.Id,
-                segmentName = x.Segment.Name
+                segmentId = x.SegmentEffort.SegmentId,
+                segmentName = x.SegmentEffort.Name
             }).ToArray(),
         };
     }
