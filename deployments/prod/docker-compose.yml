@@ -6,6 +6,8 @@ services:
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
+      ApplicationConfiguration__MasterStravaAthleteId: ${APP_CONF_MASTER_STRAVA_ATHLETE_ID}
+      ApplicationConfiguration__SendinBlueConfiguration__ApiKey: ${APP_CONF_SENDINBLUE_API_KEY}
       StravaApiClientConfiguration__ClientID: ${STRAVA_API_CLIENT_ID}
       StravaApiClientConfiguration__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
       IdentityConfiguration__IdentityUrl: https://komtracker.karkula.pl/kom-tracker-api/identity
