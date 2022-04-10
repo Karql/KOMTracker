@@ -1,1 +1,3 @@
 - Fix change tracking & auditing for upsert etc.
+- Improve query right away for new segment details
+- Fix don't mark new koms in first track changes for athlete
