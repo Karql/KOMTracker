@@ -106,7 +106,7 @@ public class SegmentServiceTests
     }
 
     [Fact]
-    public async Task Get_last_koms_summary_efforts_returns_empty_list_when_no_data_in_db()
+    public async Task Get_last_koms_summary_efforts_returns_null_when_no_data_in_db()
     {
         // Arrange
         _segmentRepository.GetLastKomsSummaryEffortsAsync(TestAthleteId).Returns((IEnumerable<EffortModel>)null);
@@ -115,8 +115,7 @@ public class SegmentServiceTests
         var res = await _segmentService.GetLastKomsSummaryEffortsAsync(TestAthleteId);
 
         // Assert
-        res.Should().NotBeNull();
-        res.Any().Should().BeFalse();
+        res.Should().BeNull();
     }
     #endregion
 
@@ -218,7 +217,7 @@ public class SegmentServiceTests
         };
 
         // Act
-        var comparedEffots = _segmentService.CompareEfforts(actualKomsEffots, lastKomsEffots);
+        var comparedEffots = _segmentService.CompareEfforts(actualKomsEffots, lastKomsEffots, false);
 
         // Assert
         comparedEffots.Should().NotBeNull();
@@ -227,6 +226,7 @@ public class SegmentServiceTests
         comparedEffots.ImprovedKomsCount.Should().Be(1);
         comparedEffots.LostKomsCount.Should().Be(1);
         comparedEffots.AnyChanges.Should().BeTrue();
+        comparedEffots.FirstCompare.Should().BeFalse();
 
         var efforts = comparedEffots.Efforts;
         efforts.Should().NotBeNull();
@@ -261,7 +261,7 @@ public class SegmentServiceTests
         };
 
         // Act
-        var comparedEffots = _segmentService.CompareEfforts(actualKomsEffots, lastKomsEffots);
+        var comparedEffots = _segmentService.CompareEfforts(actualKomsEffots, lastKomsEffots, false);
 
         // Assert
         comparedEffots.Should().NotBeNull();
@@ -270,6 +270,33 @@ public class SegmentServiceTests
         comparedEffots.ImprovedKomsCount.Should().Be(0);
         comparedEffots.LostKomsCount.Should().Be(0);
         comparedEffots.AnyChanges.Should().BeFalse();
+        comparedEffots.FirstCompare.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Compare_efforts_does_not_mark_new_koms_in_first_compare()
+    {
+        // Arrange
+        var lastKomsEffots = new SegmentEffortEntity[0];
+
+        var actualKomsEffots = new SegmentEffortEntity[]
+        {
+            new() { Id = 1, SegmentId = 1 },
+            new() { Id = 2, SegmentId = 2 },
+            new() { Id = 3, SegmentId = 3 },
+        };
+
+        // Act
+        var comparedEffots = _segmentService.CompareEfforts(actualKomsEffots, lastKomsEffots, true);
+
+        // Assert
+        comparedEffots.Should().NotBeNull();
+        comparedEffots.KomsCount.Should().Be(3);
+        comparedEffots.NewKomsCount.Should().Be(0);
+        comparedEffots.ImprovedKomsCount.Should().Be(0);
+        comparedEffots.LostKomsCount.Should().Be(0);
+        comparedEffots.AnyChanges.Should().BeFalse(); // No changes for first compare
+        comparedEffots.FirstCompare.Should().BeTrue();
     }
 
     private void AssertComparedEffortLink(EffortModel model, bool lostKom, bool kom, bool newKom, bool improvedKom)

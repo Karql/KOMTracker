@@ -67,11 +67,13 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
         if (actualKoms == null) return;
 
         var lastKomsSummaryEfforts = await _segmentService.GetLastKomsSummaryEffortsAsync(athleteId);
-        var lastKomsEfforts = lastKomsSummaryEfforts.Where(x => x.SummarySegmentEffort.Kom).Select(x => x.SegmentEffort);
+        var firstTrack = lastKomsSummaryEfforts == null;
+        var lastKomsEfforts = lastKomsSummaryEfforts?.Where(x => x.SummarySegmentEffort.Kom).Select(x => x.SegmentEffort)
+            ?? Enumerable.Empty<SegmentEffortEntity>();
 
-        var comparedEfforts = _segmentService.CompareEfforts(actualKoms.Select(x => x.Item1), lastKomsEfforts);
+        var comparedEfforts = _segmentService.CompareEfforts(actualKoms.Select(x => x.Item1), lastKomsEfforts, firstTrack);
 
-        if (comparedEfforts.AnyChanges)
+        if (comparedEfforts.AnyChanges || firstTrack)
         {
             var newKomsEfforts = comparedEfforts
                 .Efforts

@@ -39,10 +39,9 @@ public class SegmentService : ISegmentService
 
     public async Task<IEnumerable<EffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId)
     {
-        return (await _komUoW
+        return await _komUoW
             .GetRepository<ISegmentRepository>()
-            .GetLastKomsSummaryEffortsAsync(athleteId))
-            ?? Enumerable.Empty<EffortModel>();
+            .GetLastKomsSummaryEffortsAsync(athleteId);
     }
 
     public async Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(int athleteId, DateTime dateFrom)
@@ -66,9 +65,12 @@ public class SegmentService : ISegmentService
     }
 
     // TODO: CompareEfforts not assigns segment
-    public ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualKomsEfforts, IEnumerable<SegmentEffortEntity> lastKomsEfforts)
+    public ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualKomsEfforts, IEnumerable<SegmentEffortEntity> lastKomsEfforts, bool firstCompare = false)
     {
-        var comparedEfforts = new ComparedEffortsModel();
+        var comparedEfforts = new ComparedEffortsModel
+        {
+            FirstCompare = firstCompare
+        };
 
         actualKomsEfforts.FullGroupJoin(lastKomsEfforts,
             x => x.SegmentId,
@@ -87,16 +89,20 @@ public class SegmentService : ISegmentService
                 comparedEfforts.KomsCount++;
                 link.Kom = true;
 
-                if (x.LastEffort == null)
+                // don't mark as new in first comparing
+                if (!firstCompare) 
                 {
-                    comparedEfforts.NewKomsCount++;
-                    link.NewKom = true;
-                }
+                    if (x.LastEffort == null)
+                    {
+                        comparedEfforts.NewKomsCount++;
+                        link.NewKom = true;
+                    }
 
-                else if (x.NewEffort.Id != x.LastEffort.Id)
-                {
-                    comparedEfforts.ImprovedKomsCount++;
-                    link.ImprovedKom = true;
+                    else if (x.NewEffort.Id != x.LastEffort.Id)
+                    {
+                        comparedEfforts.ImprovedKomsCount++;
+                        link.ImprovedKom = true;
+                    }
                 }
             }
 

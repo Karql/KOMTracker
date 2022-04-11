@@ -31,6 +31,11 @@ public class TrackKomsCompletedNotificationSendEmailHandler : INotificationHandl
 
     public async Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
     {
+        if (notification.ComparedEfforts.FirstCompare)
+        {
+            return; // Do not send mail for first tracking
+        }
+
         var athleteId = notification.Athlete.AthleteId;
         var user = await _userService.GetUserAsync(athleteId);
 

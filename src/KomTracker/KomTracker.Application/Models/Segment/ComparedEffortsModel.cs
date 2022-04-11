@@ -6,6 +6,7 @@ namespace KomTracker.Application.Models.Segment;
 
 public class ComparedEffortsModel
 {
+    public bool FirstCompare { get; set; } = false;
     public int KomsCount { get; set; } = 0;
     public int NewKomsCount { get; set; } = 0;
     public int ImprovedKomsCount { get; set; } = 0;

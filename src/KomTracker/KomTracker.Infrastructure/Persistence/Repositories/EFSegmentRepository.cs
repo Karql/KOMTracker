@@ -34,14 +34,22 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
 
     public async Task<IEnumerable<EffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId)
     {
+        // to distinguish between null or zero
+        var ks = await _context
+                    .KomsSummary
+                    .OrderByDescending(x => x.TrackDate)
+                    .FirstOrDefaultAsync(x => x.AthleteId == athleteId);
+
+        if (ks == null)
+        {
+            return null;
+        }
+
         return await (
             from ksse in _context.KomsSummarySegmentEffort
             join se in _context.SegmentEffort on ksse.SegmentEffortId equals se.Id
             join s in _context.Segment on se.SegmentId equals s.Id
-            where ksse.KomSummaryId == _context
-                    .KomsSummary
-                    .OrderByDescending(x => x.TrackDate)
-                    .FirstOrDefault(x => x.AthleteId == athleteId).Id
+            where ksse.KomSummaryId == ks.Id
             select new EffortModel
             {
                 SegmentEffort = se,
