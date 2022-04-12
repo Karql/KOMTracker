@@ -42,11 +42,18 @@ public class SendinBlueMailService : IMailService
     }
 
     public async System.Threading.Tasks.Task SendTrackKomsNotificationAsync(SendTrackKomsNotificationParamsModel p)
-    {       
+    {
+        var to = p.To;
+
+        if (!string.IsNullOrWhiteSpace(_applicationConfiguration.SendinBlueConfiguration.TestMail))
+        {
+            to = _applicationConfiguration.SendinBlueConfiguration.TestMail;
+        }
+
         var apiInstance = new TransactionalEmailsApi();
         var sendSmtpEmail = new SendSmtpEmail
         {
-            To = new List<SendSmtpEmailTo> { new SendSmtpEmailTo(p.To) },
+            To = new List<SendSmtpEmailTo> { new SendSmtpEmailTo(to) },
             TemplateId = _applicationConfiguration.SendinBlueConfiguration.KomChangesTemplateId,
             Params = ConvertToTemplateParams(p)
         };
