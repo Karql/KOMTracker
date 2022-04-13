@@ -1,0 +1,89 @@
+﻿@page "/account"
+@attribute [Authorize]
+
+@if (!_loaded)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">Account</MudText>
+
+    <MudTabs Elevation="1" Rounded="true" PanelClass="mt-6">
+        <MudTabPanel Text="General">
+            <MudGrid>
+                <MudItem xs="12" sm="4" md="3">
+                    <MudCard >
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText>Profile</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <div class="d-flex justify-center mb-4">
+                                <MudAvatar Image="@_user.Avatar" Style="height:100px; width:100px;">
+                                </MudAvatar>                                
+                            </div>
+                            <MudText Align="Align.Center">@_user.FirstName @_user.LastName</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="8" md="9">
+                    <MudCard >
+                        <MudCardHeader>
+                            <CardHeaderContent>
+                                <MudText>Profile Details</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudGrid>
+                                <MudItem xs="12" md="6">
+                                    <MudTextField @bind-Value="_user.FirstName" Label="First Name" Variant="Variant.Outlined" Disabled="true" />
+                                </MudItem>
+                                <MudItem xs="12" md="6">
+                                    <MudTextField @bind-Value="_user.LastName" Label="Last Name" Variant="Variant.Outlined" Disabled="true" />
+                                </MudItem>
+                                <MudItem xs="12" md="6">
+                                    <MudTextField @bind-Value="_user.Username" Label="User name" Variant="Variant.Outlined" Disabled="true" />
+                                </MudItem>
+                                <MudItem xs="12" md="6">
+                                    <MudTextField @bind-Value="Email" Label="Email" Variant="Variant.Outlined" HelperText="For notifications" InputType="InputType.Email" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudCardContent>
+                        <MudCardActions Class="pb-4 pl-4">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" @onclick="@(() => SaveChanges("Profile details saved", Severity.Success))">Save Changes</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudTabPanel>
+        <MudTabPanel Text="Notifications">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText>Notifications</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudGrid>
+                        <MudItem xs="12" sm="4">
+                            <MudText>
+                                <b>Email</b>
+                            </MudText>
+                            <MudText Typo="Typo.body2">
+                                What type of notifications you want to recieve to your email.
+                            </MudText>
+                            <div class="d-flex flex-column mt-6">
+                                <MudCheckBox @bind-Checked="@KomsChangesNotification" Label="KOMs changes" Color="Color.Primary"></MudCheckBox>
+                            </div>
+                        </MudItem>
+                    </MudGrid>
+                </MudCardContent>
+                <MudCardActions Class="pb-4 pl-4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" @onclick="@(() => SaveChanges("Notification settings saved", Severity.Success))">Save Changes</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudTabPanel>
+    </MudTabs>
+}

@@ -76,9 +76,12 @@ public static class IdentityDependencyInjection
     private static IdentityResource[] GetIdentityResources()
     {
         var profile = new IdentityResources.Profile();
+        profile.UserClaims.Add(JwtClaimTypes.Email);
+        profile.UserClaims.Add(JwtClaimTypes.EmailVerified);
         profile.UserClaims.Add(Claims.AthleteId);
         profile.UserClaims.Add(Claims.FirstName);
         profile.UserClaims.Add(Claims.LastName);
+        profile.UserClaims.Add(Claims.Username);
         profile.UserClaims.Add(Claims.Avatar);
 
         return new IdentityResource[]
@@ -92,7 +95,7 @@ public static class IdentityDependencyInjection
     {
         return new []
         {
-            new ApiScope(OAuth2.Scopes.Api, "KOM Tracker API", new [] { JwtClaimTypes.Role, Claims.AthleteId, Claims.FirstName, Claims.LastName, Claims.Avatar })
+            new ApiScope(OAuth2.Scopes.Api, "KOM Tracker API", new [] { JwtClaimTypes.Role, JwtClaimTypes.Email, JwtClaimTypes.EmailVerified,  Claims.AthleteId, Claims.FirstName, Claims.LastName, Claims.Username, Claims.Avatar })
         };
     }
 

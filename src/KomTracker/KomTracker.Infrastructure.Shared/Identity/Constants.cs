@@ -35,7 +35,11 @@ public static class Constants
         public const string AthleteId = "athlete_id";
         public const string FirstName = "first_name";
         public const string LastName = "last_name";
+        public const string Username = "username";
         public const string Avatar = "avatar";
+        public const string Email = "email";
+        public const string EmailVerified = "email_verified";
+        public const string Password = "password";
     }
 
     public static class OAuth2

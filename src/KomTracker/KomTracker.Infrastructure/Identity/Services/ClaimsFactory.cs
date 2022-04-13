@@ -37,6 +37,7 @@ public class ClaimsFactory<T> : UserClaimsPrincipalFactory<T>
         identity.AddClaim(new Claim(Constants.Claims.AthleteId, athlete.AthleteId.ToString()));
         identity.AddClaim(new Claim(Constants.Claims.FirstName, athlete.FirstName));
         identity.AddClaim(new Claim(Constants.Claims.LastName, athlete.LastName));
+        identity.AddClaim(new Claim(Constants.Claims.Username, athlete.Username));
         identity.AddClaim(new Claim(Constants.Claims.Avatar, athlete.ProfileMedium));
 
         return identity;
