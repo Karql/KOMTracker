@@ -3,6 +3,7 @@ using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.Application.Queries.Athlete;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace KomTracker.API.Controllers;
 [Route("athletes")]
@@ -38,5 +39,19 @@ public class AthletesController : BaseApiController<AthletesController>
         var komsSummaries = await _mediator.Send(new GetKomsSummariesQuery { AthleteId = athleteId });
 
         return Ok(_mapper.Map<IEnumerable<KomsSummaryViewModel>>(komsSummaries));
+    }
+
+    [HttpPut]
+    [Route("{athleteId}/change-email/{newEmail}")]
+    public async Task<IActionResult> ChangeEmail([FromRoute][Required]int athleteId, [FromRoute][Required]string newEmail)
+    {
+        var user = GetCurrentUser();
+
+        if (user?.AthleteId != athleteId)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+
+        return Ok();
     }
 }

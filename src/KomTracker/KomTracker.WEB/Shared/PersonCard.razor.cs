@@ -1,5 +1,5 @@
-﻿using KomTracker.WEB.Infrastructure.Services.User;
-using KomTracker.WEB.Models.User;
+﻿using KomTracker.API.Shared.Models.User;
+using KomTracker.WEB.Infrastructure.Services.User;
 using Microsoft.AspNetCore.Components;
 
 namespace KomTracker.WEB.Shared;

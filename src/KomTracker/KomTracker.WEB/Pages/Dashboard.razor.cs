@@ -1,6 +1,6 @@
-﻿using KomTracker.API.Shared.ViewModels.Segment;
+﻿using KomTracker.API.Shared.Models.User;
+using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.WEB.Infrastructure.Services.User;
-using KomTracker.WEB.Models.User;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;

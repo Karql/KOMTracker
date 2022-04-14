@@ -1,5 +1,4 @@
-﻿using KomTracker.WEB.Models.User;
-using System.Security.Claims;
+﻿using KomTracker.API.Shared.Models.User;
 
 namespace KomTracker.WEB.Infrastructure.Services.User;
 

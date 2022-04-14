@@ -1,6 +1,6 @@
-﻿using KomTracker.WEB.Infrastructure.Services.Preference;
+﻿using KomTracker.API.Shared.Models.User;
+using KomTracker.WEB.Infrastructure.Services.Preference;
 using KomTracker.WEB.Infrastructure.Services.User;
-using KomTracker.WEB.Models.User;
 using KomTracker.WEB.Settings;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;

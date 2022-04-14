@@ -9,6 +9,7 @@ using KomTracker.Application.Models.Mail;
 using KomTracker.Application.Models.Segment;
 using KomTracker.Application.Notifications.Tracking;
 using KomTracker.Domain.Entities.Athlete;
+using KomTracker.Application.Interfaces.Services.Identity;
 
 namespace KomTracker.API.Controllers; 
 
@@ -26,7 +27,7 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
     }
 
     [HttpGet("test")]
-    public async Task<ActionResult> Test(string token)
+    public async Task<ActionResult> Test()
     {
         var cancellationTokenSource = new CancellationTokenSource();
 
@@ -34,6 +35,7 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
         var segmentApi = _serviceProvider.GetRequiredService<ISegmentApi>();
         var stravaAthleteService = _serviceProvider.GetRequiredService<IStravaAthleteService>();
         var mailService = _serviceProvider.GetRequiredService<IMailService>();
+        var userService = _serviceProvider.GetRequiredService<IUserService>();
 
         //var res = await athleteApi.GetKomsAsync(2394302, token);
         //var res = await athleteService.GetAthleteKomsAsync(2394302, token);
@@ -41,62 +43,10 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
         //var res = await segmentApi.GetSegmentAsync(30393774, token);
 
 
-        await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
-        //await _mediator.Send(new RefreshSegmentsCommand { SegmentsToRefresh = 2 }, cancellationTokenSource.Token);
-        //await _mediator.Publish(new TrackKomsCompletedNotification
-        //{
-        //    Athlete = new AthleteEntity
-        //    {
-        //        AthleteId = 2394302,
-        //        FirstName = "Mateusz"
-        //    },
-        //    ComparedEfforts = new ComparedEffortsModel
-        //    {
-        //        KomsCount = 625,
-        //        NewKomsCount = 1,
-        //        ImprovedKomsCount = 1,
-        //        LostKomsCount = 1,
-        //        Efforts = new List<EffortModel>
-        //        {
-        //            new EffortModel
-        //            {
-        //                Segment = new Domain.Entities.Segment.SegmentEntity
-        //                {
-        //                    Id = 1,
-        //                    Name = "Seg1"
-        //                },
-        //                SummarySegmentEffort = new Domain.Entities.Segment.KomsSummarySegmentEffortEntity
-        //                {
-        //                    NewKom = true
-        //                }
-        //            },
-        //            new EffortModel
-        //            {
-        //                Segment = new Domain.Entities.Segment.SegmentEntity
-        //                {
-        //                    Id = 2,
-        //                    Name = "Seg2"
-        //                },
-        //                SummarySegmentEffort = new Domain.Entities.Segment.KomsSummarySegmentEffortEntity
-        //                {
-        //                    ImprovedKom = true
-        //                }
-        //            },
-        //            new EffortModel
-        //            {
-        //                Segment = new Domain.Entities.Segment.SegmentEntity
-        //                {
-        //                    Id = 3,
-        //                    Name = "Seg3"
-        //                },
-        //                SummarySegmentEffort = new Domain.Entities.Segment.KomsSummarySegmentEffortEntity
-        //                {
-        //                    LostKom = true
-        //                }
-        //            }
-        //        }
-        //    }
-        //});
+        //await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
+        //await _mediator.Send(new RefreshSegmentsCommand { SegmentsToRefresh = 2 }, cancellationTokenSource.Token);       
+
+        await userService.ChangeUserMailAsync(2394302, "matuesz@karkula.pl");
 
         return new NoContentResult();
     }

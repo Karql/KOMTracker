@@ -13,4 +13,6 @@ public interface IUserService
     Task<bool> IsUserExistsAsync(int athleteId);
     Task<UserModel?> GetUserAsync(int athleteId);
     Task AddUserAsync(AthleteEntity athlete);
+
+    Task ChangeUserMailAsync(int athleteId, string newEmail);
 }

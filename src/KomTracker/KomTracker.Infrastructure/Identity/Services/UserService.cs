@@ -49,4 +49,20 @@ public class UserService : IUserService
             UserName = athlete.Username
         });
     }
+
+    public async Task ChangeUserMailAsync(int athleteId, string newEmail)
+    {
+        var user = await GetUserByAthleteIdAsync(athleteId);
+
+        // TODO: check mail already exists
+
+        var token = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+
+        await _userManager.ChangeEmailAsync(user, newEmail, token);
+    }
+
+    private Task<UserEntity> GetUserByAthleteIdAsync(int athleteId)
+    {
+        return _userManager.Users.FirstOrDefaultAsync(x => x.AthleteId == athleteId);
+    }
 }

@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\KomTracker.Infrastructure.Shared\KomTracker.Infrastructure.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

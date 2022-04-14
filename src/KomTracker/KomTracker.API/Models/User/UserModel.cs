@@ -1,4 +1,4 @@
-﻿namespace KomTracker.WEB.Models.User;
+﻿namespace KomTracker.API.Models.User;
 
 public class UserModel
 {
