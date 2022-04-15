@@ -16,7 +16,6 @@ using MoreLinq;
 using KomTracker.Domain.Entities.Segment;
 using KomTracker.Application.Interfaces.Services.Strava;
 using KomTracker.Infrastructure.Strava.Services;
-using KomTracker.Application.Errors.Strava.Athlete;
 
 namespace KomTracker.Infrastructure.Tests.Strava.Services;
 

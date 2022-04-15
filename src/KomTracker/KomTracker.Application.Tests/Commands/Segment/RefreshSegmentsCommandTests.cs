@@ -5,7 +5,6 @@ using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Models.Configuration;
 using KomTracker.Application.Services;
 using KomTracker.Domain.Entities.Token;
-using KomTracker.Domain.Errors.Athlete;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System;

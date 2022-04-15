@@ -31,7 +31,11 @@ public static class IdentityDependencyInjection
 
         services.AddSingleton<IdentityConfiguration>(configuration.GetIdentityConfiguration());
 
-        services.AddIdentity<UserEntity, RoleEntity>()
+        services
+            .AddIdentity<UserEntity, RoleEntity>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            })
             .AddEntityFrameworkStores<KOMDBContext>()
             .AddDefaultTokenProviders()
             .AddClaimsPrincipalFactory<ClaimsFactory<UserEntity>>();

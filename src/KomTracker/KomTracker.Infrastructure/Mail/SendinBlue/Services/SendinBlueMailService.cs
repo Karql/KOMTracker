@@ -31,14 +31,45 @@ public class SendinBlueMailService : IMailService
             throw new ArgumentException("SendinBlueConfiguration.ApiKey not defined!", nameof(applicationConfiguration.SendinBlueConfiguration.ApiKey));
         }
 
-        var komChangesTemplateId = applicationConfiguration.SendinBlueConfiguration.KomChangesTemplateId;
+        var changeEmailConfirmationTemplateId = applicationConfiguration.SendinBlueConfiguration.ChangeEmailConfirmationTemplateId;
 
-        if (komChangesTemplateId <= 0)
+        if (changeEmailConfirmationTemplateId <= 0)
         {
-            throw new ArgumentException("SendinBlueConfiguration.KomChangesTemplateId not defined!", nameof(applicationConfiguration.SendinBlueConfiguration.KomChangesTemplateId));
+            throw new ArgumentException("SendinBlueConfiguration.ChangeEmailConfirmationTemplateId not defined!", nameof(applicationConfiguration.SendinBlueConfiguration.ChangeEmailConfirmationTemplateId));
+        }
+
+        var trackKomsTemplateId = applicationConfiguration.SendinBlueConfiguration.TrackKomsTemplateId;
+
+        if (trackKomsTemplateId <= 0)
+        {
+            throw new ArgumentException("SendinBlueConfiguration.TrackKomsTemplateId not defined!", nameof(applicationConfiguration.SendinBlueConfiguration.TrackKomsTemplateId));
         }
 
         Configuration.Default.AddApiKey("api-key", apiKey);
+    }
+
+    public async System.Threading.Tasks.Task SendChangeEmailConfirmationAsync(SendChangeEmailConfirmationParamsModel p)
+    {
+        var to = p.To;
+
+        if (!string.IsNullOrWhiteSpace(_applicationConfiguration.SendinBlueConfiguration.TestMail))
+        {
+            to = _applicationConfiguration.SendinBlueConfiguration.TestMail;
+        }
+
+        var apiInstance = new TransactionalEmailsApi();
+        var sendSmtpEmail = new SendSmtpEmail
+        {
+            To = new List<SendSmtpEmailTo> { new SendSmtpEmailTo(to) },
+            TemplateId = _applicationConfiguration.SendinBlueConfiguration.ChangeEmailConfirmationTemplateId,
+            Params = new ChangeEmailConfirmationTemplateParamsModel
+            {
+                firstName = p.FirstName,
+                url = p.Url
+            }
+        };
+
+        var result = await apiInstance.SendTransacEmailAsync(sendSmtpEmail);
     }
 
     public async System.Threading.Tasks.Task SendTrackKomsNotificationAsync(SendTrackKomsNotificationParamsModel p)
@@ -54,7 +85,7 @@ public class SendinBlueMailService : IMailService
         var sendSmtpEmail = new SendSmtpEmail
         {
             To = new List<SendSmtpEmailTo> { new SendSmtpEmailTo(to) },
-            TemplateId = _applicationConfiguration.SendinBlueConfiguration.KomChangesTemplateId,
+            TemplateId = _applicationConfiguration.SendinBlueConfiguration.TrackKomsTemplateId,
             Params = ConvertToTemplateParams(p)
         };
 

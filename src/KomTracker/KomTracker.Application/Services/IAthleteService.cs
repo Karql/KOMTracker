@@ -38,6 +38,17 @@ public interface IAthleteService
 
     /// <summary>
     /// Get token from DB and refresh when needed
-    /// <summary>
+    /// </summary>
     Task<Result<TokenEntity>> GetValidTokenAsync(int athleteId);
+}
+
+public class GetValidTokenError : FluentResults.Error
+{
+    public const string NoTokenInDB = "No token in DB!";
+    public const string RefreshFailed = "Refresh failed!";
+
+    public GetValidTokenError(string message)
+        : base(message)
+    {
+    }
 }

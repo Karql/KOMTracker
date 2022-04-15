@@ -4,7 +4,6 @@ using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Domain.Entities.Segment;
 using KomTracker.Domain.Entities.Token;
-using KomTracker.Domain.Errors.Athlete;
 using System;
 using System.Collections.Generic;
 using System.Linq;

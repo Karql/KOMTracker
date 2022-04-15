@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using FluentResults;
 using FluentResults.Extensions.FluentAssertions;
-using KomTracker.Application.Errors.Account;
 using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Domain.Entities.Token;
 using NSubstitute;
@@ -15,9 +14,10 @@ using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Services;
 using IStravaTokenService = KomTracker.Application.Interfaces.Services.Strava.ITokenService;
 using IIdentityUserService = KomTracker.Application.Interfaces.Services.Identity.IUserService;
-using KomTracker.Application.Errors.Strava.Token;
 using KomTracker.Application.Commands.Account;
 using System.Threading;
+
+using ExchangeError = KomTracker.Application.Interfaces.Services.Strava.ExchangeError;
 
 namespace KomTracker.Application.Tests.Commands.Account;
 
@@ -74,7 +74,7 @@ public class ConnectCommandTests
 
         // Assert
         res.Should().BeFailure();
-        res.HasError<ConnectError>(x => x.Message == ConnectError.NoRequiredScope).Should().BeTrue();
+        res.HasError<ConnectCommandError>(x => x.Message == ConnectCommandError.NoRequiredScope).Should().BeTrue();
 
         await AssertConnectNoUpdate();
     }
@@ -87,7 +87,7 @@ public class ConnectCommandTests
 
         // Assert
         res.Should().BeFailure();
-        res.HasError<ConnectError>(x => x.Message == ConnectError.InvalidCode).Should().BeTrue();
+        res.HasError<ConnectCommandError>(x => x.Message == ConnectCommandError.InvalidCode).Should().BeTrue();
 
         await AssertConnectNoUpdate();
     }

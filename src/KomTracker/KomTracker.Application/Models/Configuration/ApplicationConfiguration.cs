@@ -10,7 +10,8 @@ public class SendinBlueConfiguration
 {
     public string? TestMail { get; set; }
     public string? ApiKey { get; set; }
-    public int KomChangesTemplateId { get; set; }
+    public int ChangeEmailConfirmationTemplateId { get; set; }
+    public int TrackKomsTemplateId { get; set; }
 }
 
 public class ApplicationConfiguration

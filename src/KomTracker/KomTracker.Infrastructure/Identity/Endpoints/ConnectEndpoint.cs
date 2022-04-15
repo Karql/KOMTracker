@@ -1,6 +1,5 @@
 ﻿using IdentityServer4.Hosting;
 using KomTracker.Application.Commands.Account;
-using KomTracker.Application.Errors.Account;
 using KomTracker.Infrastructure.Identity.Endpoints.Results;
 using KomTracker.Infrastructure.Identity.Services;
 using MediatR;
@@ -38,13 +37,13 @@ internal class ConnectEndpoint : IEndpointHandler
 
         if (!res.IsSuccess)
         {
-            if (!res.HasError<ConnectError>())
+            if (!res.HasError<ConnectCommandError>())
             {
                 throw new Exception($"{nameof(ConnectEndpoint)} {nameof(ConnectCommand)} failed!");
             }
 
             // TODO: Better handling (redirect with error message)
-            var error = (ConnectError)res.Errors.FirstOrDefault();
+            var error = (ConnectCommandError)res.Errors.FirstOrDefault();
             return new BadRequestResult(error.Message);
         }
 

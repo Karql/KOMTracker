@@ -2,7 +2,6 @@
 using FluentAssertions;
 using FluentResults;
 using FluentResults.Extensions.FluentAssertions;
-using KomTracker.Application.Errors.Strava.Token;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Domain.Entities.Token;
@@ -16,6 +15,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using ApiModel = Strava.API.Client.Model;
+using ExchangeError = KomTracker.Application.Interfaces.Services.Strava.ExchangeError;
+using RefreshError = KomTracker.Application.Interfaces.Services.Strava.RefreshError;
 
 namespace KomTracker.Infrastructure.Tests.Strava.Services;
 

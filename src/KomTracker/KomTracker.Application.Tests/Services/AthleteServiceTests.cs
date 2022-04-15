@@ -2,13 +2,11 @@
 using FluentAssertions;
 using FluentResults;
 using FluentResults.Extensions.FluentAssertions;
-using KomTracker.Application.Errors.Strava.Token;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Application.Services;
 using KomTracker.Application.Tests.Persistence;
 using KomTracker.Domain.Entities.Token;
-using KomTracker.Domain.Errors.Athlete;
 using Microsoft.AspNetCore.Identity;
 using MockQueryable.NSubstitute;
 using NSubstitute;
@@ -21,6 +19,7 @@ using Utils.Tests.UserManager;
 using Utils.UnitOfWork.Abstract;
 using Xunit;
 using IStravaTokenService = KomTracker.Application.Interfaces.Services.Strava.ITokenService;
+using RefreshError = KomTracker.Application.Interfaces.Services.Strava.RefreshError;
 
 namespace KomTracker.Application.Tests.Infrastructure.Services;
 

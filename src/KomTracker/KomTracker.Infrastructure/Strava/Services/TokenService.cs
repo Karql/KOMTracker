@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using FluentResults;
-using KomTracker.Application.Errors.Strava.Token;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Services.Strava;
 using KomTracker.Domain.Entities.Athlete;

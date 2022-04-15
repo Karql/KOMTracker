@@ -15,3 +15,16 @@ public interface ISegmentService
     /// </summary>
     Task<Result<SegmentEntity>> GetSegmentAsync(long id, string token);
 }
+
+public class GetSegmentError : FluentResults.Error
+{
+    public const string Unauthorized = "Unauthorized";
+    public const string UnknownError = "UnknownError";
+    public const string NotFound = "NotFound";
+
+    public GetSegmentError(string message)
+    : base(message)
+    {
+    }
+}
+

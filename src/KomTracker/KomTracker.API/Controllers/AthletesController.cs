@@ -1,5 +1,6 @@
 ﻿using KomTracker.API.Attributes;
 using KomTracker.API.Shared.ViewModels.Segment;
+using KomTracker.Application.Commands.Account;
 using KomTracker.Application.Queries.Athlete;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -51,6 +52,8 @@ public class AthletesController : BaseApiController<AthletesController>
         {
             return StatusCode(StatusCodes.Status403Forbidden);
         }
+
+        await _mediator.Send(new ChangeEmailCommand { AthleteId = athleteId, NewEmail = newEmail });
 
         return Ok();
     }

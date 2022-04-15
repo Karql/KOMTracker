@@ -17,12 +17,14 @@ public static class Constants
     {
         public const string Login = "Login";
         public const string Connect = "Connect";
+        public const string ConfirmChangeEmail = "ConfirmChangeEmail";
     }
 
     public static class ProtocolRoutePaths
     {
         public const string Loing = "/account/login";
         public const string Connect = "/account/connect";
+        public const string ConfirmChangeEmail = "/account/confirm-change-email";
     }
 
     public static class ConfigurationSections

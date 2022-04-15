@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using KomTracker.Application.Errors.Account;
 using IStravaTokenService = KomTracker.Application.Interfaces.Services.Strava.ITokenService;
 using IIdentityUserService = KomTracker.Application.Interfaces.Services.Identity.IUserService;
 
@@ -29,6 +28,17 @@ public class ConnectCommand : IRequest<Result<ConnectCommandResult>>
 public class ConnectCommandResult
 {
     public int AthleteId { get; set; }
+}
+
+public class ConnectCommandError : FluentResults.Error
+{
+    public const string NoRequiredScope = "No required scope!";
+    public const string InvalidCode = "Invalid code";
+
+    public ConnectCommandError(string message)
+        : base(message)
+    {
+    }
 }
 
 public class ConnectCommandHandler : IRequestHandler<ConnectCommand, Result<ConnectCommandResult>>
@@ -54,14 +64,14 @@ public class ConnectCommandHandler : IRequestHandler<ConnectCommand, Result<Conn
         // TODO: transaction
         if (!VerifyRequiredScope(scope))
         {
-            return Result.Fail(new ConnectError(ConnectError.NoRequiredScope));
+            return Result.Fail(new ConnectCommandError(ConnectCommandError.NoRequiredScope));
         }
 
         var exchangeResult = await _stravaTokenService.ExchangeAsync(code, scope);
 
         if (!exchangeResult.IsSuccess)
         {
-            return Result.Fail(new ConnectError(ConnectError.InvalidCode));
+            return Result.Fail(new ConnectCommandError(ConnectCommandError.InvalidCode));
         }
 
         var (athlete, token) = exchangeResult.Value;

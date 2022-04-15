@@ -21,3 +21,25 @@ public interface ITokenService
     /// </summary>
     Task<Result<TokenEntity>> RefreshAsync(TokenEntity token);
 }
+
+public class ExchangeError : FluentResults.Error
+{
+    public const string InvalidCode = "Invalid code";
+    public const string UnknownError = "Unknown error";
+
+    public ExchangeError(string message)
+        : base(message)
+    {
+    }
+}
+
+public class RefreshError : FluentResults.Error
+{
+    public const string InvalidRefreshToken = "Invalid refresh token";
+    public const string UnknownError = "Unknown error";
+
+    public RefreshError(string message)
+        : base(message)
+    {
+    }
+}

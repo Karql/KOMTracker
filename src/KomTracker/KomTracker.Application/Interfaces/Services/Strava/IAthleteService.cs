@@ -15,3 +15,14 @@ public interface IAthleteService
     /// </summary>
     Task<Result<IEnumerable<(SegmentEffortEntity, SegmentEntity)>>> GetAthleteKomsAsync(int athleteId, string token);
 }
+
+public class GetAthleteKomsError : FluentResults.Error
+{
+    public const string Unauthorized = "Unauthorized";
+    public const string UnknownError = "UnknownError";
+
+    public GetAthleteKomsError(string message)
+        : base(message)
+    {
+    }
+}
