@@ -14,6 +14,10 @@ namespace KomTracker.Infrastructure.Identity.Endpoints;
 
 internal class ConnectEndpoint : IEndpointHandler
 {
+    internal const string Code_ParamName = "code";
+    internal const string Scope_ParamName = "scope";
+    internal const string State_ParamName = "state";
+
     private readonly IMediator _mediator;
     private readonly IIdentityService _identityService;
 
@@ -25,13 +29,13 @@ internal class ConnectEndpoint : IEndpointHandler
 
     public async Task<IEndpointResult> ProcessAsync(HttpContext context)
     {
-        string code = context.Request.Query["code"];
-        string scope = context.Request.Query["scope"];
-        string state = context.Request.Query["state"];
+        string code = context.Request.Query[Code_ParamName];
+        string scope = context.Request.Query[Scope_ParamName];
+        string state = context.Request.Query[State_ParamName];
 
-        if (string.IsNullOrEmpty(code)) return new BadRequestResult($"No {nameof(code)} parameter!");
-        if (string.IsNullOrEmpty(scope)) return new BadRequestResult($"No {nameof(scope)} parameter!");
-        if (string.IsNullOrEmpty(state)) return new BadRequestResult($"No {nameof(state)} parameter!");
+        if (string.IsNullOrEmpty(code)) return new BadRequestResult($"No {Code_ParamName} parameter!");
+        if (string.IsNullOrEmpty(scope)) return new BadRequestResult($"No {Scope_ParamName} parameter!");
+        if (string.IsNullOrEmpty(state)) return new BadRequestResult($"No {State_ParamName} parameter!");
 
         var res = await _mediator.Send(new ConnectCommand(code, scope));
 

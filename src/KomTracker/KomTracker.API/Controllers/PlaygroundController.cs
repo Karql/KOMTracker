@@ -46,8 +46,6 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
         //await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
         //await _mediator.Send(new RefreshSegmentsCommand { SegmentsToRefresh = 2 }, cancellationTokenSource.Token);       
 
-        await userService.ChangeUserMailAsync(2394302, "matuesz@karkula.pl");
-
         return new NoContentResult();
     }
 }

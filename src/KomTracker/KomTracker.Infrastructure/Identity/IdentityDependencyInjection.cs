@@ -52,7 +52,8 @@ public static class IdentityDependencyInjection
             .AddInMemoryClients(GetClients(configuration))
             .AddAspNetIdentity<UserEntity>()
             .AddEndpoint<LoginEndpoint>(EndpointNames.Login, ProtocolRoutePaths.Loing)
-            .AddEndpoint<ConnectEndpoint>(EndpointNames.Connect, ProtocolRoutePaths.Connect);
+            .AddEndpoint<ConnectEndpoint>(EndpointNames.Connect, ProtocolRoutePaths.Connect)
+            .AddEndpoint<ConfirmEmailChangeEndpoint>(EndpointNames.ConfirmEmailChange, ProtocolRoutePaths.ConfirmEmailChange);
 
         // Remove BasicAuthenticationSecretParser
         // With this swagger protected by basic auth not working.

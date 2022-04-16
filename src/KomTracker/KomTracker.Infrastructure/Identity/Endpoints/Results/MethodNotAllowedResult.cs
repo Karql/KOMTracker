@@ -9,12 +9,11 @@ using System.Threading.Tasks;
 
 namespace KomTracker.Infrastructure.Identity.Endpoints.Results;
 
-internal class BadRequestResult : BaseErrorResult
+internal class MethodNotAllowedResult : BaseErrorResult
 {
-    public BadRequestResult(string error = null, string errorDescription = null)
-        : base(StatusCodes.Status400BadRequest)
+    public MethodNotAllowedResult()
+        : base(StatusCodes.Status405MethodNotAllowed)
     {
-        Error = error;
-        ErrorDescription = errorDescription;
+        Error = "405 Method Not Allowed";
     }
 }

@@ -6,6 +6,7 @@ using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Infrastructure.Identity.Configurations;
 using KomTracker.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -61,16 +62,33 @@ public class UserService : IUserService
 
         if (user == null)
         {
-            return Result.Fail(new ChangeUserMailError(ChangeUserMailError.UserNotFound));
+            return Result.Fail(new GenerateChangeEmailUrlError(GenerateChangeEmailUrlError.UserNotFound));
         }
 
-        //await _userManager.Find
-
-        // TODO: check mail already exists in confirm token 
-
         var token = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
-        
-        return Result.Ok(GetConfirmChangeEmailUrl(athleteId, token));
+
+        return Result.Ok(GetConfirmChangeEmailUrl(athleteId, newEmail, token));
+    }
+
+    public async Task<Result> ConfirmEmailChangeAsync(int athleteId, string newEmail, string token)
+    {
+        var user = await GetUserByAthleteIdAsync(athleteId);
+
+        if (user == null)
+        {
+            return Result.Fail(new ConfirmEmailChangeError(ConfirmEmailChangeError.UserNotFound));
+        }
+
+        var res = await _userManager.ChangeEmailAsync(user, newEmail, token);
+
+        if (res.Succeeded)
+        {
+            return Result.Ok();
+        }
+
+        var error = res.Errors.FirstOrDefault()!;
+
+        return Result.Fail(new ConfirmEmailChangeError(ConfirmEmailChangeError.ChangeEmailFailed) { ChangeEmailFailedMsg = error.Description });
     }
 
     private Task<UserEntity> GetUserByAthleteIdAsync(int athleteId)
@@ -78,8 +96,10 @@ public class UserService : IUserService
         return _userManager.Users.FirstOrDefaultAsync(x => x.AthleteId == athleteId);
     }
 
-    private string GetConfirmChangeEmailUrl(int athleteId, string token)
+    private string GetConfirmChangeEmailUrl(int athleteId, string newEmail, string token)
     {
-        return $"{_identityConfiguration.IdentityUrl}{ProtocolRoutePaths.ConfirmChangeEmail}?athlete_id={athleteId}&token={token}";
+        var tokenEncoded = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+        return $"{_identityConfiguration.IdentityUrl}{ProtocolRoutePaths.ConfirmEmailChange}?athlete_id={athleteId}&new_email={newEmail}&token={tokenEncoded}";
     }
 }
