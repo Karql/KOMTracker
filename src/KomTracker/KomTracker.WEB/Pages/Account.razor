@@ -1,4 +1,5 @@
 ﻿@page "/account"
+@using System.ComponentModel.DataAnnotations
 @attribute [Authorize]
 
 @if (!_loaded)
@@ -36,29 +37,33 @@ else
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent>
-                            <MudGrid>
-                                <MudItem xs="12" md="6">
-                                    <MudTextField @bind-Value="_user.FirstName" Label="First Name" Variant="Variant.Outlined" Disabled="true" />
-                                </MudItem>
-                                <MudItem xs="12" md="6">
-                                    <MudTextField @bind-Value="_user.LastName" Label="Last Name" Variant="Variant.Outlined" Disabled="true" />
-                                </MudItem>
-                                <MudItem xs="12" md="6">
-                                    <MudTextField @bind-Value="_user.Username" Label="User name" Variant="Variant.Outlined" Disabled="true" />
-                                </MudItem>
-                                <MudItem xs="12" md="6">
-                                    <MudTextField @bind-Value="Email" Label="Email" Variant="Variant.Outlined" HelperText="For notifications" InputType="InputType.Email" />
-                                </MudItem>
-                            </MudGrid>
+                            <MudForm @bind-IsValid="@_profileDetailsValid">
+                                <MudGrid>
+                                    <MudItem xs="12" md="6">
+                                        <MudTextField @bind-Value="_user.FirstName" Label="First Name" Variant="Variant.Outlined" Disabled="true" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <MudTextField @bind-Value="_user.LastName" Label="Last Name" Variant="Variant.Outlined" Disabled="true" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <MudTextField @bind-Value="_user.Username" Label="User name" Variant="Variant.Outlined" Disabled="true" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        @*TODO: Validate Disabled same address*@
+                                        <MudTextField @bind-Value="_email" Label="Email" Variant="Variant.Outlined" HelperText="For notifications"                                             
+                                            Required="true" Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" InputType="InputType.Email" />
+                                    </MudItem>
+                                </MudGrid>
+                            </MudForm>
                         </MudCardContent>
                         <MudCardActions Class="pb-4 pl-4">
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" @onclick="@(() => SaveChanges("Profile details saved", Severity.Success))">Save Changes</MudButton>
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" Disabled="@(!_profileDetailsValid)" @onclick="@(async () => await ChangeEmailAsync())">Save Changes</MudButton>
                         </MudCardActions>
                     </MudCard>
                 </MudItem>
             </MudGrid>
         </MudTabPanel>
-        <MudTabPanel Text="Notifications">
+        @*<MudTabPanel Text="Notifications">
             <MudCard>
                 <MudCardHeader>
                     <CardHeaderContent>
@@ -84,6 +89,6 @@ else
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" @onclick="@(() => SaveChanges("Notification settings saved", Severity.Success))">Save Changes</MudButton>
                 </MudCardActions>
             </MudCard>
-        </MudTabPanel>
+        </MudTabPanel>*@
     </MudTabs>
 }

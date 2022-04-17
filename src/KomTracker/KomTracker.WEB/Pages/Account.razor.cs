@@ -18,17 +18,18 @@ public partial class Account
     private HttpClient Http { get; set; } = default!;
 
     [Inject]
-    private ISnackbar Snackbar { get; set; }
+    private ISnackbar Snackbar { get; set; } = default!;
 
     [Inject]
     private IUserService UserService { get; set; } = default!;
 
-    public bool KomsChangesNotification { get; set; } = true;
-    public bool NotificationEmail_2 { get; set; }
-    public bool NotificationEmail_3 { get; set; }
-    public bool NotificationEmail_4 { get; set; } = true;
+    //public bool KomsChangesNotification { get; set; } = true;
+    //public bool NotificationEmail_2 { get; set; }
+    //public bool NotificationEmail_3 { get; set; }
+    //public bool NotificationEmail_4 { get; set; } = true;
 
-    public string? Email { get; set; }
+    private bool _profileDetailsValid = false;
+    private string? _email;
 
     protected override async Task OnInitializedAsync()
     {
@@ -39,16 +40,38 @@ public partial class Account
 
         _user = await UserService.GetCurrentUser();
 
-        Email = _user.Email;
+        _email = _user.Email;
 
         _loaded = true;
     }
 
-    private void SaveChanges(string message, Severity severity)
+    private async Task ChangeEmailAsync()
     {
-        Snackbar.Add(message, severity, config =>
+        if (_email == _user.Email)
         {
-            config.ShowCloseIcon = false;
-        });
+            Snackbar.Add("You have provided the same email.", Severity.Warning, config =>
+            {
+                config.ShowCloseIcon = false;
+            });
+            return;
+        }
+
+        var res = await Http.PutAsync($"athletes/{_user.AthleteId}/change-email/{_email}", null);
+
+        if (res.StatusCode == System.Net.HttpStatusCode.NoContent)
+        {
+            Snackbar.Add("Email change confirmation has been sent. Please check your inbox.", Severity.Success, config =>
+            {
+                config.ShowCloseIcon = false;
+            });
+        }
+
+        else
+        {
+            Snackbar.Add("Something went wrong :(", Severity.Error, config =>
+            {
+                config.ShowCloseIcon = false;
+            });
+        }
     }
 }

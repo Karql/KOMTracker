@@ -53,8 +53,14 @@ public class AthletesController : BaseApiController<AthletesController>
             return StatusCode(StatusCodes.Status403Forbidden);
         }
 
-        await _mediator.Send(new ChangeEmailCommand { AthleteId = athleteId, NewEmail = newEmail });
+        var res = await _mediator.Send(new ChangeEmailCommand { AthleteId = athleteId, NewEmail = newEmail });
 
-        return Ok();
+        if (res.IsSuccess)
+        {
+            return NoContent();
+        }
+
+        // TODO: error handling
+        return BadRequest();
     }
 }
