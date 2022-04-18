@@ -32,6 +32,11 @@ services:
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
+      ApplicationConfiguration__MasterStravaAthleteId: ${APP_CONF_MASTER_STRAVA_ATHLETE_ID}
+      ApplicationConfiguration__SendinBlueConfiguration__ApiKey: ${APP_CONF_SENDINBLUE_API_KEY}
+      ApplicationConfiguration__SendinBlueConfiguration__TestMail: karql.pl@gmail.com
+      ApplicationConfiguration__SendinBlueConfiguration__ChangeEmailConfirmationTemplateId: 7
+      ApplicationConfiguration__SendinBlueConfiguration__TrackKomsTemplateId: 3
       StravaApiClientConfiguration__ClientID: ${STRAVA_API_CLIENT_ID}
       StravaApiClientConfiguration__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
       IdentityConfiguration__IdentityUrl: https://localhost:9999/kom-tracker-api/identity
