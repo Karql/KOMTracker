@@ -15,7 +15,8 @@ public class StravaApiClientProfile : Profile
     public StravaApiClientProfile()
     {
         CreateMap<ApiModel.Athlete.AthleteSummaryModel, AthleteEntity>()
-            .ForMember(dest => dest.AthleteId, opt => opt.MapFrom(src => src.Id));
+            .ForMember(dest => dest.AthleteId, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username ?? src.Id.ToString())); // fix for null username
 
         CreateMap<ApiModel.Token.TokenModel, TokenEntity>();
 

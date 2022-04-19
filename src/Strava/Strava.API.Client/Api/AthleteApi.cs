@@ -72,8 +72,8 @@ public class AthleteApi : IAthleteApi
             return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.Unauthorized));
         }
 
-        _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}",
-            (int)response.StatusCode, await response.Content.ReadAsStringAsync());
+        _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}, Url: {url}",
+            (int)response.StatusCode, await response.Content.ReadAsStringAsync(), url);
 
         return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.UnknownError));
     }

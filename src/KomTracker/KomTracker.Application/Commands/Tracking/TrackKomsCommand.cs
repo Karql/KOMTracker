@@ -78,7 +78,8 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
             var newKomsEfforts = comparedEfforts
                 .Efforts
                 .Where(x => x.SummarySegmentEffort.NewKom
-                    || x.SummarySegmentEffort.ImprovedKom)
+                    || x.SummarySegmentEffort.ImprovedKom
+                    || firstTrack)
                 .Select(x => x.SegmentEffort);
 
             // TODO: transaction

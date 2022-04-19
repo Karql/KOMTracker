@@ -34,7 +34,9 @@ public static class IdentityDependencyInjection
         services
             .AddIdentity<UserEntity, RoleEntity>(options =>
             {
-                options.User.RequireUniqueEmail = true;
+                // has to be false
+                // could not login without mail specified when true
+                options.User.RequireUniqueEmail = false;
             })
             .AddEntityFrameworkStores<KOMDBContext>()
             .AddDefaultTokenProviders()

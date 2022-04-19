@@ -43,7 +43,7 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
         //var res = await segmentApi.GetSegmentAsync(30393774, token);
 
 
-        //await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
+        await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
         //await _mediator.Send(new RefreshSegmentsCommand { SegmentsToRefresh = 2 }, cancellationTokenSource.Token);       
 
         return new NoContentResult();
