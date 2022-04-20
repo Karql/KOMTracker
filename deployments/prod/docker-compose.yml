@@ -6,6 +6,7 @@ services:
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
+      ApiConfiguration__KeysPath: /keys
       ApplicationConfiguration__MasterStravaAthleteId: ${APP_CONF_MASTER_STRAVA_ATHLETE_ID}
       ApplicationConfiguration__SendinBlueConfiguration__ApiKey: ${APP_CONF_SENDINBLUE_API_KEY}
       ApplicationConfiguration__SendinBlueConfiguration__ChangeEmailConfirmationTemplateId: 7
@@ -17,6 +18,8 @@ services:
       IdentityConfiguration__RequireHttpsMetadata: "true"
       IdentityConfiguration__RedirectUris__0: https://komtracker.karkula.pl
       IdentityConfiguration__RedirectUris__1: https://localhost
+    volumes:
+      - /u01/volumes/kom-tracker-prod/kom-tracker-api/keys:/keys
 
   kom-tracker-web:
     image: karql/kom-tracker-web:prod

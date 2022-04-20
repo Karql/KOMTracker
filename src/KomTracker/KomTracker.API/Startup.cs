@@ -22,6 +22,10 @@ using Microsoft.Extensions.Primitives;
 using Microsoft.AspNetCore.Http;
 using System.Reflection;
 using KomTracker.API.Extensions;
+using Microsoft.AspNetCore.DataProtection;
+using KomTracker.API.Models.Configuration;
+using KomTracker.Application.Models.Configuration;
+using Utils.Helpers;
 
 namespace KomTracker.API;
 
@@ -32,22 +36,30 @@ public class Startup
     private readonly IConfiguration _configuration;
     private readonly IWebHostEnvironment _environment;
 
+    private readonly ApiConfiguration _apiConfiguration;
+    private readonly ApplicationConfiguration _applicationConfiguration;
+
     public Startup(IConfiguration configuration, IWebHostEnvironment environment)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+
+        _apiConfiguration = _configuration.GetApiConfiguration();
+        _applicationConfiguration = _configuration.GetApplicationConfiguration();
     }
 
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddCors();
         services.AddControllers();
+        AddDataProtection(services);
         AddAuthentication(services);
         AddAuthorization(services);
         AddSwagger(services);
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-        services.AddSingleton(_configuration.GetApplicationConfiguration());
+        services.AddSingleton(_apiConfiguration);
+        services.AddSingleton(_applicationConfiguration);
 
         services.AddApplication();
         services.AddInfrastructure(_configuration);
@@ -101,6 +113,14 @@ public class Startup
 
         // ------
         app.UseInfrastructure();
+    }
+
+    private void AddDataProtection(IServiceCollection services)
+    {
+        var keysPath = IOHelper.ResolvePath(_apiConfiguration.KeysPath ?? throw new ArgumentException("KeysPath not defined", nameof(_apiConfiguration.KeysPath)));
+
+        services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(keysPath));
     }
 
     private void AddAuthentication(IServiceCollection services)
