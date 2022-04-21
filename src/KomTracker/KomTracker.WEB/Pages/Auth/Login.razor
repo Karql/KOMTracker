@@ -22,11 +22,13 @@
                     </MudList>
 
                     <div class="d-flex justify-center">
-                        <a @onclick="Authenticate"><img src="img/btn_strava_connectwith_orange.svg" alt="" /></a>
+                        <a @onclick="Authenticate" style="cursor: pointer;"><img src="img/btn_strava_connectwith_orange.svg" alt="" /></a>
                     </div>
-                    <div class="d-flex justify-center">
+                    @* TODO: I don't know yet how to pass this to identity (call is done by RemoteAuthenticatorView)'
+                        <div class="d-flex justify-center">
                         <MudCheckBox T="bool" Label="Remember me?" Color="Color.Primary" Class="ml-n1"></MudCheckBox>
-                    </div>
+
+                    </div>*@
                 </MudPaper>
             </div>
         </MudContainer>

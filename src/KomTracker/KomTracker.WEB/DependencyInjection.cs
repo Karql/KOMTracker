@@ -11,7 +11,7 @@ namespace KomTracker.WEB;
 public static class DependencyInjection
 {
     private const string HttpClientName = "KomTracker.API";
-    private const string ConfigurationKey_IdentityCOnfiguration = "IdentityConfiguration";
+    private const string ConfigurationKey_IdentityConfiguration = "IdentityConfiguration";
     private const string ConfigurationKey_KomTrackerApiUrl = "KomTrackerApiUrl";
 
     public static WebAssemblyHostBuilder AddClientServices(this WebAssemblyHostBuilder builder)
@@ -33,7 +33,7 @@ public static class DependencyInjection
 
         services.AddOidcAuthentication(options =>
         {
-            builder.Configuration.Bind(ConfigurationKey_IdentityCOnfiguration, options.ProviderOptions);
+            builder.Configuration.Bind(ConfigurationKey_IdentityConfiguration, options.ProviderOptions);
 
             options.ProviderOptions.ResponseType = IdentityConstants.OAuth2.CodeFlow;
             options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.Scopes.OpenId);
