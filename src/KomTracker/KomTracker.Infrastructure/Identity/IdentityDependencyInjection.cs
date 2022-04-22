@@ -54,6 +54,7 @@ public static class IdentityDependencyInjection
             .AddInMemoryClients(GetClients(configuration))
             .AddAspNetIdentity<UserEntity>()
             .AddEndpoint<LoginEndpoint>(EndpointNames.Login, ProtocolRoutePaths.Loing)
+            .AddEndpoint<LogoutEndpoint>(EndpointNames.Logout, ProtocolRoutePaths.Logout)
             .AddEndpoint<ConnectEndpoint>(EndpointNames.Connect, ProtocolRoutePaths.Connect)
             .AddEndpoint<ConfirmEmailChangeEndpoint>(EndpointNames.ConfirmEmailChange, ProtocolRoutePaths.ConfirmEmailChange);
 
@@ -126,7 +127,8 @@ public static class IdentityDependencyInjection
                 AlwaysIncludeUserClaimsInIdToken = true,
 
                 AllowedScopes = { OAuth2.Scopes.OpenId, OAuth2.Scopes.Profile, OAuth2.Scopes.Api },
-                RedirectUris = identityConfiguration.RedirectUris
+                RedirectUris = identityConfiguration.RedirectUris,
+                PostLogoutRedirectUris =identityConfiguration.PostLogoutRedirectUris
             }
         };
     }

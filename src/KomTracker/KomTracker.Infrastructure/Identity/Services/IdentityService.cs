@@ -1,4 +1,5 @@
 ﻿using IdentityServer4.Events;
+using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using KomTracker.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -45,5 +47,18 @@ internal class IdentityService : IIdentityService
         }
 
         return returnUrl;
+    }
+
+    public async Task<string> LogoutAsync(string logoutId, ClaimsPrincipal user)
+    {
+        var logout = await _interaction.GetLogoutContextAsync(logoutId);
+
+        if (user?.Identity?.IsAuthenticated ?? false)
+        {
+            await _signInManager.SignOutAsync();
+            await _events.RaiseAsync(new UserLogoutSuccessEvent(user.GetSubjectId(), user.GetDisplayName()));
+        }
+
+        return logout.PostLogoutRedirectUri;
     }
 }

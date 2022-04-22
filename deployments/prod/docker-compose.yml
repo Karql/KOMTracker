@@ -18,6 +18,8 @@ services:
       IdentityConfiguration__RequireHttpsMetadata: "true"
       IdentityConfiguration__RedirectUris__0: https://komtracker.karkula.pl
       IdentityConfiguration__RedirectUris__1: https://localhost
+      IdentityConfiguration__PostLogoutRedirectUris__0: https://komtracker.karkula.pl
+      IdentityConfiguration__PostLogoutRedirectUris__1: https://localhost      
     volumes:
       - /u01/volumes/kom-tracker-prod/kom-tracker-api/keys:/keys
 

@@ -12,4 +12,5 @@ public class IdentityConfiguration
     public string Authority { get; set; }
     public bool RequireHttpsMetadata { get; set; } = true;
     public List<string> RedirectUris { get; set; }
+    public List<string> PostLogoutRedirectUris { get; set; }
 }

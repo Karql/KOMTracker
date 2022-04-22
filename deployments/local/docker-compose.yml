@@ -43,6 +43,7 @@ services:
       IdentityConfiguration__Authority: http://kom-tracker-api/identity
       IdentityConfiguration__RequireHttpsMetadata: "false"
       IdentityConfiguration__RedirectUris__0: https://localhost
+      IdentityConfiguration__PostLogoutRedirectUris__0: https://localhost
       Serilog__MinimumLevel__Default: Debug
       ASPNETCORE_ENVIRONMENT: Development
 

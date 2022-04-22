@@ -16,6 +16,7 @@ public static class Constants
     public static class EndpointNames
     {
         public const string Login = "Login";
+        public const string Logout = "Logout";
         public const string Connect = "Connect";
         public const string ConfirmEmailChange = "ConfirmEmailChange";
     }
@@ -23,6 +24,7 @@ public static class Constants
     public static class ProtocolRoutePaths
     {
         public const string Loing = "/account/login";
+        public const string Logout = "/account/logout";
         public const string Connect = "/account/connect";
         public const string ConfirmEmailChange = "/account/confirm-email-change";
     }

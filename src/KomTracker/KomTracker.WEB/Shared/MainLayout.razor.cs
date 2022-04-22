@@ -3,6 +3,8 @@ using KomTracker.WEB.Infrastructure.Services.Preference;
 using KomTracker.WEB.Infrastructure.Services.User;
 using KomTracker.WEB.Settings;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using MudBlazor;
 
 namespace KomTracker.WEB.Shared;
@@ -18,6 +20,9 @@ public partial class MainLayout
 
     [Inject]
     private IUserService UserService { get; set; } = default!;
+
+    [Inject] NavigationManager Navigation { get; set; }
+    [Inject] SignOutSessionStateManager SignOutManager { get; set; }
 
     public List<BreadcrumbItem> BreadCrumbs = new List<BreadcrumbItem>();
 
@@ -36,5 +41,11 @@ public partial class MainLayout
     {
         await PreferenceService.ToggleDarkModeAsync();
         _currentTheme = await PreferenceService.GetCurrentThemeAsync();
+    }
+
+    protected async Task LogOut(MouseEventArgs args)
+    {
+        await SignOutManager.SetSignOutState();
+        Navigation.NavigateTo("authentication/logout");
     }
 }
