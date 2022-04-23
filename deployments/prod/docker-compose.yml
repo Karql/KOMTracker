@@ -6,8 +6,9 @@ services:
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
-      ApiConfiguration__KeysPath: /keys
+      ApiConfiguration__KeysPath: /keys      
       ApplicationConfiguration__MasterStravaAthleteId: ${APP_CONF_MASTER_STRAVA_ATHLETE_ID}
+      ApplicationConfiguration__SendinBlueConfiguration__Enabled: "true"
       ApplicationConfiguration__SendinBlueConfiguration__ApiKey: ${APP_CONF_SENDINBLUE_API_KEY}
       ApplicationConfiguration__SendinBlueConfiguration__ChangeEmailConfirmationTemplateId: 7
       ApplicationConfiguration__SendinBlueConfiguration__TrackKomsTemplateId: 3

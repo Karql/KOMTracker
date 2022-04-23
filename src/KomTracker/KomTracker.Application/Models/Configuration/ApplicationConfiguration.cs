@@ -8,6 +8,7 @@ namespace KomTracker.Application.Models.Configuration;
 
 public class SendinBlueConfiguration
 {
+    public bool Enabled { get; set; } = true;
     public string? TestMail { get; set; }
     public string? ApiKey { get; set; }
     public int ChangeEmailConfirmationTemplateId { get; set; }

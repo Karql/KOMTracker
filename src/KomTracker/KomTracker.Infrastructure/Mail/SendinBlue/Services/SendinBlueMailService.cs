@@ -50,6 +50,11 @@ public class SendinBlueMailService : IMailService
 
     public async System.Threading.Tasks.Task SendChangeEmailConfirmationAsync(SendChangeEmailConfirmationParamsModel p)
     {
+        if (!_applicationConfiguration.SendinBlueConfiguration.Enabled)
+        {
+            return;
+        }
+
         var to = p.To;
 
         if (!string.IsNullOrWhiteSpace(_applicationConfiguration.SendinBlueConfiguration.TestMail))
@@ -74,6 +79,11 @@ public class SendinBlueMailService : IMailService
 
     public async System.Threading.Tasks.Task SendTrackKomsNotificationAsync(SendTrackKomsNotificationParamsModel p)
     {
+        if (!_applicationConfiguration.SendinBlueConfiguration.Enabled)
+        {
+            return;
+        }
+
         var to = p.To;
 
         if (!string.IsNullOrWhiteSpace(_applicationConfiguration.SendinBlueConfiguration.TestMail))
