@@ -1,4 +1,5 @@
 ﻿@page "/koms"
+@using KomTracker.WEB.Helpers
 @attribute [Authorize]
 
 @if (!_loaded)
@@ -71,14 +72,14 @@ else
                 @(context.Segment.AthleteCount ?? 0)
             </MudTd>
             <MudTd DataLabel="Type">
-                <div class="d-flex align-center justify-space-between climb-category" style="background-color: @GetClimbCategoryColor(context.Segment.ClimbCategoryExtended)">
+                <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetClimbCategoryColor(context.Segment.ClimbCategoryExtended)">
                     <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
                     <span>@context.Segment.ClimbCategoryExtendedText</span>
                 </div>
             </MudTd>
             <MudTd DataLabel="Type">
                 <MudTooltip Text="@context.Segment.ActivityType">
-                    <MudIcon Icon="@GetActivityTypeIcon(context.Segment.ActivityType)"></MudIcon>
+                    <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(context.Segment.ActivityType)"></MudIcon>
                 </MudTooltip>
             </MudTd>
         </RowTemplate>

@@ -15,9 +15,12 @@ public partial class Dashboard
     private IEnumerable<EffortViewModel> _lastKomsChanges = Enumerable.Empty<EffortViewModel>();
     private IEnumerable<KomsSummaryViewModel> _komsSummaries = Enumerable.Empty<KomsSummaryViewModel>();
 
-    private int _totalKoms = 0;
-    private int _newKoms = 0;
-    private int _lostKoms = 0;
+    private IEnumerable<EffortViewModel> _newKoms = Enumerable.Empty<EffortViewModel>();
+    private IEnumerable<EffortViewModel> _lostKoms = Enumerable.Empty<EffortViewModel>();
+
+    private int _totalKomsCount = 0;
+    private int _newKomsCount = 0;
+    private int _lostKomsCount = 0;
 
     [CascadingParameter]
     public MainLayout Layout { get; set; }
@@ -50,8 +53,11 @@ public partial class Dashboard
         _lastKomsChanges = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{_user.AthleteId}/koms-changes")
             ?? Enumerable.Empty<EffortViewModel>();
 
-        _newKoms = _lastKomsChanges.Where(x => x.SummarySegmentEffort.NewKom).Count();
-        _lostKoms = _lastKomsChanges.Where(x => x.SummarySegmentEffort.LostKom).Count();
+        _newKoms = _lastKomsChanges.Where(x => x.SummarySegmentEffort.NewKom).OrderByDescending(x => x.SummarySegmentEffort.KomSummaryId);
+        _lostKoms = _lastKomsChanges.Where(x => x.SummarySegmentEffort.LostKom).OrderByDescending(x => x.SummarySegmentEffort.KomSummaryId);
+
+        _newKomsCount = _newKoms.Count();
+        _lostKomsCount = _lostKoms.Count();
     }
 
     private async Task GetSummariesAsync()
@@ -61,6 +67,6 @@ public partial class Dashboard
 
         var lastSummary = _komsSummaries.OrderByDescending(x => x.TrackDate).FirstOrDefault();
 
-        _totalKoms = lastSummary?.Koms ?? 0;
+        _totalKomsCount = lastSummary?.Koms ?? 0;
     }
 }
