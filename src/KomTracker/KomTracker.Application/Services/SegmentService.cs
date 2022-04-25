@@ -52,7 +52,7 @@ public class SegmentService : ISegmentService
             ?? Enumerable.Empty<EffortModel>();
 
         return changes.GroupBy(x => x.SegmentEffort.SegmentId)
-            .Select(x => x.OrderByDescending(x => x.SegmentEffort.StartDate).First())
+            .Select(x => x.OrderByDescending(x => x.SummarySegmentEffort.KomSummaryId).First())
             .ToList();
     }
 
