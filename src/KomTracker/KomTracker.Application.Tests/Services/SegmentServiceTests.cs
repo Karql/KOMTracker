@@ -201,17 +201,19 @@ public class SegmentServiceTests
         // Arrange
         var lastKomsEffots = new SegmentEffortEntity[]
         {
-            new() { Id = 1, SegmentId = 1 },
-            new() { Id = 2, SegmentId = 2 },
-            new() { Id = 3, SegmentId = 3 },
+            new() { Id = 1, SegmentId = 1, ElapsedTime = 10 },
+            new() { Id = 2, SegmentId = 2, ElapsedTime = 10 },
+            new() { Id = 3, SegmentId = 3, ElapsedTime = 10 },
+            new() { Id = 4, SegmentId = 4, ElapsedTime = 10 }
         };
 
         var actualKomsEffots = new SegmentEffortEntity[]
         {
             // No Id 1 - lost kom
-            new() { Id = 2, SegmentId = 2 }, // no change 
-            new() { Id = 4, SegmentId = 3 }, // improved kom
-            new() { Id = 5, SegmentId = 4 }, // new kom
+            new() { Id = 2, SegmentId = 2, ElapsedTime = 10 }, // no change 
+            new() { Id = 5, SegmentId = 3, ElapsedTime = 5 },  // improved kom (time has to be better to mark as improved)
+            new() { Id = 6, SegmentId = 4, ElapsedTime = 10 }, // no change (e.g. refreshed efforts, change privacy zone creates same efforts with diffrent ids)
+            new() { Id = 7, SegmentId = 5, ElapsedTime = 10 }, // new kom
         };
 
         // Act
@@ -219,7 +221,7 @@ public class SegmentServiceTests
 
         // Assert
         comparedEffots.Should().NotBeNull();
-        comparedEffots.KomsCount.Should().Be(3);
+        comparedEffots.KomsCount.Should().Be(4);
         comparedEffots.NewKomsCount.Should().Be(1);
         comparedEffots.ImprovedKomsCount.Should().Be(1);
         comparedEffots.LostKomsCount.Should().Be(1);
@@ -228,16 +230,18 @@ public class SegmentServiceTests
 
         var efforts = comparedEffots.Efforts;
         efforts.Should().NotBeNull();
-        efforts.Count.Should().Be(4); // 3 kom + 1 lost kom
+        efforts.Count.Should().Be(5); // 4 kom + 1 lost kom
 
         var lostKom = efforts.FirstOrDefault(x => x.SegmentEffort.Id == 1);
         var kom = efforts.FirstOrDefault(x => x.SegmentEffort.Id == 2);
-        var improvedKom = efforts.FirstOrDefault(x => x.SegmentEffort.Id == 4);
-        var newKom = efforts.FirstOrDefault(x => x.SegmentEffort.Id == 5);
+        var improvedKom = efforts.FirstOrDefault(x => x.SegmentEffort.Id == 5);
+        var komWithDiffrentEffortId = efforts.FirstOrDefault(x => x.SegmentEffort.Id == 6);
+        var newKom = efforts.FirstOrDefault(x => x.SegmentEffort.Id == 7);
 
         AssertComparedEffortLink(lostKom, true, false, false, false);
         AssertComparedEffortLink(kom, false, true, false, false);
         AssertComparedEffortLink(improvedKom, false, true, false, true);
+        AssertComparedEffortLink(komWithDiffrentEffortId, false, true, false, false);
         AssertComparedEffortLink(newKom, false, true, true, false);
     }
 

@@ -98,7 +98,13 @@ public class SegmentService : ISegmentService
                         link.NewKom = true;
                     }
 
-                    else if (x.NewEffort.Id != x.LastEffort.Id)
+                    else if (x.NewEffort.Id != x.LastEffort.Id
+                        // same effort with diffrent id
+                        // this situation occurs in actions like:
+                        // - refresh activity achievements
+                        // - change privacy zone
+                        // current segment_effort is deleted and a new one is created
+                        && x.NewEffort.ElapsedTime < x.LastEffort.ElapsedTime)
                     {
                         comparedEfforts.ImprovedKomsCount++;
                         link.ImprovedKom = true;
