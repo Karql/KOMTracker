@@ -1,2 +1,3 @@
 - Fix change tracking & auditing for upsert etc.
 - Improve query right away for new segment details 
+- Fix marking as new kom after flag etc.
