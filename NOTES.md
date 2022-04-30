@@ -26,3 +26,7 @@ King of Cracow etc.
 Koms map
 
 Koms by type on dashboard
+
+# Logo
+
+Font: Gill Sans Ultra Bold
