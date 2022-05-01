@@ -119,6 +119,8 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
             PropertiesToIncludeOnUpdate = new List<string>
             {
                 nameof(SegmentEntity.AuditMD),
+                nameof(SegmentEntity.CreatedAt),
+                nameof(SegmentEntity.UpdatedAt),
                 nameof(SegmentEntity.TotalElevationGain),
                 nameof(SegmentEntity.EffortCount),
                 nameof(SegmentEntity.AthleteCount),

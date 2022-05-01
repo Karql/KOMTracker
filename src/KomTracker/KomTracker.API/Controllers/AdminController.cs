@@ -27,4 +27,14 @@ public class AdminController : BaseApiController<AdminController>
 
         return new NoContentResult();
     }
+
+    [HttpPut("refresh-segments")]
+    public async Task<ActionResult> RefreshSegments()
+    {
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        await _mediator.Send(new RefreshSegmentsCommand(), cancellationTokenSource.Token);
+
+        return new NoContentResult();
+    }
 }

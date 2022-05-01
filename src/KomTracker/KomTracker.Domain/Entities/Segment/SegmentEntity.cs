@@ -1,4 +1,5 @@
 ﻿using KomTracker.Domain.Contracts;
+using System;
 
 namespace KomTracker.Domain.Entities.Segment;
 
@@ -23,6 +24,8 @@ public class SegmentEntity : BaseEntity
     public bool Hazardous { get; set; }
     public bool Starred { get; set; }
     #region Detailed fields
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
     public float? TotalElevationGain { get; set; }
     public int? EffortCount { get; set; }
     public int? AthleteCount { get; set; }

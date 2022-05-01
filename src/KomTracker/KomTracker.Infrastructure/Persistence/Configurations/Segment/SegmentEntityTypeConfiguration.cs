@@ -80,6 +80,12 @@ public class SegmentEntityTypeConfiguration
         builder.Property(x => x.Starred)
             .HasColumnName("starred");
 
+        builder.Property(x => x.CreatedAt)
+            .HasColumnName("created_at");
+
+        builder.Property(x => x.UpdatedAt)
+            .HasColumnName("updated_at");
+
         builder.Property(x => x.TotalElevationGain)
             .HasColumnName("total_elevation_gain");
 
