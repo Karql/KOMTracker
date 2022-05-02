@@ -1,4 +1,5 @@
 ﻿using Strava.API.Client.Model.Segment;
+using Strava.API.Client.Tests.Extensions.Model.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,8 @@ public static class SegmentDetailedModelExtensions
             ""total_elevation_gain"": {model.TotalElevationGain},
             ""effort_count"": {model.EffortCount},
             ""athlete_count"": {model.AthleteCount},
-            ""star_count"": {model.StarCount}
+            ""star_count"": {model.StarCount},
+            ""map"": {model.Map.ToJson()}
         }}";
     }
 }

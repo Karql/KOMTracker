@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Strava.API.Client.Model.Base;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,9 +28,11 @@ public  class SegmentDetailedModel : SegmentSummaryModel
     [JsonPropertyName("star_count")]
     public int StarCount { get; set; }
 
+    [JsonPropertyName("map")]
+    public PolylineMapModel Map { get; set; }
+
     /*
      * Not needed properties for now
-     * map
      * athlete_segment_stats
      * xoms
      * local_legend
