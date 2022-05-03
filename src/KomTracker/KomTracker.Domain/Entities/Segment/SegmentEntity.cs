@@ -23,6 +23,7 @@ public class SegmentEntity : BaseEntity
     public bool Private { get; set; }
     public bool Hazardous { get; set; }
     public bool Starred { get; set; }
+
     #region Detailed fields
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
@@ -30,5 +31,6 @@ public class SegmentEntity : BaseEntity
     public int? EffortCount { get; set; }
     public int? AthleteCount { get; set; }
     public int? StarCount { get; set; }
+    public string MapPolyline { get; set; }
     #endregion
 }

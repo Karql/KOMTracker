@@ -124,9 +124,9 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
                 nameof(SegmentEntity.TotalElevationGain),
                 nameof(SegmentEntity.EffortCount),
                 nameof(SegmentEntity.AthleteCount),
-                nameof(SegmentEntity.StarCount)
-            },
-            
+                nameof(SegmentEntity.StarCount),
+                nameof(SegmentEntity.MapPolyline)
+            },           
         });
     }
 }

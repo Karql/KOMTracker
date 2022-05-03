@@ -97,5 +97,8 @@ public class SegmentEntityTypeConfiguration
 
         builder.Property(x => x.StarCount)
             .HasColumnName("star_count");
+
+        builder.Property(x => x.MapPolyline)
+            .HasColumnName("map_polyline");
     }
 }

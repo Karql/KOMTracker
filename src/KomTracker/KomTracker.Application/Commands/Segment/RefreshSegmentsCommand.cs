@@ -59,6 +59,7 @@ public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsComm
                 segment.EffortCount = refreshedSegment.EffortCount;
                 segment.AthleteCount = refreshedSegment.AthleteCount;
                 segment.StarCount = refreshedSegment.StarCount;
+                segment.MapPolyline = refreshedSegment.MapPolyline;
             }
         }
 
