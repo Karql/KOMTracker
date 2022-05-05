@@ -12,10 +12,12 @@ using static MoreLinq.Extensions.ForEachExtension;
 
 namespace KomTracker.Infrastructure.Persistence.Repositories;
 
-public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepository
+public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
 {
     public Task AddSegmentsIfNotExistsAsync(IEnumerable<SegmentEntity> segments)
     {
+        SetAuidtCD(segments);
+
         return _context
             .Segment
             .UpsertRange(segments)
@@ -25,6 +27,8 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
 
     public Task AddSegmentEffortsIfNotExistsAsync(IEnumerable<SegmentEffortEntity> segmentEffots)
     {
+        SetAuidtCD(segmentEffots);
+
         return _context
             .SegmentEffort
             .UpsertRange(segmentEffots)
@@ -109,7 +113,7 @@ public class EFSegmentRepository : EFRepositoryBase<KOMDBContext>, ISegmentRepos
 
     public Task UpdateSegmentsAsync(IEnumerable<SegmentEntity> segments)
     {
-        segments.ForEach(x => x.AuditMD = DateTime.UtcNow);
+        SetAuidtMD(segments);
 
         return _context.BulkUpdateAsync(segments.ToList(), new BulkConfig
         {
