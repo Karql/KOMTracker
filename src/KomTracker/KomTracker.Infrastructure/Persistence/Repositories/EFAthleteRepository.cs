@@ -10,7 +10,7 @@ using Utils.UnitOfWork.Concrete;
 
 namespace KomTracker.Infrastructure.Persistence.Repositories;
 
-public class EFAthleteRepository : EFRepositoryBase<KOMDBContext>, IAthleteRepository
+public class EFAthleteRepository : EFBaseRepository, IAthleteRepository
 {
     public async Task<bool> IsAthleteExistsAsync(int athleteId)
     {
@@ -24,9 +24,25 @@ public class EFAthleteRepository : EFRepositoryBase<KOMDBContext>, IAthleteRepos
 
     public Task AddOrUpdateAthleteAsync(AthleteEntity athlete)
     {
+        // TODO: find cleaner way
+        athlete.AuditCD = DateTime.UtcNow;
+
         return _context
             .Athlete
             .Upsert(athlete)
+            .WhenMatched((db, model) => new AthleteEntity {
+                AuditMD = DateTime.UtcNow,
+                Username = model.Username,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Bio = model.Bio,
+                City = model.City,
+                Country = model.Country,
+                Sex = model.Sex,
+                Weight = model.Weight,
+                Profile = model.Profile,
+                ProfileMedium = model.ProfileMedium
+            })
             .RunAsync();
     }
 
@@ -49,9 +65,21 @@ public class EFAthleteRepository : EFRepositoryBase<KOMDBContext>, IAthleteRepos
 
     public Task AddOrUpdateTokenAsync(TokenEntity token)
     {
+        // TODO: find cleaner way
+        token.AuditCD = DateTime.UtcNow;
+
         return _context
             .Token
             .Upsert(token)
+            .WhenMatched((db, model) => new TokenEntity
+            {
+                AuditMD = DateTime.UtcNow,
+                TokenType = model.TokenType,
+                ExpiresAt = model.ExpiresAt,
+                AccessToken = model.AccessToken,
+                RefreshToken = model.RefreshToken,
+                Scope = model.Scope
+            })
             .RunAsync();
     }
 }
