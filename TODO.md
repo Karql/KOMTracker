@@ -1,3 +1,2 @@
-- Fix change tracking & auditing for upsert etc. after set auditCD for athlete to first koms_summary
 - Improve query right away for new segment details 
 - Fix marking as new kom after flag etc.
