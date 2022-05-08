@@ -68,23 +68,30 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
 
         var lastKomsSummaryEfforts = await _segmentService.GetLastKomsSummaryEffortsAsync(athleteId);
         var firstTrack = lastKomsSummaryEfforts == null;
-        var lastKomsEfforts = lastKomsSummaryEfforts?.Where(x => x.SummarySegmentEffort.Kom).Select(x => x.SegmentEffort)
+        var lastKomsEfforts = lastKomsSummaryEfforts?.Where(x => x.SummarySegmentEffort.Kom).Select(x => x.SegmentEffort).ToArray()
             ?? Enumerable.Empty<SegmentEffortEntity>();
 
         var comparedEfforts = _segmentService.CompareEfforts(actualKoms.Select(x => x.Item1), lastKomsEfforts, firstTrack);
 
         if (comparedEfforts.AnyChanges || firstTrack)
         {
-            var newKomsEfforts = comparedEfforts
-                .Efforts
-                .Where(x => x.SummarySegmentEffort.NewKom
-                    || x.SummarySegmentEffort.ImprovedKom
-                    || firstTrack)
-                .Select(x => x.SegmentEffort);
+            var lastSegmetns = lastKomsSummaryEfforts?.Select(x => x.Segment!).ToArray()
+                ?? Enumerable.Empty<SegmentEntity>();
+
+            // TODO: refactor to left join or override Equals and change to intersect
+            var newSegments = actualKoms.Where(x => !lastSegmetns.Any(y => y.Id == x.Item2.Id)).Select(x => x.Item2);
+            var newEfforts = actualKoms.Where(x => !lastKomsEfforts.Any(y => y.Id == x.Item1.Id)).Select(x => x.Item1);
+
+            //var newKomsEfforts = comparedEfforts
+            //    .Efforts
+            //    .Where(x => x.SummarySegmentEffort.NewKom
+            //        || x.SummarySegmentEffort.ImprovedKom
+            //        || firstTrack)
+            //    .Select(x => x.SegmentEffort);
 
             // TODO: transaction
-            await _segmentService.AddSegmentsIfNotExistsAsync(actualKoms.Select(x => x.Item2));
-            await _segmentService.AddSegmentEffortsIfNotExistsAsync(newKomsEfforts);
+            await _segmentService.AddSegmentsIfNotExistsAsync(newSegments);
+            await _segmentService.AddSegmentEffortsIfNotExistsAsync(newEfforts);
             await _segmentService.AddNewKomsSummaryWithEffortsAsync(athleteId, comparedEfforts);
 
             await _komUoW.SaveChangesAsync();
