@@ -1,5 +1,7 @@
 ﻿using KomTracker.Domain.Contracts;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace KomTracker.Domain.Entities.Segment;
 
@@ -33,4 +35,17 @@ public class SegmentEntity : BaseEntity
     public int? StarCount { get; set; }
     public string MapPolyline { get; set; }
     #endregion
+}
+
+public class SegmentEntityComparer : EqualityComparer<SegmentEntity>
+{
+    public override bool Equals(SegmentEntity x, SegmentEntity y)
+    {
+        return x.Id == y.Id;
+    }
+
+    public override int GetHashCode([DisallowNull] SegmentEntity obj)
+    {
+        return obj.Id.GetHashCode();
+    }
 }

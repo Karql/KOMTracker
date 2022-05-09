@@ -78,16 +78,8 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
             var lastSegmetns = lastKomsSummaryEfforts?.Select(x => x.Segment!).ToArray()
                 ?? Enumerable.Empty<SegmentEntity>();
 
-            // TODO: refactor to left join or override Equals and change to intersect
-            var newSegments = actualKoms.Where(x => !lastSegmetns.Any(y => y.Id == x.Item2.Id)).Select(x => x.Item2);
-            var newEfforts = actualKoms.Where(x => !lastKomsEfforts.Any(y => y.Id == x.Item1.Id)).Select(x => x.Item1);
-
-            //var newKomsEfforts = comparedEfforts
-            //    .Efforts
-            //    .Where(x => x.SummarySegmentEffort.NewKom
-            //        || x.SummarySegmentEffort.ImprovedKom
-            //        || firstTrack)
-            //    .Select(x => x.SegmentEffort);
+            var newSegments = actualKoms.Select(x => x.Item2).Except(lastSegmetns, new SegmentEntityComparer());
+            var newEfforts = actualKoms.Select(x => x.Item1).Except(lastKomsEfforts, new SegmentEffortEntityComparer());           
 
             // TODO: transaction
             await _segmentService.AddSegmentsIfNotExistsAsync(newSegments);
