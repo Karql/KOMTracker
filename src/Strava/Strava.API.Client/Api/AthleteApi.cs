@@ -68,7 +68,7 @@ public class AthleteApi : IAthleteApi
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            _logger.LogWarning(logPrefix + "Unauthorized!");
+            _logger.LogWarning(logPrefix + "Unauthorized! athleteId: {athleteId}, page: {page}", athleteId, page);
             return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.Unauthorized));
         }
 
