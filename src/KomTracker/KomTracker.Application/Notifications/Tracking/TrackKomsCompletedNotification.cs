@@ -5,6 +5,7 @@ using KomTracker.Application.Models.Mail;
 using KomTracker.Application.Models.Segment;
 using KomTracker.Domain.Entities.Athlete;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,17 +21,20 @@ public class TrackKomsCompletedNotification : INotification
 
 public class TrackKomsCompletedNotificationSendEmailHandler : INotificationHandler<TrackKomsCompletedNotification>
 {
+    private readonly ILogger<TrackKomsCompletedNotificationSendEmailHandler> _logger;
     private readonly IUserService _userService;
-    private readonly IMailService _mailService;
+    private readonly IMailService _mailService;    
 
-    public TrackKomsCompletedNotificationSendEmailHandler(IUserService userService, IMailService mailService)
+    public TrackKomsCompletedNotificationSendEmailHandler(ILogger<TrackKomsCompletedNotificationSendEmailHandler> logger, IUserService userService, IMailService mailService)
     {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _userService = userService ?? throw new ArgumentNullException(nameof(userService));
         _mailService = mailService ?? throw new ArgumentNullException(nameof(mailService));
     }
 
     public async Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
     {
+        var logPrefix = $"{nameof(TrackKomsCompletedNotificationSendEmailHandler)} ";
         if (notification.ComparedEfforts.FirstCompare)
         {
             return; // Do not send mail for first tracking
@@ -41,7 +45,8 @@ public class TrackKomsCompletedNotificationSendEmailHandler : INotificationHandl
 
         if (user == null)
         {
-            throw new Exception($"User not fount for athletedId: {athleteId}");
+            _logger.LogWarning(logPrefix + "User not fount for athletedId: {athleteId}", athleteId);
+            return;
         }
 
         if (user.EmailConfirmed && !string.IsNullOrEmpty(user.Email))
