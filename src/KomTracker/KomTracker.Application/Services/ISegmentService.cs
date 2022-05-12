@@ -8,8 +8,6 @@ namespace KomTracker.Application.Services;
 
 public interface ISegmentService
 {
-    Task<IEnumerable<(SegmentEffortEntity, SegmentEntity)>> GetActualKomsAsync(int athleteId, string token);
-
     /// <summary>
     /// Get last koms summary efforts
     /// null when not exists

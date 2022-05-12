@@ -63,8 +63,22 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
         var token = await GetTokenAsync(athleteId);
         if (token == null) return;
 
-        var actualKoms = await _segmentService.GetActualKomsAsync(athleteId, token);
-        if (actualKoms == null) return;
+        var acutalKomsRes = await _stravaAthleteService.GetAthleteKomsAsync(athleteId, token);
+
+        if (!acutalKomsRes.IsSuccess)
+        {
+            // Try again when Unauthorized
+            // TODO: infinite recursion protection 
+            if (acutalKomsRes.HasError<Interfaces.Services.Strava.GetAthleteKomsError>(x => x.Message == Interfaces.Services.Strava.GetAthleteKomsError.Unauthorized))
+            {
+                await TrackKomsForAthleteAsync(athlete);
+            }
+
+            // Logging done in Strava.API.Client
+            return;
+        }
+
+        var actualKoms = acutalKomsRes.Value;
 
         var lastKomsSummaryEfforts = await _segmentService.GetLastKomsSummaryEffortsAsync(athleteId);
         var firstTrack = lastKomsSummaryEfforts == null;

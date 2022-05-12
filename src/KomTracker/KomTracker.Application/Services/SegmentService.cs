@@ -27,16 +27,6 @@ public class SegmentService : ISegmentService
         _stravaAthleteService = stravaAthleteService ?? throw new ArgumentNullException(nameof(stravaAthleteService));
     }
 
-    public async Task<IEnumerable<(SegmentEffortEntity, SegmentEntity)>> GetActualKomsAsync(int athleteId, string token)
-    {
-        var getAthleteKomsRes = await _stravaAthleteService.GetAthleteKomsAsync(athleteId, token);
-
-        // TODO: retry on Unauthorized
-        return getAthleteKomsRes.IsSuccess ?
-            getAthleteKomsRes.Value
-            : null;
-    }
-
     public async Task<IEnumerable<EffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId)
     {
         return await _komUoW

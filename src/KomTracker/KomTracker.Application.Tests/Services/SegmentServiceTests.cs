@@ -55,38 +55,6 @@ public class SegmentServiceTests
         _segmentService = new SegmentService(_komUoW, _logger, _stravaAthleteService);
     }
 
-    #region Get actual koms
-    [Fact]
-    public async Task Get_actual_koms_calls_strava_service()
-    {
-        // Arange
-        var fixture = FixtureHelper.GetTestFixture();
-        var koms = fixture.CreateMany<(SegmentEffortEntity, SegmentEntity)>(2);
-
-        _stravaAthleteService.GetAthleteKomsAsync(TestAthleteId, TestToken).Returns(Result.Ok(koms));
-
-        // Act
-        var res = await _segmentService.GetActualKomsAsync(TestAthleteId, TestToken);
-
-        // Arrange
-        res.Should().BeEquivalentTo(koms);
-    }
-
-    [Fact]
-    public async Task Get_actual_koms_returns_null_when_failed()
-    {
-        // Arange
-        _stravaAthleteService.GetAthleteKomsAsync(TestAthleteId, TestToken).Returns(
-            Result.Fail<IEnumerable<(SegmentEffortEntity, SegmentEntity)>>(new GetAthleteKomsError(GetAthleteKomsError.UnknownError)));
-
-        // Act
-        var res = await _segmentService.GetActualKomsAsync(TestAthleteId, TestToken);
-
-        // Arrange
-        res.Should().BeNull();
-    }
-    #endregion
-
     #region Get last koms summary efforts
     [Fact]
     public async Task Get_last_koms_summary_efforts_calls_repo()
