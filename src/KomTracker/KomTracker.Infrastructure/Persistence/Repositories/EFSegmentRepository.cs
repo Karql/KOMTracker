@@ -105,7 +105,8 @@ public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
 
         return await _context.Segment
             .Where(x => !x.AuditMD.HasValue || x.AuditMD < maxAuditMD)
-            .OrderByDescending(x => x.AuditMD)
+            .OrderBy(x => x.AuditMD.HasValue) // first never queried
+            .ThenBy(x => x.AuditMD)           // then oldest
             .Take(top)
             .AsNoTracking()
             .ToListAsync();
