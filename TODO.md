@@ -1,2 +1,2 @@
-- Improve query right away for new segment details 
+- Refresh details for new segmens after TrackKoms
 - Fix marking as new kom after flag etc.
