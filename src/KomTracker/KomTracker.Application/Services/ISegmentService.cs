@@ -20,6 +20,18 @@ public interface ISegmentService
 
     ComparedEffortsModel CompareEfforts(IEnumerable<SegmentEffortEntity> actualKomsEfforts, IEnumerable<SegmentEffortEntity> lastKomsEfforts, bool firstCompare = false);
 
+    /// <summary>
+    /// Check new koms are realy new or returned
+    /// Example:
+    /// - someone has made an activity in the car
+    /// - proper kom has been lost
+    /// - activity in the car has been flagged
+    /// - kom in some situations may be tagged as new but it should not be
+    /// </summary>
+    /// <param name="comparedEfforts"></param>
+    /// <returns></returns>
+    Task CheckNewKomsAreReturnedAsync(ComparedEffortsModel comparedEfforts);
+
     Task AddSegmentsIfNotExistsAsync(IEnumerable<SegmentEntity> segments);
 
     Task AddSegmentEffortsIfNotExistsAsync(IEnumerable<SegmentEffortEntity> segmentEfforts);

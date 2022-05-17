@@ -31,4 +31,6 @@ public interface ISegmentRepository : IRepository
     Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100, TimeSpan? minTimeFromLastRefresh = null);
 
     Task UpdateSegmentsAsync(IEnumerable<SegmentEntity> segments);
+
+    Task<IEnumerable<SegmentEffortEntity>> GetSegmentEffortsAsync(HashSet<long> ids);
 }

@@ -89,7 +89,7 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
 
         if (comparedEfforts.AnyChanges || firstTrack)
         {
-            // TOOD: check are new koms are really new ;)
+            await _segmentService.CheckNewKomsAreReturnedAsync(comparedEfforts);
 
             var lastSegmetns = lastKomsSummaryEfforts?.Select(x => x.Segment!).ToArray()
                 ?? Enumerable.Empty<SegmentEntity>();

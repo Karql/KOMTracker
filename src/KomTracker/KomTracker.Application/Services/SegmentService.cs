@@ -4,13 +4,14 @@ using KomTracker.Application.Models.Segment;
 using KomTracker.Application.Services;
 using KomTracker.Domain.Entities.Segment;
 using Microsoft.Extensions.Logging;
-using MoreLinq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using IStravaAthleteService = KomTracker.Application.Interfaces.Services.Strava.IAthleteService;
+using static MoreLinq.Extensions.FullGroupJoinExtension;
+using static MoreLinq.Extensions.ForEachExtension;
 
 namespace KomTracker.Application.Services;
 
@@ -116,6 +117,23 @@ public class SegmentService : ISegmentService
         });
 
         return comparedEfforts;
+    }
+
+    public async Task CheckNewKomsAreReturnedAsync(ComparedEffortsModel comparedEfforts)
+    {
+        var newKomsEfforts = comparedEfforts.Efforts.Where(x => x.SummarySegmentEffort.NewKom).ToArray();
+
+        var segmentEfforts = await _komUoW.GetRepository<ISegmentRepository>()
+            .GetSegmentEffortsAsync(newKomsEfforts.Select(x => x.SegmentEffort.Id).ToHashSet());
+
+        newKomsEfforts
+            .Join(segmentEfforts, x => x.SegmentEffort.Id, y => y.Id, (effort, segmentEffort) => effort)
+            .ForEach(effort =>
+            {
+                effort.SummarySegmentEffort.NewKom = false;
+                // TODO: add something like ReturnedKom
+                comparedEfforts.NewKomsCount--;
+            });
     }
 
     public async Task AddSegmentsIfNotExistsAsync(IEnumerable<SegmentEntity> segments)

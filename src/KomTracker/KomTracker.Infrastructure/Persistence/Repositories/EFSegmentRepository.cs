@@ -134,4 +134,9 @@ public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
             },           
         });
     }
+
+    public async Task<IEnumerable<SegmentEffortEntity>> GetSegmentEffortsAsync(HashSet<long> ids)
+    {
+        return await _context.SegmentEffort.Where(x => ids.Contains(x.Id)).ToArrayAsync();
+    }
 }
