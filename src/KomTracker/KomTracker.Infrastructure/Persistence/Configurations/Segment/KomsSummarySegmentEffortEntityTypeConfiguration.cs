@@ -40,5 +40,9 @@ public class KomsSummarySegmentEffortEntityTypeConfiguration
         builder.Property(x => x.LostKom)
             .HasColumnName("lost_kom")
             .IsRequired(true);
+
+        builder.Property(x => x.ReturnedKom)
+            .HasColumnName("returned_kom")
+            .IsRequired(true);
     }
 }

@@ -9,6 +9,7 @@ public class KomsSummarySegmentEffortEntity : BaseEntity
     public bool NewKom { get; set; }
     public bool ImprovedKom { get; set; }
     public bool LostKom { get; set; }
+    public bool ReturnedKom { get; set; }
     public KomsSummaryEntity KomsSummary { get; set; }
     public SegmentEffortEntity SegmentEffort { get; set; }
 }
