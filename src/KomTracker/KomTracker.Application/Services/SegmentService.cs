@@ -131,8 +131,9 @@ public class SegmentService : ISegmentService
             .ForEach(effort =>
             {
                 effort.SummarySegmentEffort.NewKom = false;
-                // TODO: add something like ReturnedKom
+                effort.SummarySegmentEffort.ReturnedKom = true;
                 comparedEfforts.NewKomsCount--;
+                // TODO: add counter for ReturnedKomsCount
             });
     }
 
