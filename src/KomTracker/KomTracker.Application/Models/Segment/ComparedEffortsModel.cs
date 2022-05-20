@@ -11,6 +11,7 @@ public class ComparedEffortsModel
     public int NewKomsCount { get; set; } = 0;
     public int ImprovedKomsCount { get; set; } = 0;
     public int LostKomsCount { get; set; } = 0;
+    public int ReturnedKomsCount { get; set; } = 0;
 
     public List<EffortModel> Efforts { get; set; } = new List<EffortModel>();
 

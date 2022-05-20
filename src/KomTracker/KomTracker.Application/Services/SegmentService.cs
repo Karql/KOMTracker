@@ -133,7 +133,7 @@ public class SegmentService : ISegmentService
                 effort.SummarySegmentEffort.NewKom = false;
                 effort.SummarySegmentEffort.ReturnedKom = true;
                 comparedEfforts.NewKomsCount--;
-                // TODO: add counter for ReturnedKomsCount
+                comparedEfforts.ReturnedKomsCount++;
             });
     }
 
