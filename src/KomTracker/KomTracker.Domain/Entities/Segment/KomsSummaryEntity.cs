@@ -13,5 +13,6 @@ public class KomsSummaryEntity : BaseEntity
     public int NewKoms { get; set; }
     public int ImprovedKoms { get; set; }
     public int LostKoms { get; set; }
+    public int ReturnedKoms { get; set; }
     public List<SegmentEffortEntity> SegmentEfforts { get; set; }
 }

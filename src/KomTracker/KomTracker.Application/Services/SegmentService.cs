@@ -161,6 +161,7 @@ public class SegmentService : ISegmentService
             NewKoms = comparedEfforts.NewKomsCount,
             ImprovedKoms = comparedEfforts.ImprovedKomsCount,
             LostKoms = comparedEfforts.LostKomsCount,
+            ReturnedKoms = comparedEfforts.ReturnedKomsCount
         };
 
         await segmentRepo.AddKomsSummaryAsync(komsSummary);

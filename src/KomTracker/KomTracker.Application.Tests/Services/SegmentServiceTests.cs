@@ -311,11 +311,17 @@ public class SegmentServiceTests
                     SegmentEffort = new(),
                     SummarySegmentEffort = new() { Kom = true, ImprovedKom = true }
                 },
+                new()
+                {
+                    SegmentEffort = new(),
+                    SummarySegmentEffort = new() { Kom = true, ReturnedKom = true }
+                },
             },
-            KomsCount = 3,
+            KomsCount = 4,
             NewKomsCount = 1,
             ImprovedKomsCount = 1,
-            LostKomsCount = 1
+            LostKomsCount = 1,
+            ReturnedKomsCount = 1
         };
 
         // Act
@@ -332,6 +338,7 @@ public class SegmentServiceTests
         komsSummaryArg.NewKoms.Should().Be(comparedEfforts.NewKomsCount);
         komsSummaryArg.ImprovedKoms.Should().Be(comparedEfforts.ImprovedKomsCount);
         komsSummaryArg.LostKoms.Should().Be(comparedEfforts.LostKomsCount);
+        komsSummaryArg.ReturnedKoms.Should().Be(comparedEfforts.ReturnedKomsCount);
 
         var addKomsSummariesSegmentEffortsAsyncCalls = _segmentRepository.ReceivedCalls().FilterByName(nameof(_segmentRepository.AddKomsSummariesSegmentEffortsAsync));
         addKomsSummariesSegmentEffortsAsyncCalls.Count().Should().Be(1);

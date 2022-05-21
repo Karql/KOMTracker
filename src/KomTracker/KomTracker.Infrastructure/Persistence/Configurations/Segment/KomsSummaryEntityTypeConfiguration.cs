@@ -50,5 +50,8 @@ public class KomsSummaryEntityTypeConfiguration
 
         builder.Property(x => x.LostKoms)
             .HasColumnName("lost_koms");
+
+        builder.Property(x => x.ReturnedKoms)
+            .HasColumnName("returned_koms");
     }
 }
