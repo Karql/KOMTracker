@@ -282,6 +282,49 @@ public class SegmentServiceTests
     }
     #endregion
 
+    #region Check new koms are returned
+    [InlineData(5, 3)]
+    [InlineData(2, 0)]
+    [InlineData(2, 2)]
+    [Theory]
+    public async Task Check_new_koms_are_returned_check_in_db_and_update_model_correctly(int newKomsCount, int returnedKomsCount)
+    {
+        // Arrange
+        var newIds = Enumerable.Range(1, newKomsCount).Select(x => (long)x).ToHashSet();
+        var returnedIds = Enumerable.Range(1, returnedKomsCount).Select(x => (long)x).ToHashSet();
+
+        var comparedEfforts = new ComparedEffortsModel
+        {
+            KomsCount = newKomsCount,
+            NewKomsCount = newKomsCount,
+            Efforts = newIds.Select(id => new EffortModel
+            {
+                SegmentEffort = new SegmentEffortEntity { Id = id },
+                SummarySegmentEffort = new KomsSummarySegmentEffortEntity { Kom = true, NewKom = true }
+            }).ToList()
+        };
+
+        _segmentRepository.GetSegmentEffortsAsync(Arg.Is<HashSet<long>>(x => x.SequenceEqual(newIds)))
+            .Returns(returnedIds.Select(id => new SegmentEffortEntity { Id = id }).ToList());
+
+        // Act
+        await _segmentService.CheckNewKomsAreReturnedAsync(comparedEfforts);
+
+        // Assert
+        await _segmentRepository.Received().GetSegmentEffortsAsync(Arg.Is<HashSet<long>>(x => x.SequenceEqual(newIds)));
+
+        comparedEfforts.KomsCount.Should().Be(newKomsCount); // total koms should remain the same
+        comparedEfforts.NewKomsCount.Should().Be(newKomsCount - returnedKomsCount);
+        comparedEfforts.ReturnedKomsCount.Should().Be(returnedKomsCount);
+
+        var returnedKoms = comparedEfforts.Efforts.Where(x => x.SummarySegmentEffort.ReturnedKom == true).ToList();
+        returnedKoms.Count().Should().Be(returnedKomsCount);
+        returnedKoms.Any(x => x.SummarySegmentEffort.NewKom == true).Should().BeFalse();
+        returnedKoms.Select(x => x.SegmentEffort.Id).Should().BeEquivalentTo(returnedIds);
+    }
+
+    #endregion
+
     #region Add_new_koms_summary
     [Fact]
     public async Task Add_new_koms_summary_calls_repositories()
