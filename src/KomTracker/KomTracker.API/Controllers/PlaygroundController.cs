@@ -10,20 +10,24 @@ using KomTracker.Application.Models.Segment;
 using KomTracker.Application.Notifications.Tracking;
 using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Application.Interfaces.Services.Identity;
+using KomTracker.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace KomTracker.API.Controllers; 
 
-#if DEBUG
+//#if DEBUG
 [Route("playground")]
 [ApiController]
 [BearerAuthorize(Roles = Roles.Admin)]
 public class PlaygroundController : BaseApiController<PlaygroundController>
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly KOMDBContext _context;
 
-    public PlaygroundController(IServiceProvider serviceProvider)
+    public PlaygroundController(IServiceProvider serviceProvider, KOMDBContext context)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
     [HttpGet("test")]
@@ -48,5 +52,36 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
 
         return new NoContentResult();
     }
+
+    [HttpGet("fix-returned-koms")]
+    public async Task<ActionResult> FixReturnedKoms()
+    {
+        var newEfforts = await _context.KomsSummarySegmentEffort
+            .Where(x => x.NewKom)
+            .OrderBy(x => x.KomSummaryId)
+            .ToListAsync();
+
+        foreach (var newEffort in newEfforts)
+        {
+            // check is exists before
+            var exists = await _context.KomsSummarySegmentEffort.AnyAsync(x => x.KomSummaryId < newEffort.KomSummaryId && x.SegmentEffortId == newEffort.SegmentEffortId);
+
+            // modify
+            if (exists)
+            {
+                var komSummary = await _context.KomsSummary.FirstOrDefaultAsync(x => x.Id == newEffort.KomSummaryId);
+
+                newEffort.NewKom = false;
+                newEffort.ReturnedKom = true;
+                
+                komSummary.NewKoms--;
+                komSummary.ReturnedKoms++;
+
+                _context.SaveChanges();
+            }
+        }
+
+        return new NoContentResult();
+    }
 }
-#endif
+//#endif
