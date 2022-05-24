@@ -17,6 +17,9 @@ public class SendinBlueConfiguration
 
 public class ApplicationConfiguration
 {
+    public bool TrackKomsJobEnabled { get; set; } = true;
+    public bool RefreshSegmentsJobEnabled { get; set; } = true;
+
     /// <summary>
     /// Athlete id using to queries for data like segment details
     /// </summary>

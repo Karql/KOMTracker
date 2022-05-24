@@ -74,11 +74,17 @@ public class Startup
 
             q.UseMicrosoftDependencyInjectionJobFactory();
 
-            q.ScheduleJob<TrackKomsJob>(trigger => trigger
-                .WithCronSchedule("0 0 * * * ?")); // every hour
+            if (_applicationConfiguration.TrackKomsJobEnabled)
+            {
+                q.ScheduleJob<TrackKomsJob>(trigger => trigger
+                    .WithCronSchedule("0 0 * * * ?")); // every hour
+            }
 
-            q.ScheduleJob<RefreshSegmentsJob>(trigger => trigger
-                .WithCronSchedule("0 30 * * * ?")); // half past every hour
+            if (_applicationConfiguration.RefreshSegmentsJobEnabled)
+            {
+                q.ScheduleJob<RefreshSegmentsJob>(trigger => trigger
+                    .WithCronSchedule("0 30 * * * ?")); // half past every hour
+            }
         });
 
         services.AddQuartzHostedService(options =>
