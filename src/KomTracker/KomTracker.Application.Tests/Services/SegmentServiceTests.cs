@@ -126,23 +126,23 @@ public class SegmentServiceTests
         {
             new EffortModel
             {
-                SegmentEffort = new() { SegmentId = 1, StartDate = DateTime.Today.AddMinutes(20) },
-                SummarySegmentEffort = new() { }
+                SegmentEffort = new() { SegmentId = 1 },
+                SummarySegmentEffort = new() { KomSummaryId = 3 }
             },
             new EffortModel
             {
-                SegmentEffort = new() { SegmentId = 1, StartDate = DateTime.Today.AddMinutes(15) },
-                SummarySegmentEffort = new() { }
+                SegmentEffort = new() { SegmentId = 1 },
+                SummarySegmentEffort = new() { KomSummaryId = 2 }
             },
             new EffortModel
             {
-                SegmentEffort = new() { SegmentId = 2, StartDate = DateTime.Today.AddMinutes(10) },
-                SummarySegmentEffort = new() { }
+                SegmentEffort = new() { SegmentId = 2 },
+                SummarySegmentEffort = new() { KomSummaryId = 1 }
             },
             new EffortModel
             {
-                SegmentEffort = new() { SegmentId = 2, StartDate = DateTime.Today.AddMinutes(15) },
-                SummarySegmentEffort = new() { }
+                SegmentEffort = new() { SegmentId = 2 },
+                SummarySegmentEffort = new() { KomSummaryId = 2 }
             },
         };
 

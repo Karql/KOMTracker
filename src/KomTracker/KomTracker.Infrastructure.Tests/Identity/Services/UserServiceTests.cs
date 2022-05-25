@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentAssertions;
 using KomTracker.Domain.Entities.Athlete;
+using KomTracker.Infrastructure.Identity.Configurations;
 using KomTracker.Infrastructure.Identity.Entities;
 using KomTracker.Infrastructure.Identity.Services;
 using Microsoft.AspNetCore.Identity;
@@ -34,13 +35,15 @@ public class UserServiceTests
     private readonly IMapper _mapper;
     private readonly UserManager<UserEntity> _userManager;
     private readonly UserService _userService;
+    private readonly IdentityConfiguration _identityConfiguration;
 
     public UserServiceTests()
     {
         _mapper = Substitute.For<IMapper>();
         _userManager = TestUserManagerHelper.CreateTestUserManager<UserEntity>();
+        _identityConfiguration = Substitute.For<IdentityConfiguration>();
 
-        _userService = new UserService(_mapper, _userManager);
+        _userService = new UserService(_mapper, _userManager, _identityConfiguration);
 
         PrepareMocks();
     }
