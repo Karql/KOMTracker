@@ -67,7 +67,10 @@ public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
     {
         return await (
             from ks in _context.KomsSummary
-            join ksse in _context.KomsSummarySegmentEffort.Where(x => x.NewKom == true || x.LostKom == true)
+            join ksse in _context.KomsSummarySegmentEffort.Where(x => x.NewKom == true
+                || x.LostKom == true
+                || x.ImprovedKom == true
+                || x.ReturnedKom == true)
                 on ks.Id equals ksse.KomSummaryId
             join se in _context.SegmentEffort on ksse.SegmentEffortId equals se.Id
             join s in _context.Segment on se.SegmentId equals s.Id

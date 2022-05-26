@@ -116,50 +116,6 @@ public class SegmentServiceTests
         res.Should().NotBeNull();
         res.Any().Should().BeFalse();
     }
-
-    [Fact]
-    public async Task Get_last_koms_changes_returns_last_change_per_segment()
-    {
-        // Arrange
-        var dateFrom = DateTime.Today;
-        var lastChanges = new EffortModel[]
-        {
-            new EffortModel
-            {
-                SegmentEffort = new() { SegmentId = 1 },
-                SummarySegmentEffort = new() { KomSummaryId = 3 }
-            },
-            new EffortModel
-            {
-                SegmentEffort = new() { SegmentId = 1 },
-                SummarySegmentEffort = new() { KomSummaryId = 2 }
-            },
-            new EffortModel
-            {
-                SegmentEffort = new() { SegmentId = 2 },
-                SummarySegmentEffort = new() { KomSummaryId = 1 }
-            },
-            new EffortModel
-            {
-                SegmentEffort = new() { SegmentId = 2 },
-                SummarySegmentEffort = new() { KomSummaryId = 2 }
-            },
-        };
-
-        _segmentRepository.GetLastKomsChangesAsync(TestAthleteId, dateFrom).Returns(lastChanges);
-
-        var expectedChanges = new EffortModel[]
-        {
-            lastChanges[0],
-            lastChanges[3]
-        };
-
-        // Act
-        var res = await _segmentService.GetLastKomsChangesAsync(TestAthleteId, dateFrom);
-
-        // Assert
-        res.Should().BeEquivalentTo(expectedChanges);
-    }
     #endregion
 
     #region Compare efforts
