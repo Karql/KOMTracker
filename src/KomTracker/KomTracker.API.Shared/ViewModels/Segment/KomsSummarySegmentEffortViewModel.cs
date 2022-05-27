@@ -14,4 +14,5 @@ public class KomsSummarySegmentEffortViewModel
     public bool NewKom { get; set; }
     public bool ImprovedKom { get; set; }
     public bool LostKom { get; set; }
+    public bool ReturnedKom { get; set; }
 }

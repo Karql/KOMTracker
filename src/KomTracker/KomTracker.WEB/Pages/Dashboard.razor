@@ -23,7 +23,7 @@ else
                 <MudIcon Icon="@Icons.Material.Filled.Add" Color="Color.Success" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
                 <div>
                     <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1"><MudTooltip Text="In last 30 days">New KOMs</MudTooltip></MudText>
-                    <MudText Typo="Typo.h5">@_newKomsCount</MudText>
+                    <MudText Typo="Typo.h5">@_newKomsChanges.Count()</MudText>
                 </div>
             </MudPaper>
         </MudItem>
@@ -32,7 +32,7 @@ else
                 <MudIcon Icon="@Icons.Material.Filled.Remove" Color="Color.Error" Class="mx-4" Style="width:54px; height:54px;"></MudIcon>
                 <div>
                     <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1"><MudTooltip Text="In last 30 days">Lost KOMs</MudTooltip></MudText>
-                    <MudText Typo="Typo.h5">@_lostKomsCount</MudText>
+                    <MudText Typo="Typo.h5">@_lostKomsChanges.Count()</MudText>
                 </div>
             </MudPaper>
         </MudItem>
@@ -54,21 +54,21 @@ else
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var evm in _newKoms)
+                            @foreach (var change in _newKomsChanges.OrderByDescending(x => x.KomSummaryId))
                             {
                                 <tr>
                                     <td>
-                                        <MudLink Target="_blank" Href="@($"https://strava.com/segments/{evm.Segment.Id}")"><MudHighlighter Text="@evm.Segment.Name" /></MudLink>
+                                        <MudLink Target="_blank" Href="@($"https://strava.com/segments/{change.Segment.Id}")"><MudHighlighter Text="@change.Segment.Name" /></MudLink>
                                         </td>
                                     <td>
-                                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetClimbCategoryColor(evm.Segment.ClimbCategoryExtended)">
+                                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetClimbCategoryColor(change.Segment.ClimbCategoryExtended)">
                                             <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                                            <span>@evm.Segment.ClimbCategoryExtendedText</span>
+                                            <span>@change.Segment.ClimbCategoryExtendedText</span>
                                         </div>
                                     </td>
                                     <td>
-                                        <MudTooltip Text="@evm.Segment.ActivityType">
-                                            <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(evm.Segment.ActivityType)"></MudIcon>
+                                        <MudTooltip Text="@change.Segment.ActivityType">
+                                            <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(change.Segment.ActivityType)"></MudIcon>
                                         </MudTooltip>
                                     </td>
                                 </tr>
@@ -95,21 +95,21 @@ else
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var evm in _lostKoms)
+                            @foreach (var change in _lostKomsChanges.OrderByDescending(x => x.KomSummaryId))
                             {
                                 <tr>
                                     <td>
-                                        <MudLink Target="_blank" Href="@($"https://strava.com/segments/{evm.Segment.Id}")"><MudHighlighter Text="@evm.Segment.Name" /></MudLink>
+                                        <MudLink Target="_blank" Href="@($"https://strava.com/segments/{change.Segment.Id}")"><MudHighlighter Text="@change.Segment.Name" /></MudLink>
                                         </td>
                                     <td>
-                                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetClimbCategoryColor(evm.Segment.ClimbCategoryExtended)">
+                                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetClimbCategoryColor(change.Segment.ClimbCategoryExtended)">
                                             <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                                            <span>@evm.Segment.ClimbCategoryExtendedText</span>
+                                            <span>@change.Segment.ClimbCategoryExtendedText</span>
                                         </div>
                                     </td>
                                     <td>
-                                        <MudTooltip Text="@evm.Segment.ActivityType">
-                                            <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(evm.Segment.ActivityType)"></MudIcon>
+                                        <MudTooltip Text="@change.Segment.ActivityType">
+                                            <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(change.Segment.ActivityType)"></MudIcon>
                                         </MudTooltip>
                                     </td>
                                 </tr>
