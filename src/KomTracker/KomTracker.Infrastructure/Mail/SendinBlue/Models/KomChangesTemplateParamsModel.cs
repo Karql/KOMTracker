@@ -19,8 +19,10 @@ internal class KomChangesTemplateParamsModel
     public int newKomsCount { get; set; }
     public int improvedKomsCount { get; set; }
     public int lostKomsCount { get; set; }
+    public int returnedKomsCount { get; set; }
 
     public IEnumerable<KomChangesTemplateParamsSegmentModel> newKoms { get; set; }
     public IEnumerable<KomChangesTemplateParamsSegmentModel> improvedKoms { get; set; }
     public IEnumerable<KomChangesTemplateParamsSegmentModel> lostKoms { get; set; }
+    public IEnumerable<KomChangesTemplateParamsSegmentModel> returnedKoms { get; set; }
 }

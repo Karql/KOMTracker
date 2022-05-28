@@ -113,6 +113,7 @@ public class SendinBlueMailService : IMailService
             newKomsCount = comparedEfforts.NewKomsCount,
             improvedKomsCount = comparedEfforts.ImprovedKomsCount,
             lostKomsCount = comparedEfforts.LostKomsCount,
+            returnedKomsCount = comparedEfforts.ReturnedKomsCount,
             newKoms = comparedEfforts.Efforts.Where(x => x.SummarySegmentEffort.NewKom).Select(x => new KomChangesTemplateParamsSegmentModel
             {
                 // TOOD: change to x.Segment after fixing CompareEfforts
@@ -125,6 +126,11 @@ public class SendinBlueMailService : IMailService
                 segmentName = x.SegmentEffort.Name
             }).ToArray(),
             lostKoms = comparedEfforts.Efforts.Where(x => x.SummarySegmentEffort.LostKom).Select(x => new KomChangesTemplateParamsSegmentModel
+            {
+                segmentId = x.SegmentEffort.SegmentId,
+                segmentName = x.SegmentEffort.Name
+            }).ToArray(),
+            returnedKoms = comparedEfforts.Efforts.Where(x => x.SummarySegmentEffort.ReturnedKom).Select(x => new KomChangesTemplateParamsSegmentModel
             {
                 segmentId = x.SegmentEffort.SegmentId,
                 segmentName = x.SegmentEffort.Name
