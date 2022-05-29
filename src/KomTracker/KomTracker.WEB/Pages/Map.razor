@@ -1,0 +1,12 @@
+﻿@page "/map"
+@using KomTracker.WEB.Helpers
+@attribute [Authorize]
+
+@if (!_loaded)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <div>Map here</div>
+}
