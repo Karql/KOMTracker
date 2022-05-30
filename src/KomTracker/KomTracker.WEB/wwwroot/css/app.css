@@ -11,3 +11,17 @@
     width: 20px;
     text-align: center
 }
+
+.map-wrapper {
+    height: 400px; /* TODO: Full height */
+    position: relative;
+}
+
+#mapId {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: var(--border-radius-base) !important;
+}

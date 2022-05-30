@@ -1,4 +1,5 @@
 ﻿using Blazored.LocalStorage;
+using FisSst.BlazorMaps.DependencyInjection;
 using KomTracker.WEB.Infrastructure.Services.Preference;
 using KomTracker.WEB.Infrastructure.Services.User;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -60,6 +61,8 @@ public static class DependencyInjection
         services.AddScoped(sp => sp.GetService<IHttpClientFactory>()!.CreateClient(HttpClientName));
 
         services.AddMudServices();
+
+        services.AddBlazorLeafletMaps();
 
         return builder;
     }
