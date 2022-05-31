@@ -13,8 +13,30 @@
 }
 
 .map-wrapper {
-    height: 400px; /* TODO: Full height */
+    min-height: 400px;
     position: relative;
+}
+
+/* Fill map to full page height
+* 32px - margin top and bottom
+* 64px - mud-toolbar (bread crumbs etc. visible from md)
+*/
+@media (min-width: 0px) {
+    .map-wrapper {
+        height: calc(100vh - (var(--mud-appbar-height) - var(--mud-appbar-height)/8) - 32px);
+    }
+}
+
+@media (min-width: 600px) {
+    .map-wrapper {
+        height: calc(100vh - var(--mud-appbar-height) - 32px);
+    }
+}
+
+@media (min-width: 960px) {
+    .map-wrapper {
+        height: calc(100vh - var(--mud-appbar-height) - 64px - 32px);
+    }
 }
 
 #mapId {
