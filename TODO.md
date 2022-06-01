@@ -1,2 +1,3 @@
 - Refresh details for new segmens after TrackKoms
 - Fix marking as new kom after flag etc.
+- Find lib to decrpyt polyline
