@@ -12,6 +12,7 @@ using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Application.Interfaces.Services.Identity;
 using KomTracker.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using KomTracker.API.Shared.Helpers;
 
 namespace KomTracker.API.Controllers; 
 
@@ -80,6 +81,15 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
                 _context.SaveChanges();
             }
         }
+
+        return new NoContentResult();
+    }
+
+    [HttpGet("test-polyline")]
+    public async Task<ActionResult> TestPolyline()
+    {
+        var polyline = @"uzdpHun}wBu@VWQi@i@sAiB[Wi@[a@KSJu@d@i@Vo@`@a@`BYj@W`AYt@a@p@UVa@\u@\iCPyAA"; // bogucianka
+        var points = MapHelper.Decode(polyline);
 
         return new NoContentResult();
     }
