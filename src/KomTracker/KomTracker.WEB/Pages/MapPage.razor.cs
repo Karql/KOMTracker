@@ -25,6 +25,9 @@ public partial class MapPage
     [Inject]
     private IUserService UserService { get; set; } = default!;
 
+    [Inject]
+    private IPolylineFactory PolylineFactory { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         _mapOptions = new MapOptions()
@@ -42,6 +45,19 @@ public partial class MapPage
             }
         };
 
+        var polyline = @"uzdpHun}wBu@VWQi@i@sAiB[Wi@[a@KSJu@d@i@Vo@`@a@`BYj@W`AYt@a@p@UVa@\u@\iCPyAA"; // bogucianka
+        var points = MapHelper.Decode(polyline).Select(x => new LatLng { Lat = x.Latitude, Lng = x.Longitude}).ToArray();
+
+        
+
         _loaded = true;
+
+        Task.Run(async () =>
+        {
+            await Task.Delay(2000);
+            var polyline = await PolylineFactory.CreateAndAddToMap(points, _mapRef);
+            polyline.BindTooltip("Bogucianka");
+            StateHasChanged();
+        });        
     }
 }
