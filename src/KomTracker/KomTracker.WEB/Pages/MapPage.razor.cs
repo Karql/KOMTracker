@@ -57,6 +57,9 @@ public partial class MapPage
             await Task.Delay(2000);
             var polyline = await PolylineFactory.CreateAndAddToMap(points, _mapRef);
             polyline.BindTooltip("Bogucianka");
+
+            polyline.BindPopup(@"<b>popup</b><div style=""color: red"">Test</div>");
+
             StateHasChanged();
         });        
     }
