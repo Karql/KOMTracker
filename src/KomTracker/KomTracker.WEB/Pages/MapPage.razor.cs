@@ -3,6 +3,7 @@ using KomTracker.API.Shared.Helpers;
 using KomTracker.API.Shared.Models.User;
 using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.WEB.Infrastructure.Services.User;
+using KomTracker.WEB.Settings;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -33,7 +34,8 @@ public partial class MapPage
         _mapOptions = new MapOptions()
         {
             DivId = "mapId",
-            Center = new LatLng(50.072038, 20.037298),
+            Center = new LatLng(50.000372, 19.816786), // Bogucianka
+            // Center = new LatLng(50.072038, 20.037298), // Plac Centralny
             Zoom = 13,
             UrlTileLayer = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             SubOptions = new MapSubOptions()
@@ -55,12 +57,58 @@ public partial class MapPage
         Task.Run(async () =>
         {
             await Task.Delay(2000);
-            var polyline = await PolylineFactory.CreateAndAddToMap(points, _mapRef);
+            
+            var polyline = await PolylineFactory.CreateAndAddToMap(points, _mapRef, new PolylineOptions
+            {
+                Color = Theme.DefaultTheme.Palette.Primary.ToString()
+            });
+
             polyline.BindTooltip("Bogucianka");
 
-            polyline.BindPopup(@"<b>popup</b><div style=""color: red"">Test</div>");
+            var html = GetPopupHtml(new SegmentViewModel
+            {
+                Id = 1637516,
+                Name = "Bogucianka",
+                AverageGrade = 5,
+                Distance = 1100,
+                ElevationLow = 200,
+                ElevationHigh = 250
+            }, new SegmentEffortViewModel
+            {
+                Id = 2953716945498634992
+            });
+            polyline.BindPopup(html);
 
             StateHasChanged();
         });        
+    }
+
+    private string GetPopupHtml(SegmentViewModel segment, SegmentEffortViewModel effort)
+    {
+        return $@"
+            <h3><a href=""https://strava.com/segments/{segment.Id}"" target=""_blank"" class=""mud-primary-text"">{segment.Name}</a></h3>
+            <div class=""general-info mt-4"">
+                <div class=""d-flex flex-row"">
+                    <div class=""stat mr-4"">
+                        <strong>{(segment.Distance / 1000).ToString("F2")} km</strong>
+                        <br />
+                        <span class=""label"">Distance</span>
+                    </div>
+                    <div class=""stat"">
+                        <strong>{segment.AverageGrade.ToString("F1")}%</strong>
+                        <br />
+                        <span class=""label"">Grade</span>
+                    </div>
+                    <div class=""stat ml-4"">
+                        <strong>{(segment.ElevationHigh - segment.ElevationLow).ToString("F0")} m</strong>
+                        <br />
+                        <span class=""label"">Elev Gain</span>
+                    </div>
+                </div>
+                <div class=""my-4"">
+                    <strong>Your Best:</strong> <a href=""https://www.strava.com/segment_efforts/{effort.Id}"" target=""_blank"" class=""mud-primary-text"">1:11</a>
+                </div>                
+            </div>                      
+        ";
     }
 }

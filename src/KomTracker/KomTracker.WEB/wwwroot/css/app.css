@@ -47,3 +47,25 @@
     right: 0;
     border-radius: var(--border-radius-base) !important;
 }
+
+.map-koms {
+
+}
+
+.map-koms .leaflet-popup-content-wrapper {
+    border-radius: 0;
+}
+
+.map-koms .general-info {
+
+}
+
+.map-koms .general-info .stat {
+    line-height: 0.75;
+}
+
+.map-koms .general-info .stat .label {
+    font-size: 8px;
+    color: #979797;
+    text-transform: uppercase;
+}
