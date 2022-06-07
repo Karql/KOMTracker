@@ -21,6 +21,8 @@ public class SegmentViewModel
     public int? EffortCount { get; set; }
     public int? AthleteCount { get; set; }
     public int? StarCount { get; set; }
+
+    public string MapPolyline { get; set; }
     #endregion
 
     [JsonIgnore]
