@@ -1,3 +1,4 @@
 - Refresh details for new segmens after TrackKoms
 - Fix marking as new kom after flag etc.
 - Find lib to decrpyt polyline
+- Fix dashboard when last kom summary is older than 30days
