@@ -14,8 +14,11 @@ namespace KomTracker.WEB.Pages;
 public partial class MapPage
 {
     private bool _loaded = false;
+    private bool _polylinesLoaded = false;
     private Map _mapRef;
     private MapOptions _mapOptions;
+    private UserModel _user = default!;
+    private IEnumerable<EffortViewModel> _koms = Enumerable.Empty<EffortViewModel>();
 
     [CascadingParameter]
     public MainLayout Layout { get; set; }
@@ -31,11 +34,16 @@ public partial class MapPage
 
     protected override async Task OnInitializedAsync()
     {
+        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        {
+            new BreadcrumbItem("Map (beta)", href: "/map"),
+        };
+
         _mapOptions = new MapOptions()
         {
             DivId = "mapId",
-            Center = new LatLng(50.000372, 19.816786), // Bogucianka
             // Center = new LatLng(50.072038, 20.037298), // Plac Centralny
+            Center = new LatLng(50.061289, 19.937693), // Rynek           
             Zoom = 13,
             UrlTileLayer = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
             SubOptions = new MapSubOptions()
@@ -47,40 +55,41 @@ public partial class MapPage
             }
         };
 
-        var polyline = @"uzdpHun}wBu@VWQi@i@sAiB[Wi@[a@KSJu@d@i@Vo@`@a@`BYj@W`AYt@a@p@UVa@\u@\iCPyAA"; // bogucianka
-        var points = MapHelper.Decode(polyline).Select(x => new LatLng { Lat = x.Latitude, Lng = x.Longitude}).ToArray();
-
-        
+        _user = await UserService.GetCurrentUser();
+        await GetAllKoms();
 
         _loaded = true;
+        StateHasChanged();
 
         Task.Run(async () =>
         {
-            await Task.Delay(2000);
-            
-            var polyline = await PolylineFactory.CreateAndAddToMap(points, _mapRef, new PolylineOptions
-            {
-                Color = Theme.DefaultTheme.Palette.Primary.ToString()
-            });
-
-            polyline.BindTooltip("Bogucianka");
-
-            var html = GetPopupHtml(new SegmentViewModel
-            {
-                Id = 1637516,
-                Name = "Bogucianka",
-                AverageGrade = 5,
-                Distance = 1100,
-                ElevationLow = 200,
-                ElevationHigh = 250
-            }, new SegmentEffortViewModel
-            {
-                Id = 2953716945498634992
-            });
-            polyline.BindPopup(html);
-
+            await Task.Delay(500);
+            await AddPolylinesAsync();
             StateHasChanged();
         });        
+    }
+
+    private async Task GetAllKoms()
+    {
+        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{_user.AthleteId}/koms")
+            ?? Enumerable.Empty<EffortViewModel>();
+    }
+
+    private async Task AddPolylinesAsync()
+    {
+        foreach (var effort in _koms)
+        {
+            var points = MapHelper.Decode(effort.Segment.MapPolyline).Select(x => new LatLng { Lat = x.Latitude, Lng = x.Longitude }).ToArray();
+            var polyline = await PolylineFactory.CreateAndAddToMap(points, _mapRef, new PolylineOptions
+            {
+                Color = Theme.DefaultTheme.Palette.Primary.ToString(),                
+            });            
+
+            var popupHtml = GetPopupHtml(effort.Segment, effort.SegmentEffort);
+            await polyline.BindPopup(popupHtml);
+            await polyline.BindTooltip(effort.Segment.Name);
+        }
+        _polylinesLoaded = true;
     }
 
     private string GetPopupHtml(SegmentViewModel segment, SegmentEffortViewModel effort)
@@ -106,7 +115,7 @@ public partial class MapPage
                     </div>
                 </div>
                 <div class=""my-4"">
-                    <strong>Your Best:</strong> <a href=""https://www.strava.com/segment_efforts/{effort.Id}"" target=""_blank"" class=""mud-primary-text"">1:11</a>
+                    <strong>Your Best:</strong> <a href=""https://www.strava.com/segment_efforts/{effort.Id}"" target=""_blank"" class=""mud-primary-text"">{TimeSpan.FromSeconds(effort.ElapsedTime).ToString()}</a>
                 </div>                
             </div>                      
         ";
