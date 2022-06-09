@@ -13,6 +13,10 @@ namespace KomTracker.WEB.Pages;
 
 public partial class MapPage
 {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int? AthleteId { get; set; }
+
     private bool _loaded = false;
     private bool _polylinesLoaded = false;
     private Map _mapRef;
@@ -71,7 +75,9 @@ public partial class MapPage
 
     private async Task GetAllKoms()
     {
-        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{_user.AthleteId}/koms")
+        var athleteId = AthleteId ?? _user.AthleteId;
+
+        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{athleteId}/koms")
             ?? Enumerable.Empty<EffortViewModel>();
     }
 
