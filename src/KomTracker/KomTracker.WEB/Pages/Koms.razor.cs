@@ -10,6 +10,10 @@ namespace KomTracker.WEB.Pages;
 
 public partial class Koms
 {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int? AthleteId { get; set; }
+
     private bool _loaded = false;
     private UserModel _user = default!;
     private string _searchString = "";
@@ -41,7 +45,9 @@ public partial class Koms
 
     private async Task GetAllKoms()
     {
-        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{_user.AthleteId}/koms")
+        var athleteId = AthleteId ?? _user.AthleteId;
+
+        _koms = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{athleteId}/koms")
             ?? Enumerable.Empty<EffortViewModel>();
     }
 
