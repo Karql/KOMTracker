@@ -8,7 +8,7 @@
   	<PackageReference Include="AutoMapper" Version="10.1.1" />
   	<PackageReference Include="EFCore.BulkExtensions" Version="6.4.1" />
   	<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.6" />
     <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.0-preview5" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.3" />
     <PackageReference Include="sib_api_v3_sdk" Version="3.3.0" />
