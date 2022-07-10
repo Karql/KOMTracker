@@ -6,7 +6,7 @@
 
   <ItemGroup>
   	<PackageReference Include="AutoMapper" Version="11.0.1" />
-  	<PackageReference Include="EFCore.BulkExtensions" Version="6.5.2" />
+  	<PackageReference Include="EFCore.BulkExtensions" Version="6.5.3" />
   	<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.6" />
     <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="6.0.1" />
