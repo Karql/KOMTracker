@@ -64,5 +64,5 @@ public class ClubSummaryModel
     public bool Verified { get; set; }
 
     [JsonPropertyName("url")]
-    public bool Url { get; set; }
+    public string Url { get; set; }
 }

@@ -17,5 +17,6 @@ public static class DependencyInjection
         services.AddTransient<ITokenApi, TokenApi>();
         services.AddTransient<IAthleteApi, AthleteApi>();
         services.AddTransient<ISegmentApi, SegmentApi>();
+        services.AddTransient<IClubApi, ClubApi>();
     }
 }

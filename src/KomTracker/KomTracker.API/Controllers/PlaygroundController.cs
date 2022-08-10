@@ -31,13 +31,14 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    [HttpGet("test")]
-    public async Task<ActionResult> Test()
+    [HttpPost("test")]
+    public async Task<ActionResult> Test(string token)
     {
         var cancellationTokenSource = new CancellationTokenSource();
 
         var athleteApi = _serviceProvider.GetRequiredService<IAthleteApi>();
         var segmentApi = _serviceProvider.GetRequiredService<ISegmentApi>();
+        var clubApi    = _serviceProvider.GetRequiredService<IClubApi>();
         var stravaAthleteService = _serviceProvider.GetRequiredService<IStravaAthleteService>();
         var mailService = _serviceProvider.GetRequiredService<IMailService>();
         var userService = _serviceProvider.GetRequiredService<IUserService>();
@@ -48,8 +49,10 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
         //var res = await segmentApi.GetSegmentAsync(30393774, token);
 
 
-        await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
+        //await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
         //await _mediator.Send(new RefreshSegmentsCommand { SegmentsToRefresh = 2 }, cancellationTokenSource.Token);       
+
+        var clubs = await clubApi.GetClubsAsync(token);
 
         return new NoContentResult();
     }
