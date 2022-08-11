@@ -27,6 +27,8 @@ Koms map
 
 Koms by type on dashboard
 
+Last changes new koms, lost koms for following, club etc.
+
 # Logo
 
 Font: Gill Sans Ultra Bold
