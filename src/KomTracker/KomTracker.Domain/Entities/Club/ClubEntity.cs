@@ -1,11 +1,12 @@
-﻿using System;
+﻿using KomTracker.Domain.Contracts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace KomTracker.Domain.Entities.Club;
-public class ClubEntity
+public class ClubEntity : BaseEntity
 {
     public long Id { get; set; }
     public string Name { get; set; }
