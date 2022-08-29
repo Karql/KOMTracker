@@ -14,6 +14,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using KomTracker.Infrastructure.Persistence.Configurations.Club;
+using KomTracker.Domain.Entities.Club;
 
 namespace KomTracker.Infrastructure.Persistence;
 
@@ -42,6 +44,8 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
     public virtual DbSet<KomsSummaryEntity> KomsSummary { get; set; }
 
     public virtual DbSet<KomsSummarySegmentEffortEntity> KomsSummarySegmentEffort { get; set; }
+
+    public virtual DbSet<ClubEntity> Club { get; set; }
 
     public KOMDBContext(DbContextOptions<KOMDBContext> options, ILoggerFactory loggerFactory)
         : base(options)
@@ -80,5 +84,6 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
         builder.ApplyConfiguration(new SegmentEffortEntityTypeConfiguration());
         builder.ApplyConfiguration(new KomsSummaryEntityTypeConfiguration());
         builder.ApplyConfiguration(new KomsSummarySegmentEffortEntityTypeConfiguration());
+        builder.ApplyConfiguration(new ClubEntityTypeConfiguration());
     }
 }
