@@ -29,6 +29,8 @@ Koms by type on dashboard
 
 Last changes new koms, lost koms for following, club etc.
 
+Segment stars tracking - notify when someone stared segment that you have kom.
+
 # Logo
 
 Font: Gill Sans Ultra Bold
