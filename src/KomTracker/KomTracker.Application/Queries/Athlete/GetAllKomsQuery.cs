@@ -26,11 +26,11 @@ public class GetAllKomsQueryHandler : IRequestHandler<GetAllKomsQuery, IEnumerab
 
     public async Task<IEnumerable<EffortModel>> Handle(GetAllKomsQuery request, CancellationToken cancellationToken)
     {
-        var lastKomsSummaryEfforts = (await _segmentService.GetLastKomsSummaryEffortsAsync(request.AthleteId))?
+        var komsEfforts = (await _segmentService.GetLastKomsSummaryEffortsAsync(request.AthleteId))?
             .Where(x => x.SummarySegmentEffort.Kom)
             .ToList()
             ?? Enumerable.Empty<EffortModel>();
 
-        return lastKomsSummaryEfforts;
+        return komsEfforts;
     }
 }

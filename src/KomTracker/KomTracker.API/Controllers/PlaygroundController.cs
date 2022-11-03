@@ -13,7 +13,7 @@ using KomTracker.Application.Interfaces.Services.Identity;
 using KomTracker.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using KomTracker.API.Shared.Helpers;
-using KomTracker.Application.Commands.Ranking;
+using KomTracker.Application.Commands.Stats;
 
 namespace KomTracker.API.Controllers; 
 
@@ -52,7 +52,7 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
 
         //await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
         //await _mediator.Send(new RefreshSegmentsCommand { SegmentsToRefresh = 2 }, cancellationTokenSource.Token);
-        await _mediator.Send(new CalculateRankingCommand(), cancellationTokenSource.Token); 
+        await _mediator.Send(new RecalculateStatsCommand(), cancellationTokenSource.Token); 
 
         //var clubs = await clubApi.GetClubsAsync(token);
 
