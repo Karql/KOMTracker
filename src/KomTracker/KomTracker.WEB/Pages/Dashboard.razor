@@ -61,9 +61,9 @@ else
                                         <MudLink Target="_blank" Href="@($"https://strava.com/segments/{change.Segment.Id}")"><MudHighlighter Text="@change.Segment.Name" /></MudLink>
                                         </td>
                                     <td>
-                                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetClimbCategoryColor(change.Segment.ClimbCategoryExtended)">
+                                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(change.Segment.ExtendedCategory)">
                                             <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                                            <span>@change.Segment.ClimbCategoryExtendedText</span>
+                                            <span>@change.Segment.ExtendedCategoryText</span>
                                         </div>
                                     </td>
                                     <td>
@@ -102,9 +102,9 @@ else
                                         <MudLink Target="_blank" Href="@($"https://strava.com/segments/{change.Segment.Id}")"><MudHighlighter Text="@change.Segment.Name" /></MudLink>
                                         </td>
                                     <td>
-                                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetClimbCategoryColor(change.Segment.ClimbCategoryExtended)">
+                                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(change.Segment.ExtendedCategory)">
                                             <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                                            <span>@change.Segment.ClimbCategoryExtendedText</span>
+                                            <span>@change.Segment.ExtendedCategoryText</span>
                                         </div>
                                     </td>
                                     <td>

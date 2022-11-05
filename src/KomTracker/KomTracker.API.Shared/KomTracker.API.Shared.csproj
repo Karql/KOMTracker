@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\KomTracker.Application.Shared\KomTracker.Application.Shared.csproj" />
     <ProjectReference Include="..\KomTracker.Infrastructure.Shared\KomTracker.Infrastructure.Shared.csproj" />
   </ItemGroup>
 

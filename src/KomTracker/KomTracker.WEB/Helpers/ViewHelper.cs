@@ -16,18 +16,24 @@ public static class ViewHelper
         };
     }
 
-    public static string GetClimbCategoryColor(int climbCategory)
+    public static string GetExtendedCategoryColor(int climbCategory)
     {
         return climbCategory switch
         {
-            -1 => "#000",
-            0 => "#F3A73B",
+            -8 => "#000",
+            -7 => "#000",
+            -6 => "#00d",
+            -5 => "#0b0",
+            -4 => "#0b0",
+            -3 => "#0b0",
+            -2 => "#db0",
+            -1 => "#f40",
             1 => "#EB9138",
             2 => "#E47B34",
             3 => "#DC6531",
             4 => "#D34B2D",
             5 => "#CA2A2A",
-            _ => throw new ArgumentOutOfRangeException($"{nameof(climbCategory)} should has value between -1 and 5"),
+            _ => throw new ArgumentOutOfRangeException($"{nameof(climbCategory)} should has value between -8 and 5 (without 0)"),
         };
     }
 }

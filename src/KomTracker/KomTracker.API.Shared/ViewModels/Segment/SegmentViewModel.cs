@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using KomTracker.Application.Shared.Helpers;
+using System.Text.Json.Serialization;
 
 namespace KomTracker.API.Shared.ViewModels.Segment;
 
@@ -26,25 +27,8 @@ public class SegmentViewModel
     #endregion
 
     [JsonIgnore]
-    public int ClimbCategoryExtended
-    {
-        get
-        {
-            return AverageGrade < -4.0f ?
-                -1
-                : ClimbCategory;
-        }
-    }
+    public int ExtendedCategory => SegmentHelper.GetExtendedCategory(ClimbCategory, AverageGrade, Distance);
 
-    public string ClimbCategoryExtendedText => ClimbCategoryExtended switch
-    {
-        -1 => "DH",
-        0 => "0",
-        1 => "4",
-        2 => "3",
-        3 => "2",
-        4 => "1",
-        5 => "HC",
-        _ => throw new ArgumentOutOfRangeException($"{nameof(ClimbCategoryExtended)} should has value between -1 and 5"),
-    };
+    [JsonIgnore]
+    public string ExtendedCategoryText => SegmentHelper.GetExtendedCategoryText(ExtendedCategory);
 }
