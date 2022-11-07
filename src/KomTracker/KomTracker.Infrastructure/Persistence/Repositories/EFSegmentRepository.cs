@@ -63,9 +63,9 @@ public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
         ).ToListAsync();
     }
 
-    public async Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(int athleteId, DateTime dateFrom)
+    public async Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(IEnumerable<int> athleteIds, DateTime? dateFrom, int? top = null)
     {
-        return await (
+        var query =
             from ks in _context.KomsSummary
             join ksse in _context.KomsSummarySegmentEffort.Where(x => x.NewKom == true
                 || x.LostKom == true
@@ -74,14 +74,22 @@ public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
                 on ks.Id equals ksse.KomSummaryId
             join se in _context.SegmentEffort on ksse.SegmentEffortId equals se.Id
             join s in _context.Segment on se.SegmentId equals s.Id
-            where ks.AthleteId == athleteId && ks.TrackDate >= dateFrom
+            where athleteIds.Contains(ks.AthleteId)
+                && (!dateFrom.HasValue || ks.TrackDate >= dateFrom)
+            orderby ksse.AuditCD descending
             select new EffortModel
             {
                 SegmentEffort = se,
                 SummarySegmentEffort = ksse,
                 Segment = s
-            }
-        ).ToListAsync();
+            };
+
+        if (top.HasValue)
+        {
+            query = query.Take(top.Value);
+        }
+        
+        return await query.ToListAsync();
     }
 
     public async Task<IEnumerable<KomsSummaryEntity>> GetKomsSummariesAsync(int athleteId, DateTime dateFrom)

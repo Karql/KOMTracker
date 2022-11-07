@@ -15,6 +15,7 @@ public interface ISegmentService
     Task<IEnumerable<EffortModel>> GetLastKomsSummaryEffortsAsync(int athleteId);
 
     Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(int athleteId, DateTime dateFrom);
+    Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(IEnumerable<int> athleteIds, DateTime? dateFrom = null, int? top = null);
 
     Task<IEnumerable<KomsSummaryEntity>> GetKomsSummariesAsync(int athleteId, DateTime dateFrom);
 

@@ -35,11 +35,16 @@ public class SegmentService : ISegmentService
             .GetLastKomsSummaryEffortsAsync(athleteId);
     }
 
-    public async Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(int athleteId, DateTime dateFrom)
+    public Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(int athleteId, DateTime dateFrom)
+    {
+        return GetLastKomsChangesAsync(new[] { athleteId }, dateFrom: dateFrom);
+    }
+
+    public async Task<IEnumerable<EffortModel>> GetLastKomsChangesAsync(IEnumerable<int> athleteIds, DateTime? dateFrom = null, int? top = null)
     {
         return (await _komUoW
             .GetRepository<ISegmentRepository>()
-            .GetLastKomsChangesAsync(athleteId, dateFrom))
+            .GetLastKomsChangesAsync(athleteIds, dateFrom, top))
             ?? Enumerable.Empty<EffortModel>();
     }
 

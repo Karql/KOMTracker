@@ -93,7 +93,7 @@ public class SegmentServiceTests
         var dateFrom = DateTime.Today;
         var fixture = FixtureHelper.GetTestFixture();
         var lastChanges = fixture.CreateMany<EffortModel>(2);
-        _segmentRepository.GetLastKomsChangesAsync(TestAthleteId, dateFrom).Returns(lastChanges);
+        _segmentRepository.GetLastKomsChangesAsync(Arg.Is<IEnumerable<int>>(x => x.First() == TestAthleteId), dateFrom, null).Returns(lastChanges);
 
         // Act
         var res = await _segmentService.GetLastKomsChangesAsync(TestAthleteId, dateFrom);
@@ -107,7 +107,7 @@ public class SegmentServiceTests
     {
         // Arrange
         var dateFrom = DateTime.Today;
-        _segmentRepository.GetLastKomsChangesAsync(TestAthleteId, dateFrom).Returns((IEnumerable<EffortModel>)null);
+        _segmentRepository.GetLastKomsChangesAsync(Arg.Is<IEnumerable<int>>(x => x.First() == TestAthleteId), dateFrom, null).Returns((IEnumerable<EffortModel>)null);
 
         // Act
         var res = await _segmentService.GetLastKomsChangesAsync(TestAthleteId, dateFrom);

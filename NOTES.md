@@ -50,6 +50,11 @@ Climbs:
 WL - Wall: 8% <= avg
 MC - Minnor climb: 3% <= avg < 8%
 
+# Clubs
+
+In club edit page you can set only club type.
+Fields in api: `activity_types`, `activity_types_icon` are set bassed on club type.
+
 # Logo
 
 Font: Gill Sans Ultra Bold
