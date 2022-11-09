@@ -4,12 +4,12 @@ using KomTracker.Domain.Entities.Athlete;
 namespace KomTracker.Application.Models.Stats;
 public class LastKomsChangesModel
 {
-    public AthleteEntity Athletee { get; set; } = default!;
+    public AthleteEntity Athlete { get; set; } = default!;
     public EffortModel Change { get; set; } = default!;
 
-    public LastKomsChangesModel(AthleteEntity athletee, EffortModel change)
+    public LastKomsChangesModel(AthleteEntity athlete, EffortModel change)
     {
-        Athletee = athletee ?? throw new ArgumentNullException(nameof(athletee));
+        Athlete = athlete ?? throw new ArgumentNullException(nameof(athlete));
         Change = change ?? throw new ArgumentNullException(nameof(change));
     }
 }

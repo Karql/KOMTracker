@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace KomTracker.API.Shared.ViewModels.Athlete;
@@ -18,4 +19,7 @@ public class AthleteViewModel
     public float Weight { get; set; }
     public string Profile { get; set; }
     public string ProfileMedium { get; set; }
+
+    [JsonIgnore]
+    public string FullName => $"{FirstName} {LastName}";
 }

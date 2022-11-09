@@ -15,7 +15,9 @@ public class DtoProfile : Profile
     {
         CreateMap<SegmentEffortEntity, SegmentEffortViewModel>();
         CreateMap<SegmentEntity, SegmentViewModel>();
-        CreateMap<KomsSummarySegmentEffortEntity, KomsSummarySegmentEffortViewModel>();
+        CreateMap<KomsSummarySegmentEffortEntity, KomsSummarySegmentEffortViewModel>()
+            .ForMember(dest => dest.TrackDate, opt => opt.MapFrom(src => src.AuditCD)); 
+
         CreateMap<EffortModel, EffortViewModel>();
         CreateMap<KomsSummaryEntity, KomsSummaryViewModel>();
         CreateMap<AthleteEntity, AthleteViewModel>();

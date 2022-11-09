@@ -1,8 +1,9 @@
 ﻿using MudBlazor;
+using MudBlazor.Utilities;
 
 namespace KomTracker.WEB.Settings;
 
-public class Theme
+public static class Theme
 {
     public static readonly MudTheme DefaultTheme = new MudTheme()
     {

@@ -15,4 +15,5 @@ public class KomsSummarySegmentEffortViewModel
     public bool ImprovedKom { get; set; }
     public bool LostKom { get; set; }
     public bool ReturnedKom { get; set; }
+    public DateTime TrackDate { get; set; }
 }

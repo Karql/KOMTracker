@@ -1,0 +1,108 @@
+﻿@page "/last-koms-changes"
+@using KomTracker.API.Shared.ViewModels.Stats
+@using KomTracker.WEB.Helpers
+@using KomTracker.WEB.Settings
+@attribute [Authorize]
+
+@if (!_loaded)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudTable Hover="true" Elevation="25" Items="_changes" Dense="false" Bordered="false" Striped="true" Filter="new Func<LastKomsChangesViewModel, bool>(Search)" @bind-kom="_change">
+        <ToolBarContent>
+            <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for changes (segment, athlete)" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Athlete.FullName)">Athlete</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SummarySegmentEffort.TrackDate)">Change date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.Name)">Segment name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.Distance)">Distance</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.ElevationHigh - x.Change.Segment.ElevationLow)">Elev diff</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.AverageGrade)">Grade</MudTableSortLabel></MudTh>            
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.Speed)">Speed</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.AverageHeartrate ?? 0)">HR</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.ExtendedCategory)">Cat</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.ActivityType)">Type</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Change type">
+                <div class="d-flex align-center">
+                    @if (@context.Change.SummarySegmentEffort.NewKom) {
+                        <MudIcon Icon="@Icons.Material.Filled.Add" Color="Color.Success" Size="Size.Medium"></MudIcon>
+                    }
+                    @if (@context.Change.SummarySegmentEffort.LostKom) {
+                        <MudIcon Icon="@Icons.Material.Filled.Remove" Color="Color.Error" Size="Size.Medium"></MudIcon>
+                    }
+                    @if (@context.Change.SummarySegmentEffort.ImprovedKom) {
+                        <MudIcon Icon="@Icons.Material.Filled.ArrowUpward" Color="Color.Info" Size="Size.Medium"></MudIcon>
+                    }
+                    @if (@context.Change.SummarySegmentEffort.ReturnedKom) {
+                        <MudIcon Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Dark" Size="Size.Medium"></MudIcon>
+                    }
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Athlete">
+                <div class="d-flex align-center">
+                    <MudAvatar Size="Size.Small" Image="@context.Athlete.ProfileMedium" Class="mr-4" /> 
+                    <MudLink Target="_blank" Href="@($"https://strava.com/athletes/{context.Athlete.AthleteId}")"><MudHighlighter Text="@context.Athlete.FullName" HighlightedText="@_searchString" /></MudLink>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Change date">
+                @context.Change.SummarySegmentEffort.TrackDate.ToString("yyyy-MM-dd")
+            </MudTd>
+            <MudTd DataLabel="Name">
+                <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.Change.SegmentEffort.Id}")"><MudHighlighter Text="@context.Change.Segment.Name" HighlightedText="@_searchString" /></MudLink>
+            </MudTd>
+            <MudTd DataLabel="Distnce">
+                @((context.Change.Segment.Distance / 1000).ToString("F2")) km
+            </MudTd>
+             <MudTd DataLabel="Elev diff">
+                @((context.Change.Segment.ElevationHigh - context.Change.Segment.ElevationLow).ToString("F0")) m
+            </MudTd>
+            <MudTd DataLabel="Grade">
+                @context.Change.Segment.AverageGrade.ToString("F1")%
+            </MudTd>
+            <MudTd DataLabel="Date">
+                @context.Change.SegmentEffort.StartDate.ToString("yyyy-MM-dd")
+            </MudTd>
+            <MudTd DataLabel="Speed">
+                @context.Change.SegmentEffort.Speed.ToString("F1")km/h
+            </MudTd>
+            <MudTd DataLabel="HR">
+                @((context.Change.SegmentEffort.AverageHeartrate ?? 0) == 0 ? "-" : context.Change.SegmentEffort.AverageHeartrate!.Value.ToString("F0"))
+            </MudTd>
+            <MudTd DataLabel="Power" >
+                <span class="d-flex align-center">
+                @((context.Change.SegmentEffort.AverageWatts ?? 0) == 0 ? "-" : context.Change.SegmentEffort.AverageWatts!.Value.ToString("F0") + "W")
+                @if (context.Change.SegmentEffort.DeviceWatts)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Bolt"></MudIcon>
+                }
+                </span>
+            </MudTd>
+            <MudTd DataLabel="Time">
+                @(TimeSpan.FromSeconds(context.Change.SegmentEffort.ElapsedTime).ToString())                
+            </MudTd>
+            <MudTd DataLabel="Cat">
+                <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(context.Change.Segment.ExtendedCategory)">
+                    <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
+                    <span>@context.Change.Segment.ExtendedCategoryText</span>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Type">
+                <MudTooltip Text="@context.Change.Segment.ActivityType">
+                    <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(context.Change.Segment.ActivityType)"></MudIcon>
+                </MudTooltip>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>    
+}

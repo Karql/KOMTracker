@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29652677-6AFE-4786-A5D9-6611495347B3}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		..\CHANGELOG.md = ..\CHANGELOG.md
 		..\DEV.md = ..\DEV.md
 		..\NOTES.md = ..\NOTES.md
 		..\README.md = ..\README.md
@@ -44,7 +45,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.API.Shared", "Ko
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.Infrastructure.Shared", "KomTracker\KomTracker.Infrastructure.Shared\KomTracker.Infrastructure.Shared.csproj", "{5F7427DF-E6A2-4647-89ED-957F49279224}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KomTracker.Application.Shared", "KomTracker\KomTracker.Application.Shared\KomTracker.Application.Shared.csproj", "{4CE2FCD9-7690-46AA-A015-E2F65CE09285}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KomTracker.Application.Shared", "KomTracker\KomTracker.Application.Shared\KomTracker.Application.Shared.csproj", "{4CE2FCD9-7690-46AA-A015-E2F65CE09285}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

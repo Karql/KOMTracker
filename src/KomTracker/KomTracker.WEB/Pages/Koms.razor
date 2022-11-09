@@ -71,7 +71,7 @@ else
             <MudTd DataLabel="Athletes">
                 @(context.Segment.AthleteCount ?? 0)
             </MudTd>
-            <MudTd DataLabel="Type">
+            <MudTd DataLabel="Cat">
                 <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(context.Segment.ExtendedCategory)">
                     <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
                     <span>@context.Segment.ExtendedCategoryText</span>
