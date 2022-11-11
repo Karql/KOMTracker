@@ -20,6 +20,7 @@ public static class DependencyInjection
         //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(RequestPerformanceBehaviour<,>));
 
         services.AddTransient<IAthleteService, AthleteService>();
+        services.AddTransient<IClubService, ClubService>();
         services.AddTransient<ISegmentService, SegmentService>();
 
         return services;

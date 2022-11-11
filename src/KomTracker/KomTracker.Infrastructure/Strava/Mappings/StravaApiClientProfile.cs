@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using KomTracker.Domain.Entities.Athlete;
+using KomTracker.Domain.Entities.Club;
 using KomTracker.Domain.Entities.Segment;
 using KomTracker.Domain.Entities.Token;
 using System;
@@ -30,5 +31,7 @@ public class StravaApiClientProfile : Profile
 
         CreateMap<ApiModel.Segment.SegmentSummaryModel, SegmentEntity>();
         CreateMap<ApiModel.Segment.SegmentDetailedModel, SegmentEntity>();
+
+        CreateMap<ApiModel.Club.ClubSummaryModel, ClubEntity>();
     }
 }

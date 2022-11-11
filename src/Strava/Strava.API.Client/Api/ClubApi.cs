@@ -1,7 +1,7 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
 using Strava.API.Client.Model.Club;
-using Strava.API.Client.Model.Segment.Error;
+using Strava.API.Client.Model.Club.Error;
 using System;
 using System.Collections.Generic;
 using System.Linq;

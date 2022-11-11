@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Strava.API.Client.Model.Segment.Error;
+namespace Strava.API.Client.Model.Club.Error;
 
 public class GetClubsError : BaseError
 {

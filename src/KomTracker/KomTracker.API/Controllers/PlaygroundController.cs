@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using KomTracker.API.Shared.Helpers;
 using KomTracker.Application.Commands.Stats;
 using KomTracker.Application.Queries.Stats;
+using KomTracker.Application.Commands.Club;
 
 namespace KomTracker.API.Controllers; 
 
@@ -55,10 +56,12 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
         //await _mediator.Send(new RefreshSegmentsCommand { SegmentsToRefresh = 2 }, cancellationTokenSource.Token);
         //await _mediator.Send(new RecalculateStatsCommand(), cancellationTokenSource.Token); 
 
-        var res = await _mediator.Send(new GetLastKomsChangesQuery());
+        //var res = await _mediator.Send(new GetLastKomsChangesQuery());
+
+
 
         //var clubs = await clubApi.GetClubsAsync(token);
-
+        await _mediator.Send(new RefreshClubsCommand(), cancellationTokenSource.Token); 
 
 
         return new NoContentResult();

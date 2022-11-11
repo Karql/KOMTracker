@@ -127,6 +127,7 @@ public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
     {
         SetAuidtMD(segments);
 
+        // always update full list for ability to query last updated
         return _context.BulkUpdateAsync(segments.ToList(), new BulkConfig
         {
             CalculateStats = false,
