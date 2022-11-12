@@ -35,6 +35,8 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
 
     public virtual DbSet<AthleteEntity> Athlete { get; set; }
 
+    public virtual DbSet<AthleteClubEntity> AthleteClub { get; set; }
+
     public virtual DbSet<TokenEntity> Token { get; set; }
 
     public virtual DbSet<SegmentEntity> Segment { get; set; }
@@ -79,6 +81,7 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
 
         // Strava
         builder.ApplyConfiguration(new AthleteEntityTypeConfiguration());
+        builder.ApplyConfiguration(new AthleteClubEntityTypeConfiguration());
         builder.ApplyConfiguration(new TokenEntityTypeConfiguration());
         builder.ApplyConfiguration(new SegmentEntityTypeConfiguration());
         builder.ApplyConfiguration(new SegmentEffortEntityTypeConfiguration());

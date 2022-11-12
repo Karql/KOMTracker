@@ -1,4 +1,5 @@
 ﻿using KomTracker.Domain.Contracts;
+using KomTracker.Domain.Entities.Club;
 using KomTracker.Domain.Entities.Token;
 using System;
 using System.Collections.Generic;
@@ -21,4 +22,5 @@ public class AthleteEntity : BaseEntity
     public string Profile { get; set; }
     public string ProfileMedium { get; set; }
     public virtual TokenEntity Token { get; set; }
+    public List<ClubEntity> Clubs { get; set; }
 }

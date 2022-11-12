@@ -18,6 +18,13 @@ public class AthleteEntityTypeConfiguration
 
         builder.PrepareBaseColumns();
 
+        builder.HasMany(x => x.Clubs)
+            .WithMany(x => x.Athletes)
+            .UsingEntity<AthleteClubEntity>(
+                x => x.HasOne(x => x.Club).WithMany().HasForeignKey(x => x.ClubId),
+                x => x.HasOne(x => x.Athlete).WithMany().HasForeignKey(x => x.AthleteId)
+            );
+
         builder.HasKey(x => x.AthleteId);
 
         builder.Property(x => x.AthleteId)

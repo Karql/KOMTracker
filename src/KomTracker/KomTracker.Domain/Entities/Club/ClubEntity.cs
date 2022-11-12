@@ -1,4 +1,5 @@
 ﻿using KomTracker.Domain.Contracts;
+using KomTracker.Domain.Entities.Athlete;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,4 +25,6 @@ public class ClubEntity : BaseEntity
     public bool Featured { get; set; }
     public bool Verified { get; set; }
     public string Url { get; set; }
+
+    public List<AthleteEntity> Athletes { get; set; }
 }
