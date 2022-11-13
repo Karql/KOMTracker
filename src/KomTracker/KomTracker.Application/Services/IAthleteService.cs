@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using KomTracker.Domain.Entities.Athlete;
+using KomTracker.Domain.Entities.Club;
 using KomTracker.Domain.Entities.Segment;
 using KomTracker.Domain.Entities.Token;
 using System;
@@ -40,6 +41,8 @@ public interface IAthleteService
     /// Get token from DB and refresh when needed
     /// </summary>
     Task<Result<TokenEntity>> GetValidTokenAsync(int athleteId);
+
+    Task SyncAthleteClubsAsync(int athleteId, IEnumerable<ClubEntity> clubs);
 }
 
 public class GetValidTokenError : FluentResults.Error

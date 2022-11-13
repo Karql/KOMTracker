@@ -2,6 +2,7 @@
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Domain.Entities.Athlete;
+using KomTracker.Domain.Entities.Club;
 using KomTracker.Domain.Entities.Segment;
 using KomTracker.Domain.Entities.Token;
 using System;
@@ -84,6 +85,13 @@ public class AthleteService : IAthleteService
 
         await DeactivateAthleteAsync(athleteId);
         return Result.Fail<TokenEntity>(new GetValidTokenError(GetValidTokenError.RefreshFailed));
+    }
+
+    public Task SyncAthleteClubsAsync(int athleteId, IEnumerable<ClubEntity> clubs)
+    {
+        return _komUoW
+            .GetRepository<IAthleteRepository>()
+            .SyncAthleteClubsAsync(athleteId, clubs);
     }
 
     protected Task<TokenEntity> GetTokenAsync(int athleteId)

@@ -1,4 +1,5 @@
 ﻿using KomTracker.Domain.Entities.Athlete;
+using KomTracker.Domain.Entities.Club;
 using KomTracker.Domain.Entities.Token;
 using System;
 using System.Collections.Generic;
@@ -17,4 +18,5 @@ public interface IAthleteRepository : IRepository
     Task<TokenEntity> GetTokenAsync(int athleteId);
     Task<IEnumerable<AthleteEntity>> GetAllAthletesAsync();
     Task AddOrUpdateTokenAsync(TokenEntity token);
+    Task SyncAthleteClubsAsync(int athleteId, IEnumerable<ClubEntity> clubs);
 }
