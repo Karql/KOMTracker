@@ -1,4 +1,9 @@
-﻿## 1.3.0 (2022-11-08)
+﻿## UPCOMMING
+
+### Features
+- Athlete clubs
+
+## 1.3.0 (2022-11-08)
 
 ### Features
 - Last koms changes

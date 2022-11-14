@@ -1,4 +1,5 @@
 ﻿using KomTracker.API.Attributes;
+using KomTracker.Application.Commands.Club;
 using KomTracker.Application.Commands.Tracking;
 using Microsoft.AspNetCore.Mvc;
 using static KomTracker.Application.Constants;
@@ -34,6 +35,16 @@ public class AdminController : BaseApiController<AdminController>
         var cancellationTokenSource = new CancellationTokenSource();
 
         await _mediator.Send(new RefreshSegmentsCommand(), cancellationTokenSource.Token);
+
+        return new NoContentResult();
+    }
+
+    [HttpPut("refresh-clubs")]
+    public async Task<ActionResult> RefreshClubs()
+    {
+        var cancellationTokenSource = new CancellationTokenSource();
+
+        await _mediator.Send(new RefreshClubsCommand(), cancellationTokenSource.Token);
 
         return new NoContentResult();
     }

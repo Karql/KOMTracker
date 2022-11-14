@@ -26,6 +26,7 @@ using Microsoft.AspNetCore.DataProtection;
 using KomTracker.API.Models.Configuration;
 using KomTracker.Application.Models.Configuration;
 using Utils.Helpers;
+using TimeZoneConverter;
 
 namespace KomTracker.API;
 
@@ -84,6 +85,14 @@ public class Startup
             {
                 q.ScheduleJob<RefreshSegmentsJob>(trigger => trigger
                     .WithCronSchedule("0 30 * * * ?")); // half past every hour
+            }
+
+            if (_applicationConfiguration.RefreshClubsJobEnabled)
+            {
+                var tz = TZConvert.GetTimeZoneInfo("Europe/Warsaw");
+
+                q.ScheduleJob<RefreshSegmentsJob>(trigger => trigger
+                    .WithCronSchedule("0 45 0,12 * * ?", action => action.InTimeZone(tz))); // 45 past midnight and midday
             }
         });
 
