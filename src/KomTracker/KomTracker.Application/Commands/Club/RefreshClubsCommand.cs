@@ -71,7 +71,7 @@ public class RefreshClubsCommandHandler : IRequestHandler<RefreshClubsCommand, R
         var clubs = clubsRes.Value;
 
         await _clubService.AddOrUpdateClubsAsync(clubs);
-        await _athleteService.SyncAthleteClubsAsync(athleteId, clubs);
+        await _clubService.SyncAthleteClubsAsync(athleteId, clubs);
         await _komUoW.SaveChangesAsync();
     }
 

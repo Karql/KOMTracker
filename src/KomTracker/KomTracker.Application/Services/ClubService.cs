@@ -23,4 +23,17 @@ public class ClubService : IClubService
             .GetRepository<IClubRepository>()
             .AddOrUpdateClubsAsync(clubs);
     }
+
+    public Task SyncAthleteClubsAsync(int athleteId, IEnumerable<ClubEntity> clubs)
+    {
+        return _komUoW
+            .GetRepository<IClubRepository>()
+            .SyncAthleteClubsAsync(athleteId, clubs);
+    }
+    public Task<IEnumerable<ClubEntity>> GetAthleteClubsAsync(int athleteId)
+    {
+        return _komUoW
+            .GetRepository<IClubRepository>()
+            .GetAthleteClubsAsync(athleteId);
+    }
 }

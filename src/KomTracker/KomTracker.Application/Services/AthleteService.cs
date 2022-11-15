@@ -87,13 +87,6 @@ public class AthleteService : IAthleteService
         return Result.Fail<TokenEntity>(new GetValidTokenError(GetValidTokenError.RefreshFailed));
     }
 
-    public Task SyncAthleteClubsAsync(int athleteId, IEnumerable<ClubEntity> clubs)
-    {
-        return _komUoW
-            .GetRepository<IAthleteRepository>()
-            .SyncAthleteClubsAsync(athleteId, clubs);
-    }
-
     protected Task<TokenEntity> GetTokenAsync(int athleteId)
     {
         return _komUoW

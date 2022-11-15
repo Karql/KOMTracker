@@ -1,15 +1,10 @@
 ﻿using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Domain.Entities.Athlete;
-using KomTracker.Domain.Entities.Club;
 using KomTracker.Domain.Entities.Token;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Utils.UnitOfWork.Concrete;
-using static MoreLinq.Extensions.FullGroupJoinExtension;
-using static MoreLinq.Extensions.ForEachExtension;
 
 namespace KomTracker.Infrastructure.Persistence.Repositories;
 
@@ -85,31 +80,5 @@ public class EFAthleteRepository : EFBaseRepository, IAthleteRepository
                 Scope = model.Scope
             })
             .RunAsync();
-    }
-
-    public async Task SyncAthleteClubsAsync(int athleteId, IEnumerable<ClubEntity> clubs)
-    {
-        var dbClubs = await _context.AthleteClub.Where(x => x.AthleteId == athleteId).ToListAsync();
-
-        dbClubs.FullGroupJoin(clubs,
-            x => x.ClubId,
-            y => y.Id,
-            (key, x, y) => new { dbClub = x.FirstOrDefault(), club = y.FirstOrDefault() }
-        ).ForEach(x =>
-        {
-            if (x.dbClub == null)
-            {
-                _context.AthleteClub.Add(new AthleteClubEntity
-                {
-                    AthleteId = athleteId,
-                    ClubId = x.club.Id
-                });
-            }
-
-            else if (x.club == null)
-            {
-                _context.AthleteClub.Remove(x.dbClub);
-            }
-        });
     }
 }

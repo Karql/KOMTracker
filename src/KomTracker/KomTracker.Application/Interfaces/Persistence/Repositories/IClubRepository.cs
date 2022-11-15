@@ -11,4 +11,6 @@ namespace KomTracker.Application.Interfaces.Persistence.Repositories;
 public interface IClubRepository : IRepository
 {
     Task AddOrUpdateClubsAsync(IEnumerable<ClubEntity> clubs);
+    Task SyncAthleteClubsAsync(int athleteId, IEnumerable<ClubEntity> clubs);
+    Task<IEnumerable<ClubEntity>> GetAthleteClubsAsync(int athleteId);
 }

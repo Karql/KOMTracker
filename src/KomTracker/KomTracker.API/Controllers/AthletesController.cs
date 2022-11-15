@@ -1,4 +1,5 @@
 ﻿using KomTracker.API.Attributes;
+using KomTracker.API.Shared.ViewModels.Club;
 using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.Application.Commands.Account;
 using KomTracker.Application.Queries.Athlete;
@@ -40,6 +41,17 @@ public class AthletesController : BaseApiController<AthletesController>
         var komsSummaries = await _mediator.Send(new GetKomsSummariesQuery { AthleteId = athleteId });
 
         return Ok(_mapper.Map<IEnumerable<KomsSummaryViewModel>>(komsSummaries));
+    }
+
+
+    [HttpGet]
+    [Route("{athleteId}/clubs")]
+    [SwaggerResponse(StatusCodes.Status200OK, type: typeof(IEnumerable<ClubViewModel>))]
+    public async Task<IActionResult> GetClubs([FromRoute] int athleteId)
+    {
+        var clubs = await _mediator.Send(new GetAthleteClubsQuery { AthleteId = athleteId });
+
+        return Ok(_mapper.Map<IEnumerable<ClubViewModel>>(clubs));
     }
 
     [HttpPut]

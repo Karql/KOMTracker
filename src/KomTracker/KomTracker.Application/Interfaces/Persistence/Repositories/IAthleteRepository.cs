@@ -17,6 +17,5 @@ public interface IAthleteRepository : IRepository
     Task DeactivateAthleteAsync(int athleteId);
     Task<TokenEntity> GetTokenAsync(int athleteId);
     Task<IEnumerable<AthleteEntity>> GetAllAthletesAsync();
-    Task AddOrUpdateTokenAsync(TokenEntity token);
-    Task SyncAthleteClubsAsync(int athleteId, IEnumerable<ClubEntity> clubs);
+    Task AddOrUpdateTokenAsync(TokenEntity token);    
 }
