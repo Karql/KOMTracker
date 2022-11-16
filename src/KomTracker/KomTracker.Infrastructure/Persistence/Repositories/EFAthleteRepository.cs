@@ -4,6 +4,7 @@ using KomTracker.Domain.Entities.Token;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace KomTracker.Infrastructure.Persistence.Repositories;
@@ -60,6 +61,15 @@ public class EFAthleteRepository : EFBaseRepository, IAthleteRepository
     {
         // TODO: only active
         return await _context.Athlete.ToListAsync();
+    }
+
+    public async Task<IEnumerable<AthleteEntity>> GetAthletesByClubAsync(long clubId)
+    {
+        return await _context
+            .Club
+            .Where(x => x.Id == clubId)
+            .SelectMany(x => x.Athletes)
+            .ToListAsync();
     }
 
     public Task AddOrUpdateTokenAsync(TokenEntity token)

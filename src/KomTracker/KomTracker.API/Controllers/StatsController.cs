@@ -14,9 +14,9 @@ public class StatsController : BaseApiController<StatsController>
     [HttpGet]
     [Route("koms-changes")]
     [SwaggerResponse(StatusCodes.Status200OK, type: typeof(IEnumerable<LastKomsChangesViewModel>))]
-    public async Task<IActionResult> GetLastKomsChangesAsync()
+    public async Task<IActionResult> GetLastKomsChangesAsync([FromQuery(Name = "club_id")] long? clubId)
     {
-        var lastChanges = await _mediator.Send(new GetLastKomsChangesQuery());
+        var lastChanges = await _mediator.Send(new GetLastKomsChangesQuery { ClubId = clubId });
 
         return Ok(_mapper.Map<IEnumerable<LastKomsChangesViewModel>>(lastChanges));
     }

@@ -59,6 +59,13 @@ public class AthleteService : IAthleteService
             .GetAllAthletesAsync();
     }
 
+    public async Task<IEnumerable<AthleteEntity>> GetAthletesByClubAsync(long clubId)
+    {
+        return await _komUoW
+            .GetRepository<IAthleteRepository>()
+            .GetAthletesByClubAsync(clubId);
+    }
+
     public async Task<Result<TokenEntity>> GetValidTokenAsync(int athleteId)
     {
         var token = await GetTokenAsync(athleteId);

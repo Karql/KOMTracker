@@ -14,6 +14,8 @@ namespace KomTracker.Application.Queries.Stats;
 public class GetLastKomsChangesQuery : IRequest<IEnumerable<LastKomsChangesModel>>
 {
     public int Top { get; set; } = 100;
+
+    public long? ClubId { get; set; } = null;
 }
 
 public class GetLastKomsChangesQueryHandler : IRequestHandler<GetLastKomsChangesQuery, IEnumerable<LastKomsChangesModel>>
@@ -29,8 +31,9 @@ public class GetLastKomsChangesQueryHandler : IRequestHandler<GetLastKomsChanges
 
     public async Task<IEnumerable<LastKomsChangesModel>> Handle(GetLastKomsChangesQuery request, CancellationToken cancellationToken)
     {
-        // TODO: filter by club etc.
-        var athletes = await _athleteService.GetAllAthletesAsync();
+        var athletes = (request.ClubId.HasValue) ?
+            await _athleteService.GetAthletesByClubAsync(request.ClubId.Value)
+            : await _athleteService.GetAllAthletesAsync();
 
         var changes = await _segmentService.GetLastKomsChangesAsync(athletes.Select(x => x.AthleteId).ToHashSet(), top: request.Top);
 

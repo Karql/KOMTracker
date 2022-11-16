@@ -38,6 +38,11 @@ public interface IAthleteService
     Task<IEnumerable<AthleteEntity>> GetAllAthletesAsync();
 
     /// <summary>
+    /// Get athletes by club from DB
+    /// </summary>
+    Task<IEnumerable<AthleteEntity>> GetAthletesByClubAsync(long clubId);
+
+    /// <summary>
     /// Get token from DB and refresh when needed
     /// </summary>
     Task<Result<TokenEntity>> GetValidTokenAsync(int athleteId);
