@@ -36,4 +36,11 @@ public static class ViewHelper
             _ => throw new ArgumentOutOfRangeException($"{nameof(climbCategory)} should has value between -8 and 5 (without 0)"),
         };
     }
+
+    public static string GetClubAvatar(string url)
+    {
+        return url.StartsWith("http") ?
+            url
+            : "/img/avatar-club-medium.png";
+    }
 }

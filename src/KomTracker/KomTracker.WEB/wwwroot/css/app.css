@@ -12,6 +12,18 @@
     text-align: center
 }
 
+/* #region club-select */
+.mud-select-input .club-select-item-wrapper {
+    position: relative;
+    top: -11px;
+}
+
+.club-select-profile-medium {
+    height: 40px;
+}
+/* #endregion club-select */
+
+/* #region map */
 .map-wrapper {
     min-height: 400px;
     position: relative;
@@ -74,3 +86,4 @@
     color: #979797;
     text-transform: uppercase;
 }
+/* #endregion map */

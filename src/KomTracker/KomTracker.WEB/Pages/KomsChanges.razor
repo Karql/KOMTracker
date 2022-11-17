@@ -1,4 +1,5 @@
 ﻿@page "/last-koms-changes"
+@using KomTracker.API.Shared.ViewModels.Club
 @using KomTracker.API.Shared.ViewModels.Stats
 @using KomTracker.WEB.Helpers
 @using KomTracker.WEB.Settings
@@ -10,7 +11,31 @@
 }
 else
 {
-    <MudTable Hover="true" Elevation="25" Items="_changes" Dense="false" Bordered="false" Striped="true" Filter="new Func<LastKomsChangesViewModel, bool>(Search)" @bind-kom="_change">
+    <MudGrid Class="mb-2">
+        <MudItem xs="12" sm="3">
+            <MudSelect
+                T="ClubViewModel"                
+                Label="Club" 
+                Class="club-select"
+                Variant="Variant.Outlined" 
+                AnchorOrigin="Origin.BottomCenter"
+                Clearable="true"
+                ValueChanged="@SelectedClubChanged"> 
+                @foreach (var club in _clubs)
+                {
+                    <MudSelectItem Value="@club">
+                        <div class="d-flex align-center club-select-item-wrapper">
+                            <img src="@ViewHelper.GetClubAvatar(club.ProfileMedium)" class="club-select-profile-medium mr-2" /> @club.Name
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+
+
+
+    <MudTable Hover="true" Elevation="25" Items="_changes" Dense="false" Bordered="false" Striped="true" Filter="new Func<LastKomsChangesViewModel, bool>(SearchChanges)" @bind-kom="_change">
         <ToolBarContent>
             <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for changes (segment, athlete)" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
         </ToolBarContent>
