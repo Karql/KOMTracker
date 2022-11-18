@@ -18,9 +18,9 @@ public partial class KomsChanges
     private UserModel _user = default!;
     private string _searchString = "";
     private IEnumerable<ClubViewModel> _clubs = Enumerable.Empty<ClubViewModel>();
-    private IEnumerable<LastKomsChangesViewModel> _changes = Enumerable.Empty<LastKomsChangesViewModel>();
+    private IEnumerable<EffortWithAthleteViewModel> _changes = Enumerable.Empty<EffortWithAthleteViewModel>();
     
-    private LastKomsChangesViewModel _change;
+    private EffortWithAthleteViewModel _change;
 
     [CascadingParameter]
     public MainLayout Layout { get; set; }
@@ -58,16 +58,16 @@ public partial class KomsChanges
     {
         var query = clubId.HasValue ? $"?club_id={clubId.Value}" : String.Empty;
 
-        _changes = await Http.GetFromJsonAsync<LastKomsChangesViewModel[]>($"stats/koms-changes{query}")
-            ?? Enumerable.Empty<LastKomsChangesViewModel>();
+        _changes = await Http.GetFromJsonAsync<EffortWithAthleteViewModel[]>($"stats/koms-changes{query}")
+            ?? Enumerable.Empty<EffortWithAthleteViewModel>();
     }
 
-    private bool SearchChanges(LastKomsChangesViewModel change)
+    private bool SearchChanges(EffortWithAthleteViewModel change)
     {
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
 
         return
-            change.Change.Segment.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true
+            change.Effort.Segment.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true
             || change.Athlete.FullName.Contains(_searchString, StringComparison.OrdinalIgnoreCase);
 
     }

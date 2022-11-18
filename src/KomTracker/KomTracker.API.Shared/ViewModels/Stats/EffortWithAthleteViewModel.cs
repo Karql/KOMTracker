@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace KomTracker.API.Shared.ViewModels.Stats;
-public class LastKomsChangesViewModel
+public class EffortWithAthleteViewModel
 {
-    public AthleteViewModel Athlete { get; set; } = default!;
-    public EffortViewModel Change { get; set; } = default!;
+    public EffortViewModel Effort { get; set; } = default!;
+    public AthleteViewModel Athlete { get; set; } = default!;    
 }

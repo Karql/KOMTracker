@@ -23,7 +23,7 @@ public class DtoProfile : Profile
         CreateMap<EffortModel, EffortViewModel>();
         CreateMap<KomsSummaryEntity, KomsSummaryViewModel>();
         CreateMap<AthleteEntity, AthleteViewModel>();
-        CreateMap<LastKomsChangesModel, LastKomsChangesViewModel>();
+        CreateMap<EffortWithAthleteModel, EffortWithAthleteViewModel>();
 
         CreateMap<ClubEntity, ClubViewModel>();
     }

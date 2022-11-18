@@ -35,39 +35,39 @@ else
 
 
 
-    <MudTable Hover="true" Elevation="25" Items="_changes" Dense="false" Bordered="false" Striped="true" Filter="new Func<LastKomsChangesViewModel, bool>(SearchChanges)" @bind-kom="_change">
+    <MudTable Hover="true" Elevation="25" Items="_changes" Dense="false" Bordered="false" Striped="true" Filter="new Func<EffortWithAthleteViewModel, bool>(SearchChanges)" @bind-kom="_change">
         <ToolBarContent>
             <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for changes (segment, athlete)" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
         </ToolBarContent>
         <HeaderContent>
             <MudTh></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Athlete.FullName)">Athlete</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SummarySegmentEffort.TrackDate)">Change date</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.Name)">Segment name</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.Distance)">Distance</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.ElevationHigh - x.Change.Segment.ElevationLow)">Elev diff</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.AverageGrade)">Grade</MudTableSortLabel></MudTh>            
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.Speed)">Speed</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.AverageHeartrate ?? 0)">HR</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.ExtendedCategory)">Cat</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<LastKomsChangesViewModel, object>(x => x.Change.Segment.ActivityType)">Type</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Athlete.FullName)">Athlete</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SummarySegmentEffort.TrackDate)">Change date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Segment.Name)">Segment name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Segment.Distance)">Distance</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Segment.ElevationHigh - x.Effort.Segment.ElevationLow)">Elev diff</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Segment.AverageGrade)">Grade</MudTableSortLabel></MudTh>            
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SegmentEffort.Speed)">Speed</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SegmentEffort.AverageHeartrate ?? 0)">HR</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Segment.ExtendedCategory)">Cat</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Segment.ActivityType)">Type</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Change type">
                 <div class="d-flex align-center">
-                    @if (@context.Change.SummarySegmentEffort.NewKom) {
+                    @if (@context.Effort.SummarySegmentEffort.NewKom) {
                         <MudIcon Icon="@Icons.Material.Filled.Add" Color="Color.Success" Size="Size.Medium"></MudIcon>
                     }
-                    @if (@context.Change.SummarySegmentEffort.LostKom) {
+                    @if (@context.Effort.SummarySegmentEffort.LostKom) {
                         <MudIcon Icon="@Icons.Material.Filled.Remove" Color="Color.Error" Size="Size.Medium"></MudIcon>
                     }
-                    @if (@context.Change.SummarySegmentEffort.ImprovedKom) {
+                    @if (@context.Effort.SummarySegmentEffort.ImprovedKom) {
                         <MudIcon Icon="@Icons.Material.Filled.ArrowUpward" Color="Color.Info" Size="Size.Medium"></MudIcon>
                     }
-                    @if (@context.Change.SummarySegmentEffort.ReturnedKom) {
+                    @if (@context.Effort.SummarySegmentEffort.ReturnedKom) {
                         <MudIcon Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Dark" Size="Size.Medium"></MudIcon>
                     }
                 </div>
@@ -79,50 +79,50 @@ else
                 </div>
             </MudTd>
             <MudTd DataLabel="Change date">
-                @context.Change.SummarySegmentEffort.TrackDate.ToString("yyyy-MM-dd")
+                @context.Effort.SummarySegmentEffort.TrackDate.ToString("yyyy-MM-dd")
             </MudTd>
             <MudTd DataLabel="Name">
-                <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.Change.SegmentEffort.Id}")"><MudHighlighter Text="@context.Change.Segment.Name" HighlightedText="@_searchString" /></MudLink>
+                <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.Effort.SegmentEffort.Id}")"><MudHighlighter Text="@context.Effort.Segment.Name" HighlightedText="@_searchString" /></MudLink>
             </MudTd>
             <MudTd DataLabel="Distnce">
-                @((context.Change.Segment.Distance / 1000).ToString("F2")) km
+                @((context.Effort.Segment.Distance / 1000).ToString("F2")) km
             </MudTd>
              <MudTd DataLabel="Elev diff">
-                @((context.Change.Segment.ElevationHigh - context.Change.Segment.ElevationLow).ToString("F0")) m
+                @((context.Effort.Segment.ElevationHigh - context.Effort.Segment.ElevationLow).ToString("F0")) m
             </MudTd>
             <MudTd DataLabel="Grade">
-                @context.Change.Segment.AverageGrade.ToString("F1")%
+                @context.Effort.Segment.AverageGrade.ToString("F1")%
             </MudTd>
             <MudTd DataLabel="Date">
-                @context.Change.SegmentEffort.StartDate.ToString("yyyy-MM-dd")
+                @context.Effort.SegmentEffort.StartDate.ToString("yyyy-MM-dd")
             </MudTd>
             <MudTd DataLabel="Speed">
-                @context.Change.SegmentEffort.Speed.ToString("F1")km/h
+                @context.Effort.SegmentEffort.Speed.ToString("F1")km/h
             </MudTd>
             <MudTd DataLabel="HR">
-                @((context.Change.SegmentEffort.AverageHeartrate ?? 0) == 0 ? "-" : context.Change.SegmentEffort.AverageHeartrate!.Value.ToString("F0"))
+                @((context.Effort.SegmentEffort.AverageHeartrate ?? 0) == 0 ? "-" : context.Effort.SegmentEffort.AverageHeartrate!.Value.ToString("F0"))
             </MudTd>
             <MudTd DataLabel="Power" >
                 <span class="d-flex align-center">
-                @((context.Change.SegmentEffort.AverageWatts ?? 0) == 0 ? "-" : context.Change.SegmentEffort.AverageWatts!.Value.ToString("F0") + "W")
-                @if (context.Change.SegmentEffort.DeviceWatts)
+                @((context.Effort.SegmentEffort.AverageWatts ?? 0) == 0 ? "-" : context.Effort.SegmentEffort.AverageWatts!.Value.ToString("F0") + "W")
+                @if (context.Effort.SegmentEffort.DeviceWatts)
                 {
                     <MudIcon Icon="@Icons.Material.Filled.Bolt"></MudIcon>
                 }
                 </span>
             </MudTd>
             <MudTd DataLabel="Time">
-                @(TimeSpan.FromSeconds(context.Change.SegmentEffort.ElapsedTime).ToString())                
+                @(TimeSpan.FromSeconds(context.Effort.SegmentEffort.ElapsedTime).ToString())                
             </MudTd>
             <MudTd DataLabel="Cat">
-                <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(context.Change.Segment.ExtendedCategory)">
+                <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(context.Effort.Segment.ExtendedCategory)">
                     <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                    <span>@context.Change.Segment.ExtendedCategoryText</span>
+                    <span>@context.Effort.Segment.ExtendedCategoryText</span>
                 </div>
             </MudTd>
             <MudTd DataLabel="Type">
-                <MudTooltip Text="@context.Change.Segment.ActivityType">
-                    <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(context.Change.Segment.ActivityType)"></MudIcon>
+                <MudTooltip Text="@context.Effort.Segment.ActivityType">
+                    <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(context.Effort.Segment.ActivityType)"></MudIcon>
                 </MudTooltip>
             </MudTd>
         </RowTemplate>

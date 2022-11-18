@@ -1,7 +1,8 @@
-﻿## UPCOMMING
+﻿## 1.4.0 (2022-11-13)
 
 ### Features
 - Athlete clubs
+- Filter last koms changes by club
 
 ## 1.3.0 (2022-11-08)
 
