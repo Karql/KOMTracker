@@ -1,6 +1,7 @@
 ﻿using FluentResults;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Models.Segment;
+using KomTracker.Application.Models.Stats;
 using KomTracker.Application.Services;
 using KomTracker.Domain.Entities.Athlete;
 using MediatR;
@@ -9,23 +10,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Utils.Extensions;
 
 namespace KomTracker.Application.Commands.Stats;
-public class RecalculateStatsCommand : IRequest<Result>
+public class RefreshStatsCommand : IRequest<Result>
 {
-
+    public int? AthleteId { get; set; }
 }
 
-public class RecalculateStatsCommandHandler : IRequestHandler<RecalculateStatsCommand, Result>
+public class RefreshStatsCommandHandler : IRequestHandler<RefreshStatsCommand, Result>
 {
     private readonly IKOMUnitOfWork _komUoW;
-    private readonly ILogger<RecalculateStatsCommandHandler> _logger;
+    private readonly ILogger<RefreshStatsCommandHandler> _logger;
     private readonly IAthleteService _athleteService;
     private readonly ISegmentService _segmentService;
 
-    public RecalculateStatsCommandHandler(IKOMUnitOfWork komUoW, ILogger<RecalculateStatsCommandHandler> logger, IAthleteService athleteService, ISegmentService segmentService)
+    public RefreshStatsCommandHandler(IKOMUnitOfWork komUoW, ILogger<RefreshStatsCommandHandler> logger, IAthleteService athleteService, ISegmentService segmentService)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -33,38 +36,45 @@ public class RecalculateStatsCommandHandler : IRequestHandler<RecalculateStatsCo
         _segmentService = segmentService ?? throw new ArgumentNullException(nameof(segmentService));
     }
 
-    public async Task<Result> Handle(RecalculateStatsCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(RefreshStatsCommand request, CancellationToken cancellationToken)
     {
-        var athlets = await _athleteService.GetAllAthletesAsync();
+        var athlets = request.AthleteId.HasValue ?
+            new [] { await _athleteService.GetAthleteAsync(request.AthleteId.Value) }
+            : await _athleteService.GetAllAthletesAsync();
 
-        //foreach (var athlete in athlets)
-        foreach (var athlete in athlets.Where(x => x.AthleteId == 2394302))
+        foreach (var athlete in athlets)
         {
             if (cancellationToken.IsCancellationRequested) return Result.Ok(); // TODO: OK?
 
-            await RecalculateStatsForAthleteAsync(athlete);
+            await RefreshAthleteStatsAsync(athlete);
         }
 
         return Result.Ok();
     }
 
-    private async Task RecalculateStatsForAthleteAsync(AthleteEntity athlete)
+    private async Task RefreshAthleteStatsAsync(AthleteEntity athlete)
     {
-        await RecalculateTotalForAthleteAsync(athlete);
-        await RecaluclateLastKomsChangesSummaryForAthleteAsync(athlete);
+        var athleteStats = await GetAthleteStatsAsync(athlete);
     }
 
-    private async Task RecalculateTotalForAthleteAsync(AthleteEntity athlete)
+    private async Task<AthleteStatsModel> GetAthleteStatsAsync(AthleteEntity athlete)
     {
-        var komsEfforts = (await _segmentService.GetLastKomsSummaryEffortsAsync(athlete.AthleteId))?
+        var koms = await GetAllKomsAsync(athlete);
+        var komsChanges = await GetKomsChangesForAthleteAsync(athlete);
+
+        return new AthleteStatsModel(athlete, koms,
+            komsChanges.KomsChangesLast30Days, komsChanges.KomsChangesLastWeek, komsChanges.KomsChangesThisWeek);
+    }
+
+    private async Task<IEnumerable<EffortModel>> GetAllKomsAsync(AthleteEntity athlete)
+    {
+        return (await _segmentService.GetLastKomsSummaryEffortsAsync(athlete.AthleteId))?
             .Where(x => x.SummarySegmentEffort.Kom)
             .ToList()
             ?? Enumerable.Empty<EffortModel>();
-
-        GetTotals(komsEfforts);
     }
 
-    private async Task RecaluclateLastKomsChangesSummaryForAthleteAsync(AthleteEntity athlete)
+    private async Task<(KomsChangesModel KomsChangesLast30Days, KomsChangesModel KomsChangesLastWeek, KomsChangesModel KomsChangesThisWeek)> GetKomsChangesForAthleteAsync(AthleteEntity athlete)
     {
         var last30days = DateTime.UtcNow.AddDays(-30).BeginningOfDay();
         var lastKomChanges = await _segmentService.GetLastKomsChangesAsync(athlete.AthleteId, last30days);
@@ -74,19 +84,14 @@ public class RecalculateStatsCommandHandler : IRequestHandler<RecalculateStatsCo
         var beginningOfLastWeek = beginningOfWeek.AddDays(-1).BeginningOfWeek();
         var endOfLastWeek = beginningOfWeek.AddDays(-1).EndOfWeek();
 
-        var last30daysKomsChangesSummary = GetLastKomsChangesSummary(lastKomChanges, last30days, now);
-        var lastWeekKomsChangesSummary = GetLastKomsChangesSummary(lastKomChanges, beginningOfLastWeek, endOfLastWeek);
-        var thisWeekKomsChangesSummary = GetLastKomsChangesSummary(lastKomChanges, beginningOfWeek, now);
+        var komsChangesLast30Days = GetKomsChanges(lastKomChanges, last30days, now);
+        var komsChangesLastWeek = GetKomsChanges(lastKomChanges, beginningOfLastWeek, endOfLastWeek);
+        var komsChangesThisWeek = GetKomsChanges(lastKomChanges, beginningOfWeek, now);
+
+        return (komsChangesLast30Days, komsChangesLastWeek, komsChangesThisWeek);
     }
 
-    private void GetTotals(IEnumerable<EffortModel> komsEfforts)
-    {
-        var komsCount = komsEfforts.Count();
-
-        var totalDistance = komsEfforts.Sum(x => x.Segment.Distance);
-    }
-
-    private (int lostKomsCount, int newKomsCount) GetLastKomsChangesSummary(IEnumerable<EffortModel> lastKomChanges, DateTime dateFrom, DateTime dateTo)
+    private KomsChangesModel GetKomsChanges(IEnumerable<EffortModel> lastKomChanges, DateTime dateFrom, DateTime dateTo)
     {
         var lostKomsChanges = new List<EffortModel>();
         var newKomsChanges = new List<EffortModel>();
@@ -111,6 +116,6 @@ public class RecalculateStatsCommandHandler : IRequestHandler<RecalculateStatsCo
             }
         }
 
-        return (lostKomsChanges.Count, newKomsChanges.Count);
+        return new KomsChangesModel { NewKoms = newKomsChanges, LostKoms = lostKomsChanges };
     }
 }

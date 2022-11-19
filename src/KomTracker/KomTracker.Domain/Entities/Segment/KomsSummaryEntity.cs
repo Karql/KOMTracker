@@ -1,6 +1,7 @@
 ﻿using KomTracker.Domain.Contracts;
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace KomTracker.Domain.Entities.Segment;
 
@@ -14,5 +15,6 @@ public class KomsSummaryEntity : BaseEntity
     public int ImprovedKoms { get; set; }
     public int LostKoms { get; set; }
     public int ReturnedKoms { get; set; }
+    [JsonIgnore]
     public List<SegmentEffortEntity> SegmentEfforts { get; set; }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace KomTracker.Domain.Entities.Segment;
 
@@ -29,7 +30,7 @@ public class SegmentEffortEntity : BaseEntity
     public float? MaxHeartrate { get; set; }
     public int? PrRank { get; set; }
     public int? KomRank { get; set; }
-
+    [JsonIgnore]
     public List<KomsSummaryEntity> KomSummaries { get; set; }
 }
 

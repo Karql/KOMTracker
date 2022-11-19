@@ -54,14 +54,14 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
 
         //await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
         //await _mediator.Send(new RefreshSegmentsCommand { SegmentsToRefresh = 2 }, cancellationTokenSource.Token);
-        //await _mediator.Send(new RecalculateStatsCommand(), cancellationTokenSource.Token); 
+        await _mediator.Send(new RefreshStatsCommand { AthleteId= 2394302 }, cancellationTokenSource.Token); 
 
         //var res = await _mediator.Send(new GetLastKomsChangesQuery());
 
 
 
         //var clubs = await clubApi.GetClubsAsync(token);
-        await _mediator.Send(new RefreshClubsCommand(), cancellationTokenSource.Token); 
+        //await _mediator.Send(new RefreshClubsCommand(), cancellationTokenSource.Token); 
 
 
         return new NoContentResult();
