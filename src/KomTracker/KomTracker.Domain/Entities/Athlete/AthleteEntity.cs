@@ -22,5 +22,6 @@ public class AthleteEntity : BaseEntity
     public string Profile { get; set; }
     public string ProfileMedium { get; set; }
     public virtual TokenEntity Token { get; set; }
+    public virtual AthleteStatsEntity Stats { get; set; }
     public List<ClubEntity> Clubs { get; set; }
 }
