@@ -91,4 +91,20 @@ public class EFAthleteRepository : EFBaseRepository, IAthleteRepository
             })
             .RunAsync();
     }
+
+    public Task AddOrUpdateAthleteStatsAsync(AthleteStatsEntity athleteStats)
+    {
+        // TODO: find cleaner way
+        athleteStats.AuditCD = DateTime.UtcNow;
+
+        return _context
+            .AthleteStats
+            .Upsert(athleteStats)
+            .WhenMatched((db, model) => new AthleteStatsEntity
+            {
+                AuditMD = DateTime.UtcNow,
+                StatsJson = athleteStats.StatsJson,
+            })
+            .RunAsync();
+    }
 }

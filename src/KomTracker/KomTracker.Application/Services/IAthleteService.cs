@@ -33,6 +33,11 @@ public interface IAthleteService
     Task AddOrUpdateTokenAsync(TokenEntity token);
 
     /// <summary>
+    /// Add or update athlete stats in DB
+    /// </summary>
+    Task AddOrUpdateAthleteStatsAsync(AthleteStatsEntity athleteStats);
+
+    /// <summary>
     /// Get all athletes from DB
     /// </summary>
     Task<IEnumerable<AthleteEntity>> GetAllAthletesAsync();

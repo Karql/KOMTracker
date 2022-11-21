@@ -55,6 +55,10 @@ public class RefreshStatsCommandHandler : IRequestHandler<RefreshStatsCommand, R
     private async Task RefreshAthleteStatsAsync(AthleteEntity athlete)
     {
         var athleteStats = await GetAthleteStatsAsync(athlete);
+        var entity = ConvertToAthleteStatsEntity(athleteStats);
+
+        await _athleteService.AddOrUpdateAthleteStatsAsync(entity);
+        await _komUoW.SaveChangesAsync();
     }
 
     private async Task<AthleteStatsModel> GetAthleteStatsAsync(AthleteEntity athlete)
@@ -117,5 +121,14 @@ public class RefreshStatsCommandHandler : IRequestHandler<RefreshStatsCommand, R
         }
 
         return new KomsChangesModel { NewKoms = newKomsChanges, LostKoms = lostKomsChanges };
+    }
+
+    private AthleteStatsEntity ConvertToAthleteStatsEntity(AthleteStatsModel athleteStats)
+    {
+        return new AthleteStatsEntity
+        {
+            AthleteId = athleteStats.Athlete.AthleteId,
+            StatsJson = JsonSerializer.Serialize(athleteStats)
+        };
     }
 }

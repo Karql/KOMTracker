@@ -52,6 +52,13 @@ public class AthleteService : IAthleteService
             .AddOrUpdateTokenAsync(token);
     }
 
+    public Task AddOrUpdateAthleteStatsAsync(AthleteStatsEntity athleteStats)
+    {
+        return _komUoW
+            .GetRepository<IAthleteRepository>()
+            .AddOrUpdateAthleteStatsAsync(athleteStats);
+    }
+
     public async Task<IEnumerable<AthleteEntity>> GetAllAthletesAsync()
     {
         return await _komUoW
