@@ -107,4 +107,12 @@ public class EFAthleteRepository : EFBaseRepository, IAthleteRepository
             })
             .RunAsync();
     }
+
+    public async Task<IEnumerable<AthleteStatsEntity>> GetAthletesStatsAsync(IEnumerable<int> athleteIds)
+    {
+        return await _context
+            .AthleteStats
+            .Where(x => athleteIds.Contains(x.AthleteId))
+            .ToListAsync();
+    }
 }

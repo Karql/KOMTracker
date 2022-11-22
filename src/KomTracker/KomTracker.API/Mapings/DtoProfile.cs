@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using KomTracker.API.Shared.ViewModels.Athlete;
 using KomTracker.API.Shared.ViewModels.Club;
+using KomTracker.API.Shared.ViewModels.Ranking;
 using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.API.Shared.ViewModels.Stats;
+using KomTracker.Application.Models.Ranking;
 using KomTracker.Application.Models.Segment;
 using KomTracker.Application.Models.Stats;
 using KomTracker.Domain.Entities.Athlete;
@@ -26,5 +28,8 @@ public class DtoProfile : Profile
         CreateMap<EffortWithAthleteModel, EffortWithAthleteViewModel>();
 
         CreateMap<ClubEntity, ClubViewModel>();
+
+        CreateMap<AthleteRankingModel, AthleteRankingViewModel>();
+        CreateMap<AthleteRankingTotalModel, AthleteRankingTotalViewModel>();
     }
 }

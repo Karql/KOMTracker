@@ -51,6 +51,11 @@ public interface IAthleteService
     /// Get token from DB and refresh when needed
     /// </summary>
     Task<Result<TokenEntity>> GetValidTokenAsync(int athleteId);
+
+    /// <summary>
+    /// Get athletes stats from DB
+    /// </summary>
+    Task<IEnumerable<AthleteStatsEntity>> GetAthletesStatsAsync(IEnumerable<int> athleteIds);
 }
 
 public class GetValidTokenError : FluentResults.Error

@@ -49,7 +49,7 @@ public static class SegmentHelper
             3 => "2",
             4 => "1",
             5 => "HC",
-            _ => throw new ArgumentException($"{nameof(extendedCategory)} should be between -1 and 5 (without 0)")
+            _ => throw new ArgumentException($"{nameof(extendedCategory)} should be between -8 and 5 (without 0)")
         };
     }
 }

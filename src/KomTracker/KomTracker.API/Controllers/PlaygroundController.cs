@@ -16,6 +16,7 @@ using KomTracker.API.Shared.Helpers;
 using KomTracker.Application.Commands.Stats;
 using KomTracker.Application.Queries.Stats;
 using KomTracker.Application.Commands.Club;
+using KomTracker.Application.Queries.Ranking;
 
 namespace KomTracker.API.Controllers; 
 
@@ -55,7 +56,10 @@ public class PlaygroundController : BaseApiController<PlaygroundController>
         //await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
         //await _mediator.Send(new RefreshSegmentsCommand { SegmentsToRefresh = 2 }, cancellationTokenSource.Token);
         //await _mediator.Send(new RefreshStatsCommand { AthleteId= 2394302 }, cancellationTokenSource.Token);
-        await _mediator.Send(new RefreshStatsCommand {  }, cancellationTokenSource.Token); 
+        //await _mediator.Send(new RefreshStatsCommand {  }, cancellationTokenSource.Token); 
+
+        var res = await _mediator.Send(new GetRankingQuery { }, cancellationTokenSource.Token);
+        return Ok(res);
 
         //var res = await _mediator.Send(new GetLastKomsChangesQuery());
 

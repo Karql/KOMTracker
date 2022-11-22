@@ -101,6 +101,14 @@ public class AthleteService : IAthleteService
         return Result.Fail<TokenEntity>(new GetValidTokenError(GetValidTokenError.RefreshFailed));
     }
 
+    public async Task<IEnumerable<AthleteStatsEntity>> GetAthletesStatsAsync(IEnumerable<int> athleteIds)
+    {
+        return (await _komUoW
+            .GetRepository<IAthleteRepository>()
+            .GetAthletesStatsAsync(athleteIds))
+            ?? Enumerable.Empty<AthleteStatsEntity>();
+    }
+
     protected Task<TokenEntity> GetTokenAsync(int athleteId)
     {
         return _komUoW
