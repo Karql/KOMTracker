@@ -1,5 +1,6 @@
 ﻿@page "/faq"
 @using KomTracker.Application.Shared.Helpers
+@using KomTracker.Application.Shared.Models.Segment
 @using KomTracker.WEB.Helpers
 @attribute [Authorize]
 
@@ -26,41 +27,41 @@
         </MudText>
 
         <div class="d-flex align-center my-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(1)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.C4)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(1)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.C4)</span>
             </div> 
             <span>rank > 8000</span>
         </div>
 
         <div class="d-flex align-center mb-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(2)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.C3)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(2)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.C3)</span>
             </div> 
             <span>rank > 16000</span>
         </div>
 
         <div class="d-flex align-center mb-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(3)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.C2)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(3)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.C2)</span>
             </div> 
             <span>rank > 32000</span>
         </div>
 
         <div class="d-flex align-center mb-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(4)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.C1)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(4)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.C1)</span>
             </div> 
             <span>rank > 64000</span>
         </div>
 
         <div class="d-flex align-center">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(5)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.HC)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(5)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.HC)</span>
             </div> 
             <span>rank > 64000</span>
         </div>
@@ -71,63 +72,63 @@
         </MudText>
 
         <div class="d-flex align-center my-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(-1)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.WL)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(-1)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.WL)</span>
             </div> 
             <span>Wall - average gradient >= 8%</span>
         </div>
         <div class="d-flex align-center mb-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(-2)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.MC)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(-2)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.MC)</span>
             </div> 
             <span>Minor climb - average gradient >= 3% and &lt; 8%</span>
         </div>
 
         <MudText Typo="Typo.body2" Class="mt-2 mb-4">Flat segments average gradient >= -4% and &lt; 3%:</MudText>
         <div class="d-flex align-center my-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(-3)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.TTS)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(-3)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.TTL)</span>
             </div> 
             <span>TT long - distance >= 7500m</span>
         </div>
         <div class="d-flex align-center mb-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(-4)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.TTL)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(-4)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.TTS)</span>
             </div> 
             <span>TT short - distance >= 3500m and &lt; 7500m</span>
         </div>
         <div class="d-flex align-center mb-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(-5)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.FM)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(-5)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.FM)</span>
             </div> 
             <span>Flat standard - distance >= 1000m and &lt; 3500m</span>
         </div>
         <div class="d-flex align-center mb-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(-6)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.SP)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(-6)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.SP)</span>
             </div> 
             <span>Sprint - distance &lt; 1000m</span>
         </div>
 
         <MudText Typo="Typo.body2" Class="mt-2 mb-4">Downhill segments:</MudText>
         <div class="d-flex align-center my-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(-7)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.D2)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(-7)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.D2)</span>
             </div> 
             <span>Downhill standard - average gradient >= -8% and &lt -4%</span>
         </div>
 
         <div class="d-flex align-center mb-4">
-            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(-8)">
+            <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.D1)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                <span>@SegmentHelper.GetExtendedCategoryText(-8)</span>
+                <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.D1)</span>
             </div> 
             <span>Downhill steep - average gradient &lt -8%</span>
         </div>

@@ -1,4 +1,5 @@
 ﻿using KomTracker.Application.Shared.Helpers;
+using KomTracker.Application.Shared.Models.Segment;
 using System.Text.Json.Serialization;
 
 namespace KomTracker.API.Shared.ViewModels.Segment;
@@ -27,7 +28,7 @@ public class SegmentViewModel
     #endregion
 
     [JsonIgnore]
-    public int ExtendedCategory => SegmentHelper.GetExtendedCategory(ClimbCategory, AverageGrade, Distance);
+    public ExtendedCategoryEnum ExtendedCategory => SegmentHelper.GetExtendedCategory(ClimbCategory, AverageGrade, Distance);
 
     [JsonIgnore]
     public string ExtendedCategoryText => SegmentHelper.GetExtendedCategoryText(ExtendedCategory);

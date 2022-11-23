@@ -1,4 +1,5 @@
-﻿using MudBlazor;
+﻿using KomTracker.Application.Shared.Models.Segment;
+using MudBlazor;
 
 namespace KomTracker.WEB.Helpers;
 
@@ -16,24 +17,24 @@ public static class ViewHelper
         };
     }
 
-    public static string GetExtendedCategoryColor(int climbCategory)
+    public static string GetExtendedCategoryColor(ExtendedCategoryEnum extendedCategory)
     {
-        return climbCategory switch
+        return extendedCategory switch
         {
-            -8 => "#000",
-            -7 => "#000",
-            -6 => "#00d",
-            -5 => "#0b0",
-            -4 => "#0b0",
-            -3 => "#0b0",
-            -2 => "#db0",
-            -1 => "#f40",
-            1 => "#EB9138",
-            2 => "#E47B34",
-            3 => "#DC6531",
-            4 => "#D34B2D",
-            5 => "#CA2A2A",
-            _ => throw new ArgumentOutOfRangeException($"{nameof(climbCategory)} should has value between -8 and 5 (without 0)"),
+            ExtendedCategoryEnum.D1 => "#000",
+            ExtendedCategoryEnum.D2 => "#000",
+            ExtendedCategoryEnum.SP => "#00d",
+            ExtendedCategoryEnum.FM => "#0b0",
+            ExtendedCategoryEnum.TTS => "#0b0",
+            ExtendedCategoryEnum.TTL => "#0b0",
+            ExtendedCategoryEnum.MC => "#db0",
+            ExtendedCategoryEnum.WL => "#f40",
+            ExtendedCategoryEnum.C4 => "#EB9138",
+            ExtendedCategoryEnum.C3 => "#E47B34",
+            ExtendedCategoryEnum.C2 => "#DC6531",
+            ExtendedCategoryEnum.C1 => "#D34B2D",
+            ExtendedCategoryEnum.HC => "#CA2A2A",
+            _ => throw new ArgumentOutOfRangeException($"{nameof(extendedCategory)} should has value between -8 and 5 (without 0)"),
         };
     }
 
