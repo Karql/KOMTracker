@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Utils\Utils\Utils.csproj" />
+    <ProjectReference Include="..\KomTracker.Application.Shared\KomTracker.Application.Shared.csproj" />
     <ProjectReference Include="..\KomTracker.Domain\KomTracker.Domain.csproj" />
   </ItemGroup>
 

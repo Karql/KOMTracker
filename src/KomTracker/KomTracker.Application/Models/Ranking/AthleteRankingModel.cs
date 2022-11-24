@@ -1,4 +1,5 @@
-﻿using KomTracker.Domain.Entities.Athlete;
+﻿using KomTracker.Application.Shared.Models.Segment;
+using KomTracker.Domain.Entities.Athlete;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,4 +17,5 @@ public class AthleteRankingModel
 public class AthleteRankingTotalModel
 {
     public int KomsCount { get; set; }
+    public Dictionary<ExtendedCategoryEnum, int> KomsCountByCategory { get; set; } = new();
 }

@@ -2,6 +2,7 @@
 using KomTracker.Application.Models.Segment;
 using KomTracker.Application.Models.Stats;
 using KomTracker.Application.Services;
+using KomTracker.Application.Shared.Helpers;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using System;
@@ -70,6 +71,9 @@ public class GetRankingQueryHandler : IRequestHandler<GetRankingQuery, IEnumerab
 
         model.Total.KomsCount = koms.Count();
 
+        model.Total.KomsCountByCategory = koms
+            .GroupBy(x => SegmentHelper.GetExtendedCategory(x.Segment!.ClimbCategory, x.Segment.AverageGrade, x.Segment.Distance))
+            .ToDictionary(x => x.Key, v => v.Count());
 
         return model;
     }
