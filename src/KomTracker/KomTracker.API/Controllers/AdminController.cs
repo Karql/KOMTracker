@@ -1,5 +1,6 @@
 ﻿using KomTracker.API.Attributes;
 using KomTracker.Application.Commands.Club;
+using KomTracker.Application.Commands.Stats;
 using KomTracker.Application.Commands.Tracking;
 using Microsoft.AspNetCore.Mvc;
 using static KomTracker.Application.Constants;
@@ -20,31 +21,33 @@ public class AdminController : BaseApiController<AdminController>
     }
 
     [HttpPut("track-koms")]
-    public async Task<ActionResult> TrackKoms()
+    public async Task<ActionResult> TrackKoms(CancellationToken cancellationToken)
     {
-        var cancellationTokenSource = new CancellationTokenSource();
-
-        await _mediator.Send(new TrackKomsCommand(), cancellationTokenSource.Token);
+        await _mediator.Send(new TrackKomsCommand(), cancellationToken);
 
         return new NoContentResult();
     }
 
     [HttpPut("refresh-segments")]
-    public async Task<ActionResult> RefreshSegments()
+    public async Task<ActionResult> RefreshSegments(CancellationToken cancellationToken)
     {
-        var cancellationTokenSource = new CancellationTokenSource();
-
-        await _mediator.Send(new RefreshSegmentsCommand(), cancellationTokenSource.Token);
+        await _mediator.Send(new RefreshSegmentsCommand(), cancellationToken);
 
         return new NoContentResult();
     }
 
     [HttpPut("refresh-clubs")]
-    public async Task<ActionResult> RefreshClubs()
+    public async Task<ActionResult> RefreshClubs(CancellationToken cancellationToken)
     {
-        var cancellationTokenSource = new CancellationTokenSource();
+        await _mediator.Send(new RefreshClubsCommand(), cancellationToken);
 
-        await _mediator.Send(new RefreshClubsCommand(), cancellationTokenSource.Token);
+        return new NoContentResult();
+    }
+
+    [HttpPut("refresh-stats")]
+    public async Task<ActionResult> RefreshStats(CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new RefreshStatsCommand(), cancellationToken);
 
         return new NoContentResult();
     }

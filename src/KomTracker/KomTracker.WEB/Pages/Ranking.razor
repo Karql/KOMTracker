@@ -1,0 +1,80 @@
+﻿@page "/ranking"
+@using KomTracker.API.Shared.ViewModels.Club
+@using KomTracker.API.Shared.ViewModels.Ranking
+@using KomTracker.Application.Shared.Helpers
+@using KomTracker.Application.Shared.Models.Segment
+@using KomTracker.WEB.Helpers
+@using KomTracker.WEB.Settings
+@attribute [Authorize]
+
+@if (!_loaded)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudGrid Class="mb-2">
+        <MudItem xs="12" sm="3">
+            <MudSelect
+                T="ClubViewModel"                
+                Label="Club" 
+                Class="club-select"
+                Variant="Variant.Outlined" 
+                AnchorOrigin="Origin.BottomCenter"
+                Clearable="true"
+                ValueChanged="@SelectedClubChanged"> 
+                @foreach (var club in _clubs)
+                {
+                    <MudSelectItem Value="@club">
+                        <div class="d-flex align-center club-select-item-wrapper">
+                            <img src="@ViewHelper.GetClubAvatar(club.ProfileMedium)" class="club-select-profile-medium mr-2" /> @club.Name
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+
+    <MudTable Hover="true" Elevation="25" Items="_ranking" Dense="false" Bordered="false" Striped="true" Filter="new Func<AthleteRankingViewModel, bool>(SearchRanking)" @bind-kom="_item">
+        <ToolBarContent>
+            <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for changes (athlete)" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.Athlete.FullName)">Athlete</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.Total.KomsCount)">Koms</MudTableSortLabel></MudTh>
+            @foreach(var cat in _extendedCategories)
+            {
+                <MudTh>
+                    <MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.Total.GetKomsCountByCategory(cat))">                        
+@*                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(cat)">
+                            <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
+                            <span>@SegmentHelper.GetExtendedCategoryText(cat)</span>
+                        </div>*@
+                        @SegmentHelper.GetExtendedCategoryText(cat)
+                    </MudTableSortLabel>
+                </MudTh>
+            }
+    </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Athlete">
+                <div class="d-flex align-center">
+                    <MudAvatar Size="Size.Small" Image="@context.Athlete.ProfileMedium" Class="mr-4" /> 
+                    <MudLink Target="_blank" Href="@($"https://strava.com/athletes/{context.Athlete.AthleteId}")"><MudHighlighter Text="@context.Athlete.FullName" HighlightedText="@_searchString" /></MudLink>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Koms">
+                @context.Total.KomsCount
+            </MudTd>
+
+            @foreach(var cat in _extendedCategories)
+            {
+                <MudTd DataLabel="@SegmentHelper.GetExtendedCategoryText(cat)">
+                    @context.Total.GetKomsCountByCategory(cat)
+                </MudTd>
+            }
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>    
+}

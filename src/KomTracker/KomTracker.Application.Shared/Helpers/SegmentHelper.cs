@@ -33,8 +33,8 @@ public static class SegmentHelper
                 distance switch
                 {
                     < 1000 => ExtendedCategoryEnum.SP,
-                    >= 1000 and < 3500 => ExtendedCategoryEnum.FM,
-                    >= 3500 and < 7500 => ExtendedCategoryEnum.TTL,
+                    >= 1000 and < 3500 => ExtendedCategoryEnum.FL,
+                    >= 3500 and < 7500 => ExtendedCategoryEnum.TTS,
                     _ => ExtendedCategoryEnum.TTL
                 },
             >= 3 and < 8 => ExtendedCategoryEnum.MC,

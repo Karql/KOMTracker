@@ -24,7 +24,7 @@ public static class ViewHelper
             ExtendedCategoryEnum.D1 => "#000",
             ExtendedCategoryEnum.D2 => "#000",
             ExtendedCategoryEnum.SP => "#00d",
-            ExtendedCategoryEnum.FM => "#0b0",
+            ExtendedCategoryEnum.FL => "#0b0",
             ExtendedCategoryEnum.TTS => "#0b0",
             ExtendedCategoryEnum.TTL => "#0b0",
             ExtendedCategoryEnum.MC => "#db0",

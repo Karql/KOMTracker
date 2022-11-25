@@ -14,4 +14,9 @@ public class AthleteRankingTotalViewModel
     public int KomsCount { get; set; }
 
     public Dictionary<ExtendedCategoryEnum, int> KomsCountByCategory { get; set; } = new();
+
+    public int GetKomsCountByCategory(ExtendedCategoryEnum cat)
+    {
+        return KomsCountByCategory.TryGetValue(cat, out var count) ? count : 0;
+    }
 }
