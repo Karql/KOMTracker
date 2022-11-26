@@ -16,6 +16,21 @@ else
     <MudGrid Class="mb-2">
         <MudItem xs="12" sm="3">
             <MudSelect
+                T="RankingType"
+                @bind-Value="_rankingType"
+                Label="Type" 
+                Variant="Variant.Outlined" 
+                AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var rt in _rankingTypes)
+                    {
+                        <MudSelectItem Value="@rt.Value">
+                            @rt.Label
+                        </MudSelectItem>
+                    }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudSelect
                 T="ClubViewModel"                
                 Label="Club" 
                 Class="club-select"
@@ -41,20 +56,28 @@ else
         </ToolBarContent>
         <HeaderContent>
             <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.Athlete.FullName)">Athlete</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.Total.KomsCount)">Koms</MudTableSortLabel></MudTh>
-            @foreach(var cat in _extendedCategories)
+            @if (_rankingType == RankingType.Total)
             {
-                <MudTh>
-                    <MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.Total.GetKomsCountByCategory(cat))">                        
-@*                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(cat)">
-                            <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
-                            <span>@SegmentHelper.GetExtendedCategoryText(cat)</span>
-                        </div>*@
-                        @SegmentHelper.GetExtendedCategoryText(cat)
-                    </MudTableSortLabel>
-                </MudTh>
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<AthleteRankingViewModel, object>(x => x.Total.KomsCount)">Koms</MudTableSortLabel></MudTh>
+                @foreach(var cat in _extendedCategories)
+                {
+                    <MudTh>
+                        <MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.Total.GetKomsCountByCategory(cat))">                        
+                            @SegmentHelper.GetExtendedCategoryText(cat)
+                        </MudTableSortLabel>
+                    </MudTh>
+                }
             }
-    </HeaderContent>
+            @if (_rankingType == RankingType.KomsChanges)
+            {
+                <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<AthleteRankingViewModel, object>(x => x.KomsChangesThisWeek.NewKomsCount)">New this week </MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.KomsChangesThisWeek.LostKomsCount)">Lost this week</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.KomsChangesLastWeek.NewKomsCount)">New last week</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.KomsChangesLastWeek.LostKomsCount)">Lost last week</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.KomsChanges30Days.NewKomsCount)">New last 30 days</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.KomsChanges30Days.LostKomsCount)">Lost last 30 days</MudTableSortLabel></MudTh>
+            }
+        </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Athlete">
                 <div class="d-flex align-center">
@@ -62,14 +85,38 @@ else
                     <MudLink Target="_blank" Href="@($"https://strava.com/athletes/{context.Athlete.AthleteId}")"><MudHighlighter Text="@context.Athlete.FullName" HighlightedText="@_searchString" /></MudLink>
                 </div>
             </MudTd>
-            <MudTd DataLabel="Koms">
-                @context.Total.KomsCount
-            </MudTd>
-
-            @foreach(var cat in _extendedCategories)
+            @if (_rankingType == RankingType.Total)
             {
-                <MudTd DataLabel="@SegmentHelper.GetExtendedCategoryText(cat)">
-                    @context.Total.GetKomsCountByCategory(cat)
+                <MudTd DataLabel="Koms">
+                    @context.Total.KomsCount
+                </MudTd>
+
+                @foreach (var cat in _extendedCategories)
+                {
+                    <MudTd DataLabel="@SegmentHelper.GetExtendedCategoryText(cat)">
+                        @context.Total.GetKomsCountByCategory(cat)
+                    </MudTd>
+                }
+            }
+            @if (_rankingType == RankingType.KomsChanges)
+            {
+                <MudTd DataLabel="New this week">
+                    <MudText Color="Color.Success" Typo="Typo.body2">@context.KomsChangesThisWeek.NewKomsCount</MudText>                    
+                </MudTd>
+                <MudTd DataLabel="Lost this week">
+                    <MudText Color="Color.Error" Typo="Typo.body2">@context.KomsChangesThisWeek.LostKomsCount</MudText>      
+                </MudTd>
+                <MudTd DataLabel="New last week">
+                    <MudText Color="Color.Success" Typo="Typo.body2">@context.KomsChangesLastWeek.NewKomsCount</MudText>     
+                </MudTd>
+                <MudTd DataLabel="Lost last week">
+                    <MudText Color="Color.Error" Typo="Typo.body2">@context.KomsChangesLastWeek.LostKomsCount</MudText>
+                </MudTd>
+                <MudTd DataLabel="New last 30 days">
+                    <MudText Color="Color.Success" Typo="Typo.body2">@context.KomsChanges30Days.NewKomsCount</MudText>     
+                </MudTd>
+                <MudTd DataLabel="Lost last 30 days">
+                    <MudText Color="Color.Error" Typo="Typo.body2">@context.KomsChanges30Days.LostKomsCount</MudText>
                 </MudTd>
             }
         </RowTemplate>

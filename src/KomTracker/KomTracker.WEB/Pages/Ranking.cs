@@ -16,6 +16,18 @@ namespace KomTracker.WEB.Pages;
 
 public partial class Ranking
 {
+    private enum RankingType
+    {
+        Total,
+        KomsChanges
+    };
+
+    private readonly IEnumerable<(RankingType Value, string Label)> _rankingTypes = new[]
+    {
+        (RankingType.Total, "Total"),
+        (RankingType.KomsChanges, "Koms changes"),
+    };
+
     private bool _loaded = false;
     private UserModel _user = default!;
     private string _searchString = "";
@@ -24,6 +36,7 @@ public partial class Ranking
     private readonly ExtendedCategoryEnum[] _extendedCategories = Enum.GetValues<ExtendedCategoryEnum>().OrderByDescending(x => x).ToArray();
 
     private AthleteRankingViewModel _item;
+    private RankingType _rankingType = RankingType.Total;
 
     [CascadingParameter]
     public MainLayout Layout { get; set; }

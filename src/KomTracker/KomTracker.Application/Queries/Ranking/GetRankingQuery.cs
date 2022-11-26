@@ -60,21 +60,39 @@ public class GetRankingQueryHandler : IRequestHandler<GetRankingQuery, IEnumerab
         }
     }
 
-    public AthleteRankingModel GetAthleteRankingModel(AthleteStatsModel athleteStats, GetRankingQuery request)
+    private AthleteRankingModel GetAthleteRankingModel(AthleteStatsModel athleteStats, GetRankingQuery request)
     {
-        var model = new AthleteRankingModel
+        return new AthleteRankingModel
         {
             Athlete = athleteStats.Athlete,
+            Total = GetAthleteRankingTotalModel(athleteStats.Koms, request),
+            KomsChanges30Days = GetAthleteRankingKomsChangesModel(athleteStats.KomsChangesLast30Days, request),
+            KomsChangesLastWeek = GetAthleteRankingKomsChangesModel(athleteStats.KomsChangesLastWeek, request),
+            KomsChangesThisWeek = GetAthleteRankingKomsChangesModel(athleteStats.KomsChangesThisWeek, request)
         };
+    }
 
-        var koms = athleteStats.Koms.ToArray(); // TOOD: filter by request activity type
+    private AthleteRankingTotalModel GetAthleteRankingTotalModel(IEnumerable<EffortModel> koms, GetRankingQuery request)
+    {
+        koms = koms.ToArray(); // TOOD: filter by request activity type
 
-        model.Total.KomsCount = koms.Count();
+        return new AthleteRankingTotalModel
+        {
+            KomsCount = koms.Count(),
+            KomsCountByCategory = koms
+                .GroupBy(x => SegmentHelper.GetExtendedCategory(x.Segment!.ClimbCategory, x.Segment.AverageGrade, x.Segment.Distance))
+                .ToDictionary(x => x.Key, v => v.Count())
+        };
+    }
 
-        model.Total.KomsCountByCategory = koms
-            .GroupBy(x => SegmentHelper.GetExtendedCategory(x.Segment!.ClimbCategory, x.Segment.AverageGrade, x.Segment.Distance))
-            .ToDictionary(x => x.Key, v => v.Count());
+    private AthleteRankingKomsChangesModel GetAthleteRankingKomsChangesModel(KomsChangesModel komsChangesLast30Days, GetRankingQuery request)
+    {
+        // TOOD: filter by request activity type
 
-        return model;
+        return new AthleteRankingKomsChangesModel
+        {
+            NewKomsCount = komsChangesLast30Days.NewKoms.Count(),
+            LostKomsCount = komsChangesLast30Days.LostKoms.Count(),
+        };               
     }
 }

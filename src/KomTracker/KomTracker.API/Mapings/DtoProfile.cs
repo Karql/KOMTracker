@@ -31,5 +31,7 @@ public class DtoProfile : Profile
 
         CreateMap<AthleteRankingModel, AthleteRankingViewModel>();
         CreateMap<AthleteRankingTotalModel, AthleteRankingTotalViewModel>();
+        CreateMap<AthleteRankingKomsChangesModel, AthleteRankingKomsChangesViewModel>();
+        
     }
 }

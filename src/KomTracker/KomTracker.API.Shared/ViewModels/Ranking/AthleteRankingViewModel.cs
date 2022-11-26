@@ -7,6 +7,10 @@ public class AthleteRankingViewModel
     public AthleteViewModel Athlete { get; set; } = default!;
 
     public AthleteRankingTotalViewModel Total { get; set; } = new();
+
+    public AthleteRankingKomsChangesViewModel KomsChanges30Days { get; set; } = new();
+    public AthleteRankingKomsChangesViewModel KomsChangesLastWeek { get; set; } = new();
+    public AthleteRankingKomsChangesViewModel KomsChangesThisWeek { get; set; } = new();
 }
 
 public class AthleteRankingTotalViewModel
@@ -19,4 +23,10 @@ public class AthleteRankingTotalViewModel
     {
         return KomsCountByCategory.TryGetValue(cat, out var count) ? count : 0;
     }
+}
+
+public class AthleteRankingKomsChangesViewModel
+{
+    public int NewKomsCount { get; set; }
+    public int LostKomsCount { get; set; }
 }
