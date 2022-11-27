@@ -35,6 +35,7 @@ services:
       ApplicationConfiguration__TrackKomsJobEnabled: "false"
       ApplicationConfiguration__RefreshSegmentsJobEnabled: "false"
       ApplicationConfiguration__RefreshClubsJobEnabled: "false"
+      ApplicationConfiguration__RefreshStatsJobEnabled: "false"
       ApplicationConfiguration__MasterStravaAthleteId: ${APP_CONF_MASTER_STRAVA_ATHLETE_ID}
       ApplicationConfiguration__SendinBlueConfiguration__Enabled: "false"
       ApplicationConfiguration__SendinBlueConfiguration__ApiKey: ${APP_CONF_SENDINBLUE_API_KEY}

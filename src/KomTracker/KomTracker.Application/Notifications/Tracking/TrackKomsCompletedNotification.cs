@@ -1,4 +1,5 @@
-﻿using KomTracker.Application.Interfaces.Persistence;
+﻿using KomTracker.Application.Commands.Stats;
+using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Services.Identity;
 using KomTracker.Application.Interfaces.Services.Mail;
 using KomTracker.Application.Models.Mail;
@@ -21,7 +22,7 @@ public class TrackKomsCompletedNotification : INotification
 
 public class TrackKomsCompletedNotificationSendEmailHandler : INotificationHandler<TrackKomsCompletedNotification>
 {
-    private readonly ILogger<TrackKomsCompletedNotificationSendEmailHandler> _logger;
+    private readonly ILogger _logger;
     private readonly IUserService _userService;
     private readonly IMailService _mailService;    
 
@@ -58,5 +59,22 @@ public class TrackKomsCompletedNotificationSendEmailHandler : INotificationHandl
                 ComparedEfforts = notification.ComparedEfforts
             });
         }
+    }
+}
+
+public class TrackKomsCompletedNotificationRefreshStatsHandler : INotificationHandler<TrackKomsCompletedNotification>
+{
+    private readonly ILogger _logger;
+    private readonly IMediator _medaitor;
+
+    public TrackKomsCompletedNotificationRefreshStatsHandler(ILogger<TrackKomsCompletedNotificationRefreshStatsHandler> logger, IMediator mediator)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _medaitor = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    }
+
+    public Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
+    {
+        return _medaitor.Send(new RefreshStatsCommand { AthleteId = notification.Athlete.AthleteId }, cancellationToken);
     }
 }

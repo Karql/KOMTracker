@@ -1,7 +1,10 @@
-﻿## UPCOMMING
+﻿## 1.5.0 (2022-11-25)
 
 ### Features
 - Ranking
+
+### Bug fixes
+- Fix job for refreshing clubs data
 
 ## 1.4.0 (2022-11-13)
 

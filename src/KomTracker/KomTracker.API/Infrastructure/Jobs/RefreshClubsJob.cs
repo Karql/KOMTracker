@@ -1,4 +1,4 @@
-﻿using KomTracker.Application.Commands.Tracking;
+﻿using KomTracker.Application.Commands.Club;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Quartz;
@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 namespace KomTracker.API.Infrastructure.Jobs;
 
 [DisallowConcurrentExecution]
-public class RefreshSegmentsJob : IJob
+public class RefreshClubsJob : IJob
 {
-    private readonly ILogger<RefreshSegmentsJob> _logger;
+    private readonly ILogger<RefreshClubsJob> _logger;
     private readonly IMediator _mediator;
 
-    public RefreshSegmentsJob(ILogger<RefreshSegmentsJob> logger, IMediator mediator)
+    public RefreshClubsJob(ILogger<RefreshClubsJob> logger, IMediator mediator)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
@@ -21,7 +21,7 @@ public class RefreshSegmentsJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
-        _logger.LogDebug("Start job: {job}", nameof(RefreshSegmentsJob));
-        await _mediator.Send(new RefreshSegmentsCommand(), context.CancellationToken);
+        _logger.LogDebug("Start job: {job}", nameof(RefreshClubsJob));
+        await _mediator.Send(new RefreshClubsCommand(), context.CancellationToken);
     }
 }

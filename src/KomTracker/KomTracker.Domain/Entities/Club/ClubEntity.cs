@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace KomTracker.Domain.Entities.Club;
@@ -25,6 +26,6 @@ public class ClubEntity : BaseEntity
     public bool Featured { get; set; }
     public bool Verified { get; set; }
     public string Url { get; set; }
-
+    [JsonIgnore]
     public List<AthleteEntity> Athletes { get; set; }
 }

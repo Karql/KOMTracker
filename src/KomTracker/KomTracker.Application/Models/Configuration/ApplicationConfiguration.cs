@@ -20,6 +20,7 @@ public class ApplicationConfiguration
     public bool TrackKomsJobEnabled { get; set; } = true;
     public bool RefreshSegmentsJobEnabled { get; set; } = true;
     public bool RefreshClubsJobEnabled { get; set; } = true;
+    public bool RefreshStatsJobEnabled { get; set; } = true;
 
     /// <summary>
     /// Athlete id using to queries for data like segment details

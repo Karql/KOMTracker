@@ -68,9 +68,12 @@ public class Startup
         // Jobs
         services.AddTransient<TrackKomsJob>();
         services.AddTransient<RefreshSegmentsJob>();
+        services.AddTransient<RefreshClubsJob>();
+        services.AddTransient<RefreshStatsJob>();
 
         services.AddQuartz(q =>
         {
+            var tz = TZConvert.GetTimeZoneInfo("Europe/Warsaw");
             q.InterruptJobsOnShutdownWithWait = true;
 
             q.UseMicrosoftDependencyInjectionJobFactory();
@@ -88,11 +91,15 @@ public class Startup
             }
 
             if (_applicationConfiguration.RefreshClubsJobEnabled)
-            {
-                var tz = TZConvert.GetTimeZoneInfo("Europe/Warsaw");
-
-                q.ScheduleJob<RefreshSegmentsJob>(trigger => trigger
+            {               
+                q.ScheduleJob<RefreshClubsJob>(trigger => trigger
                     .WithCronSchedule("0 45 0,12 * * ?", action => action.InTimeZone(tz))); // 45 past midnight and midday
+            }
+
+            if (_applicationConfiguration.RefreshStatsJobEnabled)
+            {
+                q.ScheduleJob<RefreshStatsJob>(trigger => trigger
+                    .WithCronSchedule("0 55 0 * * ?", action => action.InTimeZone(tz))); // 55 past midnight
             }
         });
 
