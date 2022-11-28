@@ -17,7 +17,7 @@ else
         <MudItem xs="12" sm="3">
             <MudSelect
                 T="RankingType"
-                @bind-Value="_rankingType"
+                @bind-Value="_selectedRankingType"
                 Label="Ranking type" 
                 Variant="Variant.Outlined" 
                 AnchorOrigin="Origin.BottomCenter">
@@ -25,6 +25,24 @@ else
                     {
                         <MudSelectItem Value="@rt.Value">
                             @rt.Label
+                        </MudSelectItem>
+                    }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudSelect
+                T="string"
+                Label="Activity type" 
+                Variant="Variant.Outlined" 
+                AnchorOrigin="Origin.BottomCenter"
+                Clearable="true"
+                ValueChanged="@SelectedActivityTypeChanged">
+                    @foreach (var x in ActivityTypeHelper.GetActivityTypes())
+                    {
+                        <MudSelectItem Value="@x.ActivityType">
+                            <div class="d-flex align-center">
+                                <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(x.ActivityType)" Class="mr-2" /> @x.Name
+                            </div>                            
                         </MudSelectItem>
                     }
             </MudSelect>
@@ -56,7 +74,7 @@ else
         </ToolBarContent>
         <HeaderContent>
             <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.Athlete.FullName)">Athlete</MudTableSortLabel></MudTh>
-            @if (_rankingType == RankingType.Total)
+            @if (_selectedRankingType == RankingType.Total)
             {
                 <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<AthleteRankingViewModel, object>(x => x.Total.KomsCount)">Koms</MudTableSortLabel></MudTh>
                 @foreach(var cat in _extendedCategories)
@@ -68,7 +86,7 @@ else
                     </MudTh>
                 }
             }
-            @if (_rankingType == RankingType.KomsChanges)
+            @if (_selectedRankingType == RankingType.KomsChanges)
             {
                 <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<AthleteRankingViewModel, object>(x => x.KomsChangesThisWeek.NewKomsCount)">New this week </MudTableSortLabel></MudTh>
                 <MudTh><MudTableSortLabel SortBy="new Func<AthleteRankingViewModel, object>(x => x.KomsChangesThisWeek.LostKomsCount)">Lost this week</MudTableSortLabel></MudTh>
@@ -85,7 +103,7 @@ else
                     <MudLink Target="_blank" Href="@($"https://strava.com/athletes/{context.Athlete.AthleteId}")"><MudHighlighter Text="@context.Athlete.FullName" HighlightedText="@_searchString" /></MudLink>
                 </div>
             </MudTd>
-            @if (_rankingType == RankingType.Total)
+            @if (_selectedRankingType == RankingType.Total)
             {
                 <MudTd DataLabel="Koms">
                     @context.Total.KomsCount
@@ -98,7 +116,7 @@ else
                     </MudTd>
                 }
             }
-            @if (_rankingType == RankingType.KomsChanges)
+            @if (_selectedRankingType == RankingType.KomsChanges)
             {
                 <MudTd DataLabel="New this week">
                     <MudText Color="Color.Success" Typo="Typo.body2">@context.KomsChangesThisWeek.NewKomsCount</MudText>                    

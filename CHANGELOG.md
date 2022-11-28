@@ -1,4 +1,9 @@
-﻿## 1.5.0 (2022-11-25)
+﻿## 1.5.1 (2022-11-28)
+
+### Features
+- Ranking by activity type
+
+## 1.5.0 (2022-11-25)
 
 ### Features
 - Ranking

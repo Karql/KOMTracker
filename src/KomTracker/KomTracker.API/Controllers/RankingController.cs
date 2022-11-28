@@ -14,9 +14,9 @@ public class RankingController : BaseApiController<AthletesController>
     [HttpGet]
     [Route("")]
     [SwaggerResponse(StatusCodes.Status200OK, type: typeof(IEnumerable<AthleteRankingViewModel>))]
-    public async Task<IActionResult> Index([FromQuery(Name = "club_id")] long? clubId)
+    public async Task<IActionResult> Index([FromQuery(Name = "club_id")] long? clubId, [FromQuery(Name = "activity_type")]string? activityType)
     {
-        var ranking = await _mediator.Send(new GetRankingQuery { ClubId = clubId });
+        var ranking = await _mediator.Send(new GetRankingQuery { ClubId = clubId, ActivityType = activityType });
 
         return Ok(_mapper.Map<IEnumerable<AthleteRankingViewModel>>(ranking));
     }

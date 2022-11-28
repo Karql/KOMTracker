@@ -1,6 +1,7 @@
 ﻿@page "/last-koms-changes"
 @using KomTracker.API.Shared.ViewModels.Club
 @using KomTracker.API.Shared.ViewModels.Stats
+@using KomTracker.Application.Shared.Helpers
 @using KomTracker.WEB.Helpers
 @using KomTracker.WEB.Settings
 @attribute [Authorize]
@@ -53,7 +54,7 @@ else
             <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Segment.ExtendedCategory)">Cat</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Segment.ActivityType)">Type</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => ActivityTypeHelper.GetActivityTypeOrder(x.Effort.Segment.ActivityType))">Type</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Change type">
@@ -121,7 +122,7 @@ else
                 </div>
             </MudTd>
             <MudTd DataLabel="Type">
-                <MudTooltip Text="@context.Effort.Segment.ActivityType">
+                <MudTooltip Text="@ActivityTypeHelper.GetActivityTypeName(context.Effort.Segment.ActivityType)">
                     <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(context.Effort.Segment.ActivityType)"></MudIcon>
                 </MudTooltip>
             </MudTd>

@@ -1,4 +1,5 @@
 ﻿@page "/koms"
+@using KomTracker.Application.Shared.Helpers
 @using KomTracker.WEB.Helpers
 @attribute [Authorize]
 
@@ -78,7 +79,7 @@ else
                 </div>
             </MudTd>
             <MudTd DataLabel="Type">
-                <MudTooltip Text="@context.Segment.ActivityType">
+                <MudTooltip Text="@ActivityTypeHelper.GetActivityTypeName(context.Segment.ActivityType)">
                     <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(context.Segment.ActivityType)"></MudIcon>
                 </MudTooltip>
             </MudTd>

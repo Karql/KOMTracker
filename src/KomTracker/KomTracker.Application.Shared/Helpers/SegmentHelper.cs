@@ -9,7 +9,6 @@ namespace KomTracker.Application.Shared.Helpers;
 
 public static class SegmentHelper
 {
-
     public static ExtendedCategoryEnum GetExtendedCategory(int climbCategory, float averageGrade, float distance)
     {
         if (climbCategory > 0)

@@ -12,12 +12,14 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Utils.Extensions;
 
 namespace KomTracker.Application.Queries.Ranking;
 
 public class GetRankingQuery : IRequest<IEnumerable<AthleteRankingModel>>
 {
     public long? ClubId { get; set; } = null;
+    public string? ActivityType { get; set; }
 }
 
 public class GetRankingQueryHandler : IRequestHandler<GetRankingQuery, IEnumerable<AthleteRankingModel>>
@@ -74,7 +76,10 @@ public class GetRankingQueryHandler : IRequestHandler<GetRankingQuery, IEnumerab
 
     private AthleteRankingTotalModel GetAthleteRankingTotalModel(IEnumerable<EffortModel> koms, GetRankingQuery request)
     {
-        koms = koms.ToArray(); // TOOD: filter by request activity type
+        koms = koms
+            .Where(x => string.IsNullOrWhiteSpace(request.ActivityType) 
+                || x.Segment!.ActivityType.EqualsCI(request.ActivityType))
+            .ToArray();
 
         return new AthleteRankingTotalModel
         {
@@ -85,14 +90,24 @@ public class GetRankingQueryHandler : IRequestHandler<GetRankingQuery, IEnumerab
         };
     }
 
-    private AthleteRankingKomsChangesModel GetAthleteRankingKomsChangesModel(KomsChangesModel komsChangesLast30Days, GetRankingQuery request)
+    private AthleteRankingKomsChangesModel GetAthleteRankingKomsChangesModel(KomsChangesModel komsChanges, GetRankingQuery request)
     {
-        // TOOD: filter by request activity type
+        var newKomsCount = komsChanges
+            .NewKoms
+            .Where(x => string.IsNullOrWhiteSpace(request.ActivityType)
+                || x.Segment!.ActivityType.EqualsCI(request.ActivityType))
+            .Count();
+
+        var lostKomsCount = komsChanges
+            .LostKoms
+            .Where(x => string.IsNullOrWhiteSpace(request.ActivityType)
+                || x.Segment!.ActivityType.EqualsCI(request.ActivityType))
+            .Count();
 
         return new AthleteRankingKomsChangesModel
         {
-            NewKomsCount = komsChangesLast30Days.NewKoms.Count(),
-            LostKomsCount = komsChangesLast30Days.LostKoms.Count(),
+            NewKomsCount = newKomsCount,
+            LostKomsCount = lostKomsCount,
         };               
     }
 }

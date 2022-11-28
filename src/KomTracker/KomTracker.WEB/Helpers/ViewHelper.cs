@@ -1,4 +1,5 @@
-﻿using KomTracker.Application.Shared.Models.Segment;
+﻿using KomTracker.Application.Shared.Helpers;
+using KomTracker.Application.Shared.Models.Segment;
 using MudBlazor;
 
 namespace KomTracker.WEB.Helpers;
@@ -9,11 +10,20 @@ public static class ViewHelper
     {
         return activityType switch
         {
-            "Ride" => Icons.Material.Filled.DirectionsBike,
-            "Run" => Icons.Material.Filled.DirectionsRun,
-            "Hike" => Icons.Material.Filled.Hiking,
-            "NordicSki" => Icons.Material.Filled.NordicWalking,
-            _ => Icons.Material.Filled.HelpCenter
+            ActivityTypeConsts.Ride => Icons.Material.Filled.DirectionsBike,
+            ActivityTypeConsts.Run => Icons.Material.Filled.DirectionsRun,
+            ActivityTypeConsts.Swim => Icons.Material.Filled.Pool,
+            ActivityTypeConsts.Hike => Icons.Material.Filled.Hiking,
+            ActivityTypeConsts.Walk => Icons.Material.Filled.DirectionsRun,
+            ActivityTypeConsts.AlpineSki => Icons.Material.Filled.DownhillSkiing,
+            ActivityTypeConsts.BackcountrySki => Icons.Material.Filled.NordicWalking,
+            ActivityTypeConsts.EBikeRide => Icons.Material.Filled.ElectricBike,
+            ActivityTypeConsts.InlineSkate => Icons.Material.Filled.RollerSkating,
+            ActivityTypeConsts.NordicSki => Icons.Material.Filled.NordicWalking,
+            ActivityTypeConsts.Snowboard => Icons.Material.Filled.Snowboarding,
+            ActivityTypeConsts.VirtualRide => Icons.Material.Filled.Tv,
+            ActivityTypeConsts.WaterSport=> Icons.Material.Filled.Water,
+            _ => Icons.Material.Outlined.HelpCenter
         };
     }
 

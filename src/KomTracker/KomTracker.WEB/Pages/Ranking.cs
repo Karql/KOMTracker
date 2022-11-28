@@ -9,6 +9,7 @@ using KomTracker.WEB.Infrastructure.Services.User;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.WebUtilities;
 using MudBlazor;
 using System.Net.Http.Json;
 
@@ -36,7 +37,9 @@ public partial class Ranking
     private readonly ExtendedCategoryEnum[] _extendedCategories = Enum.GetValues<ExtendedCategoryEnum>().OrderByDescending(x => x).ToArray();
 
     private AthleteRankingViewModel _item;
-    private RankingType _rankingType = RankingType.Total;
+    private RankingType _selectedRankingType = RankingType.Total;
+    private string? _selectedActivityType = null;
+    private ClubViewModel? _selectedClub = null;
 
     [CascadingParameter]
     public MainLayout Layout { get; set; }
@@ -70,11 +73,21 @@ public partial class Ranking
             ?? Enumerable.Empty<ClubViewModel>();
     }
 
-    private async Task GetRankingAsync(long? clubId = null)
+    private async Task GetRankingAsync()
     {
-        var query = clubId.HasValue ? $"?club_id={clubId.Value}" : String.Empty;
+        var qParams = new Dictionary<string, string>();
 
-        _ranking = await Http.GetFromJsonAsync<AthleteRankingViewModel[]>($"ranking{query}")
+        if (_selectedClub?.Id != null)
+        {
+            qParams.Add("club_id", _selectedClub.Id.ToString());
+        }
+
+        if (!string.IsNullOrEmpty(_selectedActivityType))
+        {
+            qParams.Add("activity_type", _selectedActivityType);
+        }
+
+        _ranking = await Http.GetFromJsonAsync<AthleteRankingViewModel[]>(QueryHelpers.AddQueryString("ranking", qParams))
             ?? Enumerable.Empty<AthleteRankingViewModel>();
     }
 
@@ -83,16 +96,17 @@ public partial class Ranking
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
 
         return item.Athlete.FullName.Contains(_searchString, StringComparison.OrdinalIgnoreCase);
-
     }
 
-    private Task<IEnumerable<ClubViewModel>> SearchClubs(string club)
+    private async Task SelectedActivityTypeChanged(string selectedActivityType)
     {
-        return Task.FromResult(_clubs.Where(x => string.IsNullOrEmpty(club) || x.Name.Contains(club, StringComparison.OrdinalIgnoreCase)));
+        _selectedActivityType = selectedActivityType;
+        await GetRankingAsync();
     }
 
     private async Task SelectedClubChanged(ClubViewModel selectedClub)
     {
-        await GetRankingAsync(selectedClub?.Id);
+        _selectedClub = selectedClub;
+        await GetRankingAsync();
     }
 }
