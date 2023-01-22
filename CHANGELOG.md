@@ -1,4 +1,9 @@
-﻿## 1.5.1 (2022-11-28)
+﻿## UPCOMMING
+
+### Features
+- Update to .NET 7.0
+
+## 1.5.1 (2022-11-28)
 
 ### Features
 - Ranking by activity type
