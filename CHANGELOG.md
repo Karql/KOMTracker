@@ -2,6 +2,7 @@
 
 ### Features
 - Update to .NET 7.0
+- Update dependiencies
 
 ## 1.5.1 (2022-11-28)
 
