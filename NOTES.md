@@ -31,6 +31,8 @@ Last changes new koms, lost koms for following, club etc.
 
 Segment stars tracking - notify when someone stared segment that you have kom.
 
+Segment direction and sorting.
+
 # Extended KOM classes for 0 category 
 # based on https://www.marcellobrivio.com/projects/strava-toolbox/kom-lister.php
 # https://support.strava.com/hc/en-us/articles/216917057-Climb-Categorization
