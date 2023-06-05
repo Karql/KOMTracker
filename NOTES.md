@@ -11,10 +11,6 @@ Ranking by:
 - avg speed
 - ...
 
-Register with code:
-- start from mine.
-- add few after registration
-
 Arena | Battle field:
 - competition between athlets
 - who bet who etc.
