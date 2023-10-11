@@ -1,8 +1,11 @@
-﻿## UPCOMMING
+﻿## 1.6.0
 
 ### Features
 - Update to .NET 7.0
 - Update dependiencies
+
+## Bug fixes
+- Add infinite recursion protection for `TrackKomsForAthleteAsync` (e.g. rejected token by user)
 
 ## 1.5.1 (2022-11-28)
 

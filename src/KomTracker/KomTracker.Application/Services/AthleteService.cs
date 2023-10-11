@@ -80,6 +80,7 @@ public class AthleteService : IAthleteService
         if (token == null)
         {
             await DeactivateAthleteAsync(athleteId);
+            // TODO: log
             return Result.Fail<TokenEntity>(new GetValidTokenError(GetValidTokenError.NoTokenInDB));
         }
 
@@ -98,6 +99,7 @@ public class AthleteService : IAthleteService
         }
 
         await DeactivateAthleteAsync(athleteId);
+        // TODO: log
         return Result.Fail<TokenEntity>(new GetValidTokenError(GetValidTokenError.RefreshFailed));
     }
 

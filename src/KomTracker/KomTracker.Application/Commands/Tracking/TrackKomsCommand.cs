@@ -26,6 +26,8 @@ public class TrackKomsCommand : IRequest<Result>
 
 public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
 {
+    private const int MAX_RETRY_COUNT = 5;
+
     private readonly IMediator _mediator;
     private readonly IKOMUnitOfWork _komUoW;
     private readonly ILogger<TrackKomsCommandHandler> _logger;
@@ -57,8 +59,16 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
         return Result.Ok();
     }
 
-    protected async Task TrackKomsForAthleteAsync(AthleteEntity athlete)
+    protected async Task TrackKomsForAthleteAsync(AthleteEntity athlete, int retry = 0)
     {
+        var logPrefix = $"{nameof(TrackKomsForAthleteAsync)} ";
+
+        if (retry >= MAX_RETRY_COUNT)
+        {
+            _logger.LogWarning(logPrefix + "max retry count: {maxRetryCount} exceeded", MAX_RETRY_COUNT);
+            return;
+        }
+
         var athleteId = athlete.AthleteId;
         var token = await GetTokenAsync(athleteId);
         if (token == null) return;
@@ -68,10 +78,9 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
         if (!acutalKomsRes.IsSuccess)
         {
             // Try again when Unauthorized
-            // TODO: infinite recursion protection 
             if (acutalKomsRes.HasError<Interfaces.Services.Strava.GetAthleteKomsError>(x => x.Message == Interfaces.Services.Strava.GetAthleteKomsError.Unauthorized))
             {
-                await TrackKomsForAthleteAsync(athlete);
+                await TrackKomsForAthleteAsync(athlete, ++retry);
             }
 
             // Logging done in Strava.API.Client
