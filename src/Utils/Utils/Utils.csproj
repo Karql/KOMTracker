@@ -14,7 +14,7 @@
     <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="19.2.87" />
+    <PackageReference Include="System.IO.Abstractions" Version="20.0.4" />
   </ItemGroup>
 
 </Project>
