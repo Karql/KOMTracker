@@ -1,4 +1,10 @@
-﻿## 1.6.0 (2023-10-11)
+﻿## 1.7.0 (2024-01-03)
+
+### Features
+- Update to .NET 8.0
+- Update dependiencies
+
+## 1.6.0 (2023-10-11)
 
 ### Features
 - Update to .NET 7.0

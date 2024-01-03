@@ -63,6 +63,7 @@ public class CommonProgram
 
     private static IHostBuilder CreateHostBuilder<TStartup>(string[] args, IConfiguration configuration) where TStartup : class =>
         Host.CreateDefaultBuilder(args)
+            .UseSerilog()
             .ConfigureWebHostDefaults(webHostBuilder =>
             {
                 webHostBuilder
@@ -72,9 +73,7 @@ public class CommonProgram
                     builder.AddConfiguration(configuration);
                 })
                 .CaptureStartupErrors(false)
-                .UseStartup<TStartup>()
-                .UseSerilog()
-                .UseKestrel();
+                .UseStartup<TStartup>();
             });
 
     /// <remarks>

@@ -45,7 +45,7 @@ services:
       StravaApiClientConfiguration__ClientID: ${STRAVA_API_CLIENT_ID}
       StravaApiClientConfiguration__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
       IdentityConfiguration__IdentityUrl: https://localhost:9999/kom-tracker-api/identity
-      IdentityConfiguration__Authority: http://kom-tracker-api/identity
+      IdentityConfiguration__Authority: http://kom-tracker-api:8080/identity
       IdentityConfiguration__RequireHttpsMetadata: "false"
       IdentityConfiguration__RedirectUris__0: https://localhost
       IdentityConfiguration__PostLogoutRedirectUris__0: https://localhost

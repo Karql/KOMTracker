@@ -16,13 +16,15 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:6.0
+    # user: root
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: kom@kom.kom
       PGADMIN_DEFAULT_PASSWORD: kom
       PGADMIN_SERVER_JSON_FILE: /app/servers.json
     volumes:
-      - ./volumes/pgadmin/data:/var/lib/pgadmin # set chown 5050:5050 (pgadmin:pgadmin)
+      # set chown 5050:5050 (pgadmin:pgadmin) - uncomment user: root and enter to container 
+      - ./volumes/pgadmin/data:/var/lib/pgadmin 
       - ./servers.json:/app/servers.json:ro    
     ports:
       - 8050:80
