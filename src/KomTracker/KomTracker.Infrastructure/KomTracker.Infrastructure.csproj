@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-  	<PackageReference Include="AutoMapper" Version="13.0.0" />
+  	<PackageReference Include="AutoMapper" Version="13.0.1" />
   	<PackageReference Include="EFCore.BulkExtensions.PostgreSql" Version="8.0.1" />
   	<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
