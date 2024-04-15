@@ -90,6 +90,7 @@ public class AthleteServiceTests
 
     [Theory]
     [InlineData(ApiModel.Segment.Error.GetKomsError.Unauthorized, GetAthleteKomsError.Unauthorized)]
+    [InlineData(ApiModel.Segment.Error.GetKomsError.TooManyRequests, GetAthleteKomsError.TooManyRequests)]
     [InlineData(ApiModel.Segment.Error.GetKomsError.UnknownError, GetAthleteKomsError.UnknownError)]
     public async Task Get_athlete_koms_passes_error(string apiError, string serviceError)
     {

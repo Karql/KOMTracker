@@ -20,6 +20,7 @@ public class SegmentService : ISegmentService
     private readonly IReadOnlyDictionary<string, string> _getSegmentErrorMap = new Dictionary<string, string>()
     {
         { ApiModel.Segment.Error.GetSegmentError.Unauthorized,  GetSegmentError.Unauthorized },
+        { ApiModel.Segment.Error.GetSegmentError.TooManyRequests,  GetSegmentError.TooManyRequests },
         { ApiModel.Segment.Error.GetSegmentError.NotFound,  GetSegmentError.NotFound },
     };
 
@@ -40,9 +41,9 @@ public class SegmentService : ISegmentService
 
         var error = getSegmentRes.Errors.OfType<ApiModel.Segment.Error.GetSegmentError>().FirstOrDefault();
 
-        if (_getSegmentErrorMap.ContainsKey(error?.Message))
+        if (_getSegmentErrorMap.TryGetValue(error?.Message, out var mappedErrorMessage))
         {
-            return Result.Fail<SegmentEntity>(new GetSegmentError(_getSegmentErrorMap[error.Message]));
+            return Result.Fail<SegmentEntity>(new GetSegmentError(mappedErrorMessage));
         }
 
         return Result.Fail<SegmentEntity>(new GetSegmentError(GetSegmentError.UnknownError));

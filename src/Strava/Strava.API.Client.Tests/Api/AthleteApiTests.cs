@@ -131,6 +131,23 @@ public class AthleteApiTests
     }
 
     [Fact]
+    public async Task Get_koms_returns_too_many_requests_on_429()
+    {
+        // Arrange
+        _mockHttp.Expect(HttpMethod.Get, GetKomsUrl(1))
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_VALID}")
+            .Respond(HttpStatusCode.TooManyRequests);
+
+        // Act
+        var res = await _athleteApi.GetKomsAsync(TEST_ATHLETE_ID, TEST_TOKEN_VALID);
+
+        // Arrange
+        res.Should().BeFailure();
+        _mockHttp.VerifyNoOutstandingExpectation();
+        _logger.CheckLogError("Rate Limit Exceeded!");
+    }
+
+    [Fact]
     public async Task Get_koms_throws_exception_when_something_went_wrong()
     {
         // Arrange

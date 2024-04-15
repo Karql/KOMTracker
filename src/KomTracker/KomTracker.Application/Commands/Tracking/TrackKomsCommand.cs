@@ -51,40 +51,51 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
 
         foreach (var athlete in athlets)
         {
-            if (cancellationToken.IsCancellationRequested) return Result.Ok(); // TODO: OK?
+            if (cancellationToken.IsCancellationRequested)
+                return Result.Ok(); // TODO: OK?
 
-            await TrackKomsForAthleteAsync(athlete);
+            if (!await TrackKomsForAthleteAsync(athlete))
+                return Result.Fail($"{nameof(TrackKomsCommand)} execution interrupted!");
         }
 
         return Result.Ok();
     }
 
-    protected async Task TrackKomsForAthleteAsync(AthleteEntity athlete, int retry = 0)
+    /// <returns>If loop should be continued</returns>
+    protected async Task<bool> TrackKomsForAthleteAsync(AthleteEntity athlete, int retry = 0)
     {
         var logPrefix = $"{nameof(TrackKomsForAthleteAsync)} ";
 
         if (retry >= MAX_RETRY_COUNT)
         {
             _logger.LogWarning(logPrefix + "max retry count: {maxRetryCount} exceeded", MAX_RETRY_COUNT);
-            return;
+            return true;
         }
 
         var athleteId = athlete.AthleteId;
         var token = await GetTokenAsync(athleteId);
-        if (token == null) return;
+        if (token == null) return true;
 
         var acutalKomsRes = await _stravaAthleteService.GetAthleteKomsAsync(athleteId, token);
 
         if (!acutalKomsRes.IsSuccess)
         {
+            var errorMessage = acutalKomsRes.Errors.OfType<Interfaces.Services.Strava.GetAthleteKomsError>().FirstOrDefault()?.Message;
+
             // Try again when Unauthorized
-            if (acutalKomsRes.HasError<Interfaces.Services.Strava.GetAthleteKomsError>(x => x.Message == Interfaces.Services.Strava.GetAthleteKomsError.Unauthorized))
+            if (errorMessage == Interfaces.Services.Strava.GetAthleteKomsError.Unauthorized)
             {
                 await TrackKomsForAthleteAsync(athlete, ++retry);
             }
 
+            // Break execution on TooManyRequest
+            if (errorMessage == Interfaces.Services.Strava.GetAthleteKomsError.TooManyRequests)
+            {
+                return false;
+            }
+
             // Logging done in Strava.API.Client
-            return;
+            return true;
         }
 
         var actualKoms = acutalKomsRes.Value;
@@ -119,6 +130,8 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
                 ComparedEfforts = comparedEfforts
             });
         }
+
+        return true;
     }
 
     protected async Task<string?> GetTokenAsync(int athleteId)

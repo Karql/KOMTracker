@@ -106,6 +106,25 @@ public class SegmentApiTests
     }
 
     [Fact]
+    public async Task Get_segment_returns_too_many_requests_on_429()
+    {
+        // Arrange
+        _mockHttp.Expect(HttpMethod.Get, GetSegmentUrl(TEST_SEGMENT_ID))
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_VALID}")
+            .Respond(HttpStatusCode.TooManyRequests);
+
+        // Act
+        var res = await _segmentApi.GetSegmentAsync(TEST_SEGMENT_ID, TEST_TOKEN_VALID);
+
+        // Assert
+        res.Should().BeFailure();
+        res.HasError<GetSegmentError>(x => x.Message == GetSegmentError.TooManyRequests).Should().BeTrue();
+
+        _mockHttp.VerifyNoOutstandingExpectation();
+        _logger.CheckLogError("Rate Limit Exceeded!");
+    }
+
+    [Fact]
     public async Task Get_segment_throws_exception_when_something_went_wrong()
     {
         // Arrange

@@ -19,8 +19,9 @@ public interface ISegmentService
 public class GetSegmentError : FluentResults.Error
 {
     public const string Unauthorized = "Unauthorized";
-    public const string UnknownError = "UnknownError";
+    public const string TooManyRequests = "TooManyRequests";
     public const string NotFound = "NotFound";
+    public const string UnknownError = "UnknownError";
 
     public GetSegmentError(string message)
     : base(message)

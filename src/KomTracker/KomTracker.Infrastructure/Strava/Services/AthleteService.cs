@@ -43,12 +43,14 @@ public class AthleteService : IAthleteService
             );
         }
 
-        if (getKomsRes.HasError<ApiModel.Segment.Error.GetKomsError>(x => x.Message == ApiModel.Segment.Error.GetKomsError.Unauthorized))
+        var mappedErrorMessage = getKomsRes.Errors.OfType<ApiModel.Segment.Error.GetKomsError>().FirstOrDefault()?.Message switch
         {
-            return Result.Fail<IEnumerable<(SegmentEffortEntity, SegmentEntity)>>(new GetAthleteKomsError(GetAthleteKomsError.Unauthorized));
-        }
+            ApiModel.Segment.Error.GetKomsError.Unauthorized => GetAthleteKomsError.Unauthorized,
+            ApiModel.Segment.Error.GetKomsError.TooManyRequests => GetAthleteKomsError.TooManyRequests,
+            _ => GetAthleteKomsError.UnknownError
+        };
 
-        return Result.Fail<IEnumerable<(SegmentEffortEntity, SegmentEntity)>>(new GetAthleteKomsError(GetAthleteKomsError.UnknownError));
+        return Result.Fail<IEnumerable<(SegmentEffortEntity, SegmentEntity)>>(new GetAthleteKomsError(mappedErrorMessage));
     }
 
     public async Task<Result<IEnumerable<ClubEntity>>> GetAthleteClubsAsync(string token)
@@ -64,11 +66,13 @@ public class AthleteService : IAthleteService
             );
         }
 
-        if (getKomsRes.HasError<ApiModel.Club.Error.GetClubsError>(x => x.Message == ApiModel.Club.Error.GetClubsError.Unauthorized))
+        var mappedErrorMessage = getKomsRes.Errors.OfType<ApiModel.Club.Error.GetClubsError>().FirstOrDefault()?.Message switch
         {
-            return Result.Fail<IEnumerable<ClubEntity>>(new GetAthleteClubsError(GetAthleteClubsError.Unauthorized));
-        }
+            ApiModel.Club.Error.GetClubsError.Unauthorized => GetAthleteClubsError.Unauthorized,
+            ApiModel.Club.Error.GetClubsError.TooManyRequests => GetAthleteClubsError.TooManyRequests,
+            _ => GetAthleteClubsError.UnknownError
+        };
 
-        return Result.Fail<IEnumerable<ClubEntity>>(new GetAthleteClubsError(GetAthleteClubsError.UnknownError));
+        return Result.Fail<IEnumerable<ClubEntity>>(new GetAthleteClubsError(mappedErrorMessage));
     }
 }

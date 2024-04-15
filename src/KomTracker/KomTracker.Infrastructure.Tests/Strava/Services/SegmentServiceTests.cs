@@ -65,6 +65,7 @@ public class SegmentServiceTests
 
     [Theory]
     [InlineData(ApiModel.Segment.Error.GetSegmentError.Unauthorized, GetSegmentError.Unauthorized)]
+    [InlineData(ApiModel.Segment.Error.GetSegmentError.TooManyRequests, GetSegmentError.TooManyRequests)]
     [InlineData(ApiModel.Segment.Error.GetSegmentError.NotFound, GetSegmentError.NotFound)]
     [InlineData(ApiModel.Segment.Error.GetSegmentError.UnknownError, GetSegmentError.UnknownError)]
     public async Task Get_segment_passes_error(string apiError, string serviceError)

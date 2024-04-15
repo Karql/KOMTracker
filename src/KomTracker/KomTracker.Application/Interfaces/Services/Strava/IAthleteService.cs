@@ -22,6 +22,7 @@ public interface IAthleteService
 public class GetAthleteKomsError : FluentResults.Error
 {
     public const string Unauthorized = "Unauthorized";
+    public const string TooManyRequests = "TooManyRequests";
     public const string UnknownError = "UnknownError";
 
     public GetAthleteKomsError(string message)
@@ -33,6 +34,7 @@ public class GetAthleteKomsError : FluentResults.Error
 public class GetAthleteClubsError : FluentResults.Error
 {
     public const string Unauthorized = "Unauthorized";
+    public const string TooManyRequests = "TooManyRequests";
     public const string UnknownError = "UnknownError";
 
     public GetAthleteClubsError(string message)

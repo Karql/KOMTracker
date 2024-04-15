@@ -2,6 +2,8 @@
 using Microsoft.Extensions.Logging;
 using Strava.API.Client.Model.Club;
 using Strava.API.Client.Model.Club.Error;
+using Strava.API.Client.Model.Segment.Error;
+using Strava.API.Client.Model.Segment;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,6 +71,19 @@ public class ClubApi : IClubApi
         {
             _logger.LogWarning(logPrefix + "Unauthorized! page: {page}", page);
             return Result.Fail<IEnumerable<ClubSummaryModel>>(new GetClubsError(GetClubsError.Unauthorized));
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            IEnumerable<string> values;
+            var rateLimitLimit = response.Headers.TryGetValues("X-RateLimit-Limit", out values) ? values.FirstOrDefault() : null;
+            var rateLimitUsage = response.Headers.TryGetValues("X-RateLimit-Usage", out values) ? values.FirstOrDefault() : null;
+            var readRateLimitLimit = response.Headers.TryGetValues("X-ReadRateLimit-Limit", out values) ? values.FirstOrDefault() : null;
+            var readRateLimitUsage = response.Headers.TryGetValues("X-ReadRateLimit-Usage", out values) ? values.FirstOrDefault() : null;
+
+            _logger.LogError(logPrefix + "Rate Limit Exceeded! X-RateLimit-Limit: {rateLimitLimit}, X-RateLimit-Usage: {rateLimitUsage}, X-ReadRateLimit-Limit: {readRateLimitLimit}, X-ReadRateLimit-Usage: {readRateLimitUsage}, Url: {url}",
+                rateLimitLimit, rateLimitUsage, readRateLimitLimit, readRateLimitUsage, url);
+            return Result.Fail<IEnumerable<ClubSummaryModel>>(new GetKomsError(GetKomsError.TooManyRequests));
         }
 
         _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}, Url: {url}",

@@ -1,4 +1,10 @@
-﻿## 1.7.0 (2024-01-03)
+﻿## LATSET
+
+### Features
+- Interrupt jobs on 429 Too Many Requests (Rate Limit Exceeded)
+- Update dependiencies
+
+## 1.7.0 (2024-01-03)
 
 ### Features
 - Update to .NET 8.0

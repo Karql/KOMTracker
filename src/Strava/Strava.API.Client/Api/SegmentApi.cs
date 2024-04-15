@@ -53,6 +53,20 @@ public class SegmentApi : ISegmentApi
             return Result.Fail<SegmentDetailedModel>(new GetSegmentError(GetSegmentError.NotFound));
         }
 
+        else if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            IEnumerable<string> values;
+            var rateLimitLimit = response.Headers.TryGetValues("X-RateLimit-Limit", out values) ? values.FirstOrDefault() : null;
+            var rateLimitUsage = response.Headers.TryGetValues("X-RateLimit-Usage", out values) ? values.FirstOrDefault() : null;
+            var readRateLimitLimit = response.Headers.TryGetValues("X-ReadRateLimit-Limit", out values) ? values.FirstOrDefault() : null;
+            var readRateLimitUsage = response.Headers.TryGetValues("X-ReadRateLimit-Usage", out values) ? values.FirstOrDefault() : null;
+
+            _logger.LogError(logPrefix + "Rate Limit Exceeded! X-RateLimit-Limit: {rateLimitLimit}, X-RateLimit-Usage: {rateLimitUsage}, X-ReadRateLimit-Limit: {readRateLimitLimit}, X-ReadRateLimit-Usage: {readRateLimitUsage}, Segment id: {segmentId}",
+                rateLimitLimit, rateLimitUsage, readRateLimitLimit, readRateLimitUsage, id);
+
+            return Result.Fail<SegmentDetailedModel>(new GetSegmentError(GetSegmentError.TooManyRequests));
+        }
+
         _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}, Segment id: {segmentId}",
             (int)response.StatusCode, await response.Content.ReadAsStringAsync(), id);
 

@@ -132,6 +132,23 @@ public class ClubApiTests
     }
 
     [Fact]
+    public async Task Get_clubs_returns_too_many_requests_on_429()
+    {
+        // Arrange
+        _mockHttp.Expect(HttpMethod.Get, GetClubsUrl(1))
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_VALID}")
+            .Respond(HttpStatusCode.TooManyRequests);
+
+        // Act
+        var res = await _clubApi.GetClubsAsync(TEST_TOKEN_VALID);
+
+        // Arrange
+        res.Should().BeFailure();
+        _mockHttp.VerifyNoOutstandingExpectation();
+        _logger.CheckLogError("Rate Limit Exceeded!");
+    }
+
+    [Fact]
     public async Task Get_clubs_throws_exception_when_something_went_wrong()
     {
         // Arrange

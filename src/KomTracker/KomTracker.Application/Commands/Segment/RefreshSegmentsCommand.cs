@@ -11,7 +11,7 @@ namespace KomTracker.Application.Commands.Tracking;
 
 public class RefreshSegmentsCommand : IRequest<Result>
 {
-    public int SegmentsToRefresh { get; set; } = 100;
+    public int SegmentsToRefresh { get; set; } = 50;
 
     public TimeSpan? MinimumTimeFromLastRefresh { get; set; }
 }
@@ -61,6 +61,19 @@ public class RefreshSegmentsCommandHandler : IRequestHandler<RefreshSegmentsComm
                 segment.StarCount = refreshedSegment.StarCount;
                 segment.MapPolyline = refreshedSegment.MapPolyline;
             }
+
+            else
+            {
+                var errorMessage = getSegmentRes.Errors.OfType<KomTracker.Application.Interfaces.Services.Strava.GetSegmentError>().FirstOrDefault()?.Message;
+
+                if (errorMessage == KomTracker.Application.Interfaces.Services.Strava.GetSegmentError.TooManyRequests)
+                {
+                    // interrupt execution
+                    break;
+                }
+
+                // TODO: remove segment on not found
+            }            
         }
 
         await _segmentService.UpdateSegmentsAsync(segments);
