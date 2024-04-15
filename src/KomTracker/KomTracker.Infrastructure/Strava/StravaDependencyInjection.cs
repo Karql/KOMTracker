@@ -2,12 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Strava.API.Client;
 using Strava.API.Client.Configurations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 using IStravaTokenService = KomTracker.Application.Interfaces.Services.Strava.ITokenService;
 using IStravaAthleteService = KomTracker.Application.Interfaces.Services.Strava.IAthleteService;
