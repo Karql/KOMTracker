@@ -19,6 +19,8 @@ using FluentResults.Extensions.FluentAssertions;
 using Strava.API.Client.Model.Base;
 using Strava.API.Client.Tests.Extensions.Model.Base;
 using Strava.API.Client.Tests.Common;
+using Strava.API.Client.Model.Club.Error;
+using Strava.API.Client.Model.Segment.Error;
 
 namespace Strava.API.Client.Tests.Api;
 
@@ -109,8 +111,11 @@ public class AthleteApiTests
 
         // Assert
         res.Should().BeFailure();
+        res.HasError<GetKomsError>(x => x.Message == GetKomsError.UnknownError).Should().BeTrue();
+
         _mockHttp.VerifyNoOutstandingExpectation();
-        _logger.CheckLogError("failed! SatusCode");
+        
+        _logger.CheckLogError("failed! Athlete Id");
     }
 
     [Fact]
@@ -126,7 +131,10 @@ public class AthleteApiTests
 
         // Arrange
         res.Should().BeFailure();
+        res.HasError<GetKomsError>(x => x.Message == GetKomsError.Unauthorized).Should().BeTrue();
+
         _mockHttp.VerifyNoOutstandingExpectation();
+        
         _logger.CheckLogWarning("Unauthorized!");
     }
 
@@ -143,7 +151,10 @@ public class AthleteApiTests
 
         // Arrange
         res.Should().BeFailure();
+        res.HasError<GetKomsError>(x => x.Message == GetKomsError.TooManyRequests).Should().BeTrue();
+
         _mockHttp.VerifyNoOutstandingExpectation();
+        
         _logger.CheckLogError("Rate Limit Exceeded!");
     }
 

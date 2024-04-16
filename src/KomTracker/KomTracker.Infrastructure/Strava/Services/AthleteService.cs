@@ -53,9 +53,9 @@ public class AthleteService : IAthleteService
         return Result.Fail<IEnumerable<(SegmentEffortEntity, SegmentEntity)>>(new GetAthleteKomsError(mappedErrorMessage));
     }
 
-    public async Task<Result<IEnumerable<ClubEntity>>> GetAthleteClubsAsync(string token)
+    public async Task<Result<IEnumerable<ClubEntity>>> GetAthleteClubsAsync(int athleteId, string token)
     {
-        var getKomsRes = await _clubApi.GetClubsAsync(token);
+        var getKomsRes = await _clubApi.GetClubsAsync(athleteId, token);
 
         if (getKomsRes.IsSuccess)
         {

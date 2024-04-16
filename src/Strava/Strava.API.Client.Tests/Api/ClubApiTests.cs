@@ -21,6 +21,7 @@ using Strava.API.Client.Tests.Extensions.Model.Base;
 using Strava.API.Client.Tests.Common;
 using Strava.API.Client.Model.Club;
 using Strava.API.Client.Tests.Extensions.Model.Club;
+using Strava.API.Client.Model.Club.Error;
 
 namespace Strava.API.Client.Tests.Api;
 
@@ -32,6 +33,7 @@ public class ClubApiTests
     private readonly IClubApi _clubApi;
 
     #region TestData
+    private const int TEST_ATHLETE_ID = 666;
     private const string TEST_TOKEN_VALID = "token123";
     private const string TEST_TOKEN_INVALID = "tokeninvalid123";
     #endregion
@@ -74,7 +76,7 @@ public class ClubApiTests
             .Respond(HttpStatusCode.OK, MediaTypeNames.Application.Json, Enumerable.Empty<ClubSummaryModel>().ToJson());
 
         // Act
-        var res = await _clubApi.GetClubsAsync(TEST_TOKEN_VALID);
+        var res = await _clubApi.GetClubsAsync(TEST_ATHLETE_ID, TEST_TOKEN_VALID);
 
         // Assert
         res.Should().BeSuccess();
@@ -106,12 +108,14 @@ public class ClubApiTests
             .Respond(HttpStatusCode.BadRequest);
 
         // Act
-        var res = await _clubApi.GetClubsAsync(TEST_TOKEN_VALID);
+        var res = await _clubApi.GetClubsAsync(TEST_ATHLETE_ID, TEST_TOKEN_VALID);
 
         // Assert
         res.Should().BeFailure();
+        res.HasError<GetClubsError>(x => x.Message == GetClubsError.UnknownError).Should().BeTrue();
+
         _mockHttp.VerifyNoOutstandingExpectation();
-        _logger.CheckLogError("failed! SatusCode");
+        _logger.CheckLogError("failed! Athlete Id");
     }
 
     [Fact]
@@ -123,11 +127,14 @@ public class ClubApiTests
             .Respond(HttpStatusCode.Unauthorized);
 
         // Act
-        var res = await _clubApi.GetClubsAsync(TEST_TOKEN_INVALID);
+        var res = await _clubApi.GetClubsAsync(TEST_ATHLETE_ID, TEST_TOKEN_INVALID);
 
         // Arrange
         res.Should().BeFailure();
+        res.HasError<GetClubsError>(x => x.Message == GetClubsError.Unauthorized).Should().BeTrue();
+
         _mockHttp.VerifyNoOutstandingExpectation();
+        
         _logger.CheckLogWarning("Unauthorized!");
     }
 
@@ -140,11 +147,14 @@ public class ClubApiTests
             .Respond(HttpStatusCode.TooManyRequests);
 
         // Act
-        var res = await _clubApi.GetClubsAsync(TEST_TOKEN_VALID);
+        var res = await _clubApi.GetClubsAsync(TEST_ATHLETE_ID, TEST_TOKEN_VALID);
 
         // Arrange
         res.Should().BeFailure();
+        res.HasError<GetClubsError>(x => x.Message == GetClubsError.TooManyRequests).Should().BeTrue();
+
         _mockHttp.VerifyNoOutstandingExpectation();
+        
         _logger.CheckLogError("Rate Limit Exceeded!");
     }
 
@@ -156,7 +166,7 @@ public class ClubApiTests
             .Throw(new Exception("Something went wrong"));
 
         // Act
-        Func<Task> action = () => _clubApi.GetClubsAsync(TEST_TOKEN_VALID);
+        Func<Task> action = () => _clubApi.GetClubsAsync(TEST_ATHLETE_ID,TEST_TOKEN_VALID);
 
         // Assert
         await action.Should().ThrowAsync<Exception>();

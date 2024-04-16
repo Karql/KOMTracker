@@ -16,7 +16,7 @@ public interface IAthleteService
     /// </summary>
     Task<Result<IEnumerable<(SegmentEffortEntity, SegmentEntity)>>> GetAthleteKomsAsync(int athleteId, string token);
 
-    Task<Result<IEnumerable<ClubEntity>>> GetAthleteClubsAsync(string token);
+    Task<Result<IEnumerable<ClubEntity>>> GetAthleteClubsAsync(int athleteId, string token);
 }
 
 public class GetAthleteKomsError : FluentResults.Error

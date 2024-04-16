@@ -68,7 +68,7 @@ public class AthleteApi : IAthleteApi
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            _logger.LogWarning(logPrefix + "Unauthorized! athleteId: {athleteId}, page: {page}", athleteId, page);
+            _logger.LogWarning(logPrefix + "Unauthorized! Athlete Id: {athleteId}, Page: {page}", athleteId, page);
             return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.Unauthorized));
         }
 
@@ -80,13 +80,13 @@ public class AthleteApi : IAthleteApi
             var readRateLimitLimit = response.Headers.TryGetValues("X-ReadRateLimit-Limit", out values) ? values.FirstOrDefault() : null;
             var readRateLimitUsage = response.Headers.TryGetValues("X-ReadRateLimit-Usage", out values) ? values.FirstOrDefault() : null;
 
-            _logger.LogError(logPrefix + "Rate Limit Exceeded! X-RateLimit-Limit: {rateLimitLimit}, X-RateLimit-Usage: {rateLimitUsage}, X-ReadRateLimit-Limit: {readRateLimitLimit}, X-ReadRateLimit-Usage: {readRateLimitUsage}, Url: {url}",
-                rateLimitLimit, rateLimitUsage, readRateLimitLimit, readRateLimitUsage, url);
+            _logger.LogError(logPrefix + "Rate Limit Exceeded! Athlete Id: {athleteId}, Page: {page}, X-RateLimit-Limit: {rateLimitLimit}, X-RateLimit-Usage: {rateLimitUsage}, X-ReadRateLimit-Limit: {readRateLimitLimit}, X-ReadRateLimit-Usage: {readRateLimitUsage}",
+                athleteId, page, rateLimitLimit, rateLimitUsage, readRateLimitLimit, readRateLimitUsage);
             return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.TooManyRequests));
         }
 
-        _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}, Url: {url}",
-            (int)response.StatusCode, await response.Content.ReadAsStringAsync(), url);
+        _logger.LogError(logPrefix + "failed! Athlete Id: {athleteId}, Page: {page}, SatusCode: {statusCode}, Response: {response}",
+            athleteId, page, (int)response.StatusCode, await response.Content.ReadAsStringAsync());
 
         return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.UnknownError));
     }

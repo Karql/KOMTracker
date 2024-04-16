@@ -16,6 +16,7 @@ using MoreLinq;
 using KomTracker.Domain.Entities.Segment;
 using KomTracker.Application.Interfaces.Services.Strava;
 using KomTracker.Infrastructure.Strava.Services;
+using KomTracker.Domain.Entities.Club;
 
 namespace KomTracker.Infrastructure.Tests.Strava.Services;
 
@@ -104,6 +105,57 @@ public class AthleteServiceTests
         // Assert
         res.Should().BeFailure();
         res.HasError<GetAthleteKomsError>(x => x.Message == serviceError).Should().BeTrue();
+    }
+    #endregion
+
+    #region Get athlete clubs
+    [Fact]
+    public async Task Get_athlete_clubs_calls_api_and_returns_clubs_koms()
+    {
+        // Arrange
+        var clubsCount = 5;
+
+        var fixture = new Fixture();
+        fixture.Customize<ClubEntity>(x => x.Without(p => p.Athletes));
+
+        var apiClubs = fixture.CreateMany<ApiModel.Club.ClubSummaryModel>(clubsCount);
+        var expectedClubs = new List<ClubEntity>();
+        apiClubs.ForEach(x =>
+        {
+            var clubEntity = fixture.Create<ClubEntity>();
+            _mapper.Map<ClubEntity>(x).Returns(clubEntity);
+            expectedClubs.Add(clubEntity);
+        });
+
+        var token = TestValidToken.AccessToken;
+        _clubApi.GetClubsAsync(TestAthleteId, token).Returns(Result.Ok(apiClubs.AsEnumerable()));
+
+        // Act
+        var res = await _athleteService.GetAthleteClubsAsync(TestAthleteId, token);
+
+        // Assert
+        res.Should().BeSuccess();
+        var actualClubs = res.Value;
+
+        actualClubs.Should().BeEquivalentTo(expectedClubs);
+    }
+
+    [Theory]
+    [InlineData(ApiModel.Club.Error.GetClubsError.Unauthorized, GetAthleteClubsError.Unauthorized)]
+    [InlineData(ApiModel.Club.Error.GetClubsError.TooManyRequests, GetAthleteClubsError.TooManyRequests)]
+    [InlineData(ApiModel.Club.Error.GetClubsError.UnknownError, GetAthleteClubsError.UnknownError)]
+    public async Task Get_clubs_koms_passes_error(string apiError, string serviceError)
+    {
+        // Arrange
+        var token = TestInvalidToken.AccessToken;
+        _clubApi.GetClubsAsync(TestAthleteId, token).Returns(Result.Fail<IEnumerable<ApiModel.Club.ClubSummaryModel>>(new ApiModel.Club.Error.GetClubsError(apiError)));
+
+        // Act
+        var res = await _athleteService.GetAthleteClubsAsync(TestAthleteId, token);
+
+        // Assert
+        res.Should().BeFailure();
+        res.HasError<GetAthleteClubsError>(x => x.Message == serviceError).Should().BeTrue();
     }
     #endregion
 }

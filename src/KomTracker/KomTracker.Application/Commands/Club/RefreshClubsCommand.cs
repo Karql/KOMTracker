@@ -66,7 +66,7 @@ public class RefreshClubsCommandHandler : IRequestHandler<RefreshClubsCommand, R
         var token = await GetTokenAsync(athleteId);
         if (token == null) return true;
 
-        var clubsRes = await _stravaAthleteService.GetAthleteClubsAsync(token);
+        var clubsRes = await _stravaAthleteService.GetAthleteClubsAsync(athleteId, token);
 
         if (!clubsRes.IsSuccess)
         {

@@ -9,5 +9,5 @@ using System.Threading.Tasks;
 namespace Strava.API.Client.Api;
 public interface IClubApi
 {
-    Task<Result<IEnumerable<ClubSummaryModel>>> GetClubsAsync(string token);
+    Task<Result<IEnumerable<ClubSummaryModel>>> GetClubsAsync(int athleteId, string token);
 }

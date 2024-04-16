@@ -61,14 +61,14 @@ public class SegmentApi : ISegmentApi
             var readRateLimitLimit = response.Headers.TryGetValues("X-ReadRateLimit-Limit", out values) ? values.FirstOrDefault() : null;
             var readRateLimitUsage = response.Headers.TryGetValues("X-ReadRateLimit-Usage", out values) ? values.FirstOrDefault() : null;
 
-            _logger.LogError(logPrefix + "Rate Limit Exceeded! X-RateLimit-Limit: {rateLimitLimit}, X-RateLimit-Usage: {rateLimitUsage}, X-ReadRateLimit-Limit: {readRateLimitLimit}, X-ReadRateLimit-Usage: {readRateLimitUsage}, Segment id: {segmentId}",
-                rateLimitLimit, rateLimitUsage, readRateLimitLimit, readRateLimitUsage, id);
+            _logger.LogError(logPrefix + "Rate Limit Exceeded! Segment id: {segmentId}, X-RateLimit-Limit: {rateLimitLimit}, X-RateLimit-Usage: {rateLimitUsage}, X-ReadRateLimit-Limit: {readRateLimitLimit}, X-ReadRateLimit-Usage: {readRateLimitUsage}",
+                id, rateLimitLimit, rateLimitUsage, readRateLimitLimit, readRateLimitUsage);
 
             return Result.Fail<SegmentDetailedModel>(new GetSegmentError(GetSegmentError.TooManyRequests));
         }
 
-        _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}, Segment id: {segmentId}",
-            (int)response.StatusCode, await response.Content.ReadAsStringAsync(), id);
+        _logger.LogError(logPrefix + "failed! Segment id: {segmentId}, SatusCode: {statusCode}, Response: {response}",
+            id, (int)response.StatusCode, await response.Content.ReadAsStringAsync());
 
         return Result.Fail<SegmentDetailedModel>(new GetSegmentError(GetSegmentError.UnknownError));
     }
