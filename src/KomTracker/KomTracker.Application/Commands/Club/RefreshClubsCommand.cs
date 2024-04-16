@@ -17,7 +17,7 @@ public class RefreshClubsCommand : IRequest<Result>
 
 public class RefreshClubsCommandHandler : IRequestHandler<RefreshClubsCommand, Result>
 {
-    private const int MAX_RETRY_COUNT = 5;
+    private const int MAX_RETRY_COUNT = 2;
 
     private readonly IKOMUnitOfWork _komUoW;
     private readonly ILogger<RefreshClubsCommandHandler> _logger;

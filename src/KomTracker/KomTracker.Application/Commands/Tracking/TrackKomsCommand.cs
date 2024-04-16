@@ -26,7 +26,7 @@ public class TrackKomsCommand : IRequest<Result>
 
 public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
 {
-    private const int MAX_RETRY_COUNT = 5;
+    private const int MAX_RETRY_COUNT = 2;
 
     private readonly IMediator _mediator;
     private readonly IKOMUnitOfWork _komUoW;

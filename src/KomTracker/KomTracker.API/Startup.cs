@@ -71,25 +71,25 @@ public class Startup
             if (_applicationConfiguration.TrackKomsJobEnabled)
             {
                 q.ScheduleJob<TrackKomsJob>(trigger => trigger
-                    .WithCronSchedule("0 0 * * * ?")); // every hour
+                    .WithCronSchedule("0 0 6-23 * * ?", action => action.InTimeZone(tz))); // every hour between 6 and 23:59 Europe/Warsaw
             }
 
             if (_applicationConfiguration.RefreshSegmentsJobEnabled)
             {
                 q.ScheduleJob<RefreshSegmentsJob>(trigger => trigger
-                    .WithCronSchedule("0 30 * * * ?")); // half past every hour
+                    .WithCronSchedule("0 30 6-23 * * ?", action => action.InTimeZone(tz))); // half past every hour between 6:00 and 23:59 Europe/Warsaw
             }
 
             if (_applicationConfiguration.RefreshClubsJobEnabled)
             {               
                 q.ScheduleJob<RefreshClubsJob>(trigger => trigger
-                    .WithCronSchedule("0 45 0,12 * * ?", action => action.InTimeZone(tz))); // 45 past midnight and midday
+                    .WithCronSchedule("0 45 5 * * ?", action => action.InTimeZone(tz))); // 5:45 Europe/Warsaw
             }
 
             if (_applicationConfiguration.RefreshStatsJobEnabled)
             {
                 q.ScheduleJob<RefreshStatsJob>(trigger => trigger
-                    .WithCronSchedule("0 55 0 * * ?", action => action.InTimeZone(tz))); // 55 past midnight
+                    .WithCronSchedule("0 45 23 * * ?", action => action.InTimeZone(tz))); // 23:45 Europe/Warsaw
             }
         });
 
