@@ -2,7 +2,6 @@
 
 ### Features
 - Interrupt jobs on 429 Too Many Requests (Rate Limit Exceeded)
-- Change jobs schedule to stay within Strava API limits
 - Update dependiencies
 
 ## 1.7.0 (2024-01-03)
