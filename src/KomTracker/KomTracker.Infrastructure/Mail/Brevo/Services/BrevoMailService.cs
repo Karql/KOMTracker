@@ -1,48 +1,44 @@
 ﻿using KomTracker.Application.Interfaces.Services.Mail;
 using KomTracker.Application.Models.Configuration;
 using KomTracker.Application.Models.Mail;
-using KomTracker.Application.Models.Segment;
-using KomTracker.Infrastructure.Mail.SendinBlue.Models;
-using sib_api_v3_sdk.Api;
-using sib_api_v3_sdk.Client;
-using sib_api_v3_sdk.Model;
+using brevo_csharp.Api;
+using brevo_csharp.Client;
+using brevo_csharp.Model;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using KomTracker.Infrastructure.Mail.Brevo.Models;
 
-namespace KomTracker.Infrastructure.Mail.SendinBlue.Services;
+namespace KomTracker.Infrastructure.Mail.Brevo.Services;
 
-public class SendinBlueMailService : IMailService
+public class BrevoMailService : IMailService
 {
     private readonly ApplicationConfiguration _applicationConfiguration;
 
-    public SendinBlueMailService(ApplicationConfiguration applicationConfiguration)
+    public BrevoMailService(ApplicationConfiguration applicationConfiguration)
     {
         _applicationConfiguration = applicationConfiguration ?? throw new ArgumentNullException(nameof(applicationConfiguration));
-        _ = applicationConfiguration.SendinBlueConfiguration ?? throw new ArgumentException("SendinBlueConfiguration not defined!", nameof(applicationConfiguration.SendinBlueConfiguration));
+        _ = applicationConfiguration.BrevoConfiguration ?? throw new ArgumentException("BrevoConfiguration not defined!", nameof(applicationConfiguration.BrevoConfiguration));
 
-        var apiKey = applicationConfiguration.SendinBlueConfiguration.ApiKey;        
+        var apiKey = applicationConfiguration.BrevoConfiguration.ApiKey;        
 
         if (string.IsNullOrEmpty(apiKey))
         {
-            throw new ArgumentException("SendinBlueConfiguration.ApiKey not defined!", nameof(applicationConfiguration.SendinBlueConfiguration.ApiKey));
+            throw new ArgumentException("BrevoConfiguration.ApiKey not defined!", nameof(applicationConfiguration.BrevoConfiguration.ApiKey));
         }
 
-        var changeEmailConfirmationTemplateId = applicationConfiguration.SendinBlueConfiguration.ChangeEmailConfirmationTemplateId;
+        var changeEmailConfirmationTemplateId = applicationConfiguration.BrevoConfiguration.ChangeEmailConfirmationTemplateId;
 
         if (changeEmailConfirmationTemplateId <= 0)
         {
-            throw new ArgumentException("SendinBlueConfiguration.ChangeEmailConfirmationTemplateId not defined!", nameof(applicationConfiguration.SendinBlueConfiguration.ChangeEmailConfirmationTemplateId));
+            throw new ArgumentException("BrevoConfiguration.ChangeEmailConfirmationTemplateId not defined!", nameof(applicationConfiguration.BrevoConfiguration.ChangeEmailConfirmationTemplateId));
         }
 
-        var trackKomsTemplateId = applicationConfiguration.SendinBlueConfiguration.TrackKomsTemplateId;
+        var trackKomsTemplateId = applicationConfiguration.BrevoConfiguration.TrackKomsTemplateId;
 
         if (trackKomsTemplateId <= 0)
         {
-            throw new ArgumentException("SendinBlueConfiguration.TrackKomsTemplateId not defined!", nameof(applicationConfiguration.SendinBlueConfiguration.TrackKomsTemplateId));
+            throw new ArgumentException("BrevoConfiguration.TrackKomsTemplateId not defined!", nameof(applicationConfiguration.BrevoConfiguration.TrackKomsTemplateId));
         }
 
         Configuration.Default.AddApiKey("api-key", apiKey);
@@ -50,23 +46,23 @@ public class SendinBlueMailService : IMailService
 
     public async System.Threading.Tasks.Task SendChangeEmailConfirmationAsync(SendChangeEmailConfirmationParamsModel p)
     {
-        if (!_applicationConfiguration.SendinBlueConfiguration.Enabled)
+        if (!_applicationConfiguration.BrevoConfiguration.Enabled)
         {
             return;
         }
 
         var to = p.To;
 
-        if (!string.IsNullOrWhiteSpace(_applicationConfiguration.SendinBlueConfiguration.TestMail))
+        if (!string.IsNullOrWhiteSpace(_applicationConfiguration.BrevoConfiguration.TestMail))
         {
-            to = _applicationConfiguration.SendinBlueConfiguration.TestMail;
+            to = _applicationConfiguration.BrevoConfiguration.TestMail;
         }
 
         var apiInstance = new TransactionalEmailsApi();
         var sendSmtpEmail = new SendSmtpEmail
         {
             To = new List<SendSmtpEmailTo> { new SendSmtpEmailTo(to) },
-            TemplateId = _applicationConfiguration.SendinBlueConfiguration.ChangeEmailConfirmationTemplateId,
+            TemplateId = _applicationConfiguration.BrevoConfiguration.ChangeEmailConfirmationTemplateId,
             Params = new ChangeEmailConfirmationTemplateParamsModel
             {
                 firstName = p.FirstName,
@@ -79,23 +75,23 @@ public class SendinBlueMailService : IMailService
 
     public async System.Threading.Tasks.Task SendTrackKomsNotificationAsync(SendTrackKomsNotificationParamsModel p)
     {
-        if (!_applicationConfiguration.SendinBlueConfiguration.Enabled)
+        if (!_applicationConfiguration.BrevoConfiguration.Enabled)
         {
             return;
         }
 
         var to = p.To;
 
-        if (!string.IsNullOrWhiteSpace(_applicationConfiguration.SendinBlueConfiguration.TestMail))
+        if (!string.IsNullOrWhiteSpace(_applicationConfiguration.BrevoConfiguration.TestMail))
         {
-            to = _applicationConfiguration.SendinBlueConfiguration.TestMail;
+            to = _applicationConfiguration.BrevoConfiguration.TestMail;
         }
 
         var apiInstance = new TransactionalEmailsApi();
         var sendSmtpEmail = new SendSmtpEmail
         {
             To = new List<SendSmtpEmailTo> { new SendSmtpEmailTo(to) },
-            TemplateId = _applicationConfiguration.SendinBlueConfiguration.TrackKomsTemplateId,
+            TemplateId = _applicationConfiguration.BrevoConfiguration.TrackKomsTemplateId,
             Params = ConvertToTemplateParams(p)
         };
 

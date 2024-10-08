@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KomTracker.Application.Models.Configuration;
 
-public class SendinBlueConfiguration
+public class BrevoConfiguration
 {
     public bool Enabled { get; set; } = true;
     public string? TestMail { get; set; }
@@ -27,5 +27,5 @@ public class ApplicationConfiguration
     /// </summary>
     public int MasterStravaAthleteId { get; set; }
 
-    public SendinBlueConfiguration? SendinBlueConfiguration { get; set; }
+    public BrevoConfiguration? BrevoConfiguration { get; set; }
 }

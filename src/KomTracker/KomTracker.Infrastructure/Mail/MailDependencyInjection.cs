@@ -1,5 +1,5 @@
 ﻿using KomTracker.Application.Interfaces.Services.Mail;
-using KomTracker.Infrastructure.Mail.SendinBlue.Services;
+using KomTracker.Infrastructure.Mail.Brevo.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -13,7 +13,7 @@ public static class MailDependencyInjection
 {
     public static IServiceCollection AddMail(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddTransient<IMailService, SendinBlueMailService>();
+        services.AddTransient<IMailService, BrevoMailService>();
 
         return services;
     }

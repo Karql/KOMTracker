@@ -3,6 +3,7 @@
 ### Features
 - Interrupt jobs on 429 Too Many Requests (Rate Limit Exceeded)
 - Update dependiencies
+- Migrate from SendinBlue to Brevo (only rebrading).
 
 ## 1.7.0 (2024-01-03)
 
