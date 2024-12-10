@@ -22,7 +22,8 @@ else
                         </MudCardHeader>
                         <MudCardContent>
                             <div class="d-flex justify-center mb-4">
-                                <MudAvatar Image="@_user.Avatar" Style="height:100px; width:100px;">
+                                <MudAvatar Style="height:100px; width:100px;">
+                                    <MudImage Src="@_user.Avatar"></MudImage>
                                 </MudAvatar>                                
                             </div>
                             <MudText Align="Align.Center">@_user.FirstName @_user.LastName</MudText>

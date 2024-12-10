@@ -4,6 +4,6 @@ namespace KomTracker.WEB.Infrastructure.Services.Preference;
 
 public interface IPreferenceService
 {
-    Task<MudTheme> GetCurrentThemeAsync();
+    Task<bool> IsDarkModeAsync();
     Task ToggleDarkModeAsync();
 }

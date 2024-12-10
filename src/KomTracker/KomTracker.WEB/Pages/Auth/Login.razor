@@ -5,7 +5,8 @@
 
 <AuthorizeView>
     <NotAuthorized>
-        <MudThemeProvider Theme="Theme.DefaultTheme" />
+        <MudThemeProvider Theme="Theme.KomTrackerTheme" />
+        <MudPopoverProvider />
         <MudSnackbarProvider />
 
         <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: 100vh;">
@@ -14,7 +15,7 @@
                     <div class="d-flex justify-center">
                         <img src="img/kom-tracker-logo.png" alt="logo" style="width:200px; height:200px;" />
                     </div>
-                    <MudList Clickable="false" Class="mb-5">
+                    <MudList T="string" ReadOnly="true" Class="mb-5">
                         <MudListItem Text="Uh oh all the way!" Icon="@Icons.Material.Filled.NotificationsActive" />
                         <MudListItem Text="Track your's KOMs" Icon="@Icons.Material.Filled.ShowChart" />
                         <MudListItem Text="Rankings" Icon="@Icons.Material.Filled.MilitaryTech" />

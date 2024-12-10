@@ -1,4 +1,4 @@
-﻿## LATSET
+﻿## 1.8.0 (2024-12-10)
 
 ### Features
 - Interrupt jobs on 429 Too Many Requests (Rate Limit Exceeded)

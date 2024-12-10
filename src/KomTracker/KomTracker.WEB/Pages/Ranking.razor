@@ -99,7 +99,9 @@ else
         <RowTemplate>
             <MudTd DataLabel="Athlete">
                 <div class="d-flex align-center">
-                    <MudAvatar Size="Size.Small" Image="@context.Athlete.ProfileMedium" Class="mr-4" /> 
+                    <MudAvatar Size="Size.Small" Class="mr-4">
+                        <MudImage Src="@context.Athlete.ProfileMedium" />
+                    </MudAvatar>
                     <MudLink Target="_blank" Href="@($"https://strava.com/athletes/{context.Athlete.AthleteId}")"><MudHighlighter Text="@context.Athlete.FullName" HighlightedText="@_searchString" /></MudLink>
                 </div>
             </MudTd>

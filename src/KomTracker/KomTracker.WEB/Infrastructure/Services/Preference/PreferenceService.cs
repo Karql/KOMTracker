@@ -13,16 +13,11 @@ public class PreferenceService : IPreferenceService
     {
         _localStorageService = localStorageService;
     }
-    public async Task<MudTheme> GetCurrentThemeAsync()
+    public async Task<bool> IsDarkModeAsync()
     {
         var preference = await GetPreferenceAsync();
 
-        if (preference.DarkMode == true)
-        {
-            return Theme.DarkTheme;
-        }
-
-        return Theme.DefaultTheme;
+        return preference.DarkMode;
     }
 
     public async Task ToggleDarkModeAsync()

@@ -88,7 +88,7 @@ public partial class MapPage
             var points = MapHelper.Decode(effort.Segment.MapPolyline).Select(x => new LatLng { Lat = x.Latitude, Lng = x.Longitude }).ToArray();
             var polyline = await PolylineFactory.CreateAndAddToMap(points, _mapRef, new PolylineOptions
             {
-                Color = Theme.DefaultTheme.Palette.Primary.ToString(),                
+                Color = Theme.KomTrackerTheme.PaletteLight.Primary.ToString(),                
             });            
 
             var popupHtml = GetPopupHtml(effort.Segment, effort.SegmentEffort);

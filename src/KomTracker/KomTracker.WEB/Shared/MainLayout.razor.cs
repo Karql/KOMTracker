@@ -13,7 +13,7 @@ public partial class MainLayout
 {
     private UserModel _user = new ();
     private bool _drawerOpen = true;
-    private MudTheme _currentTheme = Theme.DefaultTheme;
+    private bool _isDarkMode = false;
 
     [Inject]
     private IPreferenceService PreferenceService { get; set; } = default!;
@@ -28,7 +28,7 @@ public partial class MainLayout
 
     protected override async Task OnInitializedAsync()
     {
-        _currentTheme = await PreferenceService.GetCurrentThemeAsync();
+        _isDarkMode = await PreferenceService.IsDarkModeAsync();
         _user = await UserService.GetCurrentUser();
     }
 
@@ -40,7 +40,7 @@ public partial class MainLayout
     private async Task ToggleDarkModeAsync()
     {
         await PreferenceService.ToggleDarkModeAsync();
-        _currentTheme = await PreferenceService.GetCurrentThemeAsync();
+        _isDarkMode = await PreferenceService.IsDarkModeAsync();
     }
 
     protected async Task LogOut(MouseEventArgs args)

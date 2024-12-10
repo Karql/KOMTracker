@@ -1,8 +1,10 @@
 ﻿@inherits LayoutComponentBase
+@using KomTracker.WEB.Settings;
 <CascadingValue Value="this">
     <AuthorizeView>
         <Authorized>
-            <MudThemeProvider Theme="_currentTheme" />
+            <MudThemeProvider Theme="Theme.KomTrackerTheme" IsDarkMode="_isDarkMode" />
+            <MudPopoverProvider />
             <MudDialogProvider />
             <MudSnackbarProvider />
 
@@ -24,15 +26,17 @@
                     <MudTooltip Text="Toggle Dark Mode">
                         <MudIconButton Icon="@Icons.Material.Filled.Brightness4" Color="Color.Inherit" OnClick="@((e) => ToggleDarkModeAsync())" />
                     </MudTooltip>
-                    <MudMenu Direction="Direction.Left" OffsetX="true" Dense="true" Class="mt-1 ml-4">
+                    <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Dense="true" Class="mt-1 ml-4">
                         <ActivatorContent>
-                            <MudAvatar Image="@_user.Avatar" />
+                            <MudAvatar>
+                                <MudImage Src="@_user.Avatar" />
+                            </MudAvatar>
                         </ActivatorContent>
                         <ChildContent>
                             <PersonCard Class="mt-n2" />
                             <MudDivider Class="mb-2" />
-                            <MudListItem Text="Account" Icon="@Icons.Material.Outlined.Person" Href="account" />
-                            <MudListItem Text="Logout" Icon="@Icons.Material.Outlined.Logout" @onclick="LogOut" />
+                            <MudListItem T="string" Text="Account" Icon="@Icons.Material.Outlined.Person" Href="account" />
+                            <MudListItem T="string" Text="Logout" Icon="@Icons.Material.Outlined.Logout" @onclick="LogOut" />
                         </ChildContent>
                     </MudMenu>
                 </MudAppBar>
@@ -41,7 +45,7 @@
                 </MudDrawer>
                 <MudMainContent>
                     <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                        <MudToolBar DisableGutters="true">
+                        <MudToolBar Gutters="false">
                             <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Primary" OnClick="@((e) => DrawerToggle())" Class="ml-3" />
                             <MudBreadcrumbs Items="BreadCrumbs"></MudBreadcrumbs>                                          
                             @*<MudSpacer />
