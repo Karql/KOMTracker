@@ -1,4 +1,9 @@
-﻿## 1.8.0 (2024-12-10)
+﻿## UPCOMMING
+
+### Features
+- Update to .NET 9.0
+
+## 1.8.0 (2024-12-10)
 
 ### Features
 - Interrupt jobs on 429 Too Many Requests (Rate Limit Exceeded)
