@@ -1,7 +1,8 @@
-﻿## UPCOMMING
+﻿## 1.9.0 (2025-04-10)
 
 ### Features
 - Update to .NET 9.0
+- Update dependiencies
 
 ## 1.8.0 (2024-12-10)
 
