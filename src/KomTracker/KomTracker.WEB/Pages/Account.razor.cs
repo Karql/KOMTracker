@@ -12,7 +12,7 @@ public partial class Account
     private UserModel _user = default!;
 
     [CascadingParameter]
-    public MainLayout Layout { get; set; }
+    public required MainLayout Layout { get; set; }
 
     [Inject]
     private HttpClient Http { get; set; } = default!;

@@ -36,13 +36,13 @@ public partial class Ranking
     private IEnumerable<AthleteRankingViewModel> _ranking = Enumerable.Empty<AthleteRankingViewModel>();
     private readonly ExtendedCategoryEnum[] _extendedCategories = Enum.GetValues<ExtendedCategoryEnum>().OrderByDescending(x => x).ToArray();
 
-    private AthleteRankingViewModel _item;
+    private AthleteRankingViewModel _item = default!;
     private RankingType _selectedRankingType = RankingType.Total;
     private string? _selectedActivityType = null;
     private ClubViewModel? _selectedClub = null;
 
     [CascadingParameter]
-    public MainLayout Layout { get; set; }
+    public required MainLayout Layout { get; set; }
 
     [Inject]
     private HttpClient Http { get; set; } = default!;
@@ -75,7 +75,7 @@ public partial class Ranking
 
     private async Task GetRankingAsync()
     {
-        var qParams = new Dictionary<string, string>();
+        var qParams = new Dictionary<string, string?>();
 
         if (_selectedClub?.Id != null)
         {

@@ -1,4 +1,9 @@
-﻿## 1.9.0 (2025-04-10)
+﻿## UPCOMMING
+
+### Features
+- Update MudBlazor to v8
+
+## 1.9.0 (2025-04-10)
 
 ### Features
 - Update to .NET 9.0

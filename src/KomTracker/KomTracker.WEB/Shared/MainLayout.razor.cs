@@ -21,8 +21,8 @@ public partial class MainLayout
     [Inject]
     private IUserService UserService { get; set; } = default!;
 
-    [Inject] NavigationManager Navigation { get; set; }
-    [Inject] SignOutSessionStateManager SignOutManager { get; set; }
+    [Inject]
+    public NavigationManager Navigation { get; set; } = default!;
 
     public List<BreadcrumbItem> BreadCrumbs = new List<BreadcrumbItem>();
 
@@ -43,9 +43,8 @@ public partial class MainLayout
         _isDarkMode = await PreferenceService.IsDarkModeAsync();
     }
 
-    protected async Task LogOut(MouseEventArgs args)
+    protected void LogOut(MouseEventArgs args)
     {
-        await SignOutManager.SetSignOutState();
-        Navigation.NavigateTo("authentication/logout");
+        Navigation.NavigateToLogout("authentication/logout");
     }
 }

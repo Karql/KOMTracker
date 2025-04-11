@@ -18,10 +18,10 @@ public partial class Koms
     private UserModel _user = default!;
     private string _searchString = "";
     private IEnumerable<EffortViewModel> _koms = Enumerable.Empty<EffortViewModel>();
-    private EffortViewModel _kom;
+    private EffortViewModel _kom = default!;
 
     [CascadingParameter]
-    public MainLayout Layout { get; set; }
+    public required MainLayout Layout { get; set; }
 
     [Inject]
     private HttpClient Http { get; set; } = default!;

@@ -40,7 +40,7 @@
 </AuthorizeView> 
 
 @code {
-    private async Task Authenticate(MouseEventArgs args)
+    private void Authenticate(MouseEventArgs args)
     {
         Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.BaseUri)}");
     }

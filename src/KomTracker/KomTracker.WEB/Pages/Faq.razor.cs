@@ -9,7 +9,7 @@ namespace KomTracker.WEB.Pages;
 public partial class Faq
 {
     [CascadingParameter]
-    public MainLayout Layout { get; set; }
+    public required MainLayout Layout { get; set; }
 
     protected override Task OnInitializedAsync()
     {

@@ -20,10 +20,10 @@ public partial class KomsChanges
     private IEnumerable<ClubViewModel> _clubs = Enumerable.Empty<ClubViewModel>();
     private IEnumerable<EffortWithAthleteViewModel> _changes = Enumerable.Empty<EffortWithAthleteViewModel>();
     
-    private EffortWithAthleteViewModel _change;
+    private EffortWithAthleteViewModel _change = default!;
 
     [CascadingParameter]
-    public MainLayout Layout { get; set; }
+    public required MainLayout Layout { get; set; }
 
     [Inject]
     private HttpClient Http { get; set; } = default!;

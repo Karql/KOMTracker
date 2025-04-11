@@ -12,7 +12,7 @@ public partial class Dashboard
 {
     private class ChangeViewModel
     {
-        public SegmentViewModel Segment { get; set; }
+        public required SegmentViewModel Segment { get; set; }
         public int KomSummaryId { get; set; }
     }
 
@@ -27,7 +27,7 @@ public partial class Dashboard
     private int _totalKomsCount = 0;
 
     [CascadingParameter]
-    public MainLayout Layout { get; set; }
+    public required MainLayout Layout { get; set; }
 
     [Inject]
     private HttpClient Http { get; set; } = default!;

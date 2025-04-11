@@ -19,13 +19,13 @@ public partial class MapPage
 
     private bool _loaded = false;
     private bool _polylinesLoaded = false;
-    private Map _mapRef;
-    private MapOptions _mapOptions;
+    private Map _mapRef = default!;
+    private MapOptions _mapOptions = default!;
     private UserModel _user = default!;
     private IEnumerable<EffortViewModel> _koms = Enumerable.Empty<EffortViewModel>();
 
     [CascadingParameter]
-    public MainLayout Layout { get; set; }
+    public required MainLayout Layout { get; set; }
 
     [Inject]
     private HttpClient Http { get; set; } = default!;
@@ -65,7 +65,7 @@ public partial class MapPage
         _loaded = true;
         StateHasChanged();
 
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             await Task.Delay(500);
             await AddPolylinesAsync();
