@@ -2,7 +2,6 @@
 using KomTracker.Application.Models.Configuration;
 using KomTracker.Application.Models.Mail;
 using brevo_csharp.Api;
-using brevo_csharp.Client;
 using brevo_csharp.Model;
 using System;
 using System.Collections.Generic;
@@ -41,7 +40,7 @@ public class BrevoMailService : IMailService
             throw new ArgumentException("BrevoConfiguration.TrackKomsTemplateId not defined!", nameof(applicationConfiguration.BrevoConfiguration.TrackKomsTemplateId));
         }
 
-        Configuration.Default.AddApiKey("api-key", apiKey);
+        brevo_csharp.Client.Configuration.Default.AddApiKey("api-key", apiKey);
     }
 
     public async System.Threading.Tasks.Task SendChangeEmailConfirmationAsync(SendChangeEmailConfirmationParamsModel p)
