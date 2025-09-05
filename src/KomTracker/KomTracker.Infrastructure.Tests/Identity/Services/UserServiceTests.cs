@@ -6,12 +6,10 @@ using KomTracker.Infrastructure.Identity.Entities;
 using KomTracker.Infrastructure.Identity.Services;
 using Microsoft.AspNetCore.Identity;
 using NSubstitute;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Utils.Tests.UserManager;
+using Xunit;
 
 namespace KomTracker.Infrastructure.Tests.Identity.Services;
 
@@ -49,6 +47,7 @@ public class UserServiceTests
     }
 
     #region IsUserExistsAsync
+    [Fact]
     public async Task Is_user_exists_returns_true_when_exists()
     {
         // Act
@@ -58,6 +57,7 @@ public class UserServiceTests
         res.Should().Be(true);
     }
 
+    [Fact]
     public async Task Is_user_exists_returns_false_when_not_exists()
     {
         // Act
@@ -69,6 +69,7 @@ public class UserServiceTests
     #endregion
 
     #region AddUserAsync
+    [Fact]
     public async Task Add_user_calls_UserManager()
     {
         // Act
@@ -89,5 +90,7 @@ public class UserServiceTests
                 UserName = TestExistingAthlete.Username
             }
         };
+
+        TestUserManagerHelper.MockUsers(_userManager, users);
     }
 }

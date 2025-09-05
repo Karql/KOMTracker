@@ -2,7 +2,6 @@
 using MockQueryable;
 using NSubstitute;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Utils.Tests.UserManager;
 
@@ -15,11 +14,10 @@ public static class TestUserManagerHelper
         return Substitute.For<UserManager<TUser>>(userStore, null, null, null, null, null, null, null, null);
     }
 
-    public static void MockUsers<TUser>(this UserManager<TUser> userManager, IEnumerable<TUser> users)
+    public static void MockUsers<TUser>(this UserManager<TUser> userManager, List<TUser> users)
         where TUser : class
     {
         var qUsers = users
-            .AsQueryable()
             .BuildMock();
 
         userManager.Users.Returns(qUsers);
