@@ -10,7 +10,7 @@
   	<PackageReference Include="EFCore.BulkExtensions.PostgreSql" Version="9.0.2" />
   	<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
-    <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="9.100.1" />
+    <PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="9.101.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
 
