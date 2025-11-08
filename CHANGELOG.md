@@ -2,6 +2,7 @@
 
 ### Features
 - Update MudBlazor to v8
+- Update dependiencies
 
 ## 1.9.0 (2025-04-10)
 
