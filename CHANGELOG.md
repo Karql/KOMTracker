@@ -1,6 +1,7 @@
 ﻿## UPCOMMING
 
 ### Features
+- Update to .NET 10.0
 - Update MudBlazor to v8
 - Update dependiencies
 
