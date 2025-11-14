@@ -13,7 +13,7 @@ RUN dotnet build "KomTracker.WEB.csproj" -c Release -o /app/build
 FROM build AS publish
 RUN dotnet publish "KomTracker.WEB.csproj" -c Release -o /app/publish
 
-FROM nginx:1.21-alpine AS final
+FROM nginx:1.29-alpine AS final
 EXPOSE 80
 WORKDIR /app
 COPY --from=publish /app/publish/wwwroot .
