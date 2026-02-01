@@ -1,5 +1,4 @@
 using KomTracker.API.Infrastructure.Jobs;
-using Microsoft.OpenApi.Models;
 using Quartz;
 using Utils.AspNetCore.Extensions;
 using KomTracker.Application;
@@ -17,6 +16,7 @@ using KomTracker.API.Models.Configuration;
 using KomTracker.Application.Models.Configuration;
 using Utils.Helpers;
 using TimeZoneConverter;
+using Microsoft.OpenApi;
 
 namespace KomTracker.API;
 
