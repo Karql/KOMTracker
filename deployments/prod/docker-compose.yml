@@ -31,7 +31,7 @@ services:
       - ./conf/kom-tracker-web/appsettings.json:/app/appsettings.json
 
   postgres:
-    image: postgres:14.0
+    image: postgres:18.4
     hostname: postgres
     restart: always
     environment:

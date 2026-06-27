@@ -4,6 +4,7 @@
 - Update to .NET 10.0
 - Update MudBlazor to v8
 - Update dependiencies
+- Update postgres to 18
 
 ## 1.9.0 (2025-04-10)
 
