@@ -1,2 +1,3 @@
 - Refresh details for new segmens after TrackKoms
 - Fix dashboard when last kom summary is older than 30days
+- Add a safeguard. Sometimes the Strava API returns an empty list of KOMs (just empty, not an error, etc.).
