@@ -6,6 +6,9 @@
 - Update dependiencies
 - Update postgres to 18
 
+### Bug fixes
+- Add safeguard to skip KOM tracking updates when Strava API returns empty/partial data
+
 ## 1.9.0 (2025-04-10)
 
 ### Features

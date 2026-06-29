@@ -107,6 +107,15 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
 
         var comparedEfforts = _segmentService.CompareEfforts(actualKoms.Select(x => x.Item1), lastKomsEfforts, firstTrack);
 
+        if (comparedEfforts.IsSuspiciousApiResponse)
+        {
+            _logger.LogWarning(logPrefix + "Suspicious Strava API response for athlete {athleteId} - skipping update. " +
+                "Koms: {koms}, LostKoms: {lostKoms}, NewKoms: {newKoms}, PreviousKoms: {previousKoms}",
+                athleteId, comparedEfforts.KomsCount, comparedEfforts.LostKomsCount,
+                comparedEfforts.NewKomsCount, comparedEfforts.PreviousKomsCount);
+            return true; // do not persist suspicious data; continue with next athlete
+        }
+
         if (comparedEfforts.AnyChanges || firstTrack)
         {
             await _segmentService.CheckNewKomsAreReturnedAsync(comparedEfforts);

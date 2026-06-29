@@ -142,6 +142,7 @@ public class SegmentServiceTests
         comparedEffots.NewKomsCount.Should().Be(1);
         comparedEffots.ImprovedKomsCount.Should().Be(1);
         comparedEffots.LostKomsCount.Should().Be(1);
+        comparedEffots.PreviousKomsCount.Should().Be(lastKomsEffots.Length);
         comparedEffots.AnyChanges.Should().BeTrue();
         comparedEffots.FirstCompare.Should().BeFalse();
 

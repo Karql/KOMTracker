@@ -100,10 +100,10 @@ where id in(4064,4001,27562,4034,3971,4010,3947,27586,27576,4056,3993,4049,3986,
 
 For losses below 20, I saw a lot of legitimate cases—for example, KOMs lost because someone drove a car over the segment, which were later regained after the ride was flagged.
 
-### TODO: Implement "Smart" Safeguard
+### DONE: Implement "Smart" Safeguard
 
 We need to implement a safeguard to skip updates when the API returns suspicious data.
-Let previous_koms = koms + lost_koms - new_koms.
+Let previous_koms = the number of KOMs from the previous fetch.
 
 Skip the update if either of the following conditions is met:
 

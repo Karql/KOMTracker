@@ -117,6 +117,8 @@ public class SegmentService : ISegmentService
             });
         });
 
+        comparedEfforts.PreviousKomsCount = lastKomsEfforts.Count();
+
         return comparedEfforts;
     }
 
