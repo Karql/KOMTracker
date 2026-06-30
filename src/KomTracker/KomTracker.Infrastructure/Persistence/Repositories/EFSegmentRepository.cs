@@ -76,7 +76,13 @@ public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
             join s in _context.Segment on se.SegmentId equals s.Id
             where athleteIds.Contains(ks.AthleteId)
                 && (!dateFrom.HasValue || ks.TrackDate >= dateFrom)
-            orderby ksse.AuditCD descending
+            // Order by KomSummaryId (not AuditCD) on purpose: the composite PK
+            // (koms_summary_id, segment_effort_id) lets Postgres do a backward index
+            // scan and stop early at the LIMIT, while AuditCD has no index and forces a
+            // full sort. koms_summary_id is monotonic with AuditCD (summaries get a
+            // serial id and AuditCD is stamped at creation), so this yields the same
+            // most-recent rows. Final display order is set in-memory by the handler.
+            orderby ksse.KomSummaryId descending
             select new EffortModel
             {
                 SegmentEffort = se,

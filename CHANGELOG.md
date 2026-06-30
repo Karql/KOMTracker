@@ -9,6 +9,9 @@
 ### Bug fixes
 - Add safeguard to skip KOM tracking updates when Strava API returns empty/partial data
 
+### Performance
+- Speed up last KOMs changes query by ordering on koms_summary_id (PK index) instead of unindexed audit_cd
+
 ## 1.9.0 (2025-04-10)
 
 ### Features
