@@ -1,4 +1,4 @@
-﻿## UPCOMMING
+﻿## 1.10.0 (2026-07-01)
 
 ### Features
 - Update to .NET 10.0

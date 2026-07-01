@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   kom-tracker-api:
-    image: karql/kom-tracker-api:prod
+    image: karql/kom-tracker-api:1.10.0
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
@@ -25,7 +25,7 @@ services:
       - /u01/volumes/kom-tracker-prod/kom-tracker-api/keys:/keys
 
   kom-tracker-web:
-    image: karql/kom-tracker-web:prod
+    image: karql/kom-tracker-web:1.10.0
     restart: always
     volumes:
       - ./conf/kom-tracker-web/appsettings.json:/app/appsettings.json
