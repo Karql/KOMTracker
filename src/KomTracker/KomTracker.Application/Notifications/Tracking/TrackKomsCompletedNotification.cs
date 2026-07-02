@@ -1,4 +1,5 @@
-﻿using KomTracker.Application.Commands.Stats;
+﻿using KomTracker.Application.Commands.Segment;
+using KomTracker.Application.Commands.Stats;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Services.Identity;
 using KomTracker.Application.Interfaces.Services.Mail;
@@ -18,6 +19,7 @@ public class TrackKomsCompletedNotification : INotification
 {
     public AthleteEntity Athlete { get; set; } = default!;
     public ComparedEffortsModel ComparedEfforts { get; set; } = default!;
+    public int KomsSummaryId { get; set; }
 }
 
 public class TrackKomsCompletedNotificationSendEmailHandler : INotificationHandler<TrackKomsCompletedNotification>
@@ -76,5 +78,22 @@ public class TrackKomsCompletedNotificationRefreshStatsHandler : INotificationHa
     public Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
     {
         return _medaitor.Send(new RefreshStatsCommand { AthleteId = notification.Athlete.AthleteId }, cancellationToken);
+    }
+}
+
+public class TrackKomsCompletedNotificationDetectTakeoversHandler : INotificationHandler<TrackKomsCompletedNotification>
+{
+    private readonly ILogger _logger;
+    private readonly IMediator _mediator;
+
+    public TrackKomsCompletedNotificationDetectTakeoversHandler(ILogger<TrackKomsCompletedNotificationDetectTakeoversHandler> logger, IMediator mediator)
+    {
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+    }
+
+    public Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
+    {
+        return _mediator.Send(new DetectKomTakeoversCommand { KomsSummaryId = notification.KomsSummaryId }, cancellationToken);
     }
 }

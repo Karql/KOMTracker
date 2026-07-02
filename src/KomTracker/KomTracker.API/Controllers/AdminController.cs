@@ -1,5 +1,6 @@
 ﻿using KomTracker.API.Attributes;
 using KomTracker.Application.Commands.Club;
+using KomTracker.Application.Commands.Segment;
 using KomTracker.Application.Commands.Stats;
 using KomTracker.Application.Commands.Tracking;
 using Microsoft.AspNetCore.Mvc;
@@ -48,6 +49,34 @@ public class AdminController : BaseApiController<AdminController>
     public async Task<ActionResult> RefreshStats(CancellationToken cancellationToken)
     {
         await _mediator.Send(new RefreshStatsCommand(), cancellationToken);
+
+        return new NoContentResult();
+    }
+
+    /// <summary>
+    /// One-off backfill of KOM takeovers for koms_summary ids in [from, to].
+    /// Per-id try/catch so a removed/invalid summary does not abort the whole batch.
+    /// Run in batches manually (ids start at 1).
+    /// </summary>
+    [HttpPut("detect-takeovers")]
+    public async Task<ActionResult> DetectTakeovers([FromQuery] int from, [FromQuery] int to, CancellationToken cancellationToken)
+    {
+        for (var id = from; id <= to; id++)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                break;
+            }
+
+            try
+            {
+                await _mediator.Send(new DetectKomTakeoversCommand { KomsSummaryId = id }, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DetectTakeovers backfill failed for koms_summary id {komsSummaryId}", id);
+            }
+        }
 
         return new NoContentResult();
     }

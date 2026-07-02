@@ -377,4 +377,166 @@ public class SegmentServiceTests
         ));
     }
     #endregion
+
+    #region Resolve KOM takeovers
+    private const long TakeoverSegment = 10;
+    private const int TakeoverAthleteX = 1;
+    private const int TakeoverAthleteOther = 2;
+
+    private static KomTakeoverChangeModel TakeoverChange(KomChangeTypeEnum type, int athleteId, long segmentEffortId, int komsSummaryId, string? sex = "M", long segmentId = TakeoverSegment, DateTime trackDate = default)
+        => new()
+        {
+            AthleteId = athleteId,
+            Sex = sex,
+            SegmentId = segmentId,
+            SegmentEffortId = segmentEffortId,
+            KomsSummaryId = komsSummaryId,
+            TrackDate = trackDate,
+            ChangeType = type
+        };
+
+    private ResolveTakeoversResult Resolve(
+        IEnumerable<KomTakeoverChangeModel> summary,
+        IEnumerable<KomTakeoverChangeModel> counterpart = null,
+        IEnumerable<KomTakeoverEntity> active = null,
+        ISet<long> existingTaken = null)
+        => _segmentService.ResolveTakeovers(
+            summary,
+            counterpart ?? Enumerable.Empty<KomTakeoverChangeModel>(),
+            active ?? Enumerable.Empty<KomTakeoverEntity>(),
+            existingTaken ?? new HashSet<long>());
+
+    [Fact]
+    public void Resolve_takeovers_new_kom_paired_with_counterpart_lost_creates_takeover()
+    {
+        // Arrange - X gained, A lost the same segment (same sex)
+        var takenAt = new DateTime(2026, 6, 30, 12, 0, 0, DateTimeKind.Utc);
+        var summary = new[] { TakeoverChange(KomChangeTypeEnum.New, TakeoverAthleteX, segmentEffortId: 100, komsSummaryId: 1000, trackDate: takenAt) };
+        var counterpart = new[] { TakeoverChange(KomChangeTypeEnum.Lost, TakeoverAthleteOther, segmentEffortId: 200, komsSummaryId: 999) };
+
+        // Act
+        var res = Resolve(summary, counterpart);
+
+        // Assert
+        res.NewTakeovers.Should().ContainSingle();
+        var t = res.NewTakeovers.Single();
+        t.TakenSegmentEffortId.Should().Be(100);
+        t.LostSegmentEffortId.Should().Be(200);
+        t.TakenKomsSummaryId.Should().Be(1000);
+        t.LostKomsSummaryId.Should().Be(999);
+        t.TrackDate.Should().Be(takenAt); // from the taking (gain) side
+        t.Reverted.Should().BeFalse();
+        res.RevertedTakeoverIds.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Resolve_takeovers_lost_kom_paired_with_counterpart_new_creates_takeover()
+    {
+        // Arrange - X lost, B gained
+        var summary = new[] { TakeoverChange(KomChangeTypeEnum.Lost, TakeoverAthleteX, segmentEffortId: 200, komsSummaryId: 1000) };
+        var counterpart = new[] { TakeoverChange(KomChangeTypeEnum.New, TakeoverAthleteOther, segmentEffortId: 100, komsSummaryId: 999) };
+
+        // Act
+        var res = Resolve(summary, counterpart);
+
+        // Assert
+        var t = res.NewTakeovers.Single();
+        t.TakenSegmentEffortId.Should().Be(100); // B's effort
+        t.LostSegmentEffortId.Should().Be(200);  // X's effort
+        t.TakenKomsSummaryId.Should().Be(999);
+        t.LostKomsSummaryId.Should().Be(1000);
+    }
+
+    [Fact]
+    public void Resolve_takeovers_different_sex_does_not_create_takeover()
+    {
+        var summary = new[] { TakeoverChange(KomChangeTypeEnum.New, TakeoverAthleteX, 100, 1000, sex: "M") };
+        var counterpart = new[] { TakeoverChange(KomChangeTypeEnum.Lost, TakeoverAthleteOther, 200, 999, sex: "F") };
+
+        var res = Resolve(summary, counterpart);
+
+        res.NewTakeovers.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Resolve_takeovers_null_sex_on_both_sides_is_treated_as_equal()
+    {
+        var summary = new[] { TakeoverChange(KomChangeTypeEnum.New, TakeoverAthleteX, 100, 1000, sex: null) };
+        var counterpart = new[] { TakeoverChange(KomChangeTypeEnum.Lost, TakeoverAthleteOther, 200, 999, sex: null) };
+
+        var res = Resolve(summary, counterpart);
+
+        res.NewTakeovers.Should().ContainSingle();
+    }
+
+    [Fact]
+    public void Resolve_takeovers_no_counterpart_does_not_create_takeover()
+    {
+        var summary = new[] { TakeoverChange(KomChangeTypeEnum.New, TakeoverAthleteX, 100, 1000) };
+
+        var res = Resolve(summary);
+
+        res.NewTakeovers.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Resolve_takeovers_multiple_counterparts_picks_newest_by_koms_summary_id()
+    {
+        var summary = new[] { TakeoverChange(KomChangeTypeEnum.New, TakeoverAthleteX, 100, 1000) };
+        var counterpart = new[]
+        {
+            TakeoverChange(KomChangeTypeEnum.Lost, TakeoverAthleteOther, segmentEffortId: 200, komsSummaryId: 998),
+            TakeoverChange(KomChangeTypeEnum.Lost, TakeoverAthleteOther, segmentEffortId: 300, komsSummaryId: 999) // newest
+        };
+
+        var res = Resolve(summary, counterpart);
+
+        var t = res.NewTakeovers.Single();
+        t.LostSegmentEffortId.Should().Be(300);
+        t.LostKomsSummaryId.Should().Be(999);
+    }
+
+    [Fact]
+    public void Resolve_takeovers_returned_kom_marks_matching_takeover_reverted()
+    {
+        // Arrange - X regains effort 200; a takeover lost via effort 200 exists
+        var summary = new[] { TakeoverChange(KomChangeTypeEnum.Returned, TakeoverAthleteX, segmentEffortId: 200, komsSummaryId: 1000) };
+        var active = new[]
+        {
+            new KomTakeoverEntity { Id = 5, TakenSegmentEffortId = 100, LostSegmentEffortId = 200 }
+        };
+
+        // Act
+        var res = Resolve(summary, active: active);
+
+        // Assert
+        res.RevertedTakeoverIds.Should().BeEquivalentTo(new[] { 5 });
+        res.NewTakeovers.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Resolve_takeovers_returned_kom_without_matching_effort_does_nothing()
+    {
+        var summary = new[] { TakeoverChange(KomChangeTypeEnum.Returned, TakeoverAthleteX, segmentEffortId: 999, komsSummaryId: 1000) };
+        var active = new[]
+        {
+            new KomTakeoverEntity { Id = 5, TakenSegmentEffortId = 100, LostSegmentEffortId = 200 }
+        };
+
+        var res = Resolve(summary, active: active);
+
+        res.RevertedTakeoverIds.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Resolve_takeovers_existing_taken_effort_is_not_duplicated()
+    {
+        var summary = new[] { TakeoverChange(KomChangeTypeEnum.New, TakeoverAthleteX, segmentEffortId: 100, komsSummaryId: 1000) };
+        var counterpart = new[] { TakeoverChange(KomChangeTypeEnum.Lost, TakeoverAthleteOther, 200, 999) };
+
+        var res = Resolve(summary, counterpart, existingTaken: new HashSet<long> { 100 });
+
+        res.NewTakeovers.Should().BeEmpty();
+    }
+    #endregion
 }

@@ -115,3 +115,19 @@ Partial list response (API truncation):
 
 (Note: The 35% ratio threshold should safely allow for large, legitimate segment cleanups, which typically represent a small percentage of a user's total, while catching major API partial drops.)
 
+# Battle field / KOM takeovers
+
+Tracks "who took whose KOM" among app users only (Strava hid public leaderboards, so rivals outside the app are invisible). Stored in `kom_takeover` (lean: just the two efforts + their summaries + `reverted` + audit; athletes/segment/sex are derivable via the efforts and will be denormalized later if the ranking needs it).
+
+How detection works (`DetectKomTakeoversCommand`, one `koms_summary` per call):
+- Triggered per athlete via `TrackKomsCompletedNotification` (carries the new `koms_summary` id); backfill is a manual `from`/`to` loop in `AdminController` (`PUT admin/detect-takeovers`, per-id try/catch because some summaries may be deleted).
+- Two-sided pairing: a `NewKom` (taker) is matched to a `LostKom` (loser) on the same segment, and vice versa. Counterpart is searched only in summaries with a **smaller id** and `track_date` within a **24h backward window**. Assumption: every user is scanned within 24h. The pair is created by whichever side is processed later (it looks back and finds the earlier one). Idempotent via a UNIQUE index on `taken_segment_effort_id`.
+- If several counterparts match a segment, the **newest** (max `koms_summary_id`) is chosen.
+- Sex must match exactly (`null == null` counts as equal) - a man's KOM and a woman's QOM are different leaderboards.
+- `ReturnedKom` does NOT create a takeover; it marks a prior takeover `reverted` (matched by the concrete `lost_segment_effort_id` that came back). Covers the car-flag / deleted / set-private case where the winning effort disappears.
+- `ImprovedKom` is ignored (same athlete improving their own time).
+
+We never have 100% certainty: if A lost to a non-app user and then B (app) took it, we still credit B as taking from the last app holder A (when it fits the 24h window). A chain spread over more than ~24h may be missed - accepted tradeoff.
+
+Backfill order: process `koms_summary` ascending by id so a `NewKom` (takeover) is recorded before a later `ReturnedKom` can revert it.
+

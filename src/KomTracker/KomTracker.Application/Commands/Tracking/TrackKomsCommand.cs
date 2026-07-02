@@ -129,14 +129,15 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
             // TODO: transaction
             await _segmentService.AddSegmentsIfNotExistsAsync(newSegments);
             await _segmentService.AddSegmentEffortsIfNotExistsAsync(newEfforts);
-            await _segmentService.AddNewKomsSummaryWithEffortsAsync(athleteId, comparedEfforts);
+            var komsSummary = await _segmentService.AddNewKomsSummaryWithEffortsAsync(athleteId, comparedEfforts);
 
             await _komUoW.SaveChangesAsync();
 
             await _mediator.Publish(new TrackKomsCompletedNotification
             {
                 Athlete = athlete,
-                ComparedEfforts = comparedEfforts
+                ComparedEfforts = comparedEfforts,
+                KomsSummaryId = komsSummary.Id
             });
         }
 

@@ -37,9 +37,20 @@ public interface ISegmentService
 
     Task AddSegmentEffortsIfNotExistsAsync(IEnumerable<SegmentEffortEntity> segmentEfforts);
 
-    Task AddNewKomsSummaryWithEffortsAsync(int athleteId, ComparedEffortsModel comparedEfforts);
+    Task<KomsSummaryEntity> AddNewKomsSummaryWithEffortsAsync(int athleteId, ComparedEffortsModel comparedEfforts);
 
     Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100, TimeSpan? minTimeFromLastRefresh = null);
 
     Task UpdateSegmentsAsync(IEnumerable<SegmentEntity> segments);
+
+    /// <summary>
+    /// Pure KOM-takeover resolution for a single koms_summary (the "who took whose KOM" feature).
+    /// Pairs NewKom/LostKom changes with opposite-side counterpart changes (same segment, same sex,
+    /// different athlete); ReturnedKom changes revert a prior takeover matched by lost effort.
+    /// </summary>
+    ResolveTakeoversResult ResolveTakeovers(
+        IEnumerable<KomTakeoverChangeModel> summaryChanges,
+        IEnumerable<KomTakeoverChangeModel> counterpartChanges,
+        IEnumerable<KomTakeoverEntity> activeTakeoversByLostEffort,
+        ISet<long> existingTakenSegmentEffortIds);
 }

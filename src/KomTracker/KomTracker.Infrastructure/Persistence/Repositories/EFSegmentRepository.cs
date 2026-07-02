@@ -157,4 +157,105 @@ public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
     {
         return await _context.SegmentEffort.Where(x => ids.Contains(x.Id)).ToArrayAsync();
     }
+
+    #region KOM takeovers (battle field)
+
+    public async Task<IEnumerable<KomTakeoverChangeModel>> GetSummaryChangesForTakeoverAsync(int komsSummaryId)
+    {
+        var rows = await (
+            from ks in _context.KomsSummary
+            join ksse in _context.KomsSummarySegmentEffort on ks.Id equals ksse.KomSummaryId
+            join se in _context.SegmentEffort on ksse.SegmentEffortId equals se.Id
+            join a in _context.Athlete on ks.AthleteId equals a.AthleteId
+            where ks.Id == komsSummaryId
+                && (ksse.NewKom || ksse.LostKom || ksse.ReturnedKom)
+            select new { ks.AthleteId, a.Sex, se.SegmentId, ksse.SegmentEffortId, KomsSummaryId = ks.Id, ks.TrackDate, ksse.NewKom, ksse.LostKom }
+        ).AsNoTracking().ToListAsync();
+
+        return rows.Select(r => new KomTakeoverChangeModel
+        {
+            AthleteId = r.AthleteId,
+            Sex = r.Sex,
+            SegmentId = r.SegmentId,
+            SegmentEffortId = r.SegmentEffortId,
+            KomsSummaryId = r.KomsSummaryId,
+            TrackDate = r.TrackDate,
+            ChangeType = r.NewKom ? KomChangeTypeEnum.New : r.LostKom ? KomChangeTypeEnum.Lost : KomChangeTypeEnum.Returned
+        }).ToList();
+    }
+
+    public async Task<IEnumerable<KomTakeoverChangeModel>> GetCounterpartChangesAsync(int komsSummaryId, IEnumerable<long> segmentIds, TimeSpan window, int excludeAthleteId)
+    {
+        var segmentIdsList = segmentIds?.ToList() ?? new List<long>();
+        if (segmentIdsList.Count == 0)
+        {
+            return Enumerable.Empty<KomTakeoverChangeModel>();
+        }
+
+        var refSummary = await _context.KomsSummary.AsNoTracking().FirstOrDefaultAsync(x => x.Id == komsSummaryId);
+        if (refSummary == null)
+        {
+            return Enumerable.Empty<KomTakeoverChangeModel>();
+        }
+
+        var minTrackDate = refSummary.TrackDate - window;
+
+        var rows = await (
+            from ks in _context.KomsSummary
+            join ksse in _context.KomsSummarySegmentEffort on ks.Id equals ksse.KomSummaryId
+            join se in _context.SegmentEffort on ksse.SegmentEffortId equals se.Id
+            join a in _context.Athlete on ks.AthleteId equals a.AthleteId
+            where ks.Id < komsSummaryId
+                && ks.AthleteId != excludeAthleteId
+                && ks.TrackDate >= minTrackDate
+                && segmentIdsList.Contains(se.SegmentId)
+                && (ksse.NewKom || ksse.LostKom)
+            select new { ks.AthleteId, a.Sex, se.SegmentId, ksse.SegmentEffortId, KomsSummaryId = ks.Id, ks.TrackDate, ksse.NewKom, ksse.LostKom }
+        ).AsNoTracking().ToListAsync();
+
+        return rows.Select(r => new KomTakeoverChangeModel
+        {
+            AthleteId = r.AthleteId,
+            Sex = r.Sex,
+            SegmentId = r.SegmentId,
+            SegmentEffortId = r.SegmentEffortId,
+            KomsSummaryId = r.KomsSummaryId,
+            TrackDate = r.TrackDate,
+            ChangeType = r.NewKom ? KomChangeTypeEnum.New : KomChangeTypeEnum.Lost
+        }).ToList();
+    }
+
+    public async Task<IEnumerable<KomTakeoverEntity>> GetActiveTakeoversByLostEffortAsync(IEnumerable<long> lostSegmentEffortIds)
+    {
+        var ids = lostSegmentEffortIds?.ToList() ?? new List<long>();
+        if (ids.Count == 0)
+        {
+            return Enumerable.Empty<KomTakeoverEntity>();
+        }
+
+        // Tracked on purpose - caller flips Reverted and persists via SaveChangesAsync (sets audit_md).
+        return await _context.KomTakeover
+            .Where(x => !x.Reverted && ids.Contains(x.LostSegmentEffortId))
+            .ToListAsync();
+    }
+
+    public Task AddTakeoversIfNotExistsAsync(IEnumerable<KomTakeoverEntity> takeovers)
+    {
+        var list = takeovers?.ToList() ?? new List<KomTakeoverEntity>();
+        if (list.Count == 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        SetAuidtCD(list);
+
+        return _context
+            .KomTakeover
+            .UpsertRange(list)
+            .On(x => x.TakenSegmentEffortId)
+            .WhenMatched(x => new KomTakeoverEntity { }) // No update
+            .RunAsync();
+    }
+
+    #endregion
 }

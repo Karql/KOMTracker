@@ -152,7 +152,7 @@ public class SegmentService : ISegmentService
             .AddSegmentEffortsIfNotExistsAsync(segmentEfforts);
     }
 
-    public async Task AddNewKomsSummaryWithEffortsAsync(int athleteId, ComparedEffortsModel comparedEfforts)
+    public async Task<KomsSummaryEntity> AddNewKomsSummaryWithEffortsAsync(int athleteId, ComparedEffortsModel comparedEfforts)
     {
         var segmentRepo = _komUoW.GetRepository<ISegmentRepository>();
 
@@ -172,6 +172,8 @@ public class SegmentService : ISegmentService
         var komsSummariesSegmentEfforts = comparedEfforts.Efforts.Select(x => x.SummarySegmentEffort);
         komsSummariesSegmentEfforts.ForEach(x => x.KomsSummary = komsSummary);
         await segmentRepo.AddKomsSummariesSegmentEffortsAsync(komsSummariesSegmentEfforts);
+
+        return komsSummary;
     }
 
     public async Task<IEnumerable<SegmentEntity>> GetSegmentsToRefreshAsync(int top = 100, TimeSpan? minTimeFromLastRefresh = null)
@@ -184,5 +186,98 @@ public class SegmentService : ISegmentService
     {
         await _komUoW.GetRepository<ISegmentRepository>()
             .UpdateSegmentsAsync(segments);
+    }
+
+    public ResolveTakeoversResult ResolveTakeovers(
+        IEnumerable<KomTakeoverChangeModel> summaryChanges,
+        IEnumerable<KomTakeoverChangeModel> counterpartChanges,
+        IEnumerable<KomTakeoverEntity> activeTakeoversByLostEffort,
+        ISet<long> existingTakenSegmentEffortIds)
+    {
+        var result = new ResolveTakeoversResult();
+
+        var counterparts = counterpartChanges?.ToList() ?? new List<KomTakeoverChangeModel>();
+        var activeTakeovers = activeTakeoversByLostEffort?.ToList() ?? new List<KomTakeoverEntity>();
+        var existingTaken = existingTakenSegmentEffortIds ?? new HashSet<long>();
+
+        // Track winning efforts already produced in this run too (avoid in-batch dups).
+        var producedTakenEffortIds = new HashSet<long>();
+
+        foreach (var change in summaryChanges ?? Enumerable.Empty<KomTakeoverChangeModel>())
+        {
+            switch (change.ChangeType)
+            {
+                case KomChangeTypeEnum.New:
+                    TryCreateTakeover(
+                        winner: change,
+                        loser: FindNewestCounterpart(counterparts, change, KomChangeTypeEnum.Lost),
+                        result, existingTaken, producedTakenEffortIds);
+                    break;
+
+                case KomChangeTypeEnum.Lost:
+                    TryCreateTakeover(
+                        winner: FindNewestCounterpart(counterparts, change, KomChangeTypeEnum.New),
+                        loser: change,
+                        result, existingTaken, producedTakenEffortIds);
+                    break;
+
+                case KomChangeTypeEnum.Returned:
+                    var takeover = activeTakeovers
+                        .Where(x => x.LostSegmentEffortId == change.SegmentEffortId)
+                        .OrderByDescending(x => x.Id)
+                        .FirstOrDefault();
+
+                    if (takeover != null && !result.RevertedTakeoverIds.Contains(takeover.Id))
+                    {
+                        result.RevertedTakeoverIds.Add(takeover.Id);
+                    }
+                    break;
+            }
+        }
+
+        return result;
+    }
+
+    private static KomTakeoverChangeModel? FindNewestCounterpart(
+        IEnumerable<KomTakeoverChangeModel> counterparts, KomTakeoverChangeModel change, KomChangeTypeEnum counterpartType)
+    {
+        return counterparts
+            .Where(x => x.ChangeType == counterpartType
+                && x.SegmentId == change.SegmentId
+                && x.AthleteId != change.AthleteId
+                && SexEquals(x.Sex, change.Sex))
+            .OrderByDescending(x => x.KomsSummaryId)
+            .FirstOrDefault();
+    }
+
+    private static void TryCreateTakeover(
+        KomTakeoverChangeModel? winner, KomTakeoverChangeModel? loser,
+        ResolveTakeoversResult result, ISet<long> existingTaken, ISet<long> producedTaken)
+    {
+        if (winner == null || loser == null)
+        {
+            return;
+        }
+
+        if (existingTaken.Contains(winner.SegmentEffortId) || !producedTaken.Add(winner.SegmentEffortId))
+        {
+            return; // already recorded or already produced in this run
+        }
+
+        result.NewTakeovers.Add(new KomTakeoverEntity
+        {
+            TakenSegmentEffortId = winner.SegmentEffortId,
+            LostSegmentEffortId = loser.SegmentEffortId,
+            TakenKomsSummaryId = winner.KomsSummaryId,
+            LostKomsSummaryId = loser.KomsSummaryId,
+            TrackDate = winner.TrackDate,
+            Reverted = false
+        });
+    }
+
+    private static bool SexEquals(string? a, string? b)
+    {
+        // Exact match; null == null counts as equal.
+        return string.Equals(a, b, StringComparison.Ordinal);
     }
 }
