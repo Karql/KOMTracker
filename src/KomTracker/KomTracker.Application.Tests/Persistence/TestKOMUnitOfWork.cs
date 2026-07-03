@@ -14,4 +14,9 @@ public class TestKOMUnitOfWork : TestUnitOfWork, IKOMUnitOfWork
     public TestKOMUnitOfWork(IDictionary<Type, IRepository> repos) : base(repos)
     {
     }
+
+    public void ClearChangeTracker()
+    {
+        // No-op for the in-memory test double.
+    }
 }

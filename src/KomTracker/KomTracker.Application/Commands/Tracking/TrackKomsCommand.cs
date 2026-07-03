@@ -54,8 +54,21 @@ public class TrackKomsCommandHandler : IRequestHandler<TrackKomsCommand, Result>
             if (cancellationToken.IsCancellationRequested)
                 return Result.Ok(); // TODO: OK?
 
-            if (!await TrackKomsForAthleteAsync(athlete))
-                return Result.Fail($"{nameof(TrackKomsCommand)} execution interrupted!");
+            // Give each athlete a clean slate - the DbContext is shared for the whole run,
+            // so drop any residue left by a previous (possibly failed) athlete/handler.
+            _komUoW.ClearChangeTracker();
+
+            try
+            {
+                // false = rate limit (429) - intentionally interrupt the whole job
+                if (!await TrackKomsForAthleteAsync(athlete))
+                    return Result.Fail($"{nameof(TrackKomsCommand)} execution interrupted!");
+            }
+            catch (Exception ex)
+            {
+                // Isolate failures: one bad athlete must not abort the whole run.
+                _logger.LogError(ex, "{method} failed for athlete {athleteId} - skipping", nameof(TrackKomsForAthleteAsync), athlete.AthleteId);
+            }
         }
 
         return Result.Ok();

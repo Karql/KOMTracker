@@ -3,6 +3,9 @@
 ### Features
 - Battle field: detect KOM takeovers between app users (backend)
 
+### Bug fixes
+- Make KOM tracking resilient: isolate per-athlete failures so one error no longer aborts the whole run
+
 ## 1.10.0 (2026-07-01)
 
 ### Features

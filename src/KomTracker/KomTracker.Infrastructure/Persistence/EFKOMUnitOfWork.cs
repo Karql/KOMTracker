@@ -13,6 +13,11 @@ public class EFKOMUnitOfWork : EFUnitOfWork<KOMDBContext>, IKOMUnitOfWork
     {
     }
 
+    public void ClearChangeTracker()
+    {
+        _context.ChangeTracker.Clear();
+    }
+
     public override Task<int> SaveChangesAsync()
     {
         foreach (var entry in _context.ChangeTracker.Entries<BaseEntity>())

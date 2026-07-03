@@ -38,28 +38,37 @@ public class TrackKomsCompletedNotificationSendEmailHandler : INotificationHandl
     public async Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
     {
         var logPrefix = $"{nameof(TrackKomsCompletedNotificationSendEmailHandler)} ";
-        if (notification.ComparedEfforts.FirstCompare)
-        {
-            return; // Do not send mail for first tracking
-        }
 
-        var athleteId = notification.Athlete.AthleteId;
-        var user = await _userService.GetUserAsync(athleteId);
-
-        if (user == null)
+        try
         {
-            _logger.LogWarning(logPrefix + "User not fount for athletedId: {athleteId}", athleteId);
-            return;
-        }
-
-        if (user.EmailConfirmed && !string.IsNullOrEmpty(user.Email))
-        {
-            await _mailService.SendTrackKomsNotificationAsync(new SendTrackKomsNotificationParamsModel
+            if (notification.ComparedEfforts.FirstCompare)
             {
-                To = user.Email,
-                FirstName = notification.Athlete.FirstName,
-                ComparedEfforts = notification.ComparedEfforts
-            });
+                return; // Do not send mail for first tracking
+            }
+
+            var athleteId = notification.Athlete.AthleteId;
+            var user = await _userService.GetUserAsync(athleteId);
+
+            if (user == null)
+            {
+                _logger.LogWarning(logPrefix + "User not fount for athletedId: {athleteId}", athleteId);
+                return;
+            }
+
+            if (user.EmailConfirmed && !string.IsNullOrEmpty(user.Email))
+            {
+                await _mailService.SendTrackKomsNotificationAsync(new SendTrackKomsNotificationParamsModel
+                {
+                    To = user.Email,
+                    FirstName = notification.Athlete.FirstName,
+                    ComparedEfforts = notification.ComparedEfforts
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            // Best-effort side effect - a failure must not break tracking or sibling handlers.
+            _logger.LogError(ex, logPrefix + "failed for athlete {athleteId}", notification.Athlete.AthleteId);
         }
     }
 }
@@ -75,9 +84,17 @@ public class TrackKomsCompletedNotificationRefreshStatsHandler : INotificationHa
         _medaitor = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
-    public Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
+    public async Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
     {
-        return _medaitor.Send(new RefreshStatsCommand { AthleteId = notification.Athlete.AthleteId }, cancellationToken);
+        try
+        {
+            await _medaitor.Send(new RefreshStatsCommand { AthleteId = notification.Athlete.AthleteId }, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Best-effort side effect - recoverable via admin/refresh-stats.
+            _logger.LogError(ex, "{handler} failed for athlete {athleteId}", nameof(TrackKomsCompletedNotificationRefreshStatsHandler), notification.Athlete.AthleteId);
+        }
     }
 }
 
@@ -92,8 +109,16 @@ public class TrackKomsCompletedNotificationDetectTakeoversHandler : INotificatio
         _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
-    public Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
+    public async Task Handle(TrackKomsCompletedNotification notification, CancellationToken cancellationToken)
     {
-        return _mediator.Send(new DetectKomTakeoversCommand { KomsSummaryId = notification.KomsSummaryId }, cancellationToken);
+        try
+        {
+            await _mediator.Send(new DetectKomTakeoversCommand { KomsSummaryId = notification.KomsSummaryId }, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Best-effort side effect - recoverable via admin/detect-takeovers.
+            _logger.LogError(ex, "{handler} failed for koms summary {komsSummaryId}", nameof(TrackKomsCompletedNotificationDetectTakeoversHandler), notification.KomsSummaryId);
+        }
     }
 }
