@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using Serilog;
+using Serilog.Events;
 
 namespace Utils.AspNetCore;
 
@@ -127,6 +128,12 @@ public class CommonProgram
             .Enrich.FromLogContext();
 
         builder = builder.WriteTo.Console();
+
+        builder = builder.WriteTo.File(
+            path: $"logs/{AppName}-.log",
+            restrictedToMinimumLevel: LogEventLevel.Error,
+            rollingInterval: RollingInterval.Month,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}");
 
         return builder.CreateLogger();
     }

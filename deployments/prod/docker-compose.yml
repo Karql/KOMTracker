@@ -23,6 +23,7 @@ services:
       IdentityConfiguration__PostLogoutRedirectUris__1: https://localhost      
     volumes:
       - /u01/volumes/kom-tracker-prod/kom-tracker-api/keys:/keys
+      - /u01/volumes/kom-tracker-prod/logs:/app/logs
 
   kom-tracker-web:
     image: karql/kom-tracker-web:1.10.0
