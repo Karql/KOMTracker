@@ -1,0 +1,107 @@
+@page "/battle-field"
+@using KomTracker.API.Shared.ViewModels.Club
+@using KomTracker.API.Shared.ViewModels.KomTakeover
+@using KomTracker.Application.Shared.Helpers
+@using KomTracker.WEB.Helpers
+@attribute [Authorize]
+
+@if (!_loaded)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else
+{
+    <MudGrid Class="mb-2">
+        <MudItem xs="12" sm="3">
+            <MudSelect
+                T="PeriodOption"
+                Value="_selectedPeriod"
+                Label="Period"
+                Variant="Variant.Outlined"
+                AnchorOrigin="Origin.BottomCenter"
+                ValueChanged="@SelectedPeriodChanged"
+                ToStringFunc="@(p => p?.Label)">
+                @foreach (var period in _periods)
+                {
+                    <MudSelectItem Value="@period" Disabled="@period.IsSeparator">@period.Label</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudSelect
+                T="string"
+                Label="Activity type"
+                Variant="Variant.Outlined"
+                AnchorOrigin="Origin.BottomCenter"
+                Clearable="true"
+                ValueChanged="@SelectedActivityTypeChanged">
+                @foreach (var x in ActivityTypeHelper.GetActivityTypes())
+                {
+                    <MudSelectItem Value="@x.ActivityType">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(x.ActivityType)" Class="mr-2" /> @x.Name
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="3">
+            <MudSelect
+                T="ClubViewModel"
+                Label="Club"
+                Class="club-select"
+                Variant="Variant.Outlined"
+                AnchorOrigin="Origin.BottomCenter"
+                Clearable="true"
+                ValueChanged="@SelectedClubChanged">
+                @foreach (var club in _clubs)
+                {
+                    <MudSelectItem Value="@club">
+                        <div class="d-flex align-center club-select-item-wrapper">
+                            <img src="@ViewHelper.GetClubAvatar(club.ProfileMedium)" class="club-select-profile-medium mr-2" /> @club.Name
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+
+    <MudTable Hover="true" Elevation="25" Items="_pairs" Dense="false" Bordered="false" Striped="true" Filter="new Func<KomTakeoverPairViewModel, bool>(SearchPairs)">
+        <ToolBarContent>
+            <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search (winner, loser)" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<KomTakeoverPairViewModel, object>(x => x.WinnerAthlete.FullName)">Winner</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Descending" SortBy="new Func<KomTakeoverPairViewModel, object>(x => x.WinnerKoms)">Winner KOMs</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<KomTakeoverPairViewModel, object>(x => x.LoserKoms)">Loser KOMs</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<KomTakeoverPairViewModel, object>(x => x.LoserAthlete.FullName)">Loser</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Winner">
+                <div class="d-flex align-center">
+                    <MudAvatar Size="Size.Small" Class="mr-4">
+                        <MudImage Src="@context.WinnerAthlete.ProfileMedium" />
+                    </MudAvatar>
+                    <MudLink Target="_blank" Href="@($"https://strava.com/athletes/{context.WinnerAthlete.AthleteId}")"><MudHighlighter Text="@context.WinnerAthlete.FullName" HighlightedText="@_searchString" /></MudLink>
+                </div>
+            </MudTd>
+            <MudTd DataLabel="Winner KOMs">
+                <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => OpenWinnerEffortsAsync(context))">@context.WinnerKoms</MudButton>
+            </MudTd>
+            <MudTd DataLabel="Loser KOMs">
+                <MudButton Variant="Variant.Text" Color="Color.Error" Disabled="@(context.LoserKoms == 0)" OnClick="@(() => OpenLoserEffortsAsync(context))">@context.LoserKoms</MudButton>
+            </MudTd>
+            <MudTd DataLabel="Loser">
+                <div class="d-flex align-center">
+                    <MudAvatar Size="Size.Small" Class="mr-4">
+                        <MudImage Src="@context.LoserAthlete.ProfileMedium" />
+                    </MudAvatar>
+                    <MudLink Target="_blank" Href="@($"https://strava.com/athletes/{context.LoserAthlete.AthleteId}")"><MudHighlighter Text="@context.LoserAthlete.FullName" HighlightedText="@_searchString" /></MudLink>
+                </div>
+            </MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+}

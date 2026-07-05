@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using KomTracker.API.Shared.ViewModels.Athlete;
 using KomTracker.API.Shared.ViewModels.Club;
+using KomTracker.API.Shared.ViewModels.KomTakeover;
 using KomTracker.API.Shared.ViewModels.Ranking;
 using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.API.Shared.ViewModels.Stats;
@@ -32,6 +33,7 @@ public class DtoProfile : Profile
         CreateMap<AthleteRankingModel, AthleteRankingViewModel>();
         CreateMap<AthleteRankingTotalModel, AthleteRankingTotalViewModel>();
         CreateMap<AthleteRankingKomsChangesModel, AthleteRankingKomsChangesViewModel>();
-        
+
+        CreateMap<KomTakeoverPairModel, KomTakeoverPairViewModel>();
     }
 }

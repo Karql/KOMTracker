@@ -52,5 +52,18 @@ public interface ISegmentRepository : IRepository
     /// <summary>Insert takeovers, ignoring rows whose taken effort already exists (idempotent).</summary>
     Task AddTakeoversIfNotExistsAsync(IEnumerable<KomTakeoverEntity> takeovers);
 
+    /// <summary>
+    /// Directed takeover counts (grouped by taker + loser athlete) for the Battle Field ranking.
+    /// Non-reverted only, within the optional date range and activity type.
+    /// When <paramref name="athleteIds"/> is provided, both sides must be in the set.
+    /// </summary>
+    Task<IEnumerable<KomTakeoverCountModel>> GetTakeoverCountsAsync(IEnumerable<int>? athleteIds, DateTime? dateFrom, DateTime? dateTo, string? activityType);
+
+    /// <summary>
+    /// The taken efforts (winning effort + segment) of the takeovers where takenBy took from lostBy,
+    /// for the Battle Field details modal. Non-reverted only, filtered by date range and activity type.
+    /// </summary>
+    Task<IEnumerable<EffortModel>> GetTakeoverEffortsAsync(int takenByAthleteId, int lostByAthleteId, DateTime? dateFrom, DateTime? dateTo, string? activityType);
+
     #endregion
 }

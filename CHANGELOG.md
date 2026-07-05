@@ -2,6 +2,7 @@
 
 ### Features
 - Battle field: detect KOM takeovers between app users (backend)
+- Battle field: page with head-to-head KOM takeover ranking
 - Log errors to a monthly rolling file
 
 ### Bug fixes

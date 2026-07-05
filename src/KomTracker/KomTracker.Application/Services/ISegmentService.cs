@@ -53,4 +53,10 @@ public interface ISegmentService
         IEnumerable<KomTakeoverChangeModel> counterpartChanges,
         IEnumerable<KomTakeoverEntity> activeTakeoversByLostEffort,
         ISet<long> existingTakenSegmentEffortIds);
+
+    /// <summary>Directed KOM-takeover counts for the Battle Field ranking (both sides in athleteIds when provided).</summary>
+    Task<IEnumerable<KomTakeoverCountModel>> GetTakeoverCountsAsync(IEnumerable<int>? athleteIds, DateTime? dateFrom, DateTime? dateTo, string? activityType);
+
+    /// <summary>Taken efforts (winning effort + segment) where takenBy took a KOM from lostBy - Battle Field details.</summary>
+    Task<IEnumerable<EffortModel>> GetTakeoverEffortsAsync(int takenByAthleteId, int lostByAthleteId, DateTime? dateFrom, DateTime? dateTo, string? activityType);
 }

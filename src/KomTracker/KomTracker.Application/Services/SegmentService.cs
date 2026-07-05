@@ -280,4 +280,16 @@ public class SegmentService : ISegmentService
         // Exact match; null == null counts as equal.
         return string.Equals(a, b, StringComparison.Ordinal);
     }
+
+    public async Task<IEnumerable<KomTakeoverCountModel>> GetTakeoverCountsAsync(IEnumerable<int>? athleteIds, DateTime? dateFrom, DateTime? dateTo, string? activityType)
+    {
+        return await _komUoW.GetRepository<ISegmentRepository>()
+            .GetTakeoverCountsAsync(athleteIds, dateFrom, dateTo, activityType);
+    }
+
+    public async Task<IEnumerable<EffortModel>> GetTakeoverEffortsAsync(int takenByAthleteId, int lostByAthleteId, DateTime? dateFrom, DateTime? dateTo, string? activityType)
+    {
+        return await _komUoW.GetRepository<ISegmentRepository>()
+            .GetTakeoverEffortsAsync(takenByAthleteId, lostByAthleteId, dateFrom, dateTo, activityType);
+    }
 }

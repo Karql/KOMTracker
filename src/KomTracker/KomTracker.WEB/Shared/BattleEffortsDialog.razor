@@ -1,0 +1,138 @@
+@using KomTracker.API.Shared.ViewModels.Segment
+@using KomTracker.Application.Shared.Helpers
+@using KomTracker.WEB.Helpers
+@using Microsoft.AspNetCore.WebUtilities
+@using System.Net.Http.Json
+
+<MudDialog>
+    <DialogContent>
+        @if (!_loaded)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+        else if (!_efforts.Any())
+        {
+            <MudText Typo="Typo.body2">No segments in the selected range.</MudText>
+        }
+        else
+        {
+            <MudTable Hover="true" Elevation="0" Items="_efforts" Dense="true" Bordered="false" Striped="true">
+                <HeaderContent>
+                    <MudTh>Date</MudTh>
+                    <MudTh>Segment name</MudTh>
+                    <MudTh>Distance</MudTh>
+                    <MudTh>Elev diff</MudTh>
+                    <MudTh>Grade</MudTh>
+                    <MudTh>Speed</MudTh>
+                    <MudTh>HR</MudTh>
+                    <MudTh>Power</MudTh>
+                    <MudTh>Time</MudTh>
+                    <MudTh>Cat</MudTh>
+                    <MudTh>Type</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Date">
+                        @context.SegmentEffort.StartDate.ToString("yyyy-MM-dd")
+                    </MudTd>
+                    <MudTd DataLabel="Name">
+                        <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.SegmentEffort.Id}")">@context.Segment.Name</MudLink>
+                    </MudTd>
+                    <MudTd DataLabel="Distance">
+                        @((context.Segment.Distance / 1000).ToString("F2")) km
+                    </MudTd>
+                    <MudTd DataLabel="Elev diff">
+                        @((context.Segment.ElevationHigh - context.Segment.ElevationLow).ToString("F0")) m
+                    </MudTd>
+                    <MudTd DataLabel="Grade">
+                        @context.Segment.AverageGrade.ToString("F1")%
+                    </MudTd>
+                    <MudTd DataLabel="Speed">
+                        @context.SegmentEffort.Speed.ToString("F1")km/h
+                    </MudTd>
+                    <MudTd DataLabel="HR">
+                        @((context.SegmentEffort.AverageHeartrate ?? 0) == 0 ? "-" : context.SegmentEffort.AverageHeartrate!.Value.ToString("F0"))
+                    </MudTd>
+                    <MudTd DataLabel="Power">
+                        <span class="d-flex align-center">
+                        @((context.SegmentEffort.AverageWatts ?? 0) == 0 ? "-" : context.SegmentEffort.AverageWatts!.Value.ToString("F0") + "W")
+                        @if (context.SegmentEffort.DeviceWatts)
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Bolt"></MudIcon>
+                        }
+                        </span>
+                    </MudTd>
+                    <MudTd DataLabel="Time">
+                        @(TimeSpan.FromSeconds(context.SegmentEffort.ElapsedTime).ToString())
+                    </MudTd>
+                    <MudTd DataLabel="Cat">
+                        <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(context.Segment.ExtendedCategory)">
+                            <MudIcon Icon="@Icons.Material.Filled.Landscape"></MudIcon>
+                            <span>@context.Segment.ExtendedCategoryText</span>
+                        </div>
+                    </MudTd>
+                    <MudTd DataLabel="Type">
+                        <MudTooltip Text="@ActivityTypeHelper.GetActivityTypeName(context.Segment.ActivityType)">
+                            <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(context.Segment.ActivityType)"></MudIcon>
+                        </MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public int WinnerAthleteId { get; set; }
+    [Parameter] public int LoserAthleteId { get; set; }
+    [Parameter] public DateTime? DateFrom { get; set; }
+    [Parameter] public DateTime? DateTo { get; set; }
+    [Parameter] public string? ActivityType { get; set; }
+    [Parameter] public string Title { get; set; } = "";
+
+    [Inject]
+    private HttpClient Http { get; set; } = default!;
+
+    private bool _loaded = false;
+    private IEnumerable<EffortViewModel> _efforts = Enumerable.Empty<EffortViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var qParams = new Dictionary<string, string?>
+        {
+            { "winner_athlete_id", WinnerAthleteId.ToString() },
+            { "loser_athlete_id", LoserAthleteId.ToString() },
+        };
+
+        if (DateFrom != null)
+        {
+            qParams.Add("date_from", DateFrom.Value.ToUniversalTime().ToString("o"));
+        }
+
+        if (DateTo != null)
+        {
+            qParams.Add("date_to", DateTo.Value.ToUniversalTime().ToString("o"));
+        }
+
+        if (!string.IsNullOrEmpty(ActivityType))
+        {
+            qParams.Add("activity_type", ActivityType);
+        }
+
+        _efforts = await Http.GetFromJsonAsync<EffortViewModel[]>(
+            QueryHelpers.AddQueryString("kom-takeovers/efforts", qParams))
+            ?? Enumerable.Empty<EffortViewModel>();
+
+        _loaded = true;
+    }
+
+    private void Close() => MudDialog.Close();
+}

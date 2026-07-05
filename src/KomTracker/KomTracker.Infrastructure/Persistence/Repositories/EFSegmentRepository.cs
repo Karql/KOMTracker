@@ -257,5 +257,60 @@ public class EFSegmentRepository : EFBaseRepository, ISegmentRepository
             .RunAsync();
     }
 
+    public async Task<IEnumerable<KomTakeoverCountModel>> GetTakeoverCountsAsync(IEnumerable<int>? athleteIds, DateTime? dateFrom, DateTime? dateTo, string? activityType)
+    {
+        var athleteIdsList = athleteIds?.ToList(); // null => no athlete filter (all app users)
+
+        var query =
+            from kt in _context.KomTakeover
+            join seTaken in _context.SegmentEffort on kt.TakenSegmentEffortId equals seTaken.Id
+            join seLost in _context.SegmentEffort on kt.LostSegmentEffortId equals seLost.Id
+            join s in _context.Segment on seTaken.SegmentId equals s.Id
+            where !kt.Reverted
+            select new { kt, seTaken, seLost, s };
+
+        if (dateFrom.HasValue) query = query.Where(x => x.kt.TrackDate >= dateFrom.Value);
+        if (dateTo.HasValue) query = query.Where(x => x.kt.TrackDate <= dateTo.Value);
+        if (!string.IsNullOrEmpty(activityType)) query = query.Where(x => x.s.ActivityType == activityType);
+        if (athleteIdsList != null) query = query.Where(x => athleteIdsList.Contains(x.seTaken.AthleteId) && athleteIdsList.Contains(x.seLost.AthleteId));
+
+        return await query
+            .GroupBy(x => new { TakenBy = x.seTaken.AthleteId, LostBy = x.seLost.AthleteId })
+            .Select(g => new KomTakeoverCountModel
+            {
+                TakenByAthleteId = g.Key.TakenBy,
+                LostByAthleteId = g.Key.LostBy,
+                Count = g.Count()
+            })
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<EffortModel>> GetTakeoverEffortsAsync(int takenByAthleteId, int lostByAthleteId, DateTime? dateFrom, DateTime? dateTo, string? activityType)
+    {
+        var query =
+            from kt in _context.KomTakeover
+            join seTaken in _context.SegmentEffort on kt.TakenSegmentEffortId equals seTaken.Id
+            join seLost in _context.SegmentEffort on kt.LostSegmentEffortId equals seLost.Id
+            join s in _context.Segment on seTaken.SegmentId equals s.Id
+            where !kt.Reverted
+                && seTaken.AthleteId == takenByAthleteId
+                && seLost.AthleteId == lostByAthleteId
+            select new { kt, seTaken, s };
+
+        if (dateFrom.HasValue) query = query.Where(x => x.kt.TrackDate >= dateFrom.Value);
+        if (dateTo.HasValue) query = query.Where(x => x.kt.TrackDate <= dateTo.Value);
+        if (!string.IsNullOrEmpty(activityType)) query = query.Where(x => x.s.ActivityType == activityType);
+
+        return await query
+            .OrderByDescending(x => x.seTaken.StartDate)
+            .Select(x => new EffortModel
+            {
+                SegmentEffort = x.seTaken,
+                Segment = x.s
+            })
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     #endregion
 }
