@@ -60,6 +60,7 @@ public class Startup
         services.AddTransient<RefreshSegmentsJob>();
         services.AddTransient<RefreshClubsJob>();
         services.AddTransient<RefreshStatsJob>();
+        services.AddTransient<RefreshAthletesJob>();
 
         services.AddQuartz(q =>
         {
@@ -90,6 +91,12 @@ public class Startup
             {
                 q.ScheduleJob<RefreshStatsJob>(trigger => trigger
                     .WithCronSchedule("0 55 23 * * ?", action => action.InTimeZone(tz))); // 23:55 Europe/Warsaw
+            }
+
+            if (_applicationConfiguration.RefreshAthletesJobEnabled)
+            {
+                q.ScheduleJob<RefreshAthletesJob>(trigger => trigger
+                    .WithCronSchedule("0 45 23 * * ?", action => action.InTimeZone(tz))); // 23:45 Europe/Warsaw
             }
         });
 

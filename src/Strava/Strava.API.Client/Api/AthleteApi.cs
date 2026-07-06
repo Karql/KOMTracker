@@ -1,5 +1,7 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
+using Strava.API.Client.Model.Athlete;
+using Strava.API.Client.Model.Athlete.Error;
 using Strava.API.Client.Model.Segment;
 using Strava.API.Client.Model.Segment.Error;
 using System;
@@ -89,5 +91,47 @@ public class AthleteApi : IAthleteApi
             athleteId, page, (int)response.StatusCode, await response.Content.ReadAsStringAsync());
 
         return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.UnknownError));
+    }
+
+    public async Task<Result<AthleteSummaryModel>> GetAthleteAsync(string token)
+    {
+        var url = "https://www.strava.com/api/v3/athlete";
+
+        var logPrefix = $"{nameof(GetAthleteAsync)} ";
+        var httpClient = _httpClientFactory.CreateClient();
+        httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await httpClient.GetAsync(url);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var athlete = await response.Content.ReadFromJsonAsync<AthleteSummaryModel>();
+            return Result.Ok(athlete);
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            _logger.LogWarning(logPrefix + "Unauthorized!");
+            return Result.Fail<AthleteSummaryModel>(new GetAthleteError(GetAthleteError.Unauthorized));
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            IEnumerable<string> values;
+            var rateLimitLimit = response.Headers.TryGetValues("X-RateLimit-Limit", out values) ? values.FirstOrDefault() : null;
+            var rateLimitUsage = response.Headers.TryGetValues("X-RateLimit-Usage", out values) ? values.FirstOrDefault() : null;
+            var readRateLimitLimit = response.Headers.TryGetValues("X-ReadRateLimit-Limit", out values) ? values.FirstOrDefault() : null;
+            var readRateLimitUsage = response.Headers.TryGetValues("X-ReadRateLimit-Usage", out values) ? values.FirstOrDefault() : null;
+
+            _logger.LogError(logPrefix + "Rate Limit Exceeded! X-RateLimit-Limit: {rateLimitLimit}, X-RateLimit-Usage: {rateLimitUsage}, X-ReadRateLimit-Limit: {readRateLimitLimit}, X-ReadRateLimit-Usage: {readRateLimitUsage}",
+                rateLimitLimit, rateLimitUsage, readRateLimitLimit, readRateLimitUsage);
+            return Result.Fail<AthleteSummaryModel>(new GetAthleteError(GetAthleteError.TooManyRequests));
+        }
+
+        _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}",
+            (int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
+        return Result.Fail<AthleteSummaryModel>(new GetAthleteError(GetAthleteError.UnknownError));
     }
 }

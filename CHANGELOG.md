@@ -3,6 +3,7 @@
 ### Features
 - Battle field: detect KOM takeovers between app users (backend)
 - Battle field: page with head-to-head KOM takeover ranking
+- Refresh athletes profile data daily (fixes stale names/avatars for inactive users)
 - Log errors to a monthly rolling file
 
 ### Bug fixes

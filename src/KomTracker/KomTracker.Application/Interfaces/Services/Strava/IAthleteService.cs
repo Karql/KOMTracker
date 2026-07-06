@@ -1,4 +1,5 @@
 ﻿using FluentResults;
+using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Domain.Entities.Club;
 using KomTracker.Domain.Entities.Segment;
 using System;
@@ -17,6 +18,9 @@ public interface IAthleteService
     Task<Result<IEnumerable<(SegmentEffortEntity, SegmentEntity)>>> GetAthleteKomsAsync(int athleteId, string token);
 
     Task<Result<IEnumerable<ClubEntity>>> GetAthleteClubsAsync(int athleteId, string token);
+
+    /// <summary>Get the latest profile of the token owner from the Strava API.</summary>
+    Task<Result<AthleteEntity>> GetAthleteAsync(int athleteId, string token);
 }
 
 public class GetAthleteKomsError : FluentResults.Error
@@ -38,6 +42,18 @@ public class GetAthleteClubsError : FluentResults.Error
     public const string UnknownError = "UnknownError";
 
     public GetAthleteClubsError(string message)
+        : base(message)
+    {
+    }
+}
+
+public class GetAthleteError : FluentResults.Error
+{
+    public const string Unauthorized = "Unauthorized";
+    public const string TooManyRequests = "TooManyRequests";
+    public const string UnknownError = "UnknownError";
+
+    public GetAthleteError(string message)
         : base(message)
     {
     }

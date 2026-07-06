@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentResults;
 using KomTracker.Application.Interfaces.Services.Strava;
+using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Domain.Entities.Club;
 using KomTracker.Domain.Entities.Segment;
 using Strava.API.Client.Api;
@@ -74,5 +75,24 @@ public class AthleteService : IAthleteService
         };
 
         return Result.Fail<IEnumerable<ClubEntity>>(new GetAthleteClubsError(mappedErrorMessage));
+    }
+
+    public async Task<Result<AthleteEntity>> GetAthleteAsync(int athleteId, string token)
+    {
+        var getAthleteRes = await _athleteApi.GetAthleteAsync(token);
+
+        if (getAthleteRes.IsSuccess)
+        {
+            return Result.Ok(_mapper.Map<AthleteEntity>(getAthleteRes.Value));
+        }
+
+        var mappedErrorMessage = getAthleteRes.Errors.OfType<ApiModel.Athlete.Error.GetAthleteError>().FirstOrDefault()?.Message switch
+        {
+            ApiModel.Athlete.Error.GetAthleteError.Unauthorized => GetAthleteError.Unauthorized,
+            ApiModel.Athlete.Error.GetAthleteError.TooManyRequests => GetAthleteError.TooManyRequests,
+            _ => GetAthleteError.UnknownError
+        };
+
+        return Result.Fail<AthleteEntity>(new GetAthleteError(mappedErrorMessage));
     }
 }

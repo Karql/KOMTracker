@@ -1,4 +1,5 @@
 ﻿using KomTracker.API.Attributes;
+using KomTracker.Application.Commands.Account;
 using KomTracker.Application.Commands.Club;
 using KomTracker.Application.Commands.Segment;
 using KomTracker.Application.Commands.Stats;
@@ -49,6 +50,14 @@ public class AdminController : BaseApiController<AdminController>
     public async Task<ActionResult> RefreshStats(CancellationToken cancellationToken)
     {
         await _mediator.Send(new RefreshStatsCommand(), cancellationToken);
+
+        return new NoContentResult();
+    }
+
+    [HttpPut("refresh-athletes")]
+    public async Task<ActionResult> RefreshAthletes(CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new RefreshAthletesCommand(), cancellationToken);
 
         return new NoContentResult();
     }
