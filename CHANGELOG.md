@@ -1,4 +1,4 @@
-﻿## UPCOMMING
+﻿## 1.11.0 (2026-07-07)
 
 ### Features
 - Battle field: detect KOM takeovers between app users (backend)
