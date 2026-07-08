@@ -16,26 +16,29 @@
         }
         else
         {
-            <MudTable Hover="true" Elevation="0" Items="_efforts" Dense="true" Bordered="false" Striped="true">
+            <MudTable Hover="true" Elevation="0" Items="_efforts" Dense="true" Bordered="false" Striped="true" Filter="new Func<EffortViewModel, bool>(Search)">
+                <ToolBarContent>
+                    <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for koms" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
+                </ToolBarContent>
                 <HeaderContent>
-                    <MudTh>Date</MudTh>
-                    <MudTh>Segment name</MudTh>
-                    <MudTh>Distance</MudTh>
-                    <MudTh>Elev diff</MudTh>
-                    <MudTh>Grade</MudTh>
-                    <MudTh>Speed</MudTh>
-                    <MudTh>HR</MudTh>
-                    <MudTh>Power</MudTh>
-                    <MudTh>Time</MudTh>
-                    <MudTh>Cat</MudTh>
-                    <MudTh>Type</MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.Name)">Segment name</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.Distance)">Distance</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ElevationHigh - x.Segment.ElevationLow)">Elev diff</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.AverageGrade)">Grade</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.Speed)">Speed</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageHeartrate ?? 0)">HR</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ExtendedCategory)">Cat</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ActivityType)">Type</MudTableSortLabel></MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Date">
                         @context.SegmentEffort.StartDate.ToString("yyyy-MM-dd")
                     </MudTd>
                     <MudTd DataLabel="Name">
-                        <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.SegmentEffort.Id}")">@context.Segment.Name</MudLink>
+                        <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.SegmentEffort.Id}")"><MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /></MudLink>
                     </MudTd>
                     <MudTd DataLabel="Distance">
                         @((context.Segment.Distance / 1000).ToString("F2")) km
@@ -102,7 +105,14 @@
     private HttpClient Http { get; set; } = default!;
 
     private bool _loaded = false;
+    private string _searchString = "";
     private IEnumerable<EffortViewModel> _efforts = Enumerable.Empty<EffortViewModel>();
+
+    private bool Search(EffortViewModel kom)
+    {
+        if (string.IsNullOrWhiteSpace(_searchString)) return true;
+        return kom.Segment.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true;
+    }
 
     protected override async Task OnInitializedAsync()
     {
