@@ -2,6 +2,7 @@
 
 ### Features
 - Battle field: search and sort in the takeover details modal
+- Battle field: FAQ explaining how it works
 
 ## 1.11.0 (2026-07-07)
 
