@@ -4,6 +4,10 @@
 - Battle field: search and sort in the takeover details modal
 - Battle field: FAQ explaining how it works
 
+### Bug fixes
+- Fix stale web app after deploy: content-hash all static assets (framework fingerprinted by the SDK; CSS/library assets hashed via a build-time script) and cache them immutably; only index.html revalidates
+- Fix broken Plotly script references in index.html (point to the actual Plotly.Blazor 7.1.0 asset filenames)
+
 ## 1.11.0 (2026-07-07)
 
 ### Features

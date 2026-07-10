@@ -7,6 +7,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
+    <!-- Fill #[.{fingerprint}] placeholders in index.html at build/publish. In standalone WASM (.NET 10)
+         this fingerprints the framework loader (blazor.webassembly.<hash>.js) + emits the import map for
+         the hashed _framework assemblies. It does NOT fingerprint app CSS / RCL _content assets (SDK limitation,
+         dotnet/aspnetcore #64170) - those are revalidated via nginx no-cache instead. -->
+    <OverrideHtmlAssetPlaceholders>true</OverrideHtmlAssetPlaceholders>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

@@ -12,6 +12,8 @@ RUN dotnet build "KomTracker.WEB.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "KomTracker.WEB.csproj" -c Release -o /app/publish
+# Content-hash the assets the SDK doesn't fingerprint (app.css, _content/*) for cache-busting
+RUN sh Docker/fingerprint-assets.sh /app/publish/wwwroot
 
 FROM nginx:1.29-alpine AS final
 EXPOSE 80
