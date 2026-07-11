@@ -1,4 +1,4 @@
-﻿## UPCOMMING
+﻿## 1.12.0 (2026-07-11)
 
 ### Features
 - Battle field: search and sort in the takeover details modal
