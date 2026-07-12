@@ -15,7 +15,8 @@ RUN dotnet publish "KomTracker.WEB.csproj" -c Release -o /app/publish
 # Content-hash the assets the SDK doesn't fingerprint (app.css, _content/*) for cache-busting
 RUN sh Docker/fingerprint-assets.sh /app/publish/wwwroot
 
-FROM nginx:1.29-alpine AS final
+# Custom nginx (headers-more + ngx_brotli) so the app can serve precompressed *.br via brotli_static
+FROM karql/kom-tracker-nginx:1.31-alpine AS final
 EXPOSE 80
 WORKDIR /app
 COPY --from=publish /app/publish/wwwroot .

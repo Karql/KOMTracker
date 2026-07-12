@@ -11,7 +11,7 @@ Only app users are known to the system — Strava hid public segment leaderboard
 ## Tech stack
 
 - **Backend API**: ASP.NET Core (**.NET 10**), Swagger.
-- **Frontend**: **Blazor WebAssembly** + MudBlazor 8, Plotly, Leaflet (maps).
+- **Frontend**: **Blazor WebAssembly** + MudBlazor 8, Leaflet (maps).
 - **DB**: **PostgreSQL 18** + EF Core (Npgsql), FlexLabs.Upsert, EFCore.BulkExtensions.
 - **Auth**: **IdentityServer4** (OIDC / OAuth2 Authorization Code + PKCE), JWT Bearer. (IdentityServer4 is EOL — future migration candidate.)
 - **Scheduling**: **Quartz.NET** (Europe/Warsaw).

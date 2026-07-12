@@ -4,3 +4,4 @@
 set -euo pipefail
 
 ./build.sh nginx 1.21-alpine
+./build.sh nginx 1.31-alpine

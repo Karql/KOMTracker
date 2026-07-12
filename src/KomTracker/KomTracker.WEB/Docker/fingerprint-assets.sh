@@ -24,3 +24,10 @@ grep -oE '[^"]+\?v=__ASSET_HASH__' "$INDEX" \
         sed -i "s|${esc}?v=__ASSET_HASH__|${path}?v=${hash}|g" "$INDEX"
         echo "fingerprint-assets: $path -> ?v=$hash"
     done
+
+# Publish emits *.gz/*.br for every static file, but files in the wwwroot ROOT are either rewritten
+# after publish (index.html, above) or replaced at runtime via a volume mount (appsettings*.json).
+# Their precompressed siblings would be stale, and nginx gzip_static would serve them instead of the
+# current file -> drop them. Subdir assets (_framework/_content/css) keep their precompressed copies.
+find "$WWWROOT" -maxdepth 1 -type f \( -name '*.gz' -o -name '*.br' \) -delete
+echo "fingerprint-assets: removed stale root-level *.gz/*.br"

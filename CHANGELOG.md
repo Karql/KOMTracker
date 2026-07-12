@@ -1,4 +1,12 @@
-﻿## 1.12.0 (2026-07-11)
+﻿## UPCOMMING
+
+### Performance
+- Serve the web app over HTTP/2 (request multiplexing) and compress static assets with Brotli/gzip, cutting first-load transfer significantly
+- Brotli/gzip-compress API responses at the reverse proxy
+- Remove unused Plotly library (~9.6 MB off every page load)
+- Upgrade reverse-proxy nginx 1.21 → 1.31 and add the ngx_brotli module (security/currency + better compression)
+
+## 1.12.0 (2026-07-11)
 
 ### Features
 - Battle field: search and sort in the takeover details modal
