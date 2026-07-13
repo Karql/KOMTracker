@@ -1,6 +1,7 @@
 ﻿@page "/faq"
 @using KomTracker.Application.Shared.Helpers
 @using KomTracker.Application.Shared.Models.Segment
+@using KomTracker.Application.Shared.Models.Difficulty
 @using KomTracker.WEB.Helpers
 @attribute [Authorize]
 
@@ -145,8 +146,71 @@
             <div class="d-flex align-center justify-space-between climb-category mr-2" style="background-color: @ViewHelper.GetExtendedCategoryColor(ExtendedCategoryEnum.D1)">
                 <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
                 <span>@SegmentHelper.GetExtendedCategoryText(ExtendedCategoryEnum.D1)</span>
-            </div> 
+            </div>
             <span>Downhill steep - average gradient &lt -8%</span>
         </div>
     </MudExpansionPanel>
+
+    <MudExpansionPanel Text="What are The Bar and The Burn?">
+        <MudText Typo="Typo.body2" GutterBottom="true">
+            Two columns on the koms list that gauge <b>how hard a KOM really is</b> - one for how tough it is to
+            take, one for how hard the holder actually worked to earn it.
+        </MudText>
+
+        <MudText Typo="Typo.body2" GutterBottom="true">
+            <b>The Bar</b> - how high the bar is set, i.e. how demanding the time itself is. We take the time and
+            the segment (length, gradient) and work out the power a <b>reference rider</b> (fixed weight, aero, etc.)
+            would need to ride it under average conditions. So it rates the record itself - what you'd have to bring
+            to take it - no matter how the current holder got it. A low Bar is an easy target; a high one means you
+            need real power (or a good tailwind / group / descent).
+        </MudText>
+        <MudText Typo="Typo.body2" GutterBottom="true">
+            <b>The Burn</b> - how hard the current holder actually worked to earn it, from their real power-meter
+            data. It only shows up for rides recorded with a power meter.
+        </MudText>
+        <MudText Typo="Typo.body2" GutterBottom="true">
+            They usually agree, but the gap is telling: a high Bar with a low Burn often means the time was set
+            in easy conditions (a tailwind, or sitting in a fast group) - a good one to attack. A dash
+            (<b>&ndash;</b>) means we can't rate it: a downhill, a very short segment, or - for The Burn - no
+            power meter (and ratings are for rides only).
+        </MudText>
+
+        <MudText Typo="Typo.body2" Class="mt-4">
+            <b>How the rating is shown</b> - each one has two parts:
+        </MudText>
+        <MudText Typo="Typo.body2" GutterBottom="true">
+            &bull; a <b>category</b> (the badge) - the racing class, from Cat 5 (beginner racer) up to World Class.
+            Every effort length has its own power benchmarks (a 30-second sprint and a 20-minute climb are judged
+            against different numbers), so the category is comparable across any segment.<br />
+            &bull; a <b>score</b> (the number on the badge) - a finer figure so efforts <i>within</i> the same
+            category can still be told apart; higher = stronger. <b>100 is top world-class</b> (the best-in-the-world
+            benchmark for that effort length); most efforts sit well below, and a score <b>above 100</b> means beyond
+            even that - usually a time helped by a tailwind, a fast group, or a downhill run rather than raw strength.
+        </MudText>
+
+        <MudText Typo="Typo.body2" Class="mt-4 mb-2">The categories, hardest first:</MudText>
+        @foreach (var (category, description) in _rankLegend)
+        {
+            <div class="d-flex align-center mb-2">
+                <div class="d-flex align-center justify-center kom-rank mr-2" style="background-color: @ViewHelper.GetRankCategoryColor(category)">
+                    <span>@ViewHelper.GetRankCategoryShort(category)</span>
+                </div>
+                <span>@ViewHelper.GetRankCategoryLabel(category) &ndash; @description</span>
+            </div>
+        }
+    </MudExpansionPanel>
 </MudExpansionPanels>
+
+@code {
+    private readonly (KomCategory Category, string Description)[] _rankLegend =
+    [
+        (KomCategory.WorldClass, "world-tour / pro peloton level"),
+        (KomCategory.Pro, "near-professional"),
+        (KomCategory.Cat1, "top-level amateur racer"),
+        (KomCategory.Cat2, "strong racer"),
+        (KomCategory.Cat3, "solid club racer"),
+        (KomCategory.Cat4, "entry-level racer"),
+        (KomCategory.Cat5, "beginner racer"),
+        (KomCategory.Recreational, "casual - just out riding"),
+    ];
+}

@@ -1,5 +1,8 @@
-﻿using KomTracker.Application.Models.Segment;
+﻿using KomTracker.Application.Interfaces.Persistence;
+using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Models.Segment;
 using KomTracker.Application.Services;
+using KomTracker.Application.Shared.Helpers;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -18,10 +21,12 @@ public class GetAllKomsQuery : IRequest<IEnumerable<EffortModel>>
 public class GetAllKomsQueryHandler : IRequestHandler<GetAllKomsQuery, IEnumerable<EffortModel>>
 {
     private readonly ISegmentService _segmentService;
+    private readonly IKOMUnitOfWork _komUoW;
 
-    public GetAllKomsQueryHandler(ISegmentService segmentService)
+    public GetAllKomsQueryHandler(ISegmentService segmentService, IKOMUnitOfWork komUoW)
     {
         _segmentService = segmentService ?? throw new ArgumentNullException(nameof(segmentService));
+        _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
     }
 
     public async Task<IEnumerable<EffortModel>> Handle(GetAllKomsQuery request, CancellationToken cancellationToken)
@@ -29,7 +34,32 @@ public class GetAllKomsQueryHandler : IRequestHandler<GetAllKomsQuery, IEnumerab
         var komsEfforts = (await _segmentService.GetLastKomsSummaryEffortsAsync(request.AthleteId))?
             .Where(x => x.SummarySegmentEffort.Kom)
             .ToList()
-            ?? Enumerable.Empty<EffortModel>();
+            ?? new List<EffortModel>();
+
+        // The Burn needs the KOM holder's weight/sex (all these KOMs belong to AthleteId).
+        var athlete = await _komUoW.GetRepository<IAthleteRepository>().GetAthleteAsync(request.AthleteId);
+        var sex = athlete?.Sex;
+        var weight = athlete?.Weight ?? 0f;
+
+        foreach (var effort in komsEfforts)
+        {
+            if (effort.Segment is null) continue;
+
+            effort.Bar = KomDifficultyCalculator.EstimateDifficulty(
+                effort.Segment.ActivityType,
+                effort.SegmentEffort.ElapsedTime,
+                effort.Segment.Distance,
+                effort.Segment.AverageGrade,
+                sex);
+
+            effort.Burn = KomDifficultyCalculator.MeasuredEffort(
+                effort.Segment.ActivityType,
+                effort.SegmentEffort.AverageWatts,
+                effort.SegmentEffort.DeviceWatts,
+                weight,
+                effort.SegmentEffort.ElapsedTime,
+                sex);
+        }
 
         return komsEfforts;
     }

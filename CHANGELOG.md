@@ -1,5 +1,8 @@
 ﻿## UPCOMMING
 
+### Features
+- KOM difficulty & effort ratings on the koms list — "The Bar" (how hard a KOM is to take, estimated from the winning time + terrain) and "The Burn" (how hard the holder actually worked, from measured power), rated on Coggan's Cat 5 → World Class scale (0–100); with an FAQ explainer
+
 ### Performance
 - Serve the web app over HTTP/2 (request multiplexing) and compress static assets with Brotli/gzip, cutting first-load transfer significantly
 - Brotli/gzip-compress API responses at the reverse proxy

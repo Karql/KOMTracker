@@ -12,6 +12,16 @@
     text-align: center
 }
 
+.kom-rank {
+    color: #fff;
+    border-radius: 13px;
+    width: 66px;
+    height: 26px;
+    padding: 0 8px;
+    white-space: nowrap;
+    font-size: 0.8rem;
+}
+
 /* #region club-select */
 .mud-select-input .club-select-item-wrapper {
     position: relative;

@@ -1,5 +1,7 @@
 ﻿using AutoFixture;
 using FluentAssertions;
+using KomTracker.Application.Interfaces.Persistence;
+using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Application.Models.Segment;
 using KomTracker.Application.Queries.Athlete;
 using KomTracker.Application.Services;
@@ -21,15 +23,18 @@ public class GetAllKomsQueryTests
     private const int TestAthleteId = 1;
 
     private readonly ISegmentService _segmentService;
+    private readonly IKOMUnitOfWork _komUoW;
     private readonly CancellationToken _cancellationToken;
     private readonly GetAllKomsQueryHandler _getAllKomsQueryHandler;
 
     public GetAllKomsQueryTests()
     {
         _segmentService = Substitute.For<ISegmentService>();
+        _komUoW = Substitute.For<IKOMUnitOfWork>();
+        _komUoW.GetRepository<IAthleteRepository>().Returns(Substitute.For<IAthleteRepository>());
         _cancellationToken = new CancellationTokenSource().Token;
 
-        _getAllKomsQueryHandler = new GetAllKomsQueryHandler(_segmentService);
+        _getAllKomsQueryHandler = new GetAllKomsQueryHandler(_segmentService, _komUoW);
     }
 
     [Fact]

@@ -26,6 +26,8 @@ else
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.EffortCount ?? 0)">Attempts</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.AthleteCount ?? 0)">Athletes</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ExtendedCategory)">Cat</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Bar?.Ranking ?? -1)">The Bar</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Burn?.Ranking ?? -1)">The Burn</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ActivityType)">Type</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
@@ -77,6 +79,12 @@ else
                     <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
                     <span>@context.Segment.ExtendedCategoryText</span>
                 </div>
+            </MudTd>
+            <MudTd DataLabel="The Bar">
+                <RankBadge Rank="context.Bar" />
+            </MudTd>
+            <MudTd DataLabel="The Burn">
+                <RankBadge Rank="context.Burn" />
             </MudTd>
             <MudTd DataLabel="Type">
                 <MudTooltip Text="@ActivityTypeHelper.GetActivityTypeName(context.Segment.ActivityType)">

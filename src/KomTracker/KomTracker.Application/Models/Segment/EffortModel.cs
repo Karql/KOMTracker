@@ -1,4 +1,5 @@
-﻿using KomTracker.Domain.Entities.Segment;
+﻿using KomTracker.Application.Shared.Models.Difficulty;
+using KomTracker.Domain.Entities.Segment;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,4 +15,10 @@ public class EffortModel
     public KomsSummarySegmentEffortEntity SummarySegmentEffort { get; set; }
 
     public SegmentEntity? Segment { get; set; }
+
+    /// <summary>"The Bar" — difficulty estimated from the KOM time (null when not rateable).</summary>
+    public KomRankResult? Bar { get; set; }
+
+    /// <summary>"The Burn" — effort measured from the holder's power (null when not rateable).</summary>
+    public KomRankResult? Burn { get; set; }
 }

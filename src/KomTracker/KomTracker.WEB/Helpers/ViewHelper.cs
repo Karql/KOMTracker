@@ -1,4 +1,5 @@
 ﻿using KomTracker.Application.Shared.Helpers;
+using KomTracker.Application.Shared.Models.Difficulty;
 using KomTracker.Application.Shared.Models.Segment;
 using MudBlazor;
 
@@ -6,6 +7,53 @@ namespace KomTracker.WEB.Helpers;
 
 public static class ViewHelper
 {
+    // Colours for the KOM difficulty/effort categories (green = easy -> purple = elite),
+    // in the spirit of Sauce4Strava's ranking emblems (images/ranking).
+    public static string GetRankCategoryColor(KomCategory category)
+    {
+        return category switch
+        {
+            KomCategory.WorldClass => "#8e24aa",
+            KomCategory.Pro => "#d32f2f",
+            KomCategory.Cat1 => "#f4511e",
+            KomCategory.Cat2 => "#fb8c00",
+            KomCategory.Cat3 => "#fbc02d",
+            KomCategory.Cat4 => "#7cb342",
+            KomCategory.Cat5 => "#43a047",
+            _ => "#9e9e9e",
+        };
+    }
+
+    public static string GetRankCategoryShort(KomCategory category)
+    {
+        return category switch
+        {
+            KomCategory.WorldClass => "WC",
+            KomCategory.Pro => "PRO",
+            KomCategory.Cat1 => "C1",
+            KomCategory.Cat2 => "C2",
+            KomCategory.Cat3 => "C3",
+            KomCategory.Cat4 => "C4",
+            KomCategory.Cat5 => "C5",
+            _ => "REC",
+        };
+    }
+
+    public static string GetRankCategoryLabel(KomCategory category)
+    {
+        return category switch
+        {
+            KomCategory.WorldClass => "World Class",
+            KomCategory.Pro => "Pro",
+            KomCategory.Cat1 => "Cat 1",
+            KomCategory.Cat2 => "Cat 2",
+            KomCategory.Cat3 => "Cat 3",
+            KomCategory.Cat4 => "Cat 4",
+            KomCategory.Cat5 => "Cat 5",
+            _ => "Recreational",
+        };
+    }
+
     public static string GetActivityTypeIcon(string activityType)
     {
         return activityType switch

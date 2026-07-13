@@ -1,0 +1,34 @@
+@using KomTracker.Application.Shared.Models.Difficulty
+@using KomTracker.WEB.Helpers
+
+@if (Rank is null)
+{
+    <span class="mud-text-secondary">&ndash;</span>
+}
+else
+{
+    <MudTooltip Text="@GetTooltip()">
+        <div class="d-flex align-center justify-center kom-rank" style="background-color: @ViewHelper.GetRankCategoryColor(Rank.Category)">
+            <span>@ViewHelper.GetRankCategoryShort(Rank.Category)&nbsp;@Rank.Ranking</span>
+        </div>
+    </MudTooltip>
+}
+
+@code {
+    [Parameter]
+    public KomRankResult? Rank { get; set; }
+
+    private string GetTooltip()
+    {
+        if (Rank is null)
+        {
+            return string.Empty;
+        }
+
+        var wKg = Math.Round(Rank.WKg, 1);
+        var min = Math.Round(Rank.CategoryMinWKg, 1);
+        var max = Math.Round(Rank.CategoryMaxWKg, 1);
+
+        return $"{ViewHelper.GetRankCategoryLabel(Rank.Category)} · {wKg:F1} W/kg (category {min:F1}–{max:F1} W/kg)";
+    }
+}

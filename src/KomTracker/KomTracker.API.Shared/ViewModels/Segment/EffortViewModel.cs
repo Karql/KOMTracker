@@ -1,4 +1,6 @@
-﻿namespace KomTracker.API.Shared.ViewModels.Segment;
+﻿using KomTracker.Application.Shared.Models.Difficulty;
+
+namespace KomTracker.API.Shared.ViewModels.Segment;
 
 public class EffortViewModel
 {
@@ -8,4 +10,9 @@ public class EffortViewModel
 
     public SegmentViewModel Segment { get; set; }
 
+    /// <summary>"The Bar" — KOM difficulty (estimated). Null when not rated.</summary>
+    public KomRankResult? Bar { get; set; }
+
+    /// <summary>"The Burn" — measured effort of the holder. Null when not rated.</summary>
+    public KomRankResult? Burn { get; set; }
 }
