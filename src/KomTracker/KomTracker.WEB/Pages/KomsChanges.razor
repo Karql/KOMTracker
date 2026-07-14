@@ -54,6 +54,8 @@ else
             <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Segment.ExtendedCategory)">Cat</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Bar?.Ranking ?? -1)">The Bar</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => x.Effort.Burn?.Ranking ?? -1)">The Burn</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<EffortWithAthleteViewModel, object>(x => ActivityTypeHelper.GetActivityTypeOrder(x.Effort.Segment.ActivityType))">Type</MudTableSortLabel></MudTh>
         </HeaderContent>
         <RowTemplate>
@@ -122,6 +124,12 @@ else
                     <MudIcon  Icon="@Icons.Material.Filled.Landscape"></MudIcon>
                     <span>@context.Effort.Segment.ExtendedCategoryText</span>
                 </div>
+            </MudTd>
+            <MudTd DataLabel="The Bar">
+                <RankBadge Rank="context.Effort.Bar" />
+            </MudTd>
+            <MudTd DataLabel="The Burn">
+                <RankBadge Rank="context.Effort.Burn" />
             </MudTd>
             <MudTd DataLabel="Type">
                 <MudTooltip Text="@ActivityTypeHelper.GetActivityTypeName(context.Effort.Segment.ActivityType)">

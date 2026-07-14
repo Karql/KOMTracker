@@ -3,6 +3,7 @@ using KomTracker.API.Shared.ViewModels.Club;
 using KomTracker.API.Shared.ViewModels.Ranking;
 using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.API.Shared.ViewModels.Stats;
+using KomTracker.Application.Shared.Helpers;
 using KomTracker.Application.Shared.Models.Segment;
 using KomTracker.WEB.Helpers;
 using KomTracker.WEB.Infrastructure.Services.User;
@@ -49,6 +50,9 @@ public partial class Ranking
 
     [Inject]
     private IUserService UserService { get; set; } = default!;
+
+    [Inject]
+    private IDialogService DialogService { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,5 +112,77 @@ public partial class Ranking
     {
         _selectedClub = selectedClub;
         await GetRankingAsync();
+    }
+
+    // Ranking type = Total: reuse the athlete's koms endpoint and filter client-side by the
+    // selected activity type (+ the clicked category, or all for the "Koms" total column).
+    private async Task OpenTotalKomsAsync(AthleteRankingViewModel row, ExtendedCategoryEnum? category, string label)
+    {
+        var koms = await Http.GetFromJsonAsync<EffortViewModel[]>($"athletes/{row.Athlete.AthleteId}/koms")
+            ?? Array.Empty<EffortViewModel>();
+
+        IEnumerable<EffortViewModel> filtered = koms;
+
+        if (!string.IsNullOrEmpty(_selectedActivityType))
+        {
+            filtered = filtered.Where(x => string.Equals(x.Segment.ActivityType, _selectedActivityType, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (category.HasValue)
+        {
+            filtered = filtered.Where(x => x.Segment.ExtendedCategory == category.Value);
+        }
+
+        await ShowKomsAsync(BuildTitle(row, label), filtered.ToArray());
+    }
+
+    // Ranking type = Koms changes: the new/lost lists live in the precomputed stats, fetched lazily.
+    private async Task OpenKomsChangesAsync(AthleteRankingViewModel row, string period, string direction, string label, int count)
+    {
+        if (count <= 0) return;
+
+        var qParams = new Dictionary<string, string?>
+        {
+            { "athlete_id", row.Athlete.AthleteId.ToString() },
+            { "period", period },
+            { "direction", direction },
+        };
+
+        if (!string.IsNullOrEmpty(_selectedActivityType))
+        {
+            qParams.Add("activity_type", _selectedActivityType);
+        }
+
+        var koms = await Http.GetFromJsonAsync<EffortViewModel[]>(
+            QueryHelpers.AddQueryString("ranking/koms-changes-details", qParams))
+            ?? Array.Empty<EffortViewModel>();
+
+        await ShowKomsAsync(BuildTitle(row, label), koms);
+    }
+
+    private string BuildTitle(AthleteRankingViewModel row, string label)
+    {
+        var suffix = string.IsNullOrEmpty(_selectedActivityType)
+            ? string.Empty
+            : $" · {ActivityTypeHelper.GetActivityTypeName(_selectedActivityType)}";
+
+        return $"{row.Athlete.FullName} — {label}{suffix}";
+    }
+
+    private async Task ShowKomsAsync(string title, IEnumerable<EffortViewModel> efforts)
+    {
+        var parameters = new DialogParameters<KomsListDialog>
+        {
+            { x => x.Efforts, efforts },
+        };
+
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.ExtraExtraLarge,
+            FullWidth = true,
+            CloseButton = true
+        };
+
+        await DialogService.ShowAsync<KomsListDialog>(title, parameters, options);
     }
 }

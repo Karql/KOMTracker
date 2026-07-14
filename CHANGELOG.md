@@ -1,7 +1,9 @@
 ﻿## UPCOMMING
 
 ### Features
-- KOM difficulty & effort ratings on the koms list — "The Bar" (how hard a KOM is to take, estimated from the winning time + terrain) and "The Burn" (how hard the holder actually worked, from measured power), rated on Coggan's Cat 5 → World Class scale (0–100); with an FAQ explainer
+- KOM difficulty & effort ratings — "The Bar" (how hard a KOM is to take, estimated from the winning time + terrain) and "The Burn" (how hard the holder actually worked, from measured power), rated on Coggan's Cat 5 → World Class scale; shown on the koms list, the koms-changes list and the Battle Field details, with an FAQ explainer
+- Ranking: click a count to see the KOMs behind it — a category (or total) count in Total, or a New/Lost count in Koms changes (respects the selected activity type)
+- Koms list: segment names now link to the actual effort on Strava (not just the segment)
 
 ### Performance
 - Serve the web app over HTTP/2 (request multiplexing) and compress static assets with Brotli/gzip, cutting first-load transfer significantly

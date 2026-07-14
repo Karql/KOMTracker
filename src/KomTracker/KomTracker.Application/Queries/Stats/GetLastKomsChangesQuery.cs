@@ -38,7 +38,11 @@ public class GetLastKomsChangesQueryHandler : IRequestHandler<GetLastKomsChanges
         var changes = await _segmentService.GetLastKomsChangesAsync(athletes.Select(x => x.AthleteId).ToHashSet(), top: request.Top);
 
         return athletes
-            .Join(changes, a => a.AthleteId, c => c.SegmentEffort.AthleteId, (a, c) => new EffortWithAthleteModel(c, a))
+            .Join(changes, a => a.AthleteId, c => c.SegmentEffort.AthleteId, (a, c) =>
+            {
+                KomRatingEnricher.Apply(c, a.Sex, a.Weight);
+                return new EffortWithAthleteModel(c, a);
+            })
             .OrderByDescending(x => x.Effort.SummarySegmentEffort.AuditCD)
             .ToList();
     }

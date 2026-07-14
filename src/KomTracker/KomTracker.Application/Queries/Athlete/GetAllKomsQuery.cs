@@ -43,22 +43,7 @@ public class GetAllKomsQueryHandler : IRequestHandler<GetAllKomsQuery, IEnumerab
 
         foreach (var effort in komsEfforts)
         {
-            if (effort.Segment is null) continue;
-
-            effort.Bar = KomDifficultyCalculator.EstimateDifficulty(
-                effort.Segment.ActivityType,
-                effort.SegmentEffort.ElapsedTime,
-                effort.Segment.Distance,
-                effort.Segment.AverageGrade,
-                sex);
-
-            effort.Burn = KomDifficultyCalculator.MeasuredEffort(
-                effort.Segment.ActivityType,
-                effort.SegmentEffort.AverageWatts,
-                effort.SegmentEffort.DeviceWatts,
-                weight,
-                effort.SegmentEffort.ElapsedTime,
-                sex);
+            KomRatingEnricher.Apply(effort, sex, weight);
         }
 
         return komsEfforts;

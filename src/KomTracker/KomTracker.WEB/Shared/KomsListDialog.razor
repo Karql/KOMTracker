@@ -1,42 +1,35 @@
 @using KomTracker.API.Shared.ViewModels.Segment
 @using KomTracker.Application.Shared.Helpers
 @using KomTracker.WEB.Helpers
-@using Microsoft.AspNetCore.WebUtilities
-@using System.Net.Http.Json
 
 <MudDialog>
     <DialogContent>
-        @if (!_loaded)
+        @if (!Efforts.Any())
         {
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-        }
-        else if (!_efforts.Any())
-        {
-            <MudText Typo="Typo.body2">No segments in the selected range.</MudText>
+            <MudText Typo="Typo.body2">No KOMs to show.</MudText>
         }
         else
         {
-            <MudTable Hover="true" Elevation="0" Items="_efforts" Dense="true" Bordered="false" Striped="true" Filter="new Func<EffortViewModel, bool>(Search)">
+            <MudTable Hover="true" Elevation="0" Items="Efforts" Dense="true" Bordered="false" Striped="true" Filter="new Func<EffortViewModel, bool>(Search)">
                 <ToolBarContent>
                     <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for koms" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
-                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.Name)">Segment name</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.Distance)">Distance</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ElevationHigh - x.Segment.ElevationLow)">Elev diff</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.AverageGrade)">Grade</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.StartDate)">Date</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.Speed)">Speed</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageHeartrate ?? 0)">HR</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.AverageWatts ?? 0)">Power</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.SegmentEffort.ElapsedTime)">Time</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ExtendedCategory)">Cat</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Bar?.Ranking ?? -1)">The Bar</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Burn?.Ranking ?? -1)">The Burn</MudTableSortLabel></MudTh>
                     <MudTh><MudTableSortLabel SortBy="new Func<EffortViewModel, object>(x => x.Segment.ActivityType)">Type</MudTableSortLabel></MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="Date">
-                        @context.SegmentEffort.StartDate.ToString("yyyy-MM-dd")
-                    </MudTd>
                     <MudTd DataLabel="Name">
                         <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.SegmentEffort.Id}")"><MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /></MudLink>
                     </MudTd>
@@ -48,6 +41,9 @@
                     </MudTd>
                     <MudTd DataLabel="Grade">
                         @context.Segment.AverageGrade.ToString("F1")%
+                    </MudTd>
+                    <MudTd DataLabel="Date">
+                        @context.SegmentEffort.StartDate.ToString("yyyy-MM-dd")
                     </MudTd>
                     <MudTd DataLabel="Speed">
                         @context.SegmentEffort.Speed.ToString("F1")km/h
@@ -73,6 +69,12 @@
                             <span>@context.Segment.ExtendedCategoryText</span>
                         </div>
                     </MudTd>
+                    <MudTd DataLabel="The Bar">
+                        <RankBadge Rank="context.Bar" />
+                    </MudTd>
+                    <MudTd DataLabel="The Burn">
+                        <RankBadge Rank="context.Burn" />
+                    </MudTd>
                     <MudTd DataLabel="Type">
                         <MudTooltip Text="@ActivityTypeHelper.GetActivityTypeName(context.Segment.ActivityType)">
                             <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(context.Segment.ActivityType)"></MudIcon>
@@ -94,54 +96,14 @@
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    [Parameter] public int WinnerAthleteId { get; set; }
-    [Parameter] public int LoserAthleteId { get; set; }
-    [Parameter] public DateTime? DateFrom { get; set; }
-    [Parameter] public DateTime? DateTo { get; set; }
-    [Parameter] public string? ActivityType { get; set; }
-    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public IEnumerable<EffortViewModel> Efforts { get; set; } = Enumerable.Empty<EffortViewModel>();
 
-    [Inject]
-    private HttpClient Http { get; set; } = default!;
-
-    private bool _loaded = false;
     private string _searchString = "";
-    private IEnumerable<EffortViewModel> _efforts = Enumerable.Empty<EffortViewModel>();
 
     private bool Search(EffortViewModel kom)
     {
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
         return kom.Segment.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true;
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        var qParams = new Dictionary<string, string?>
-        {
-            { "winner_athlete_id", WinnerAthleteId.ToString() },
-            { "loser_athlete_id", LoserAthleteId.ToString() },
-        };
-
-        if (DateFrom != null)
-        {
-            qParams.Add("date_from", DateFrom.Value.ToUniversalTime().ToString("o"));
-        }
-
-        if (DateTo != null)
-        {
-            qParams.Add("date_to", DateTo.Value.ToUniversalTime().ToString("o"));
-        }
-
-        if (!string.IsNullOrEmpty(ActivityType))
-        {
-            qParams.Add("activity_type", ActivityType);
-        }
-
-        _efforts = await Http.GetFromJsonAsync<EffortViewModel[]>(
-            QueryHelpers.AddQueryString("kom-takeovers/efforts", qParams))
-            ?? Enumerable.Empty<EffortViewModel>();
-
-        _loaded = true;
     }
 
     private void Close() => MudDialog.Close();

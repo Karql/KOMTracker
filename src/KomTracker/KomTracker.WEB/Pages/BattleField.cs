@@ -2,6 +2,7 @@ using KomTracker.API.Shared.Models.User;
 using KomTracker.API.Shared.ViewModels.Athlete;
 using KomTracker.API.Shared.ViewModels.Club;
 using KomTracker.API.Shared.ViewModels.KomTakeover;
+using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.WEB.Infrastructure.Services.User;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
@@ -163,14 +164,34 @@ public partial class BattleField
 
         var title = $"{taker.FullName} → {loser.FullName} ({count})";
 
-        var parameters = new DialogParameters<BattleEffortsDialog>
+        var qParams = new Dictionary<string, string?>
         {
-            { x => x.WinnerAthleteId, taker.AthleteId },
-            { x => x.LoserAthleteId, loser.AthleteId },
-            { x => x.DateFrom, _selectedPeriod?.DateFrom },
-            { x => x.DateTo, _selectedPeriod?.DateTo },
-            { x => x.ActivityType, _selectedActivityType },
-            { x => x.Title, title },
+            { "winner_athlete_id", taker.AthleteId.ToString() },
+            { "loser_athlete_id", loser.AthleteId.ToString() },
+        };
+
+        if (_selectedPeriod?.DateFrom != null)
+        {
+            qParams.Add("date_from", _selectedPeriod.DateFrom.Value.ToUniversalTime().ToString("o"));
+        }
+
+        if (_selectedPeriod?.DateTo != null)
+        {
+            qParams.Add("date_to", _selectedPeriod.DateTo.Value.ToUniversalTime().ToString("o"));
+        }
+
+        if (!string.IsNullOrEmpty(_selectedActivityType))
+        {
+            qParams.Add("activity_type", _selectedActivityType);
+        }
+
+        var efforts = await Http.GetFromJsonAsync<EffortViewModel[]>(
+            QueryHelpers.AddQueryString("kom-takeovers/efforts", qParams))
+            ?? Array.Empty<EffortViewModel>();
+
+        var parameters = new DialogParameters<KomsListDialog>
+        {
+            { x => x.Efforts, efforts },
         };
 
         var options = new DialogOptions
@@ -180,7 +201,7 @@ public partial class BattleField
             CloseButton = true
         };
 
-        await DialogService.ShowAsync<BattleEffortsDialog>(title, parameters, options);
+        await DialogService.ShowAsync<KomsListDialog>(title, parameters, options);
     }
 }
 

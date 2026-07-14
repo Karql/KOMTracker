@@ -108,40 +108,48 @@ else
             @if (_selectedRankingType == RankingType.Total)
             {
                 <MudTd DataLabel="Koms">
-                    @context.Total.KomsCount
+                    <MudButton Variant="Variant.Text" Disabled="@(context.Total.KomsCount == 0)" OnClick="@(() => OpenTotalKomsAsync(context, null, "Koms"))">@context.Total.KomsCount</MudButton>
                 </MudTd>
 
                 @foreach (var cat in _extendedCategories)
                 {
-                    <MudTd DataLabel="@SegmentHelper.GetExtendedCategoryText(cat)">
-                        @context.Total.GetKomsCountByCategory(cat)
+                    var c = cat;
+                    var catCount = context.Total.GetKomsCountByCategory(c);
+                    <MudTd DataLabel="@SegmentHelper.GetExtendedCategoryText(c)">
+                        <MudButton Variant="Variant.Text" Disabled="@(catCount == 0)" OnClick="@(() => OpenTotalKomsAsync(context, c, SegmentHelper.GetExtendedCategoryText(c)))">@catCount</MudButton>
                     </MudTd>
                 }
             }
             @if (_selectedRankingType == RankingType.KomsChanges)
             {
                 <MudTd DataLabel="New this week">
-                    <MudText Color="Color.Success" Typo="Typo.body2">@context.KomsChangesThisWeek.NewKomsCount</MudText>                    
+                    @ChangeCell(context, context.KomsChangesThisWeek.NewKomsCount, "ThisWeek", "New", "New this week", Color.Success)
                 </MudTd>
                 <MudTd DataLabel="Lost this week">
-                    <MudText Color="Color.Error" Typo="Typo.body2">@context.KomsChangesThisWeek.LostKomsCount</MudText>      
+                    @ChangeCell(context, context.KomsChangesThisWeek.LostKomsCount, "ThisWeek", "Lost", "Lost this week", Color.Error)
                 </MudTd>
                 <MudTd DataLabel="New last week">
-                    <MudText Color="Color.Success" Typo="Typo.body2">@context.KomsChangesLastWeek.NewKomsCount</MudText>     
+                    @ChangeCell(context, context.KomsChangesLastWeek.NewKomsCount, "LastWeek", "New", "New last week", Color.Success)
                 </MudTd>
                 <MudTd DataLabel="Lost last week">
-                    <MudText Color="Color.Error" Typo="Typo.body2">@context.KomsChangesLastWeek.LostKomsCount</MudText>
+                    @ChangeCell(context, context.KomsChangesLastWeek.LostKomsCount, "LastWeek", "Lost", "Lost last week", Color.Error)
                 </MudTd>
                 <MudTd DataLabel="New last 30 days">
-                    <MudText Color="Color.Success" Typo="Typo.body2">@context.KomsChanges30Days.NewKomsCount</MudText>     
+                    @ChangeCell(context, context.KomsChanges30Days.NewKomsCount, "Last30Days", "New", "New last 30 days", Color.Success)
                 </MudTd>
                 <MudTd DataLabel="Lost last 30 days">
-                    <MudText Color="Color.Error" Typo="Typo.body2">@context.KomsChanges30Days.LostKomsCount</MudText>
+                    @ChangeCell(context, context.KomsChanges30Days.LostKomsCount, "Last30Days", "Lost", "Lost last 30 days", Color.Error)
                 </MudTd>
             }
         </RowTemplate>
         <PagerContent>
             <MudTablePager />
         </PagerContent>
-    </MudTable>    
+    </MudTable>
+}
+
+@code {
+    private RenderFragment ChangeCell(AthleteRankingViewModel row, int count, string period, string direction, string label, Color color) => @<text>
+        <MudButton Variant="Variant.Text" Color="color" Disabled="@(count == 0)" OnClick="@(() => OpenKomsChangesAsync(row, period, direction, label, count))">@count</MudButton>
+    </text>;
 }
