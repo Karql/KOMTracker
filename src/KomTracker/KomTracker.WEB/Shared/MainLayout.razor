@@ -54,7 +54,14 @@
                         </MudToolBar>
                     </MudHidden>
                     <MudContainer MaxWidth="MaxWidth.False" Class="mt-4">
-                        @Body
+                        <ErrorBoundary @ref="_errorBoundary" Context="ex">
+                            <ChildContent>
+                                @Body
+                            </ChildContent>
+                            <ErrorContent>
+                                <MudAlert Severity="Severity.Error" Class="mt-4">Something went wrong. Please refresh the page.</MudAlert>
+                            </ErrorContent>
+                        </ErrorBoundary>
                     </MudContainer>
                 </MudMainContent>
             </MudLayout>

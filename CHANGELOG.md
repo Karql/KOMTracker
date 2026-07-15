@@ -5,6 +5,9 @@
 - Ranking: click a count to see the KOMs behind it — a category (or total) count in Total, or a New/Lost count in Koms changes (respects the selected activity type)
 - Koms list: segment names now link to the actual effort on Strava (not just the segment)
 
+### Bug fixes
+- Recover gracefully when the session token can't be renewed (e.g. after an API restart): silently redirect to re-login instead of crashing the page
+
 ### Performance
 - Serve the web app over HTTP/2 (request multiplexing) and compress static assets with Brotli/gzip, cutting first-load transfer significantly
 - Brotli/gzip-compress API responses at the reverse proxy

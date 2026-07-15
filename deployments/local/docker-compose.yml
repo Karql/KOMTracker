@@ -32,6 +32,7 @@ services:
     restart: always
     environment:
       ConnectionStrings__DB: ${CONNECTION_STRING}
+      ApiConfiguration__KeysPath: /keys        
       ApplicationConfiguration__TrackKomsJobEnabled: "false"
       ApplicationConfiguration__RefreshSegmentsJobEnabled: "false"
       ApplicationConfiguration__RefreshClubsJobEnabled: "false"
@@ -51,6 +52,8 @@ services:
       IdentityConfiguration__PostLogoutRedirectUris__0: https://localhost
       Serilog__MinimumLevel__Default: Debug
       ASPNETCORE_ENVIRONMENT: Development
+    volumes:
+      - ./volumes/kom-tracker-api/keys:/keys
 
   kom-tracker-web:
     image: karql/kom-tracker-web:latest

@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using FisSst.BlazorMaps.DependencyInjection;
+using KomTracker.WEB.Infrastructure;
 using KomTracker.WEB.Infrastructure.Services.Preference;
 using KomTracker.WEB.Infrastructure.Services.User;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -43,10 +44,14 @@ public static class DependencyInjection
             options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.Scopes.OfflineAccess);
         });
 
+        services.AddScoped<ReauthenticateOnFailureHandler>();
+
         services.AddHttpClient(HttpClientName, client =>
         {
             client.BaseAddress = new Uri(komTrackerApiUrl);
         })
+        // Outermost: recovers from 401 / token-renewal failure by redirecting to login.
+        .AddHttpMessageHandler<ReauthenticateOnFailureHandler>()
         .AddHttpMessageHandler(sp =>
         {
             var handler = sp.GetService<AuthorizationMessageHandler>()!
