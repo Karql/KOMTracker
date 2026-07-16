@@ -56,10 +56,10 @@ public partial class Ranking
 
     protected override async Task OnInitializedAsync()
     {
-        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        Layout.SetBreadCrumbs(new List<BreadcrumbItem>
         {
-            new BreadcrumbItem("Ranking", href: "/ranking"),
-        };
+            new BreadcrumbItem("Ranking", href: "ranking"),
+        });
 
         _user = await UserService.GetCurrentUser();
 

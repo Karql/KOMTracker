@@ -33,10 +33,10 @@ public partial class KomsChanges
 
     protected override async Task OnInitializedAsync()
     {
-        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        Layout.SetBreadCrumbs(new List<BreadcrumbItem>
         {
-            new BreadcrumbItem("Koms changes", href: "/koms-changes"),
-        };
+            new BreadcrumbItem("Koms changes", href: "koms-changes"),
+        });
 
         _user = await UserService.GetCurrentUser();
 

@@ -13,10 +13,10 @@ public partial class Faq
 
     protected override Task OnInitializedAsync()
     {
-        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        Layout.SetBreadCrumbs(new List<BreadcrumbItem>
         {
-            new BreadcrumbItem("Faq", href: "/faq"),
-        };
+            new BreadcrumbItem("Faq", href: "faq"),
+        });
 
         return Task.CompletedTask;
     }

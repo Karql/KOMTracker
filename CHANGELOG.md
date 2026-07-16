@@ -7,6 +7,7 @@
 
 ### Bug fixes
 - Recover gracefully when the session token can't be renewed (e.g. after an API restart): silently redirect to re-login instead of crashing the page
+- Fix breadcrumbs: update on the first navigation (no longer stale until a second menu click) and keep their links within the app base path
 
 ### Performance
 - Serve the web app over HTTP/2 (request multiplexing) and compress static assets with Brotli/gzip, cutting first-load transfer significantly

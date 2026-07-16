@@ -33,10 +33,10 @@ public partial class Account
 
     protected override async Task OnInitializedAsync()
     {
-        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        Layout.SetBreadCrumbs(new List<BreadcrumbItem>
         {
-            new BreadcrumbItem("Account", href: "/account"),
-        };
+            new BreadcrumbItem("Account", href: "account"),
+        });
 
         _user = await UserService.GetCurrentUser();
 

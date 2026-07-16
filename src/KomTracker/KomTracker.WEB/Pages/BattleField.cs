@@ -44,10 +44,10 @@ public partial class BattleField
 
     protected override async Task OnInitializedAsync()
     {
-        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        Layout.SetBreadCrumbs(new List<BreadcrumbItem>
         {
-            new BreadcrumbItem("Battle Field", href: "/battle-field"),
-        };
+            new BreadcrumbItem("Battle Field", href: "battle-field"),
+        });
 
         _periods = BuildPeriods();
         _selectedPeriod = _periods.First();

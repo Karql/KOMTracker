@@ -38,10 +38,10 @@ public partial class MapPage
 
     protected override async Task OnInitializedAsync()
     {
-        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        Layout.SetBreadCrumbs(new List<BreadcrumbItem>
         {
-            new BreadcrumbItem("Map (beta)", href: "/map"),
-        };
+            new BreadcrumbItem("Map (beta)", href: "map"),
+        });
 
         _mapOptions = new MapOptions()
         {

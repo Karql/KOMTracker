@@ -37,10 +37,10 @@ public partial class Dashboard
 
     protected override async Task OnInitializedAsync()
     {
-        Layout.BreadCrumbs = new List<BreadcrumbItem>
+        Layout.SetBreadCrumbs(new List<BreadcrumbItem>
         {
             new BreadcrumbItem("Dashboard", href: ""),
-        };
+        });
 
         _user = await UserService.GetCurrentUser();
 

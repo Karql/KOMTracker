@@ -28,6 +28,14 @@ public partial class MainLayout : IDisposable
 
     public List<BreadcrumbItem> BreadCrumbs = new List<BreadcrumbItem>();
 
+    // Pages set breadcrumbs from their OnInitializedAsync (after the layout already rendered), so the
+    // layout must be told to refresh — otherwise the crumbs stay stale until an unrelated re-render.
+    public void SetBreadCrumbs(List<BreadcrumbItem> items)
+    {
+        BreadCrumbs = items;
+        StateHasChanged();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         Navigation.LocationChanged += OnLocationChanged;
