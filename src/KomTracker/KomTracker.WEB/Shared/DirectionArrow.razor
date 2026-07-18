@@ -1,0 +1,19 @@
+@using KomTracker.Application.Shared.Helpers
+@using KomTracker.Application.Shared.Models.Segment
+
+@{
+    var deg = (int)Math.Round(Bearing);
+    var direction = GeoHelper.GetCompassDirection(Bearing);
+}
+<MudTooltip Text="@($"{deg}° {GeoHelper.GetCompassDirectionText(direction)}")">
+    <div class="d-flex flex-column align-center" style="line-height:1;">
+        <svg width="16" height="16" viewBox="0 0 24 24" style="transform: rotate(@(deg)deg);">
+            <path d="M12 2 L18 20 L12 15 L6 20 Z" fill="currentColor" />
+        </svg>
+        <span style="font-size:0.7rem;">@deg&deg;</span>
+    </div>
+</MudTooltip>
+
+@code {
+    [Parameter] public double Bearing { get; set; }
+}

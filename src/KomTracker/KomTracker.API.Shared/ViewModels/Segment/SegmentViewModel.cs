@@ -27,9 +27,18 @@ public class SegmentViewModel
     public string MapPolyline { get; set; }
     #endregion
 
+    /// <summary>Start -> end compass bearing in degrees [0, 360). Computed from the segment endpoints.</summary>
+    public double Bearing { get; set; }
+
     [JsonIgnore]
     public ExtendedCategoryEnum ExtendedCategory => SegmentHelper.GetExtendedCategory(ClimbCategory, AverageGrade, Distance);
 
     [JsonIgnore]
     public string ExtendedCategoryText => SegmentHelper.GetExtendedCategoryText(ExtendedCategory);
+
+    [JsonIgnore]
+    public CompassDirection Direction => GeoHelper.GetCompassDirection(Bearing);
+
+    [JsonIgnore]
+    public string DirectionText => GeoHelper.GetCompassDirectionText(Direction);
 }

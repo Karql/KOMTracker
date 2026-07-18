@@ -1,4 +1,9 @@
-﻿## 1.13.0 (2026-07-17)
+﻿## UPCOMMING
+
+### Features
+- KOM direction: show each segment's start→end compass bearing (arrow + degrees) on the koms list, koms-changes and the KOM-list modals; sortable by angle
+
+## 1.13.0 (2026-07-17)
 
 ### Features
 - KOM difficulty & effort ratings — "The Bar" (how hard a KOM is to take, estimated from the winning time + terrain) and "The Burn" (how hard the holder actually worked, from measured power), rated on Coggan's Cat 5 → World Class scale; shown on the koms list, the koms-changes list and the Battle Field details, with an FAQ explainer

@@ -8,6 +8,7 @@ using KomTracker.API.Shared.ViewModels.Stats;
 using KomTracker.Application.Models.Ranking;
 using KomTracker.Application.Models.Segment;
 using KomTracker.Application.Models.Stats;
+using KomTracker.Application.Shared.Helpers;
 using KomTracker.Domain.Entities.Athlete;
 using KomTracker.Domain.Entities.Club;
 using KomTracker.Domain.Entities.Segment;
@@ -19,7 +20,9 @@ public class DtoProfile : Profile
     public DtoProfile()
     {
         CreateMap<SegmentEffortEntity, SegmentEffortViewModel>();
-        CreateMap<SegmentEntity, SegmentViewModel>();
+        CreateMap<SegmentEntity, SegmentViewModel>()
+            .ForMember(dest => dest.Bearing, opt => opt.MapFrom(src =>
+                GeoHelper.GetBearing(src.StartLatitude, src.StartLongitude, src.EndLatitude, src.EndLongitude)));
         CreateMap<KomsSummarySegmentEffortEntity, KomsSummarySegmentEffortViewModel>()
             .ForMember(dest => dest.TrackDate, opt => opt.MapFrom(src => src.AuditCD)); 
 
