@@ -2,6 +2,7 @@
 
 ### Features
 - KOM direction: show each segment's start→end compass bearing (arrow + degrees) on the koms list, koms-changes and the KOM-list modals; sortable by angle
+- Map: show a dot at each segment's start (hover for its name); clicking a segment highlights its start (green) and finish (dark) endpoints
 
 ## 1.13.0 (2026-07-17)
 
