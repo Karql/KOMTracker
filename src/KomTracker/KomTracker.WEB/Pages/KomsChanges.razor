@@ -2,6 +2,7 @@
 @using KomTracker.API.Shared.ViewModels.Club
 @using KomTracker.API.Shared.ViewModels.Stats
 @using KomTracker.Application.Shared.Helpers
+@using KomTracker.Application.Shared.Models.Segment
 @using KomTracker.WEB.Helpers
 @using KomTracker.WEB.Settings
 @attribute [Authorize]
@@ -13,7 +14,7 @@
 else
 {
     <MudGrid Class="mb-2">
-        <MudItem xs="12" sm="3">
+        <MudItem xs="12" sm="4" md="3" lg="2">
             <MudSelect
                 T="ClubViewModel"                
                 Label="Club" 
@@ -27,6 +28,43 @@ else
                     <MudSelectItem Value="@club">
                         <div class="d-flex align-center club-select-item-wrapper">
                             <img src="@ViewHelper.GetClubAvatar(club.ProfileMedium)" class="club-select-profile-medium mr-2" /> @club.Name
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="4" md="3" lg="2">
+            <MudSelect
+                T="string"
+                @bind-Value="_selectedActivityType"
+                Label="Activity type"
+                Variant="Variant.Outlined"
+                AnchorOrigin="Origin.BottomCenter"
+                Clearable="true">
+                @foreach (var x in ActivityTypeHelper.GetActivityTypes())
+                {
+                    <MudSelectItem Value="@x.ActivityType">
+                        <div class="d-flex align-center">
+                            <MudIcon Icon="@ViewHelper.GetActivityTypeIcon(x.ActivityType)" Class="mr-2" /> @x.Name
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="4" md="3" lg="2">
+            <MudSelect
+                T="CompassDirection?"
+                @bind-Value="_selectedDirection"
+                Label="Direction"
+                Variant="Variant.Outlined"
+                AnchorOrigin="Origin.BottomCenter"
+                Clearable="true">
+                @foreach (var dir in Enum.GetValues<CompassDirection>())
+                {
+                    <MudSelectItem T="CompassDirection?" Value="@dir">
+                        <div class="d-flex align-center">
+                            <DirectionArrow Bearing="(int)dir * 45" ShowDegrees="false" />
+                            <span class="ml-2">@GeoHelper.GetCompassDirectionText(dir)</span>
                         </div>
                     </MudSelectItem>
                 }

@@ -1,5 +1,6 @@
 ﻿using KomTracker.API.Shared.Models.User;
 using KomTracker.API.Shared.ViewModels.Segment;
+using KomTracker.Application.Shared.Models.Segment;
 using KomTracker.WEB.Infrastructure.Services.User;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
@@ -17,6 +18,7 @@ public partial class Koms
     private bool _loaded = false;
     private UserModel _user = default!;
     private string _searchString = "";
+    private CompassDirection? _selectedDirection;
     private IEnumerable<EffortViewModel> _koms = Enumerable.Empty<EffortViewModel>();
     private EffortViewModel _kom = default!;
 
@@ -53,6 +55,7 @@ public partial class Koms
 
     private bool Search(EffortViewModel kom)
     {
+        if (_selectedDirection.HasValue && kom.Segment.Direction != _selectedDirection.Value) return false;
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
         if (kom.Segment.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true)
         {

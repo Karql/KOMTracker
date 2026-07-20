@@ -2,6 +2,7 @@
 using KomTracker.API.Shared.ViewModels.Club;
 using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.API.Shared.ViewModels.Stats;
+using KomTracker.Application.Shared.Models.Segment;
 using KomTracker.WEB.Helpers;
 using KomTracker.WEB.Infrastructure.Services.User;
 using KomTracker.WEB.Shared;
@@ -17,6 +18,8 @@ public partial class KomsChanges
     private bool _loaded = false;
     private UserModel _user = default!;
     private string _searchString = "";
+    private string? _selectedActivityType;
+    private CompassDirection? _selectedDirection;
     private IEnumerable<ClubViewModel> _clubs = Enumerable.Empty<ClubViewModel>();
     private IEnumerable<EffortWithAthleteViewModel> _changes = Enumerable.Empty<EffortWithAthleteViewModel>();
     
@@ -64,6 +67,11 @@ public partial class KomsChanges
 
     private bool SearchChanges(EffortWithAthleteViewModel change)
     {
+        if (!string.IsNullOrEmpty(_selectedActivityType)
+            && !string.Equals(change.Effort.Segment.ActivityType, _selectedActivityType, StringComparison.OrdinalIgnoreCase)) return false;
+
+        if (_selectedDirection.HasValue && change.Effort.Segment.Direction != _selectedDirection.Value) return false;
+
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
 
         return

@@ -24,7 +24,15 @@ Backend:
 Frontend:
 - New `Shared/DirectionArrow.razor` — SVG arrow rotated by `Bearing` (0 = north/up; CSS clockwise = compass-positive), degrees below, cardinal in tooltip. Integer degrees for the `rotate()` value (locale-safe).
 - New **"Dir"** column, second-to-last (before Type), in `Pages/Koms.razor`, `Pages/KomsChanges.razor`, and `Shared/KomsListDialog.razor` (the unified modal behind Battle Field + both Ranking modals). Sort by `Segment.Bearing`.
-- Cardinal direction filter on the koms page: **deferred** (the enum + `SegmentViewModel.Direction` are ready to wire a `MudSelect<CompassDirection?>` when wanted).
+- **Cardinal direction filter (done, 2026-07-22)** — a `MudSelect<CompassDirection?>` (`Clearable`) above the grid on the koms list, koms-changes and the KOM-list modals, plus an activity-type filter added to koms-changes.
+
+## Direction filter (2026-07-22)
+
+### Decisions (with rationale)
+- **Client-side via the table's existing `Filter=` predicate** — every one of these surfaces already holds its efforts in memory and `SegmentViewModel.Direction` is a computed client-side property, so the filter just folds into the `Search(...)` predicate (fail-fast on a direction mismatch before the name match). No API/backend change; the list narrows instantly on select. The koms-changes **Club** filter stays server-side (it re-fetches a different athlete set), but its new **activity-type** filter is also client-side (same in-memory rows), so only the predicate changed there.
+- **Combo above the grid, not in the toolbar** — an earlier version put a filter in `<ToolBarContent>` next to the compact search `MudTextField`, which misaligned heights against an `Outlined` `MudSelect`. Moved to the `<MudGrid Class="mb-2"><MudItem xs="12" sm="3">` pattern used by Ranking/KomsChanges/BattleField, leaving the search box alone.
+- **`DirectionArrow` gained an optional `ShowDegrees` (default true)** so the dropdown options can show just the rotated arrow (`Bearing = (int)dir * 45`) + cardinal text, reading the same as the "Dir" column, without a degree label. Default keeps all existing call sites unchanged.
+- **Direction filter is always last** in each filter row (per the maintainer); koms-changes order is Club, Activity type, Direction.
 
 ## Verification
 

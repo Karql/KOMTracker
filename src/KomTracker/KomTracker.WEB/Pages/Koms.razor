@@ -1,5 +1,6 @@
 ﻿@page "/koms"
 @using KomTracker.Application.Shared.Helpers
+@using KomTracker.Application.Shared.Models.Segment
 @using KomTracker.WEB.Helpers
 @attribute [Authorize]
 
@@ -9,6 +10,28 @@
 }
 else
 {
+    <MudGrid Class="mb-2">
+        <MudItem xs="12" sm="4" md="3" lg="2">
+            <MudSelect
+                T="CompassDirection?"
+                @bind-Value="_selectedDirection"
+                Label="Direction"
+                Variant="Variant.Outlined"
+                AnchorOrigin="Origin.BottomCenter"
+                Clearable="true">
+                @foreach (var dir in Enum.GetValues<CompassDirection>())
+                {
+                    <MudSelectItem T="CompassDirection?" Value="@dir">
+                        <div class="d-flex align-center">
+                            <DirectionArrow Bearing="(int)dir * 45" ShowDegrees="false" />
+                            <span class="ml-2">@GeoHelper.GetCompassDirectionText(dir)</span>
+                        </div>
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+    </MudGrid>
+
     <MudTable Hover="true" Elevation="25" Items="_koms" Dense="false" Bordered="false" Striped="true" Filter="new Func<EffortViewModel, bool>(Search)" @bind-kom="_kom">
         <ToolBarContent>
             <MudTextField @bind-Value="_searchString" Immediate="true" Placeholder="Search for koms" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0 mb-3"></MudTextField>
