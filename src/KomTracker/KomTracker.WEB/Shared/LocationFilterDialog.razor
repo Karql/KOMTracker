@@ -1,0 +1,147 @@
+@using FisSst.BlazorMaps
+@using KomTracker.WEB.Settings
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-2">Click on the map to pick a point, then set the radius.</MudText>
+        <div class="map-location">
+            <Map @ref="_mapRef" MapOptions="@_mapOptions"></Map>
+        </div>
+        <div class="d-flex align-center mt-4" style="gap: 16px;">
+            <MudText Typo="Typo.body2" Style="white-space: nowrap; min-width: 90px;">Radius: @($"{_radiusKm:0}") km</MudText>
+            <MudSlider T="double" Value="_radiusKm" ValueChanged="OnRadiusChanged" Min="1" Max="25" Step="1" Immediate="true" Class="flex-grow-1" />
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@(_picked is null)" OnClick="Apply">Apply</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public LocationFilter? Initial { get; set; }
+
+    [Inject] private ICircleFactory CircleFactory { get; set; } = default!;
+    [Inject] private ICircleMarkerFactory CircleMarkerFactory { get; set; } = default!;
+
+    private static readonly LatLng Krakow = new(50.062390, 19.939133);
+    private static string PrimaryColor => Theme.KomTrackerTheme.PaletteLight.Primary.ToString();
+
+    private Map _mapRef = default!;
+    private MapOptions _mapOptions = default!;
+    private double _radiusKm = 10;
+    private LatLng? _picked;
+    private CircleMarker? _marker;
+    private Circle? _circle;
+    private bool _mapInitialized;
+
+    protected override void OnInitialized()
+    {
+        if (Initial is not null)
+        {
+            _radiusKm = Initial.RadiusKm;
+        }
+
+        var center = Initial is not null ? new LatLng(Initial.Lat, Initial.Lng) : Krakow;
+
+        _mapOptions = new MapOptions
+        {
+            DivId = "locationMapId",
+            Center = center,
+            Zoom = 12,
+            UrlTileLayer = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            SubOptions = new MapSubOptions
+            {
+                Attribution = "&copy; <a lhref='http://www.openstreetmap.org/copyright'>OpenStreetMap</a>",
+                MaxZoom = 18,
+                TileSize = 256,
+                ZoomOffset = 0,
+            }
+        };
+    }
+
+    // The map can't be created until the dialog is open and sized (FisSst 1.0.1 has no InvalidateSize),
+    // so defer init one render + a short delay, mirroring MapPage.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _mapInitialized)
+        {
+            return;
+        }
+
+        _mapInitialized = true;
+        await Task.Delay(300);
+
+        await _mapRef.OnClick(async e => await PickAsync(e.LatLng));
+
+        if (Initial is not null)
+        {
+            await PickAsync(new LatLng(Initial.Lat, Initial.Lng));
+        }
+    }
+
+    private async Task PickAsync(LatLng latLng)
+    {
+        _picked = latLng;
+
+        if (_marker is not null)
+        {
+            await _marker.Remove();
+            _marker = null;
+        }
+
+        _marker = await CircleMarkerFactory.CreateAndAddToMap(latLng, _mapRef, new CircleMarkerOptions
+        {
+            Radius = 5,
+            Color = "#ffffff",
+            Weight = 2,
+            FillColor = PrimaryColor,
+            FillOpacity = 1,
+        });
+
+        await DrawCircleAsync();
+
+        StateHasChanged();
+    }
+
+    private async Task OnRadiusChanged(double km)
+    {
+        _radiusKm = km;
+        await DrawCircleAsync();
+        StateHasChanged();
+    }
+
+    // Redraw the ring by remove+recreate rather than Circle.SetRadius: SetRadius in FisSst 1.0.1
+    // serializes the live Leaflet circle and throws "circular structure to JSON".
+    private async Task DrawCircleAsync()
+    {
+        if (_picked is null)
+        {
+            return;
+        }
+
+        if (_circle is not null)
+        {
+            await _circle.Remove();
+            _circle = null;
+        }
+
+        // Subtle translucent ring so the covered area is visible; radius is metric (meters).
+        _circle = await CircleFactory.CreateAndAddToMap(_picked, _mapRef, new CircleOptions
+        {
+            Radius = _radiusKm * 1000,
+            Color = PrimaryColor,
+            Weight = 1,
+            FillColor = PrimaryColor,
+            FillOpacity = 0.12,
+        });
+    }
+
+    private void Apply()
+        => MudDialog.Close(DialogResult.Ok(new LocationFilter(_picked!.Lat, _picked.Lng, _radiusKm)));
+
+    private void Cancel() => MudDialog.Cancel();
+}

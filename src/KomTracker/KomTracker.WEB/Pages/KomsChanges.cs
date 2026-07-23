@@ -2,6 +2,7 @@
 using KomTracker.API.Shared.ViewModels.Club;
 using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.API.Shared.ViewModels.Stats;
+using KomTracker.Application.Shared.Helpers;
 using KomTracker.Application.Shared.Models.Segment;
 using KomTracker.WEB.Helpers;
 using KomTracker.WEB.Infrastructure.Services.User;
@@ -20,6 +21,7 @@ public partial class KomsChanges
     private string _searchString = "";
     private string? _selectedActivityType;
     private CompassDirection? _selectedDirection;
+    private LocationFilter? _locationFilter;
     private IEnumerable<ClubViewModel> _clubs = Enumerable.Empty<ClubViewModel>();
     private IEnumerable<EffortWithAthleteViewModel> _changes = Enumerable.Empty<EffortWithAthleteViewModel>();
     
@@ -33,6 +35,9 @@ public partial class KomsChanges
 
     [Inject]
     private IUserService UserService { get; set; } = default!;
+
+    [Inject]
+    private IDialogService DialogService { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,6 +77,9 @@ public partial class KomsChanges
 
         if (_selectedDirection.HasValue && change.Effort.Segment.Direction != _selectedDirection.Value) return false;
 
+        if (_locationFilter is not null
+            && GeoHelper.GetDistance(_locationFilter.Lat, _locationFilter.Lng, change.Effort.Segment.StartLatitude, change.Effort.Segment.StartLongitude) > _locationFilter.RadiusKm) return false;
+
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
 
         return
@@ -79,6 +87,27 @@ public partial class KomsChanges
             || change.Athlete.FullName.Contains(_searchString, StringComparison.OrdinalIgnoreCase);
 
     }
+
+    private async Task OpenLocationDialogAsync()
+    {
+        var parameters = new DialogParameters<LocationFilterDialog>
+        {
+            { x => x.Initial, _locationFilter },
+        };
+
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+
+        var dialog = await DialogService.ShowAsync<LocationFilterDialog>("Location", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled && result.Data is LocationFilter location)
+        {
+            _locationFilter = location;
+            StateHasChanged();
+        }
+    }
+
+    private void ClearLocationFilter() => _locationFilter = null;
 
     private Task<IEnumerable<ClubViewModel>> SearchClubs(string club)
     {

@@ -18,6 +18,10 @@ public class SegmentViewModel
     public string City { get; set; }
     public string Country { get; set; }
 
+    /// <summary>Segment start coordinates (used for proximity filtering on the client).</summary>
+    public float StartLatitude { get; set; }
+    public float StartLongitude { get; set; }
+
     #region Detailed fields
     public float? TotalElevationGain { get; set; }
     public int? EffortCount { get; set; }

@@ -31,6 +31,23 @@ public static class GeoHelper
 
     public static string GetCompassDirectionText(CompassDirection direction) => direction.ToString();
 
+    /// <summary>Great-circle (haversine) distance between two points, in kilometers.</summary>
+    public static double GetDistance(double lat1, double lon1, double lat2, double lon2)
+    {
+        const double earthRadiusKm = 6371.0;
+
+        var phi1 = DegToRad(lat1);
+        var phi2 = DegToRad(lat2);
+        var deltaPhi = DegToRad(lat2 - lat1);
+        var deltaLambda = DegToRad(lon2 - lon1);
+
+        var a = (Math.Sin(deltaPhi / 2) * Math.Sin(deltaPhi / 2))
+            + (Math.Cos(phi1) * Math.Cos(phi2) * Math.Sin(deltaLambda / 2) * Math.Sin(deltaLambda / 2));
+        var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+
+        return earthRadiusKm * c;
+    }
+
     private static double DegToRad(double deg) => deg * Math.PI / 180.0;
 
     private static double RadToDeg(double rad) => rad * 180.0 / Math.PI;

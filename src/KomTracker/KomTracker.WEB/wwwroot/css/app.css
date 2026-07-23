@@ -70,6 +70,34 @@
     border-radius: var(--border-radius-base) !important;
 }
 
+/* Map inside the location-filter dialog: fixed height (the .map-wrapper heights are 100vh-based). */
+.map-location {
+    position: relative;
+    height: 420px;
+}
+
+#locationMapId {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: var(--border-radius-base) !important;
+}
+
+/* Crosshair over the picker map to signal "click to choose a point". */
+.map-location .leaflet-container,
+.map-location .leaflet-grab {
+    cursor: crosshair;
+}
+
+/* The location filter is a click-to-open trigger, not a text input: keep a pointer cursor. */
+.location-filter-field,
+.location-filter-field * {
+    cursor: pointer !important;
+    user-select: none;
+}
+
 .map-koms {
 
 }

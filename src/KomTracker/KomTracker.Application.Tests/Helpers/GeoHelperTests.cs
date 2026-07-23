@@ -33,4 +33,25 @@ public class GeoHelperTests
     {
         GeoHelper.GetCompassDirection(bearing).Should().Be(expected);
     }
+
+    [Fact]
+    public void GetDistance_returns_zero_for_same_point()
+    {
+        GeoHelper.GetDistance(50.06, 19.94, 50.06, 19.94).Should().BeApproximately(0, 0.001);
+    }
+
+    [Theory]
+    [InlineData(0, 0, 0, 1, 111.19)]        // 1° of longitude at the equator ≈ 111.19 km
+    [InlineData(0, 0, 1, 0, 111.19)]        // 1° of latitude ≈ 111.19 km
+    public void GetDistance_returns_expected_km(double lat1, double lon1, double lat2, double lon2, double expectedKm)
+    {
+        GeoHelper.GetDistance(lat1, lon1, lat2, lon2).Should().BeApproximately(expectedKm, 0.5);
+    }
+
+    [Fact]
+    public void GetDistance_matches_known_city_pair()
+    {
+        // Kraków (Rynek) -> Warszawa (Centrum) ≈ 252 km
+        GeoHelper.GetDistance(50.0619, 19.9369, 52.2297, 21.0122).Should().BeApproximately(252, 5);
+    }
 }

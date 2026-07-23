@@ -2,6 +2,7 @@
 @using KomTracker.Application.Shared.Helpers
 @using KomTracker.Application.Shared.Models.Segment
 @using KomTracker.WEB.Helpers
+@inject IDialogService DialogService
 
 <MudDialog>
     <DialogContent>
@@ -30,6 +31,9 @@
                             </MudSelectItem>
                         }
                     </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="4" md="3" lg="2">
+                    <LocationFilterField Value="_locationFilter" OnOpen="OpenLocationDialogAsync" OnClear="ClearLocationFilter" />
                 </MudItem>
             </MudGrid>
 
@@ -127,10 +131,34 @@
 
     private string _searchString = "";
     private CompassDirection? _selectedDirection;
+    private LocationFilter? _locationFilter;
+
+    private async Task OpenLocationDialogAsync()
+    {
+        var parameters = new DialogParameters<LocationFilterDialog>
+        {
+            { x => x.Initial, _locationFilter },
+        };
+
+        var options = new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true, CloseButton = true };
+
+        var dialog = await DialogService.ShowAsync<LocationFilterDialog>("Location", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled && result.Data is LocationFilter location)
+        {
+            _locationFilter = location;
+            StateHasChanged();
+        }
+    }
+
+    private void ClearLocationFilter() => _locationFilter = null;
 
     private bool Search(EffortViewModel kom)
     {
         if (_selectedDirection.HasValue && kom.Segment.Direction != _selectedDirection.Value) return false;
+        if (_locationFilter is not null
+            && GeoHelper.GetDistance(_locationFilter.Lat, _locationFilter.Lng, kom.Segment.StartLatitude, kom.Segment.StartLongitude) > _locationFilter.RadiusKm) return false;
         if (string.IsNullOrWhiteSpace(_searchString)) return true;
         return kom.Segment.Name?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true;
     }

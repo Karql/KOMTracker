@@ -2,6 +2,7 @@
 
 ### Features
 - KOM direction: show each segment's start→end compass bearing (arrow + degrees) on the koms list, koms-changes and the KOM-list modals; sortable by angle, and filterable by compass direction (koms list, koms-changes, KOM-list modals)
+- Location filter: narrow koms to those starting near a point — pick it on a map and set a radius (a live circle shows the covered area); available on the koms list, koms-changes and the KOM-list modals
 - Koms changes: filter by activity type
 - Map: show a dot at each segment's start (hover for its name); clicking a segment highlights its start (green) and finish (dark) endpoints
 

@@ -1,0 +1,26 @@
+@* Filter trigger styled like the sibling MudSelect filters: an outlined field with a pin icon that
+   opens the map dialog on click; shows the picked radius + coordinates and a clear (x) when set. *@
+
+<div class="location-filter-field" @onclick="OnOpen">
+    <MudField Label="Location" Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Place">
+        <div class="d-flex align-center justify-space-between" style="width: 100%; gap: 4px;">
+            @if (Value is null)
+            {
+                <span class="mud-text-secondary">Select on map…</span>
+            }
+            else
+            {
+                <span>@($"{Value.RadiusKm:0} km · {Value.Lat:F2}, {Value.Lng:F2}")</span>
+                <span @onclick="OnClear" @onclick:stopPropagation="true" style="cursor: pointer; display: inline-flex;">
+                    <MudIcon Icon="@Icons.Material.Filled.Close" Size="Size.Small" />
+                </span>
+            }
+        </div>
+    </MudField>
+</div>
+
+@code {
+    [Parameter] public LocationFilter? Value { get; set; }
+    [Parameter] public EventCallback OnOpen { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+}
