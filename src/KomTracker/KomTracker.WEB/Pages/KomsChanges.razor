@@ -129,7 +129,7 @@ else
                 @context.Effort.SummarySegmentEffort.TrackDate.ToString("yyyy-MM-dd")
             </MudTd>
             <MudTd DataLabel="Name">
-                <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.Effort.SegmentEffort.Id}")"><MudHighlighter Text="@context.Effort.Segment.Name" HighlightedText="@_searchString" /></MudLink>
+                <MudLink Target="_blank" Href="@($"https://strava.com/segments/{context.Effort.Segment.Id}")"><MudHighlighter Text="@context.Effort.Segment.Name" HighlightedText="@_searchString" /></MudLink>
             </MudTd>
             <MudTd DataLabel="Distnce">
                 @((context.Effort.Segment.Distance / 1000).ToString("F2")) km
@@ -159,7 +159,7 @@ else
                 </span>
             </MudTd>
             <MudTd DataLabel="Time">
-                @(TimeSpan.FromSeconds(context.Effort.SegmentEffort.ElapsedTime).ToString())                
+                <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.Effort.SegmentEffort.Id}")">@(TimeSpan.FromSeconds(context.Effort.SegmentEffort.ElapsedTime).ToString())</MudLink>
             </MudTd>
             <MudTd DataLabel="Cat">
                 <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(context.Effort.Segment.ExtendedCategory)">

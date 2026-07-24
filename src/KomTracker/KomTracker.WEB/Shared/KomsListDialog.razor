@@ -59,7 +59,7 @@
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Name">
-                        <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.SegmentEffort.Id}")"><MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /></MudLink>
+                        <MudLink Target="_blank" Href="@($"https://strava.com/segments/{context.Segment.Id}")"><MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /></MudLink>
                     </MudTd>
                     <MudTd DataLabel="Distance">
                         @((context.Segment.Distance / 1000).ToString("F2")) km
@@ -89,7 +89,7 @@
                         </span>
                     </MudTd>
                     <MudTd DataLabel="Time">
-                        @(TimeSpan.FromSeconds(context.SegmentEffort.ElapsedTime).ToString())
+                        <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.SegmentEffort.Id}")">@(TimeSpan.FromSeconds(context.SegmentEffort.ElapsedTime).ToString())</MudLink>
                     </MudTd>
                     <MudTd DataLabel="Cat">
                         <div class="d-flex align-center justify-space-between climb-category" style="background-color: @ViewHelper.GetExtendedCategoryColor(context.Segment.ExtendedCategory)">

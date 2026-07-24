@@ -59,7 +59,7 @@ else
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Name">
-                <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.SegmentEffort.Id}")"><MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /></MudLink>
+                <MudLink Target="_blank" Href="@($"https://strava.com/segments/{context.Segment.Id}")"><MudHighlighter Text="@context.Segment.Name" HighlightedText="@_searchString" /></MudLink>
                 @*<br />
                 @((context.Segment.Distance / 1000).ToString("F2")) km
                 @((context.Segment.ElevationHigh - context.Segment.ElevationLow).ToString("F0")) m
@@ -93,7 +93,7 @@ else
                 </span>
             </MudTd>
             <MudTd DataLabel="Time">
-                @(TimeSpan.FromSeconds(context.SegmentEffort.ElapsedTime).ToString())                
+                <MudLink Target="_blank" Href="@($"https://strava.com/segment_efforts/{context.SegmentEffort.Id}")">@(TimeSpan.FromSeconds(context.SegmentEffort.ElapsedTime).ToString())</MudLink>
             </MudTd>
             <MudTd DataLabel="Attempts">
                 @(context.Segment.EffortCount ?? 0)
