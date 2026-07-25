@@ -1,4 +1,4 @@
-﻿## UPCOMMING
+﻿## 1.14.0 (2026-07-25)
 
 ### Features
 - KOM direction: show each segment's start→end compass bearing (arrow + degrees) on the koms list, koms-changes and the KOM-list modals; sortable by angle, and filterable by compass direction (koms list, koms-changes, KOM-list modals)
