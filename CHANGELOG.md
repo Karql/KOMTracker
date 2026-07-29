@@ -1,4 +1,9 @@
-﻿## 1.14.0 (2026-07-25)
+﻿## UPCOMMING
+
+### Features
+- New landing page: a proper scroll-through story of what KOM Tracker does (the notification blind spot, email reports, rankings, Battle Field, The Bar/The Burn & extended metrics, and the location/direction "hunt" combo) with punchy copy and light scroll animations — replaces the old 4-bullet login panel
+
+## 1.14.0 (2026-07-25)
 
 ### Features
 - KOM direction: show each segment's start→end compass bearing (arrow + degrees) on the koms list, koms-changes and the KOM-list modals; sortable by angle, and filterable by compass direction (koms list, koms-changes, KOM-list modals)

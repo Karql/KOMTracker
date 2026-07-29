@@ -1,47 +1,319 @@
-﻿@page "/login"
+@page "/login"
 @layout EmptyLayout
-@inject NavigationManager Navigation
-@using KomTracker.WEB.Settings;
+@using KomTracker.WEB.Settings
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@implements IAsyncDisposable
 
 <AuthorizeView>
     <NotAuthorized>
         <MudThemeProvider Theme="Theme.KomTrackerTheme" />
-        <MudPopoverProvider />
-        <MudSnackbarProvider />
 
-        <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: 100vh;">
-            <div class="d-flex flex-column mud-width-full">
-                <MudPaper Elevation="25" Class="pa-8" Width="100%" MaxWidth="500px">
-                    <div class="d-flex justify-center">
-                        <img src="img/kom-tracker-logo.png" alt="logo" style="width:200px; height:200px;" />
+        <div class="lp">
+
+            <header class="lp-header">
+                <div class="lp-header__inner">
+                    <a class="lp-brand" href="login">
+                        <img src="img/logo-crown.png" alt="" class="lp-brand__mark" />
+                        <span class="lp-brand__name">KOM Tracker</span>
+                    </a>
+                    <a class="lp-strava lp-strava--sm" href="authentication/login" aria-label="Connect with Strava">
+                        <img src="img/btn_strava_connectwith_orange.svg" alt="Connect with Strava" />
+                    </a>
+                </div>
+            </header>
+
+            <section class="lp-hero">
+                <div class="lp-hero__bg" aria-hidden="true"></div>
+                <div class="lp-hero__inner">
+                    <p class="lp-eyebrow reveal">For riders who don't let go</p>
+                    <h1 class="lp-hero__title reveal">
+                        Someone just took your KOM.
+                        <span class="lp-accent">Strava won't always tell you.</span>
+                    </h1>
+                    <p class="lp-hero__sub reveal">
+                        KOM Tracker quietly watches every segment you hold — climbs, sprints, flats,
+                        and the descents Strava stays silent about — and tells you the moment a crown
+                        changes hands.
+                    </p>
+                    <div class="lp-hero__cta reveal">
+                        <a class="lp-strava" href="authentication/login" aria-label="Connect with Strava">
+                            <img src="img/btn_strava_connectwith_orange.svg" alt="Connect with Strava" />
+                        </a>
+                        <a class="lp-scroll-cue" href="#story">See how it works ↓</a>
                     </div>
-                    <MudList T="string" ReadOnly="true" Class="mb-5">
-                        <MudListItem Text="Uh oh all the way!" Icon="@Icons.Material.Filled.NotificationsActive" />
-                        <MudListItem Text="Track your's KOMs" Icon="@Icons.Material.Filled.ShowChart" />
-                        <MudListItem Text="Rankings" Icon="@Icons.Material.Filled.MilitaryTech" />
-                        <MudListItem Text="Fight with your's friends" Icon="@Icons.Material.Filled.SportsKabaddi" />
-                    </MudList>
+                </div>
+            </section>
 
-                    <div class="d-flex justify-center">
-                        <a href="authentication/login" style="cursor: pointer;"><img src="img/btn_strava_connectwith_orange.svg" alt="" /></a>
+            @* 1. The notification gap *@
+            <section class="lp-section" id="story">
+                <div class="lp-feature reveal">
+                    <div class="lp-feature__text">
+                        <div class="lp-kicker"><MudIcon Icon="@Icons.Material.Filled.NotificationsActive" Size="Size.Small" /> The blind spot</div>
+                        <h2 class="lp-h2">Uh oh — <span class="lp-accent">all the way down.</span></h2>
+                        <p class="lp-lead">
+                            Strava tells you about <em>some</em> of your KOMs and stays quiet on the rest.
+                            Downhill segments? Basically never. Fair enough — Strava would rather not turn a fast
+                            road descent into a leaderboard race. But if you ride enduro or downhill in the bike
+                            park, that's every segment you actually care about.
+                        </p>
+                        <p class="lp-lead">
+                            KOM Tracker follows <strong>every change on every segment you hold</strong>. Lost one?
+                            You'll know. Bagged a new one? You'll know. Someone drew a brand-new segment right over
+                            a ride you did two seasons ago and you're quietly sitting on top? You'll know that too.
+                        </p>
+                        <div class="lp-chips">
+                            <span class="lp-chip lp-chip--new">New</span>
+                            <span class="lp-chip lp-chip--improved">Improved</span>
+                            <span class="lp-chip lp-chip--lost">Lost</span>
+                            <span class="lp-chip lp-chip--returned">Returned</span>
+                        </div>
                     </div>
-                    @* TODO: I don't know yet how to pass this to identity (call is done by RemoteAuthenticatorView)'
-                        <div class="d-flex justify-center">
-                        <MudCheckBox T="bool" Label="Remember me?" Color="Color.Primary" Class="ml-n1"></MudCheckBox>
+                    <div class="lp-feature__visual">
+                        <div class="lp-browser">
+                            <div class="lp-browser__bar"><span></span><span></span><span></span></div>
+                            <div class="lp-appbar"><img src="img/logo-crown.png" alt="" /> KOM Tracker</div>
+                            <div class="lp-mock lp-mock--changes">
+                                <div class="lp-mock__row lp-mock__row--head"><span></span><span>Segment</span><span>Cat</span><span>The Bar</span><span>Dir</span></div>
+                                <div class="lp-mock__row"><span class="lp-chg lp-chg--new">+</span><span class="lp-mock__seg">Sprint do budostalu</span><span class="lp-cat" style="background:#00d">SP</span><span class="lp-rankbadge" style="background:#7cb342">C4·32</span><span class="lp-mock__dir">↗</span></div>
+                                <div class="lp-mock__row"><span class="lp-chg lp-chg--imp">↑</span><span class="lp-mock__seg">Półłanki ↔ Domagały</span><span class="lp-cat" style="background:#0b0">FL</span><span class="lp-rankbadge" style="background:#fb8c00">C2·58</span><span class="lp-mock__dir">→</span></div>
+                                <div class="lp-mock__row"><span class="lp-chg lp-chg--new">+</span><span class="lp-mock__seg">Most Kotlarski → Stopień Dąbie</span><span class="lp-cat" style="background:#db0">MC</span><span class="lp-rankbadge" style="background:#fbc02d">C3·41</span><span class="lp-mock__dir">↑</span></div>
+                                <div class="lp-mock__row"><span class="lp-chg lp-chg--lost">−</span><span class="lp-mock__seg">Zjazd Sikornik</span><span class="lp-cat" style="background:#000">D1</span><span class="lp-rankbadge lp-rankbadge--na" style="background:#9e9e9e">–</span><span class="lp-mock__dir">↘</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                    </div>*@
-                </MudPaper>
-            </div>
-        </MudContainer>
+            @* 2. Email *@
+            <section class="lp-section lp-section--tint">
+                <div class="lp-feature lp-feature--reverse reveal">
+                    <div class="lp-feature__text">
+                        <div class="lp-kicker"><MudIcon Icon="@Icons.Material.Filled.MarkEmailRead" Size="Size.Small" /> Track your KOMs</div>
+                        <h2 class="lp-h2">Every change, <span class="lp-accent">straight to your inbox.</span></h2>
+                        <p class="lp-lead">
+                            Drop your email in your profile and KOM Tracker sends you the rundown — what you took,
+                            what you lost, what's newly yours — in a tidy little report you'll actually want to open.
+                        </p>
+                        <p class="lp-lead lp-muted-p">No app to check every day. Just ride, and let the news come to you.</p>
+                    </div>
+                    <div class="lp-feature__visual">
+                        <div class="lp-email">
+                            <img class="lp-email__logo" src="img/kom-tracker-logo.png" alt="KOM Tracker" />
+                            <div class="lp-email__hi">Hello Mateusz!</div>
+                            <p class="lp-email__intro">Changes in your KOM list.</p>
+                            <div class="lp-email__label lp-email__label--new">New</div>
+                            <span class="lp-email__seg">Sprint do budostalu</span>
+                            <span class="lp-email__seg">Na Załęczu - Sprint od zachodu</span>
+                            <span class="lp-email__seg">Most Kotlarski → Stopień Dąbie</span>
+                            <span class="lp-email__seg">Podgórska Ofiar Dąbia</span>
+                            <div class="lp-email__label lp-email__label--imp">Improved</div>
+                            <span class="lp-email__seg">Półłanki ↔ Domagały</span>
+                            <p class="lp-email__total">Now you have <strong>661</strong> KOMs.</p>
+                            <p class="lp-email__bye">Enjoy your next rides!</p>
+                            <div class="lp-email__footer">© KOM Tracker<br />This email was sent to you@example.com<br />You've received it because you've turned on notification.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* 3. Rankings *@
+            <section class="lp-section">
+                <div class="lp-feature reveal">
+                    <div class="lp-feature__text">
+                        <div class="lp-kicker"><MudIcon Icon="@Icons.Material.Filled.MilitaryTech" Size="Size.Small" /> Rankings</div>
+                        <h2 class="lp-h2">Climb the rankings, <span class="lp-accent">not just the hills.</span></h2>
+                        <p class="lp-lead">
+                            See exactly where you stand — overall and inside each of your clubs. Rank by total KOMs,
+                            by segment category, or by who's been grabbing and losing the most crowns this week, last
+                            week, or the last 30 days.
+                        </p>
+                        <p class="lp-lead">
+                            Filter by activity type and club, then click any number to see the exact segments behind it.
+                        </p>
+                    </div>
+                    <div class="lp-feature__visual">
+                        <div class="lp-browser">
+                            <div class="lp-browser__bar"><span></span><span></span><span></span></div>
+                            <div class="lp-appbar"><img src="img/logo-crown.png" alt="" /> KOM Tracker</div>
+                            <div class="lp-mock lp-mock--rank">
+                                <div class="lp-mock__row lp-mock__row--head"><span>#</span><span>Athlete</span><span>KOMs</span></div>
+                                <div class="lp-mock__row"><span class="lp-rank__pos">1</span><span class="lp-rank__ath"><span class="lp-avatar">🐈</span>Kasia W.</span><span class="lp-rank__count">128</span></div>
+                                <div class="lp-mock__row lp-mock__row--you"><span class="lp-rank__pos">2</span><span class="lp-rank__ath"><span class="lp-avatar">🦮</span>You</span><span class="lp-rank__count">117</span></div>
+                                <div class="lp-mock__row"><span class="lp-rank__pos">3</span><span class="lp-rank__ath"><span class="lp-avatar">🐕</span>Marek P.</span><span class="lp-rank__count">96</span></div>
+                                <div class="lp-mock__row"><span class="lp-rank__pos">4</span><span class="lp-rank__ath"><span class="lp-avatar">🐈‍⬛</span>Tomek R.</span><span class="lp-rank__count">71</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* 4. Battle Field *@
+            <section class="lp-section lp-section--tint">
+                <div class="lp-feature lp-feature--reverse reveal">
+                    <div class="lp-feature__text">
+                        <div class="lp-kicker"><MudIcon Icon="@Icons.Material.Filled.SportsKabaddi" Size="Size.Small" /> Battle Field</div>
+                        <h2 class="lp-h2">Settle it on the <span class="lp-accent">Battle Field.</span></h2>
+                        <p class="lp-lead">
+                            It's personal now. Battle Field is a head-to-head scoreboard: every time you steal a mate's
+                            KOM you score a point; every time they steal it back, they do too. Like goals in a rivalry
+                            that never ends.
+                        </p>
+                        <p class="lp-lead">
+                            Track your record against everyone you ride with — per club, per activity, over any stretch of time.
+                        </p>
+                    </div>
+                    <div class="lp-feature__visual">
+                        <div class="lp-browser">
+                            <div class="lp-browser__bar"><span></span><span></span><span></span></div>
+                            <div class="lp-appbar"><img src="img/logo-crown.png" alt="" /> KOM Tracker</div>
+                            <div class="lp-vs">
+                                <div class="lp-vs__row">
+                                    <span class="lp-vs__side lp-vs__side--l"><span class="lp-vs__name lp-vs__name--win">You</span><span class="lp-avatar">🦮</span></span>
+                                    <span class="lp-vs__score">7 : 4</span>
+                                    <span class="lp-vs__side lp-vs__side--r"><span class="lp-avatar">🐕</span><span class="lp-vs__name">René</span></span>
+                                </div>
+                                <div class="lp-vs__row">
+                                    <span class="lp-vs__side lp-vs__side--l"><span class="lp-vs__name lp-vs__name--win">Kasia W.</span><span class="lp-avatar">🐈</span></span>
+                                    <span class="lp-vs__score">5 : 2</span>
+                                    <span class="lp-vs__side lp-vs__side--r"><span class="lp-avatar">🦮</span><span class="lp-vs__name">You</span></span>
+                                </div>
+                                <div class="lp-vs__row">
+                                    <span class="lp-vs__side lp-vs__side--l"><span class="lp-vs__name lp-vs__name--win">You</span><span class="lp-avatar">🦮</span></span>
+                                    <span class="lp-vs__score">3 : 1</span>
+                                    <span class="lp-vs__side lp-vs__side--r"><span class="lp-avatar">🐩</span><span class="lp-vs__name">Tomek R.</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* 5. Extended metrics *@
+            <section class="lp-section">
+                <div class="lp-feature reveal">
+                    <div class="lp-feature__text">
+                        <div class="lp-kicker"><MudIcon Icon="@Icons.Material.Filled.Speed" Size="Size.Small" /> Extended metrics</div>
+                        <h2 class="lp-h2">Know how hard a KOM really is — <span class="lp-accent">before you chase it.</span></h2>
+                        <p class="lp-lead">
+                            <strong>The Bar</strong> is how high the bar is set: the power a reference rider would need to
+                            match the time. Low Bar? Easy pickings. High Bar? Bring watts — or a tailwind.
+                        </p>
+                        <p class="lp-lead">
+                            <strong>The Burn</strong> is how hard the current holder actually worked, straight from their
+                            power meter. A high Bar with a low Burn means a time set in easy conditions — a soft target.
+                        </p>
+                        <p class="lp-lead">
+                            <strong>Extended categories &amp; direction</strong> — the segment types Strava skips (walls,
+                            sprints, time-trials, proper downhill grades), plus the compass bearing each segment runs, so
+                            you can time your attack with the wind.
+                        </p>
+                    </div>
+                    <div class="lp-feature__visual">
+                        <div class="lp-card lp-metrics">
+                            <div class="lp-metrics__row">
+                                <span class="lp-metric-label">The Bar</span>
+                                <span class="lp-pill lp-pill--rank" style="background:#f4511e;">C1 · 74</span>
+                            </div>
+                            <div class="lp-metrics__row">
+                                <span class="lp-metric-label">The Burn</span>
+                                <span class="lp-pill lp-pill--rank" style="background:#fbc02d;">C3 · 51</span>
+                            </div>
+                            <div class="lp-metrics__divider"></div>
+                            <div class="lp-metrics__cats">
+                                <span class="lp-pill" style="background:#f40;">WL</span>
+                                <span class="lp-pill" style="background:#0b0;">TTL</span>
+                                <span class="lp-pill" style="background:#00d;">SP</span>
+                                <span class="lp-pill" style="background:#000;">D1</span>
+                                <span class="lp-pill lp-pill--dir"><MudIcon Icon="@Icons.Material.Filled.North" Size="Size.Small" /> NE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* 6. Hunt combo *@
+            <section class="lp-section lp-section--tint">
+                <div class="lp-feature lp-feature--reverse reveal">
+                    <div class="lp-feature__text">
+                        <div class="lp-kicker"><MudIcon Icon="@Icons.Material.Filled.GpsFixed" Size="Size.Small" /> Go hunting</div>
+                        <h2 class="lp-h2">Pick a target. <span class="lp-accent">Plan the ambush.</span></h2>
+                        <p class="lp-lead">
+                            Got a rival? Zero in on their softest crowns: filter to segments facing today's wind and close
+                            to home, then sort by The Bar to float the easiest targets to the top. KOM Tracker turns
+                            "I might grab a KOM today" into a hit list.
+                        </p>
+                    </div>
+                    <div class="lp-feature__visual">
+                        <div class="lp-browser">
+                            <div class="lp-browser__bar"><span></span><span></span><span></span></div>
+                            <div class="lp-appbar"><img src="img/logo-crown.png" alt="" /> KOM Tracker</div>
+                            <div class="lp-fchips">
+                                <span class="lp-fchip">Direction: NE</span>
+                                <span class="lp-fchip">Within 10 km</span>
+                            </div>
+                            <div class="lp-mock lp-mock--koms">
+                                <div class="lp-mock__row lp-mock__row--head"><span>Segment</span><span>Cat</span><span class="lp-sort">The Bar <span class="lp-sort__arrow">↑</span></span><span>Dir</span></div>
+                                <div class="lp-mock__row"><span class="lp-mock__seg">Na Załęczu - Sprint od zachodu</span><span class="lp-cat" style="background:#00d">SP</span><span class="lp-rankbadge" style="background:#43a047">C5·21</span><span class="lp-mock__dir">↗</span></div>
+                                <div class="lp-mock__row"><span class="lp-mock__seg">Podgorska Ofiar Dąbia</span><span class="lp-cat" style="background:#0b0">FL</span><span class="lp-rankbadge" style="background:#7cb342">C4·29</span><span class="lp-mock__dir">↗</span></div>
+                                <div class="lp-mock__row"><span class="lp-mock__seg">Aleja Pokoju sprint</span><span class="lp-cat" style="background:#db0">MC</span><span class="lp-rankbadge" style="background:#7cb342">C4·34</span><span class="lp-mock__dir">↗</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            @* Final CTA *@
+            <section class="lp-cta">
+                <div class="lp-cta__inner reveal">
+                    <h2 class="lp-cta__title">Your crowns aren't going to <span class="lp-accent">defend themselves.</span></h2>
+                    <a class="lp-strava lp-strava--lg" href="authentication/login" aria-label="Connect with Strava">
+                        <img src="img/btn_strava_connectwith_orange.svg" alt="Connect with Strava" />
+                    </a>
+                    <p class="lp-cta__note">Free. Connects in seconds with your Strava account.</p>
+                </div>
+            </section>
+
+            <footer class="lp-footer">
+                <img src="img/logo-crown.png" alt="" class="lp-footer__mark" />
+                <span>KOM Tracker</span>
+                <span class="lp-footer__sep">·</span>
+                <span class="lp-muted">Powered by Strava</span>
+            </footer>
+
+        </div>
     </NotAuthorized>
     <Authorized>
         <RedirectToHomePage />
-   </Authorized>
-</AuthorizeView> 
+    </Authorized>
+</AuthorizeView>
 
 @code {
-    private void Authenticate(MouseEventArgs args)
+    private IJSObjectReference? _module;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.BaseUri)}");
+        try
+        {
+            _module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/landing.js");
+            await _module.InvokeVoidAsync("init");
+        }
+        catch (JSDisconnectedException)
+        {
+            // Runtime tearing down (e.g. navigating to Strava login) — nothing to do.
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module is not null)
+        {
+            try
+            {
+                await _module.InvokeVoidAsync("dispose");
+                await _module.DisposeAsync();
+            }
+            catch (JSDisconnectedException) { }
+        }
     }
 }
