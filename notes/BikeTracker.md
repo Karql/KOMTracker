@@ -4,6 +4,7 @@
 
 Główna encja roweru. Do zastanowienia czy robimy go jako osobnę encja taką meta + encja w stylu StravaBike i link między nimi.
 Tak, żeby nie zafiksować się tylko na stravie, a w przyszłości można było dodać łatwo np. Garmin
+Chyba meta encja + ewentualne do linkowania z serwisami lepsze.
 
 - Nazwa
 - Marka
@@ -60,6 +61,7 @@ Tutaj chyba jeden poziom zagłebienia, albo nie ograniczać.
 Fajnie jakby się dało dodać jako historyczny wpis bez dat itp. tylko np. jaki rower + przebieg (ręcznie) i żeby się to nie psuło.
 Use case jest taki, że mam ponotowane, że np. opona jeździła w tym i tym rowerze tyle km, ale już nie mma dat itp, aby sie to samo wyliczyło.
 
+Jeden komponent może być przypięty równocześnie do większej liczby rowerów. Np. licznik przypięty do szosy i gravela, żeby bez zabawy śledzić jego przebieg.
 
 - Rower / Komponent
 - Data Od
@@ -89,4 +91,25 @@ Może nie ma wtedy takie rzeczy będą bez spięcia.
 - Miejsce zakupu (jakiś autocomplete, ale chyba nie widzielać do osobnej encji)
 - Data zakupu
 - Magazyn
+
+## Projections?
+
+Będzie potrzeba gdzieś zapisywać obliczone np. przebiegi. Przy prezentajci np. łańcuch ma 888km nie będziemy robić grupowania i sumowania na bazie.
+Tym będą zjamowąć się odpowiednie joby. Do zastanowienia czy trzymać kolumny na encjach podstawowych czy robić jakieś osobne encje do projekcji.
+
+# Funkcjonalności
+
+## MVP
+
+- Integracja z Stravą
+    - Pobieranie rowerów (gears)
+    - Synchronizacja aktywności webhooki + cykliczne odpytywanie jakby jakiś webhook itp. nie doszedł.
+- Konfigurowanie rowerów
+- Definiowanie komponentów
+- Linkowanie komponentów z rowerami
+
+## Bardziej power na przyszłość
+- Alertowanie
+    - Możliwość ustawienia alertów przebieg, godziny, okres
+- Analiza kosztowa per rower itp. itd.
 
