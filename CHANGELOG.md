@@ -1,4 +1,9 @@
-﻿## 1.15.0 (2026-07-29)
+﻿## UPCOMMING
+
+### Features
+- Update MudBlazor 8 → 9 (major upgrade). App code only needed two fixes: the app-bar avatar `MudMenu` activator (v9 no longer auto-opens — wired `MenuContext.ToggleAsync`) and a `MudTabs` param rename (`PanelClass` → `TabPanelsClass`) on the Account page. Build + all tests green.
+
+## 1.15.0 (2026-07-29)
 
 ### Features
 - New landing page: a proper scroll-through story of what KOM Tracker does (the notification blind spot, email reports, rankings, Battle Field, The Bar/The Burn & extended metrics, and the location/direction "hunt" combo) with punchy copy and light scroll animations — replaces the old 4-bullet login panel

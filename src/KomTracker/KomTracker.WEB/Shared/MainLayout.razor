@@ -27,10 +27,12 @@
                         <MudIconButton Icon="@Icons.Material.Filled.Brightness4" Color="Color.Inherit" OnClick="@((e) => ToggleDarkModeAsync())" />
                     </MudTooltip>
                     <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Dense="true" Class="mt-1 ml-4">
-                        <ActivatorContent>
-                            <MudAvatar>
-                                <MudImage Src="@_user.Avatar" />
-                            </MudAvatar>
+                        <ActivatorContent Context="menu">
+                            <span style="cursor: pointer;" @onclick="@menu.ToggleAsync">
+                                <MudAvatar>
+                                    <MudImage Src="@_user.Avatar" />
+                                </MudAvatar>
+                            </span>
                         </ActivatorContent>
                         <ChildContent>
                             <PersonCard Class="mt-n2" />
