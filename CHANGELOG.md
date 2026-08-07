@@ -1,4 +1,4 @@
-﻿## UPCOMMING
+﻿## 1.16.0 (2026-08-06)
 
 ### Features
 - Update MudBlazor 8 → 9 (major upgrade). App code only needed two fixes: the app-bar avatar `MudMenu` activator (v9 no longer auto-opens — wired `MenuContext.ToggleAsync`) and a `MudTabs` param rename (`PanelClass` → `TabPanelsClass`) on the Account page. Build + all tests green.
