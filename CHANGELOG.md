@@ -1,4 +1,10 @@
-﻿## 1.16.0 (2026-08-06)
+﻿## UPCOMMING
+
+### Features
+- BikeTracker (Phase 0): a "Bikes" garage — add / edit / list (card or table view) / detail page / lifecycle (Active → Archived / Sold) / delete, grouped under a new "Bike Tracker" nav section. Bikes persist in a new `bt` Postgres schema (`bt.bike`) with a strong FK to the athlete; every operation is scoped to the signed-in athlete.
+- Introduce app-wide input validation: FluentValidation + a MediatR `ValidationBehavior` that fails with a `Result` (no exceptions), plus semantic error types (validation/not-found/forbidden/conflict) mapped to HTTP 422/404/403/409 as `application/problem+json`.
+
+## 1.16.0 (2026-08-06)
 
 ### Features
 - Update MudBlazor 8 → 9 (major upgrade). App code only needed two fixes: the app-bar avatar `MudMenu` activator (v9 no longer auto-opens — wired `MenuContext.ToggleAsync`) and a `MudTabs` param rename (`PanelClass` → `TabPanelsClass`) on the Account page. Build + all tests green.

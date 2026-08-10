@@ -1,0 +1,72 @@
+@using System.Net.Http.Json
+@using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.Domain.Entities.Bike
+@using KomTracker.WEB.Infrastructure
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">Mark <b>@Bike.Name</b> as sold.</MudText>
+        <MudForm @ref="_form">
+            <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Required="true" RequiredError="Sale date is required" />
+            <MudNumericField @bind-Value="_salePrice" Label="Sale price" Min="0" Required="true"
+                             RequiredError="Sale price is required" Class="mt-3" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Mark as sold</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public BikeViewModel Bike { get; set; } = default!;
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private MudForm _form = default!;
+    private DateTime? _saleDate = DateTime.UtcNow.Date;
+    private decimal? _salePrice;
+    private bool _saving;
+
+    private async Task SubmitAsync()
+    {
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        _saving = true;
+
+        try
+        {
+            var body = new ChangeBikeLifecycleViewModel
+            {
+                Lifecycle = BikeLifecycle.Sold,
+                SaleDate = _saleDate,
+                SalePrice = _salePrice
+            };
+
+            var response = await Http.PutAsJsonAsync($"bikes/{Bike.Id}/lifecycle", body);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Bike marked as sold", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+                return;
+            }
+
+            await response.ShowProblemAsync(Snackbar);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

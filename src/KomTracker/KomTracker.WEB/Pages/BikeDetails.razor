@@ -1,0 +1,99 @@
+@page "/bikes/{Id:int}"
+@attribute [Authorize]
+@using System.Globalization
+@using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.Domain.Entities.Bike
+
+<PageTitle>Bike</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_bike is null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">Bike not found.</MudAlert>
+    <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Href="bikes">Back to bikes</MudButton>
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Large" />
+        <div>
+            <MudText Typo="Typo.h5">@_bike.Name</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">@($"{_bike.Brand} {_bike.Model}".Trim())</MudText>
+        </div>
+        <MudChip T="string" Size="Size.Small" Color="LifecycleColor(_bike.Lifecycle)">@_bike.Lifecycle</MudChip>
+        <MudSpacer />
+        <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Primary" OnClick="EditAsync">Edit</MudButton>
+        @if (_bike.Lifecycle == BikeLifecycle.Active)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Archive" OnClick="ArchiveAsync">Archive</MudButton>
+        }
+        else
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Unarchive" OnClick="ActivateAsync">Set active</MudButton>
+        }
+        @if (_bike.Lifecycle != BikeLifecycle.Sold)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Sell" OnClick="SellAsync">Mark as sold</MudButton>
+        }
+        <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="DeleteAsync">Delete</MudButton>
+    </div>
+
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Identity</MudText>
+                @Field("Type", _bike.Type.ToString())
+                @Field("Brand", _bike.Brand)
+                @Field("Model", _bike.Model)
+                @Field("Weight", _bike.WeightKg is { } w ? $"{w.ToString(CultureInfo.InvariantCulture)} kg" : null)
+                @Field("Notes", _bike.Notes)
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Purchase</MudText>
+                @Field("Price", _bike.Price?.ToString(CultureInfo.InvariantCulture))
+                @Field("Place", _bike.PurchasePlace)
+                @Field("Date", _bike.PurchaseDate?.ToString("yyyy-MM-dd"))
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Initial metrics</MudText>
+                @Field("Distance", $"{_bike.InitialDistanceKm.ToString(CultureInfo.InvariantCulture)} km")
+                @Field("Moving time", _bike.InitialMovingHours is { } h ? $"{h.ToString(CultureInfo.InvariantCulture)} h" : null)
+                @Field("Elevation", _bike.InitialElevationM is { } e ? $"{e.ToString(CultureInfo.InvariantCulture)} m" : null)
+            </MudPaper>
+        </MudItem>
+
+        @if (_bike.Lifecycle == BikeLifecycle.Sold)
+        {
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-4" Outlined="true">
+                    <MudText Typo="Typo.subtitle1" Class="mb-2">Sale</MudText>
+                    @Field("Sale date", _bike.SaleDate?.ToString("yyyy-MM-dd"))
+                    @Field("Sale price", _bike.SalePrice?.ToString(CultureInfo.InvariantCulture))
+                </MudPaper>
+            </MudItem>
+        }
+
+        <MudItem xs="12">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-1">Components</MudText>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">Coming soon.</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    private RenderFragment Field(string label, string? value) =>@<div class="d-flex py-1" style="gap: 8px;">
+        <MudText Typo="Typo.body2" Class="mud-text-secondary" Style="min-width: 110px;">@label</MudText>
+        <MudText Typo="Typo.body2">@(string.IsNullOrWhiteSpace(value) ? "—" : value)</MudText>
+    </div>;
+}

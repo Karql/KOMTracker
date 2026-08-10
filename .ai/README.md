@@ -11,7 +11,7 @@ Only app users are known to the system — Strava hid public segment leaderboard
 ## Tech stack
 
 - **Backend API**: ASP.NET Core (**.NET 10**), Swagger.
-- **Frontend**: **Blazor WebAssembly** + MudBlazor 8, Leaflet (maps).
+- **Frontend**: **Blazor WebAssembly** + MudBlazor 9, Leaflet (maps).
 - **DB**: **PostgreSQL 18** + EF Core (Npgsql), FlexLabs.Upsert, EFCore.BulkExtensions.
 - **Auth**: **IdentityServer4** (OIDC / OAuth2 Authorization Code + PKCE), JWT Bearer. (IdentityServer4 is EOL — future migration candidate.)
 - **Scheduling**: **Quartz.NET** (Europe/Warsaw).
@@ -22,7 +22,7 @@ Only app users are known to the system — Strava hid public segment leaderboard
 
 ## Solution layout (`src/KomTracker.sln`, Clean Architecture)
 
-- `KomTracker.Domain` — entities (Athlete, Segment, SegmentEffort, KomsSummary, KomsSummarySegmentEffort, KomTakeover, Club, Token); `BaseEntity` (AuditCD/AuditMD).
+- `KomTracker.Domain` — entities (Athlete, Segment, SegmentEffort, KomsSummary, KomsSummarySegmentEffort, KomTakeover, Club, Token; **Bike** + `BikeType`/`BikeLifecycle` enums for BikeTracker); `BaseEntity` (AuditCD/AuditMD).
 - `KomTracker.Application` — business logic: Commands/Queries/Services/Notifications (MediatR); interfaces for persistence & services.
 - `KomTracker.Infrastructure` — EF Core (`KOMDBContext`, configurations, migrations, repositories), Identity (IdentityServer4), Strava services, Brevo mail.
 - `KomTracker.API` — REST controllers + Quartz jobs + `Startup`.
@@ -51,6 +51,25 @@ Detects, among app users, "who took whose KOM". `DetectKomTakeoversCommand` proc
 - Two-sided pairing (`SegmentService.ResolveTakeovers`, pure/tested): a `NewKom` (taker) is matched to a `LostKom` (loser) on the same segment (same `sex`, `null==null`), searched only in earlier summaries within a **24h backward window** (by `TrackDate`). The pair is created by whichever side is processed later; idempotent via `UNIQUE(taken_segment_effort_id)`.
 - `ReturnedKom` marks a prior takeover `reverted` (matched by `lost_segment_effort_id`) — the car-flag / deleted / privatized case.
 - Table is lean: two effort ids + two summary ids + `TrackDate` (when the takeover happened, for time-based ranking) + `reverted` + audit. Athletes/segment are derived via the referenced efforts.
+
+## BikeTracker (`bt` schema) — sibling product, Phase 0
+
+A bike-maintenance journal being built inside the existing projects (no new solution/front-end). Full design: `docs/biketracker/CONCEPT.md` (Decisions D-1..D-19); Phase 0 spec: `.ai/plans/2026-08-09-biketracker-phase-0.md`.
+
+- **Phase 0 (done):** a "Bikes" garage — `bt.bike` table (first use of a Postgres **schema** in this repo; `ToTable("bike","bt")` + `EnsureSchema`), DB-generated key. CRUD + lifecycle (Active/Archived/Sold) + hard delete.
+- **Owner = platform User, not the Strava athlete.** `bt.bike.user_id` → `AspNetUsers.Id` (string FK). Everything is scoped to the signed-in user via the JWT `sub` (`GetCurrentUser().UserId`) — so ownership survives future integrations (Garmin, etc.). (Strava's athlete-centric linkage is the historical exception; new data hangs off the User.)
+- **Enums stored as strings** (`HasConversion<string>()`) — readable in the DB, order-independent. Enums live in `Domain`; `KomTracker.API.Shared` references `Domain` so ViewModels are enum-typed (and WEB gets a typed `MudSelect<BikeType>`).
+- **Dates** are `DateTime` UTC → `timestamptz` (consistent with the rest of the app); UI shows date only.
+- **No AutoMapper** here — explicit `BikeEntity.ToViewModel()` extension (compile-time safe). CQRS: one `SaveBikeCommand` (nullable `Id` = create/update) + `ChangeLifecycle`/`Delete` (→ `Result`); queries return `BikeEntity`. Handlers hold only existence/authz guards (`NotFoundError`/`ForbiddenError`); input validation is in FluentValidation validators (forced to `en`; error keys camelCased to match the JSON).
+- **Request body** `SaveBikeViewModel` (`API.Shared`) = the create/update body + WEB form (editable fields only). `SaveBikeCommand` carries the same fields flat (+ server-set `Id`/`UserId`); the controller maps body→command, and `BikeContractParityTests` fails if the two drift. `BikeType`/`BikeLifecycle` carry `[JsonConverter(typeof(JsonStringEnumConverter))]` so they're strings on the wire (matching the DB), targeted to just these enums.
+- **WEB:** `Pages/Bikes.razor` (card + table toggle), `Pages/BikeDetails.razor` (all fields + "Components" placeholder), `Shared/AddEditBikeDialog.razor` (progressive form), `Shared/SellBikeDialog.razor`; grouped under a "Bike Tracker" `MudNavGroup`.
+- **Out of Phase 0:** components, installations, mileage attribution, Strava `gear_id` sync, alerts, cost analysis (later phases).
+
+## Validation & error mapping (app-wide, introduced with BikeTracker)
+
+- **FluentValidation** + a MediatR `ValidationBehavior<TRequest,TResponse> where TResponse : ResultBase`: runs validators before the handler and, on failure, returns a **failed `Result` carrying a `ValidationError`** (no exceptions). The `ResultBase` constraint means only Result-returning commands are validated; queries pass through. Registered via `AddOpenBehavior` + `AddValidatorsFromAssembly` in `Application/DependencyInjection`.
+- **Semantic errors** (`Application/Errors/`): `AppError` base + `ValidationError`/`NotFoundError`/`ForbiddenError`/`ConflictError`. The API's `ResultExtensions.ToActionResult` switches on the first error's type → **422 / 404 / 403 / 409**, else **400**; bodies are built by the framework `ProblemDetailsFactory` (RFC 7807 `application/problem+json`; content-type is auto for ProblemDetails-derived values, 422 registered in `ClientErrorMapping` for its `type`). Existing `XxxError : FluentResults.Error` types are unchanged (→ 400).
+- **Where validation runs:** all command validation is in the **MediatR `ValidationBehavior`** (guaranteed from any caller). Commands are **flat** (`SaveBikeCommand` mirrors the `SaveBikeViewModel` request body; a reflection parity test guards drift), so error keys are the flat field names camelCased (`name`, `saleDate`) matching the posted JSON. (The command can't double as the request body: WEB is a separate WASM assembly that doesn't reference `Application`.) `ValidationError.From` builds the dict; FluentValidation messages forced to `en`.
 
 ## Background jobs (Quartz, Europe/Warsaw)
 

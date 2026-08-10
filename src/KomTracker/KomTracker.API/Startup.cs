@@ -43,6 +43,17 @@ public class Startup
     {
         services.AddCors();
         services.AddControllers();
+        services.AddProblemDetails();
+
+        // 422 isn't in the default ClientErrorMapping, so ProblemDetails for it would lack `type`.
+        services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
+        {
+            options.ClientErrorMapping[StatusCodes.Status422UnprocessableEntity] = new Microsoft.AspNetCore.Mvc.ClientErrorData
+            {
+                Link = "https://tools.ietf.org/html/rfc9110#section-15.5.21",
+                Title = "Unprocessable Entity"
+            };
+        });
         AddDataProtection(services);
         AddAuthentication(services);
         AddAuthorization(services);

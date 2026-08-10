@@ -1,0 +1,119 @@
+@page "/bikes"
+@attribute [Authorize]
+@using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.Domain.Entities.Bike
+@using KomTracker.WEB.Models.Preference
+
+<PageTitle>Bikes</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudText Typo="Typo.h5">Bikes</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Margin="Margin.Dense"
+                      Immediate="true" Style="max-width: 220px;" />
+        <MudSwitch T="bool" @bind-Value="_includeInactive" @bind-Value:after="LoadBikesAsync"
+                   Color="Color.Primary" Label="Show archived/sold" />
+        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+            <MudIconButton Icon="@Icons.Material.Filled.GridView"
+                           Color="@(_view == ListViewMode.Card ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Card))" />
+            <MudIconButton Icon="@Icons.Material.Filled.TableRows"
+                           Color="@(_view == ListViewMode.Table ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Table))" />
+        </MudButtonGroup>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add bike</MudButton>
+    </div>
+
+    @if (!FilteredBikes.Any())
+    {
+        <MudAlert Severity="Severity.Info">No bikes yet. Add your first one.</MudAlert>
+    }
+    else if (_view == ListViewMode.Card)
+    {
+        <MudGrid>
+            @foreach (var bike in FilteredBikes)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true">
+                        <MudCardHeader>
+                            <CardHeaderAvatar>
+                                <MudIcon Icon="@Icons.Material.Filled.PedalBike" />
+                            </CardHeaderAvatar>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">@bike.Name</MudText>
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                                    @($"{bike.Brand} {bike.Model}".Trim())
+                                </MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                @BikeMenu(bike)
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <div class="d-flex align-center" style="gap: 8px;">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@bike.Type</MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="LifecycleColor(bike.Lifecycle)">@bike.Lifecycle</MudChip>
+                            </div>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => OpenDetails(bike.Id))">Details</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudTable Items="FilteredBikes" Hover="true" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Type</MudTh>
+                <MudTh>Brand</MudTh>
+                <MudTh>Model</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh Style="text-align: right;"></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">
+                    <MudLink OnClick="@(() => OpenDetails(context.Id))">@context.Name</MudLink>
+                </MudTd>
+                <MudTd DataLabel="Type">@context.Type</MudTd>
+                <MudTd DataLabel="Brand">@context.Brand</MudTd>
+                <MudTd DataLabel="Model">@context.Model</MudTd>
+                <MudTd DataLabel="Status">
+                    <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
+                </MudTd>
+                <MudTd Style="text-align: right;">@BikeMenu(context)</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+}
+
+@code {
+    private RenderFragment BikeMenu(BikeViewModel bike) =>@<MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+        <MudMenuItem Icon="@Icons.Material.Filled.Visibility" OnClick="@(() => OpenDetails(bike.Id))">Details</MudMenuItem>
+        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditAsync(bike))">Edit</MudMenuItem>
+        @if (bike.Lifecycle == BikeLifecycle.Active)
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.Archive" OnClick="@(() => ArchiveAsync(bike))">Archive</MudMenuItem>
+        }
+        else
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.Unarchive" OnClick="@(() => ActivateAsync(bike))">Set active</MudMenuItem>
+        }
+        @if (bike.Lifecycle != BikeLifecycle.Sold)
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.Sell" OnClick="@(() => SellAsync(bike))">Mark as sold</MudMenuItem>
+        }
+        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => DeleteAsync(bike))">Delete</MudMenuItem>
+    </MudMenu>;
+}

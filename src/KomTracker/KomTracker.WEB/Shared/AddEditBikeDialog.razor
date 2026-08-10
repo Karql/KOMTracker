@@ -1,0 +1,114 @@
+@using System.Net.Http.Json
+@using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.Domain.Entities.Bike
+@using KomTracker.WEB.Infrastructure
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudTextField @bind-Value="_model.Name" Label="Name" Required="true" RequiredError="Name is required"
+                          MaxLength="200" Immediate="true" />
+
+            <MudSelect T="BikeType" @bind-Value="_model.Type" Label="Type" Class="mt-3">
+                @foreach (var type in Enum.GetValues<BikeType>())
+                {
+                    <MudSelectItem Value="type">@type</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudTextField @bind-Value="_model.Brand" Label="Brand" MaxLength="200" Class="mt-3" />
+            <MudTextField @bind-Value="_model.Model" Label="Model" MaxLength="200" Class="mt-3" />
+
+            <MudExpansionPanels Elevation="0" Class="mt-3">
+                <MudExpansionPanel Text="Additional details">
+                    <MudNumericField @bind-Value="_model.WeightKg" Label="Weight (kg)" Min="0" />
+                    <MudNumericField @bind-Value="_model.Price" Label="Price" Min="0" Class="mt-3" />
+                    <MudTextField @bind-Value="_model.PurchasePlace" Label="Purchase place" MaxLength="200" Class="mt-3" />
+                    <MudDatePicker @bind-Date="_purchaseDate" Label="Purchase date" Class="mt-3" />
+                    <MudNumericField @bind-Value="_model.InitialDistanceKm" Label="Initial distance (km)" Min="0" Class="mt-3" />
+                    <MudNumericField @bind-Value="_model.InitialMovingHours" Label="Initial moving time (h)" Min="0" Class="mt-3" />
+                    <MudNumericField @bind-Value="_model.InitialElevationM" Label="Initial elevation (m)" Min="0" Class="mt-3" />
+                    <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    /// <summary>Null = add; non-null = edit.</summary>
+    [Parameter] public BikeViewModel? Bike { get; set; }
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private MudForm _form = default!;
+    private SaveBikeViewModel _model = new();
+    private DateTime? _purchaseDate;
+    private bool _saving;
+
+    protected override void OnInitialized()
+    {
+        if (Bike is not null)
+        {
+            _model = new SaveBikeViewModel
+            {
+                Name = Bike.Name,
+                Brand = Bike.Brand,
+                Model = Bike.Model,
+                Type = Bike.Type,
+                WeightKg = Bike.WeightKg,
+                Notes = Bike.Notes,
+                Price = Bike.Price,
+                PurchasePlace = Bike.PurchasePlace,
+                PurchaseDate = Bike.PurchaseDate,
+                InitialDistanceKm = Bike.InitialDistanceKm,
+                InitialMovingHours = Bike.InitialMovingHours,
+                InitialElevationM = Bike.InitialElevationM
+            };
+            _purchaseDate = Bike.PurchaseDate;
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        _model.PurchaseDate = _purchaseDate;
+        _saving = true;
+
+        try
+        {
+            var response = Bike is null
+                ? await Http.PostAsJsonAsync("bikes", _model)
+                : await Http.PutAsJsonAsync($"bikes/{Bike.Id}", _model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var saved = await response.Content.ReadFromJsonAsync<BikeViewModel>();
+                Snackbar.Add(Bike is null ? "Bike added" : "Bike updated", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(saved));
+                return;
+            }
+
+            await response.ShowProblemAsync(Snackbar);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

@@ -14,6 +14,7 @@ public static class UserHelper
     {
         return new()
         {
+            UserId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? user.FindFirst("sub")?.Value,
             AthleteId = Convert.ToInt32(user.FindFirst(IdentityConstants.Claims.AthleteId)?.Value),
             FirstName = user.FindFirst(IdentityConstants.Claims.FirstName)?.Value!,
             LastName = user.FindFirst(IdentityConstants.Claims.LastName)?.Value!,

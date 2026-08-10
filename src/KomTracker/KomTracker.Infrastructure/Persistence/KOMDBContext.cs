@@ -16,6 +16,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KomTracker.Infrastructure.Persistence.Configurations.Club;
 using KomTracker.Domain.Entities.Club;
+using KomTracker.Infrastructure.Persistence.Configurations.Bike;
+using KomTracker.Domain.Entities.Bike;
 
 namespace KomTracker.Infrastructure.Persistence;
 
@@ -52,6 +54,9 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
     public virtual DbSet<KomTakeoverEntity> KomTakeover { get; set; }
 
     public virtual DbSet<ClubEntity> Club { get; set; }
+
+    // BikeTracker
+    public virtual DbSet<BikeEntity> Bike { get; set; }
 
     public KOMDBContext(DbContextOptions<KOMDBContext> options, ILoggerFactory loggerFactory)
         : base(options)
@@ -94,5 +99,8 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
         builder.ApplyConfiguration(new KomsSummarySegmentEffortEntityTypeConfiguration());
         builder.ApplyConfiguration(new KomTakeoverEntityTypeConfiguration());
         builder.ApplyConfiguration(new ClubEntityTypeConfiguration());
+
+        // BikeTracker
+        builder.ApplyConfiguration(new BikeEntityTypeConfiguration());
     }
 }

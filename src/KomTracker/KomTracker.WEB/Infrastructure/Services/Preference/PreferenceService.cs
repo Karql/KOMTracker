@@ -27,6 +27,20 @@ public class PreferenceService : IPreferenceService
         await SetPreference(preference);
     }
 
+    public async Task<ListViewMode> GetListViewAsync(string key, ListViewMode fallback = ListViewMode.Card)
+    {
+        var preference = await GetPreferenceAsync();
+
+        return preference.ListViews.TryGetValue(key, out var mode) ? mode : fallback;
+    }
+
+    public async Task SetListViewAsync(string key, ListViewMode mode)
+    {
+        var preference = await GetPreferenceAsync();
+        preference.ListViews[key] = mode;
+        await SetPreference(preference);
+    }
+
     private async Task<PreferenceModel> GetPreferenceAsync()
     {
         return await _localStorageService.GetItemAsync<PreferenceModel>(Constants.Storage.Preference) ?? new PreferenceModel();

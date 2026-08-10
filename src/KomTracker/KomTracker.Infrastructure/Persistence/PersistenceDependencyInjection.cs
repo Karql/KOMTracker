@@ -21,6 +21,7 @@ public static class PersistenceDependencyInjection
         services.AddScoped<IAthleteRepository, EFAthleteRepository>();
         services.AddScoped<IClubRepository, EFClubRepository>();
         services.AddScoped<ISegmentRepository, EFSegmentRepository>();
+        services.AddScoped<IBikeRepository, EFBikeRepository>();
         services.AddDbContext<KOMDBContext>(options => options.UseNpgsql(configuration.GetConnectionString("DB")));
 
         return services;
