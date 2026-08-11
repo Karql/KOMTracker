@@ -42,6 +42,9 @@ public class ClubSummaryModel
     [JsonPropertyName("sport_type")]
     public string SportType { get; set; }
 
+    [JsonPropertyName("localized_sport_type")]
+    public string LocalizedSportType { get; set; }
+
     [JsonPropertyName("city")]
     public string City { get; set; }
 
@@ -65,4 +68,14 @@ public class ClubSummaryModel
 
     [JsonPropertyName("url")]
     public string Url { get; set; }
+
+    // Membership context — present when the club is returned in the athlete's own clubs[] / GET /athlete/clubs.
+    [JsonPropertyName("membership")]
+    public string Membership { get; set; }
+
+    [JsonPropertyName("admin")]
+    public bool Admin { get; set; }
+
+    [JsonPropertyName("owner")]
+    public bool Owner { get; set; }
 }

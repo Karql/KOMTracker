@@ -29,6 +29,7 @@ public static class ClubSummaryModelExtensions
             ""activity_types_icon"": ""{model.ActivityTypesIcon}"",
             ""dimensions"": [{string.Join(", ", model.Dimensions.Select(x => '"' + x + '"'))}],
             ""sport_type"": ""{model.SportType}"",
+            ""localized_sport_type"": ""{model.LocalizedSportType}"",
             ""city"": ""{model.City}"",
             ""state"": ""{model.State}"",
             ""country"": ""{model.Country}"",
@@ -36,7 +37,10 @@ public static class ClubSummaryModelExtensions
             ""member_count"": {model.MemberCount},
             ""featured"": {model.Featured.ToLowerString()},
             ""verified"": {model.Verified.ToLowerString()},
-            ""url"": ""{model.Url}""
+            ""url"": ""{model.Url}"",
+            ""membership"": ""{model.Membership}"",
+            ""admin"": {model.Admin.ToLowerString()},
+            ""owner"": {model.Owner.ToLowerString()}
         }}";
     }
 

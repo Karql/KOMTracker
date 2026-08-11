@@ -1,6 +1,7 @@
 ﻿## UPCOMMING
 
 ### Features
+- BikeTracker (Phase 1a — Strava client foundation): extend the Strava API client with a full activity model (`ActivitySummaryModel`, incl. the hand-added `utc_offset` missing from Strava's schema), a paginated `IActivityApi.GetActivitiesAsync` (list athlete activities, `after`/`before` window, 429/rate-limit handling), and gear support (`GearSummaryModel`/`GearDetailedModel`, `IGearApi.GetGearAsync`, `bikes[]`/`shoes[]` on the athlete). No app wiring yet — foundation for the activity sync.
 - BikeTracker (Phase 0): a "Bikes" garage — add / edit / list (card or table view) / detail page / lifecycle (Active → Archived / Sold) / delete, grouped under a new "Bike Tracker" nav section. Bikes persist in a new `bt` Postgres schema (`bt.bike`) with a strong FK to the athlete; every operation is scoped to the signed-in athlete.
 - Introduce app-wide input validation: FluentValidation + a MediatR `ValidationBehavior` that fails with a `Result` (no exceptions), plus semantic error types (validation/not-found/forbidden/conflict) mapped to HTTP 422/404/403/409 as `application/problem+json`.
 

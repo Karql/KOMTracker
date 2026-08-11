@@ -2,6 +2,7 @@
 using FluentAssertions;
 using RichardSzalay.MockHttp;
 using Strava.API.Client.Api;
+using Strava.API.Client.Model.Athlete;
 using Strava.API.Client.Model.Segment;
 using Strava.API.Client.Tests.Extensions.Model.Segment;
 using System;
@@ -175,6 +176,48 @@ public class AthleteApiTests
     private string GetKomsUrl(int page)
     {
         return $"https://www.strava.com/api/v3/athletes/{TEST_ATHLETE_ID}/koms?per_page=200&page={page}"; // 200 max possible
+    }
+    #endregion
+
+    #region Get athlete
+    [Fact]
+    public async Task Get_athlete_deserializes_detailed_payload()
+    {
+        // Arrange — trimmed real GET /athlete (DetailedAthlete) response.
+        const string json = @"{
+            ""id"": 2394302, ""username"": ""karql"", ""resource_state"": 3,
+            ""firstname"": ""Mateusz"", ""lastname"": ""Karkula"", ""bio"": "":)"",
+            ""city"": ""Kraków"", ""state"": ""Lesser Poland Voivodeship"", ""country"": ""Poland"",
+            ""sex"": ""M"", ""premium"": true, ""summit"": true, ""weight"": 80.0,
+            ""ftp"": 300, ""measurement_preference"": ""meters"", ""follower_count"": 723,
+            ""clubs"": [],
+            ""bikes"": [ { ""id"": ""b805524"", ""primary"": false, ""name"": ""Bianka"",
+                          ""nickname"": ""Bianka"", ""resource_state"": 2, ""retired"": false,
+                          ""distance"": 21207353, ""converted_distance"": 21207.4 } ],
+            ""shoes"": []
+        }";
+
+        _mockHttp.Expect(HttpMethod.Get, "https://www.strava.com/api/v3/athlete")
+            .WithHeaders("Authorization", $"Bearer {TEST_TOKEN_VALID}")
+            .Respond(HttpStatusCode.OK, MediaTypeNames.Application.Json, json);
+
+        // Act
+        var res = await _athleteApi.GetAthleteAsync(TEST_TOKEN_VALID);
+
+        // Assert
+        res.Should().BeSuccess();
+        var athlete = res.Value;
+
+        athlete.FirstName.Should().Be("Mateusz");
+        athlete.Weight.Should().Be(80f);
+        athlete.Ftp.Should().Be(300);
+        athlete.MeasurementPreference.Should().Be("meters");
+        athlete.Bikes.Should().HaveCount(1);
+        athlete.Bikes[0].Id.Should().Be("b805524");
+        athlete.Bikes[0].Distance.Should().Be(21207353d);
+        athlete.Bikes[0].Retired.Should().BeFalse();
+
+        _mockHttp.VerifyNoOutstandingExpectation();
     }
     #endregion
 }

@@ -93,7 +93,7 @@ public class AthleteApi : IAthleteApi
         return Result.Fail<IEnumerable<SegmentEffortDetailedModel>>(new GetKomsError(GetKomsError.UnknownError));
     }
 
-    public async Task<Result<AthleteSummaryModel>> GetAthleteAsync(string token)
+    public async Task<Result<AthleteDetailedModel>> GetAthleteAsync(string token)
     {
         var url = "https://www.strava.com/api/v3/athlete";
 
@@ -106,14 +106,14 @@ public class AthleteApi : IAthleteApi
 
         if (response.IsSuccessStatusCode)
         {
-            var athlete = await response.Content.ReadFromJsonAsync<AthleteSummaryModel>();
+            var athlete = await response.Content.ReadFromJsonAsync<AthleteDetailedModel>();
             return Result.Ok(athlete);
         }
 
         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
             _logger.LogWarning(logPrefix + "Unauthorized!");
-            return Result.Fail<AthleteSummaryModel>(new GetAthleteError(GetAthleteError.Unauthorized));
+            return Result.Fail<AthleteDetailedModel>(new GetAthleteError(GetAthleteError.Unauthorized));
         }
 
         if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
@@ -126,12 +126,12 @@ public class AthleteApi : IAthleteApi
 
             _logger.LogError(logPrefix + "Rate Limit Exceeded! X-RateLimit-Limit: {rateLimitLimit}, X-RateLimit-Usage: {rateLimitUsage}, X-ReadRateLimit-Limit: {readRateLimitLimit}, X-ReadRateLimit-Usage: {readRateLimitUsage}",
                 rateLimitLimit, rateLimitUsage, readRateLimitLimit, readRateLimitUsage);
-            return Result.Fail<AthleteSummaryModel>(new GetAthleteError(GetAthleteError.TooManyRequests));
+            return Result.Fail<AthleteDetailedModel>(new GetAthleteError(GetAthleteError.TooManyRequests));
         }
 
         _logger.LogError(logPrefix + "failed! SatusCode: {statusCode}, Response: {response}",
             (int)response.StatusCode, await response.Content.ReadAsStringAsync());
 
-        return Result.Fail<AthleteSummaryModel>(new GetAthleteError(GetAthleteError.UnknownError));
+        return Result.Fail<AthleteDetailedModel>(new GetAthleteError(GetAthleteError.UnknownError));
     }
 }

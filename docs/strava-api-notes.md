@@ -91,3 +91,84 @@ Strava exposes **two independent buckets**, each formatted `<15-minute>,<daily>`
 ## Implications for the BikeTracker sync (Phase 1)
 - Two-tier poll of `GET /athlete/activities?...&per_page=200`, loop pages until a short/empty page: **recent-window** (`after=now-7d`) frequently + **full** (no `after`) on a slow cadence — the full pass is what catches edited/deleted old rides. **Upsert into `strava.activity` 1:1** (all fields), **no gear/sport filter** at sync (D-10); filter only at attribution. Only athletes with `strava.athlete_sync.Enabled` are synced.
 - Mind the **shared** rate buckets; the **read** bucket (600/15 min, 30 000/day) is the tighter one for our reads.
+
+## Athlete & gear — real payloads (2026-08, our account)
+
+### Token exchange athlete — `POST /oauth/token` (`athlete`)
+Docs call this a `SummaryAthlete`, but the real payload is **fatter than the documented SummaryAthlete** (it carries `bio`, `weight`, `badge_type_id`, `username` — `weight` is a *DetailedAthlete* field per spec; `bio`/`badge_type_id`/`username`/`id_str`/`friend`/`follower` aren't in the spec at all). → modelled by `AthleteSummaryModel` (we keep those "extra" fields on Summary precisely because exchange returns them).
+```json
+"athlete": {
+  "id": 2394302, "id_str": "2394302", "username": "karql", "resource_state": 2,
+  "firstname": "Mateusz", "lastname": "Karkula", "bio": ":)",
+  "city": "Kraków", "state": "Lesser Poland Voivodeship", "country": "Poland",
+  "sex": "M", "premium": true, "summit": true,
+  "created_at": "2013-06-21T16:39:29Z", "updated_at": "2026-08-06T16:09:40Z",
+  "badge_type_id": 1, "weight": 80.0,
+  "profile_medium": "…/medium.jpg", "profile": "…/large.jpg",
+  "friend": null, "follower": null
+}
+```
+
+### Get Authenticated Athlete — `GET /athlete` → **DetailedAthlete** (`resource_state: 3`)
+Superset of the exchange athlete; adds `blocked`, `can_follow`, `follower_count`, `friend_count`, `mutual_friend_count`, `athlete_type`, `date_preference`, `measurement_preference`, `clubs[]`, `postable_clubs_count`, `ftp`, **`bikes[]`**, **`shoes[]`**. → modelled by `AthleteDetailedModel : AthleteSummaryModel` (we only add `bikes[]`/`shoes[]`; the rest we don't need, System.Text.Json ignores them). Gear shape (bikes[]/shoes[] items):
+```json
+{
+  "id": "b805524", "primary": false, "name": "Bianka", "nickname": "Bianka",
+  "resource_state": 2, "retired": false,
+  "distance": 21207353, "converted_distance": 21207.4
+}
+```
+- **Gear `distance` is metres and can be huge** (21 207 353 m ≈ 21 207 km) → **use `double`, not `float`** (float ~7 sig digits would drop the last digit). `converted_distance` = km.
+- `nickname`, `retired`, `converted_distance` are **real but undocumented** (not in the spec's `SummaryGear`). `retired` is useful for gear import (Phase 1c).
+- Gear import (1c): `bikes[]` here gives the summary; `GET /gear/{id}` adds `brand_name`/`model_name`/`frame_type` (int)/`description`/**`weight`** (→ `GearDetailedModel`). `id` is a **string**; `frame_type` is an **int**; distances are **metres** (float in spec, but treat as double).
+
+### Get Equipment — `GET /gear/{id}` → **DetailedGear** (`resource_state: 3`)
+Adds `brand_name`, `model_name`, `frame_type` (int), `description`, and **`weight`** (kg — undocumented; can seed `Bike.WeightKg` in 1c) over the summary gear:
+```json
+{
+  "id": "b10707658", "primary": false, "name": "Sensa", "nickname": "Sensa",
+  "resource_state": 3, "retired": false,
+  "distance": 29143765, "converted_distance": 29143.8,
+  "brand_name": "Sensa", "model_name": "Giulia GF", "frame_type": 3,
+  "description": "", "weight": 8.0
+}
+```
+
+### Docs-vs-reality gotchas (athlete/gear)
+- **Endpoint inconsistency:** `GET /athlete/clubs` exists, but there's **no** `/athlete/bikes` / `/athlete/shoes` / `/athlete/gears` — gear only comes embedded in `GET /athlete` or via `GET /gear/{id}`.
+- **"SummaryAthlete" is often much leaner than documented** — `GET /clubs/{id}/admins` and `GET /activities/{id}/kudos` (both "SummaryAthlete" per docs) actually return only `{ resource_state, firstname, lastname }` (privacy/premium-driven trimming; docs not updated). We don't model those for BikeTracker.
+- Same theme as `utc_offset`: **trust real responses over the spec**; add real-but-unspecced fields by hand.
+
+### Clubs — one club, three inconsistent shapes (the "drama")
+The **same club** (id 105951) returns different fields depending on the endpoint — and even the same field carries different values. All three below are the same club:
+
+| field | `GET /athlete` (embedded) | `GET /athlete/clubs` | `GET /clubs/{id}` (DetailedClub) |
+|---|---|---|---|
+| `resource_state` | 2 | 2 | 3 |
+| `member_count` | **0 (bogus here!)** | 1844 | 1844 |
+| `membership` / `admin` / `owner` | ✅ present | ❌ absent | ✅ present |
+| `description` / `club_type` / `following_count` / `website` | ❌ | ❌ | ✅ (detail-only) |
+
+```jsonc
+// GET /athlete → clubs[] item (resource_state 2): has membership/admin/owner, but member_count = 0
+{ "id":105951, "resource_state":2, "name":"FFWD Wheels", …photos…,
+  "activity_types":[…], "dimensions":[…], "sport_type":"cycling", "localized_sport_type":"Cycling",
+  "city":"Zwolle","state":"Overijssel","country":"Netherlands",
+  "private":false, "member_count":0, "featured":false, "verified":true, "url":"ffwdwheels",
+  "membership":"member", "admin":false, "owner":false }
+
+// GET /athlete/clubs → item (resource_state 2): NO membership/admin/owner, real member_count 1844
+{ …same core…, "member_count":1844, "url":"ffwdwheels" }
+
+// GET /clubs/{id} → DetailedClub (resource_state 3): superset + detail-only fields
+{ …same core + membership/admin/owner…, "member_count":1844,
+  "description":"Get Confident. Go Fast. …", "club_type":"company",
+  "following_count":1, "website":"http://www.ffwdwheels.com" }
+```
+
+Rozkmina / gotchas:
+- **`member_count` is 0 in the `GET /athlete` embedded club** — don't trust it there; use `/athlete/clubs` or `/clubs/{id}` for the real count.
+- **`membership`/`admin`/`owner`** appear in the embedded `/athlete` club and in `/clubs/{id}`, but **NOT** in `/athlete/clubs` (even though that's literally "my clubs" — so the membership context is oddly dropped exactly where it's most expected).
+- `resource_state` is 2 in both summary shapes and 3 in the detailed one — but the "summary" shapes carry different subsets, so resource_state isn't a reliable indicator of which fields you'll get.
+- Detail-only (`/clubs/{id}`): `description`, `club_type`, `following_count`, `website` — all **simple scalars** (no collections), so there's no technical reason they couldn't be returned everywhere; Strava just doesn't.
+- **Model impact for us: none.** `ClubSummaryModel` covers `/athlete` + `/athlete/clubs` (incl. membership/admin/owner). We don't call `GET /clubs/{id}`, so a `DetailedClub` model (with description/club_type/following_count/website) is intentionally **not** added until something needs it.

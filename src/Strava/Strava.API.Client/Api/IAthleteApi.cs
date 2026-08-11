@@ -13,6 +13,6 @@ public interface IAthleteApi
 {
     Task<Result<IEnumerable<SegmentEffortDetailedModel>>> GetKomsAsync(int athleteId, string token);
 
-    /// <summary>Get the profile of the athlete that owns the token (Strava GET /athlete).</summary>
-    Task<Result<AthleteSummaryModel>> GetAthleteAsync(string token);
+    /// <summary>Get the profile of the athlete that owns the token (Strava GET /athlete → DetailedAthlete).</summary>
+    Task<Result<AthleteDetailedModel>> GetAthleteAsync(string token);
 }
