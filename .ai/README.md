@@ -52,6 +52,16 @@ Detects, among app users, "who took whose KOM". `DetectKomTakeoversCommand` proc
 - `ReturnedKom` marks a prior takeover `reverted` (matched by `lost_segment_effort_id`) — the car-flag / deleted / privatized case.
 - Table is lean: two effort ids + two summary ids + `TrackDate` (when the takeover happened, for time-based ranking) + `reverted` + audit. Athletes/segment are derived via the referenced efforts.
 
+## BikeTracker — Strava activity sync (`strava` schema, Phase 1)
+
+Auto-mileage source. **1a** extended `Strava.API.Client` with the activity (`ActivitySummaryModel`, incl. hand-added `utc_offset`) + gear endpoints (`IActivityApi.GetActivitiesAsync`, `IGearApi.GetGearAsync`, athlete `bikes[]`); athlete model corrected to `Meta→Summary→Detailed` (`GET /athlete` = Detailed). **1b** added the server pipeline:
+- **`strava.activity`** — Strava activities synced **1:1** (all fields; key = Strava activity id; FK to `athlete`; `gear_id` for later bike attribution). Stores `start_date` (UTC) + `utc_offset` + `timezone` — **not** `start_date_local` (bogus `Z`).
+- **`strava.athlete_sync`** — per-athlete opt-in gate (generic table; `activities_enabled` flag, room for more capabilities); the sync job processes only athletes with activities enabled. **`strava.activity_sync_history`** — one row per sync run (`RunAt`, `Duration`, `SyncFrom` null=full/else window start, status, counts, `ActivitiesCount` snapshot) for "last N syncs" on the UI.
+- **`SyncActivitiesCommand { DateTime? After }`** (Application) — loops opted-in athletes (per-athlete isolation + 429-stops-the-run, like `TrackKomsCommand`); `EFActivityRepository.UpsertAthleteActivitiesAsync` bulk-upserts (EFCore.BulkExtensions, manual audit) and **window-scoped delete-detects** (`After==null` ⇒ full; else the recent window). Explicit `ActivitySummaryModel.ToEntity` mapping (no AutoMapper, D-P0-13). `IActivityService` wraps the client + translates errors.
+- **Jobs**: `SyncActivitiesRecentJob` (`After=now-7d`, Mon–Sat 01:35) + `SyncActivitiesFullJob` (`After=null`, Sun 01:35), gated by `SyncActivitiesJobEnabled`. **Admin**: `PUT /admin/sync-activities?afterDays=`, `PUT /admin/athlete-sync?athleteId=&enabled=` (temporary opt-in until the 1c UI).
+- **1b needs only `activity:read` (existing tokens)** — it lists all the athlete's activities except "Only You"; `activity:read_all` (private/Only-You completeness) comes with 1c's re-auth.
+- Out of Phase 1b: opt-in UI + gear import (`bt.bike`/`bt.bike_link`) + scope escalation (1c); bike mileage display (1d); webhooks (Phase 6).
+
 ## BikeTracker (`bt` schema) — sibling product, Phase 0
 
 A bike-maintenance journal being built inside the existing projects (no new solution/front-end). Full design: `docs/biketracker/CONCEPT.md` (Decisions D-1..D-19); Phase 0 spec: `.ai/plans/2026-08-09-biketracker-phase-0.md`.

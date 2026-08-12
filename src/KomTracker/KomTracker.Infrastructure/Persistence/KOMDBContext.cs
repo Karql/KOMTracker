@@ -18,6 +18,8 @@ using KomTracker.Infrastructure.Persistence.Configurations.Club;
 using KomTracker.Domain.Entities.Club;
 using KomTracker.Infrastructure.Persistence.Configurations.Bike;
 using KomTracker.Domain.Entities.Bike;
+using KomTracker.Infrastructure.Persistence.Configurations.Strava;
+using KomTracker.Domain.Entities.Strava;
 
 namespace KomTracker.Infrastructure.Persistence;
 
@@ -57,6 +59,13 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
 
     // BikeTracker
     public virtual DbSet<BikeEntity> Bike { get; set; }
+
+    // Strava
+    public virtual DbSet<ActivityEntity> Activity { get; set; }
+
+    public virtual DbSet<AthleteSyncEntity> AthleteSync { get; set; }
+
+    public virtual DbSet<ActivitySyncHistoryEntity> ActivitySyncHistory { get; set; }
 
     public KOMDBContext(DbContextOptions<KOMDBContext> options, ILoggerFactory loggerFactory)
         : base(options)
@@ -102,5 +111,10 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
 
         // BikeTracker
         builder.ApplyConfiguration(new BikeEntityTypeConfiguration());
+
+        // Strava
+        builder.ApplyConfiguration(new ActivityEntityTypeConfiguration());
+        builder.ApplyConfiguration(new AthleteSyncEntityTypeConfiguration());
+        builder.ApplyConfiguration(new ActivitySyncHistoryEntityTypeConfiguration());
     }
 }

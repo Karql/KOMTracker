@@ -3,6 +3,7 @@ using KomTracker.Application.Commands.Account;
 using KomTracker.Application.Commands.Club;
 using KomTracker.Application.Commands.Segment;
 using KomTracker.Application.Commands.Stats;
+using KomTracker.Application.Commands.Strava;
 using KomTracker.Application.Commands.Tracking;
 using Microsoft.AspNetCore.Mvc;
 using static KomTracker.Application.Constants;
@@ -58,6 +59,25 @@ public class AdminController : BaseApiController<AdminController>
     public async Task<ActionResult> RefreshAthletes(CancellationToken cancellationToken)
     {
         await _mediator.Send(new RefreshAthletesCommand(), cancellationToken);
+
+        return new NoContentResult();
+    }
+
+    /// <summary>Sync Strava activities for all opted-in athletes. Omit afterDays ⇒ full pull; else last N days.</summary>
+    [HttpPut("sync-activities")]
+    public async Task<ActionResult> SyncActivities([FromQuery] int? afterDays, CancellationToken cancellationToken)
+    {
+        var after = afterDays.HasValue ? DateTime.UtcNow.AddDays(-afterDays.Value) : (DateTime?)null;
+        await _mediator.Send(new SyncActivitiesCommand { After = after }, cancellationToken);
+
+        return new NoContentResult();
+    }
+
+    /// <summary>Enable/disable Strava activity sync for one athlete (temporary opt-in until the 1c UI).</summary>
+    [HttpPut("athlete-sync")]
+    public async Task<ActionResult> SetAthleteSync([FromQuery] int athleteId, [FromQuery] bool enabled, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new SetAthleteSyncCommand { AthleteId = athleteId, Enabled = enabled }, cancellationToken);
 
         return new NoContentResult();
     }

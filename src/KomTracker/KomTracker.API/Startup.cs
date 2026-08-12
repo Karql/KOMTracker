@@ -72,6 +72,8 @@ public class Startup
         services.AddTransient<RefreshClubsJob>();
         services.AddTransient<RefreshStatsJob>();
         services.AddTransient<RefreshAthletesJob>();
+        services.AddTransient<SyncActivitiesFullJob>();
+        services.AddTransient<SyncActivitiesRecentJob>();
 
         services.AddQuartz(q =>
         {
@@ -93,9 +95,19 @@ public class Startup
             }
 
             if (_applicationConfiguration.RefreshClubsJobEnabled)
-            {               
+            {
                 q.ScheduleJob<RefreshClubsJob>(trigger => trigger
-                    .WithCronSchedule("0 45 0,12 * * ?", action => action.InTimeZone(tz))); // 45 past midnight and midday
+                    .WithCronSchedule("0 35 0,12 * * ?", action => action.InTimeZone(tz))); // 35 past midnight and midday
+            }
+
+            if (_applicationConfiguration.SyncActivitiesJobEnabled)
+            {
+                // Recent window (last 7d) Mon-Sat 01:35; full (all + delete-detection) Sun 01:35.
+                q.ScheduleJob<SyncActivitiesRecentJob>(trigger => trigger
+                    .WithCronSchedule("0 35 1 ? * MON-SAT", action => action.InTimeZone(tz)));
+
+                q.ScheduleJob<SyncActivitiesFullJob>(trigger => trigger
+                    .WithCronSchedule("0 35 1 ? * SUN", action => action.InTimeZone(tz)));
             }
 
             if (_applicationConfiguration.RefreshStatsJobEnabled)

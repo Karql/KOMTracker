@@ -22,6 +22,7 @@ public class ApplicationConfiguration
     public bool RefreshClubsJobEnabled { get; set; } = true;
     public bool RefreshStatsJobEnabled { get; set; } = true;
     public bool RefreshAthletesJobEnabled { get; set; } = true;
+    public bool SyncActivitiesJobEnabled { get; set; } = true;
 
     /// <summary>
     /// Athlete id using to queries for data like segment details

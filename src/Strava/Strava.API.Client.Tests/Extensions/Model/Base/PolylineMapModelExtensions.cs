@@ -17,7 +17,8 @@ public static class PolylineMapModelExtensions
     public static string ToJson(this PolylineMapModel model)
     {
         return @$"{{
-            ""polyline"": ""{model.Polyline}""
+            ""polyline"": ""{model.Polyline}"",
+            ""summary_polyline"": ""{model.SummaryPolyline}""
         }}";
     }
 }
