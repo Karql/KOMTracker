@@ -24,6 +24,10 @@ else
             <MudText Typo="Typo.body2" Class="mud-text-secondary">@($"{_bike.Brand} {_bike.Model}".Trim())</MudText>
         </div>
         <MudChip T="string" Size="Size.Small" Color="LifecycleColor(_bike.Lifecycle)">@_bike.Lifecycle</MudChip>
+        @if (_bike.StravaGearId is not null)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Link">Strava</MudChip>
+        }
         <MudSpacer />
         <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Primary" OnClick="EditAsync">Edit</MudButton>
         @if (_bike.Lifecycle == BikeLifecycle.Active)
@@ -37,6 +41,10 @@ else
         @if (_bike.Lifecycle != BikeLifecycle.Sold)
         {
             <MudButton StartIcon="@Icons.Material.Filled.Sell" OnClick="SellAsync">Mark as sold</MudButton>
+        }
+        @if (_bike.StravaGearId is not null)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.LinkOff" OnClick="UnlinkAsync">Unlink</MudButton>
         }
         <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="DeleteAsync">Delete</MudButton>
     </div>

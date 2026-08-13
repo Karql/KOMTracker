@@ -117,7 +117,8 @@ public class BikesController : BaseApiController<BikesController>
             PurchaseDate = model.PurchaseDate,
             InitialDistanceKm = model.InitialDistanceKm,
             InitialMovingHours = model.InitialMovingHours,
-            InitialElevationM = model.InitialElevationM
+            InitialElevationM = model.InitialElevationM,
+            StravaGearId = model.StravaGearId
         });
 
         return this.ToActionResult(result, bike => bike.ToViewModel());

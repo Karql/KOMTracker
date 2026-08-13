@@ -22,7 +22,22 @@ public class GetBikesQueryHandler : IRequestHandler<GetBikesQuery, IEnumerable<B
 
     public async Task<IEnumerable<BikeEntity>> Handle(GetBikesQuery request, CancellationToken cancellationToken)
     {
-        return await _komUoW.GetRepository<IBikeRepository>()
-            .GetBikesAsync(request.UserId, request.IncludeInactive);
+        var bikes = (await _komUoW.GetRepository<IBikeRepository>()
+            .GetBikesAsync(request.UserId, request.IncludeInactive)).ToList();
+
+        var links = (await _komUoW.GetRepository<IBikeLinkRepository>()
+            .GetByBikeIdsAsync(bikes.Select(b => b.Id).ToList()))
+            .GroupBy(l => l.BikeId)
+            .ToDictionary(g => g.Key, g => (IReadOnlyList<BikeLinkEntity>)g.ToList());
+
+        foreach (var bike in bikes)
+        {
+            if (links.TryGetValue(bike.Id, out var bikeLinks))
+            {
+                bike.Links = bikeLinks;
+            }
+        }
+
+        return bikes;
     }
 }

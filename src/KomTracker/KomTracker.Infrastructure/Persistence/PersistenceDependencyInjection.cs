@@ -22,6 +22,8 @@ public static class PersistenceDependencyInjection
         services.AddScoped<IClubRepository, EFClubRepository>();
         services.AddScoped<ISegmentRepository, EFSegmentRepository>();
         services.AddScoped<IBikeRepository, EFBikeRepository>();
+        services.AddScoped<IBikeLinkRepository, EFBikeLinkRepository>();
+        services.AddScoped<IStravaBikeRepository, EFStravaBikeRepository>();
         services.AddScoped<IActivityRepository, EFActivityRepository>();
         services.AddScoped<IAthleteSyncRepository, EFAthleteSyncRepository>();
         services.AddScoped<IActivitySyncHistoryRepository, EFActivitySyncHistoryRepository>();

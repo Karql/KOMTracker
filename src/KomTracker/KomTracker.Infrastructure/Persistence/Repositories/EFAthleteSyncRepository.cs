@@ -37,4 +37,23 @@ public class EFAthleteSyncRepository : EFBaseRepository, IAthleteSyncRepository
             })
             .RunAsync();
     }
+
+    public Task SetBikesEnabledAsync(int athleteId, bool enabled)
+    {
+        var athleteSync = new AthleteSyncEntity
+        {
+            AthleteId = athleteId,
+            BikesEnabled = enabled,
+            AuditCD = DateTime.UtcNow
+        };
+
+        return _context.AthleteSync
+            .Upsert(athleteSync)
+            .WhenMatched((db, model) => new AthleteSyncEntity
+            {
+                AuditMD = DateTime.UtcNow,
+                BikesEnabled = model.BikesEnabled
+            })
+            .RunAsync();
+    }
 }

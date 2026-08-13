@@ -1,5 +1,7 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using KomTracker.Domain.Contracts;
 
 namespace KomTracker.Domain.Entities.Bike;
@@ -50,4 +52,9 @@ public class BikeEntity : BaseEntity
     public DateTime? SaleDate { get; set; }
 
     public decimal? SalePrice { get; set; }
+
+    /// <summary>External-service links (bt.bike_link). Loaded on demand by queries — NOT an EF navigation
+    /// (keeps the update path clean; bike_link is written only via its own repo).</summary>
+    [NotMapped]
+    public IReadOnlyList<BikeLinkEntity> Links { get; set; } = new List<BikeLinkEntity>();
 }

@@ -30,6 +30,9 @@ public class GetBikeQueryHandler : IRequestHandler<GetBikeQuery, BikeEntity?>
             return null;
         }
 
+        bike.Links = (await _komUoW.GetRepository<IBikeLinkRepository>()
+            .GetByBikeIdsAsync(new[] { bike.Id })).ToList();
+
         return bike;
     }
 }

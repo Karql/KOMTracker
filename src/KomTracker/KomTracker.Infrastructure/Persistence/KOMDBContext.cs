@@ -60,8 +60,12 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
     // BikeTracker
     public virtual DbSet<BikeEntity> Bike { get; set; }
 
+    public virtual DbSet<BikeLinkEntity> BikeLink { get; set; }
+
     // Strava
     public virtual DbSet<ActivityEntity> Activity { get; set; }
+
+    public virtual DbSet<StravaBikeEntity> StravaBike { get; set; }
 
     public virtual DbSet<AthleteSyncEntity> AthleteSync { get; set; }
 
@@ -111,9 +115,11 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
 
         // BikeTracker
         builder.ApplyConfiguration(new BikeEntityTypeConfiguration());
+        builder.ApplyConfiguration(new BikeLinkEntityTypeConfiguration());
 
         // Strava
         builder.ApplyConfiguration(new ActivityEntityTypeConfiguration());
+        builder.ApplyConfiguration(new StravaBikeEntityTypeConfiguration());
         builder.ApplyConfiguration(new AthleteSyncEntityTypeConfiguration());
         builder.ApplyConfiguration(new ActivitySyncHistoryEntityTypeConfiguration());
     }

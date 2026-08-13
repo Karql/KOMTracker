@@ -21,4 +21,7 @@ public class SaveBikeViewModel
     public decimal InitialDistanceKm { get; set; }
     public decimal? InitialMovingHours { get; set; }
     public decimal? InitialElevationM { get; set; }
+
+    /// <summary>When set on create, links the new bike to this Strava gear id (bt.bike_link). Ignored on update.</summary>
+    public string? StravaGearId { get; set; }
 }

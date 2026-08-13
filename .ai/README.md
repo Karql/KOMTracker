@@ -56,11 +56,13 @@ Detects, among app users, "who took whose KOM". `DetectKomTakeoversCommand` proc
 
 Auto-mileage source. **1a** extended `Strava.API.Client` with the activity (`ActivitySummaryModel`, incl. hand-added `utc_offset`) + gear endpoints (`IActivityApi.GetActivitiesAsync`, `IGearApi.GetGearAsync`, athlete `bikes[]`); athlete model corrected to `Meta→Summary→Detailed` (`GET /athlete` = Detailed). **1b** added the server pipeline:
 - **`strava.activity`** — Strava activities synced **1:1** (all fields; key = Strava activity id; FK to `athlete`; `gear_id` for later bike attribution). Stores `start_date` (UTC) + `utc_offset` + `timezone` — **not** `start_date_local` (bogus `Z`).
-- **`strava.athlete_sync`** — per-athlete opt-in gate (generic table; `activities_enabled` flag, room for more capabilities); the sync job processes only athletes with activities enabled. **`strava.activity_sync_history`** — one row per sync run (`RunAt`, `Duration`, `SyncFrom` null=full/else window start, status, counts, `ActivitiesCount` snapshot) for "last N syncs" on the UI.
+- **`strava.athlete_sync`** — per-athlete opt-in gate (generic table; `activities_enabled` + `bikes_enabled` flags, room for more capabilities); the sync job processes only athletes with activities enabled. **`strava.activity_sync_history`** — one row per sync run (`RunAt`, `Duration`, `SyncFrom` null=full/else window start, status, counts, `ActivitiesCount` snapshot) for "last N syncs" on the UI.
+- **`strava.bike`** (1c-i) — the athlete's Strava gear synced **1:1** (key = gear id, FK to `athlete`; name/nickname/primary/retired/distance + hydrated brand/model/frame_type/weight from `GET /gear/{id}`), incl. retired. `IGearService.GetAthleteBikesAsync` fetches `bikes[]` + hydrates each; `EFStravaBikeRepository` bulk-upserts + deletes gear Strava no longer returns.
 - **`SyncActivitiesCommand { DateTime? After }`** (Application) — loops opted-in athletes (per-athlete isolation + 429-stops-the-run, like `TrackKomsCommand`); `EFActivityRepository.UpsertAthleteActivitiesAsync` bulk-upserts (EFCore.BulkExtensions, manual audit) and **window-scoped delete-detects** (`After==null` ⇒ full; else the recent window). Explicit `ActivitySummaryModel.ToEntity` mapping (no AutoMapper, D-P0-13). `IActivityService` wraps the client + translates errors.
 - **Jobs**: `SyncActivitiesRecentJob` (`After=now-7d`, Mon–Sat 01:35) + `SyncActivitiesFullJob` (`After=null`, Sun 01:35), gated by `SyncActivitiesJobEnabled`. **Admin**: `PUT /admin/sync-activities?afterDays=`, `PUT /admin/athlete-sync?athleteId=&enabled=` (temporary opt-in until the 1c UI).
-- **1b needs only `activity:read` (existing tokens)** — it lists all the athlete's activities except "Only You"; `activity:read_all` (private/Only-You completeness) comes with 1c's re-auth.
-- Out of Phase 1b: opt-in UI + gear import (`bt.bike`/`bt.bike_link`) + scope escalation (1c); bike mileage display (1d); webhooks (Phase 6).
+- **1b needs only `activity:read` (existing tokens)** — it lists all the athlete's activities except "Only You"; `activity:read_all` (private/Only-You completeness) comes with 1c-ii's re-auth.
+- **1c-i (done): opt-in UI + gear import + link/create.** WEB **Bike Tracker → Strava bikes** page; one **Sync from Strava** click = `ActivateStravaSyncCommand` (orchestrates gear-sync `SyncStravaBikesCommand` → `strava.bike` + `bikes_enabled`, then enables activity sync + backfills that athlete via `SyncActivitiesCommand { AthleteId }`). Per Strava bike: **Create** a `bt.bike` (reuses `AddEditBikeDialog` pre-filled + smuggled `StravaGearId` → `SaveBikeCommand` also writes the link; `frame_type→BikeType` via `GearMappings`; mileage is **not** seeded — accrues from activities in 1d) or **Link** to an existing bike (`LinkStravaBikeCommand`), or **Unlink** (`UnlinkStravaBikeCommand`, `DELETE .../bikes/{gearId}/link`) from either side. Linked state shows on both sides (`BikeViewModel.StravaGearId`, loaded `[NotMapped]` via the bike queries). Empty-state driven by `bikes_enabled` (never-synced vs no-bikes). Controller `StravaBikesController` (`/bike-tracker/strava/*`).
+- Out of Phase 1c-i: scope escalation re-auth for private/"Only You" rides (1c-ii); bike mileage display (1d); webhooks (Phase 6).
 
 ## BikeTracker (`bt` schema) — sibling product, Phase 0
 
@@ -72,8 +74,9 @@ A bike-maintenance journal being built inside the existing projects (no new solu
 - **Dates** are `DateTime` UTC → `timestamptz` (consistent with the rest of the app); UI shows date only.
 - **No AutoMapper** here — explicit `BikeEntity.ToViewModel()` extension (compile-time safe). CQRS: one `SaveBikeCommand` (nullable `Id` = create/update) + `ChangeLifecycle`/`Delete` (→ `Result`); queries return `BikeEntity`. Handlers hold only existence/authz guards (`NotFoundError`/`ForbiddenError`); input validation is in FluentValidation validators (forced to `en`; error keys camelCased to match the JSON).
 - **Request body** `SaveBikeViewModel` (`API.Shared`) = the create/update body + WEB form (editable fields only). `SaveBikeCommand` carries the same fields flat (+ server-set `Id`/`UserId`); the controller maps body→command, and `BikeContractParityTests` fails if the two drift. `BikeType`/`BikeLifecycle` carry `[JsonConverter(typeof(JsonStringEnumConverter))]` so they're strings on the wire (matching the DB), targeted to just these enums.
-- **WEB:** `Pages/Bikes.razor` (card + table toggle), `Pages/BikeDetails.razor` (all fields + "Components" placeholder), `Shared/AddEditBikeDialog.razor` (progressive form), `Shared/SellBikeDialog.razor`; grouped under a "Bike Tracker" `MudNavGroup`.
-- **Out of Phase 0:** components, installations, mileage attribution, Strava `gear_id` sync, alerts, cost analysis (later phases).
+- **WEB:** `Pages/Bikes.razor` (card + table toggle), `Pages/BikeDetails.razor` (all fields + "Components" placeholder), `Pages/StravaBikes.razor` (Strava gear list + sync + create/link, `bikes_enabled` empty-state), `Shared/AddEditBikeDialog.razor` (progressive form, optional Strava pre-fill), `Shared/SellBikeDialog.razor`, `Shared/LinkStravaBikeDialog.razor`; grouped under a "Bike Tracker" `MudNavGroup`.
+- **`bt.bike_link`** (1c-i) — the single bt↔external coupling (D-2): `{ bike_id → bt.bike, external_service (enum, string), external_id (gear id) }`, unique per `(service, external_id)`, created only on Create/Link. The `bt`↔`strava` boundary stays a **soft** `gear_id ↔ bike_link.external_id` match (no EF nav), so mileage attribution (1d) resolves it in logic.
+- **Out of Phase 0:** components, installations, mileage attribution, alerts, cost analysis (later phases).
 
 ## Validation & error mapping (app-wide, introduced with BikeTracker)
 
@@ -91,7 +94,7 @@ All toggled by `ApplicationConfiguration.*JobEnabled`; also triggerable via `Adm
 
 ## API controllers
 
-`Athletes` (koms, koms-changes, summaries, clubs, change-email), `Ranking`, `Stats` (koms-changes), `KomTakeovers` (pairs, efforts), `Admin` (job triggers, takeover backfill), `Playground` (dev). All `[BearerAuthorize]`; Admin endpoints require the `admin` role.
+`Athletes` (koms, koms-changes, summaries, clubs, change-email), `Ranking`, `Stats` (koms-changes), `KomTakeovers` (pairs, efforts), `Bikes` (garage CRUD), `StravaBikes` (`/bike-tracker/strava/*` — sync, bikes list, sync-status, link), `Admin` (job triggers, takeover backfill), `Playground` (dev). All `[BearerAuthorize]`; Admin endpoints require the `admin` role.
 
 ## Frontend pages
 

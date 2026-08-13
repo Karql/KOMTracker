@@ -238,6 +238,49 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("bike", "bt");
                 });
 
+            modelBuilder.Entity("KomTracker.Domain.Entities.Bike.BikeLinkEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AuditCD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_cd");
+
+                    b.Property<DateTime?>("AuditMD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_md");
+
+                    b.Property<int>("BikeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("bike_id");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("external_id");
+
+                    b.Property<string>("ExternalService")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("external_service");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BikeId");
+
+                    b.HasIndex("ExternalService", "ExternalId")
+                        .IsUnique();
+
+                    b.ToTable("bike_link", "bt");
+                });
+
             modelBuilder.Entity("KomTracker.Domain.Entities.Club.ClubEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -998,9 +1041,88 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("audit_md");
 
+                    b.Property<bool>("BikesEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("bikes_enabled");
+
                     b.HasKey("AthleteId");
 
                     b.ToTable("athlete_sync", "strava");
+                });
+
+            modelBuilder.Entity("KomTracker.Domain.Entities.Strava.StravaBikeEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AthleteId")
+                        .HasColumnType("integer")
+                        .HasColumnName("athlete_id");
+
+                    b.Property<DateTime>("AuditCD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_cd");
+
+                    b.Property<DateTime?>("AuditMD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_md");
+
+                    b.Property<string>("BrandName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("brand_name");
+
+                    b.Property<double>("ConvertedDistance")
+                        .HasColumnType("double precision")
+                        .HasColumnName("converted_distance");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<double>("Distance")
+                        .HasColumnType("double precision")
+                        .HasColumnName("distance");
+
+                    b.Property<int?>("FrameType")
+                        .HasColumnType("integer")
+                        .HasColumnName("frame_type");
+
+                    b.Property<string>("ModelName")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("model_name");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Nickname")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("nickname");
+
+                    b.Property<bool>("Primary")
+                        .HasColumnType("boolean")
+                        .HasColumnName("primary");
+
+                    b.Property<bool>("Retired")
+                        .HasColumnType("boolean")
+                        .HasColumnName("retired");
+
+                    b.Property<double?>("Weight")
+                        .HasColumnType("double precision")
+                        .HasColumnName("weight");
+
+                    b.HasKey("Id")
+                        .HasName("PK_bike1");
+
+                    b.HasIndex("AthleteId");
+
+                    b.ToTable("bike", "strava");
                 });
 
             modelBuilder.Entity("KomTracker.Domain.Entities.Token.TokenEntity", b =>
@@ -1325,6 +1447,15 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("KomTracker.Domain.Entities.Bike.BikeLinkEntity", b =>
+                {
+                    b.HasOne("KomTracker.Domain.Entities.Bike.BikeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BikeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("KomTracker.Domain.Entities.Segment.KomsSummarySegmentEffortEntity", b =>
                 {
                     b.HasOne("KomTracker.Domain.Entities.Segment.KomsSummaryEntity", "KomsSummary")
@@ -1378,6 +1509,15 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                 });
 
             modelBuilder.Entity("KomTracker.Domain.Entities.Strava.AthleteSyncEntity", b =>
+                {
+                    b.HasOne("KomTracker.Domain.Entities.Athlete.AthleteEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AthleteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KomTracker.Domain.Entities.Strava.StravaBikeEntity", b =>
                 {
                     b.HasOne("KomTracker.Domain.Entities.Athlete.AthleteEntity", null)
                         .WithMany()

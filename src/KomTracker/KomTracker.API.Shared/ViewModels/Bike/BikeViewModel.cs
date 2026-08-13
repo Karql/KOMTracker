@@ -20,4 +20,7 @@ public class BikeViewModel
     public BikeLifecycle Lifecycle { get; set; }
     public DateTime? SaleDate { get; set; }
     public decimal? SalePrice { get; set; }
+
+    /// <summary>Linked Strava gear id (bt.bike_link), or null when the bike isn't linked to Strava.</summary>
+    public string? StravaGearId { get; set; }
 }

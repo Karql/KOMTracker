@@ -28,6 +28,9 @@ public class SaveBikeCommand : IRequest<Result<BikeEntity>>
     public decimal InitialDistanceKm { get; set; }
     public decimal? InitialMovingHours { get; set; }
     public decimal? InitialElevationM { get; set; }
+
+    /// <summary>When set on create, also links the new bike to this Strava gear (bt.bike_link). Ignored on update.</summary>
+    public string? StravaGearId { get; set; }
 }
 
 public class SaveBikeCommandValidator : AbstractValidator<SaveBikeCommand>
@@ -65,9 +68,32 @@ public class SaveBikeCommandHandler : IRequestHandler<SaveBikeCommand, Result<Bi
 
         if (request.Id is null)
         {
+            var linkGearId = string.IsNullOrWhiteSpace(request.StravaGearId) ? null : request.StravaGearId;
+
+            if (linkGearId is not null)
+            {
+                var bikeLinkRepo = _komUoW.GetRepository<IBikeLinkRepository>();
+                if (await bikeLinkRepo.ExistsAsync(ExternalService.Strava, linkGearId))
+                {
+                    return Result.Fail(new ConflictError($"Strava bike {linkGearId} is already linked."));
+                }
+            }
+
             bike = new BikeEntity { UserId = request.UserId, Lifecycle = BikeLifecycle.Active };
             Apply(request, bike);
             repo.AddBike(bike);
+
+            if (linkGearId is not null)
+            {
+                await _komUoW.SaveChangesAsync(); // materialize bike.Id for the link FK
+
+                _komUoW.GetRepository<IBikeLinkRepository>().Add(new BikeLinkEntity
+                {
+                    BikeId = bike.Id,
+                    ExternalService = ExternalService.Strava,
+                    ExternalId = linkGearId
+                });
+            }
         }
         else
         {

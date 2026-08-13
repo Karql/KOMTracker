@@ -1,0 +1,87 @@
+@using System.Net.Http.Json
+@using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.API.Shared.ViewModels.BikeTracker
+@using KomTracker.WEB.Infrastructure
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3 mud-text-secondary">
+            Link <b>@GearName</b> to one of your bikes.
+        </MudText>
+
+        @if (_bikes is null)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (!_bikes.Any())
+        {
+            <MudAlert Severity="Severity.Info">You have no bikes yet — create one instead.</MudAlert>
+        }
+        else
+        {
+            <MudSelect T="int?" @bind-Value="_bikeId" Label="Bike" Required="true">
+                @foreach (var bike in _bikes)
+                {
+                    <MudSelectItem T="int?" Value="@bike.Id">@bike.Name</MudSelectItem>
+                }
+            </MudSelect>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync"
+                   Disabled="_saving || _bikeId is null">Link</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public string GearId { get; set; } = default!;
+    [Parameter] public string? GearName { get; set; }
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private BikeViewModel[]? _bikes;
+    private int? _bikeId;
+    private bool _saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _bikes = await Http.GetFromJsonAsync<BikeViewModel[]>("bikes?include_inactive=true")
+            ?? Array.Empty<BikeViewModel>();
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_bikeId is null)
+        {
+            return;
+        }
+
+        _saving = true;
+
+        try
+        {
+            var body = new LinkStravaBikeViewModel { BikeId = _bikeId.Value };
+            var response = await Http.PostAsJsonAsync($"bike-tracker/strava/bikes/{GearId}/link", body);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Bike linked", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+                return;
+            }
+
+            await response.ShowProblemAsync(Snackbar);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

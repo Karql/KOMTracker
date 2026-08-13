@@ -141,6 +141,37 @@ public partial class BikeDetails
         }
     }
 
+    private async Task UnlinkAsync()
+    {
+        if (_bike?.StravaGearId is null)
+        {
+            return;
+        }
+
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            "Unlink from Strava",
+            $"Unlink \"{_bike.Name}\" from its Strava bike?",
+            yesText: "Unlink",
+            cancelText: "Cancel");
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        var response = await Http.DeleteAsync($"bike-tracker/strava/bikes/{_bike.StravaGearId}/link");
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Unlinked from Strava", Severity.Success);
+            await LoadAsync();
+        }
+        else
+        {
+            Snackbar.Add($"Unlink failed ({(int)response.StatusCode}).", Severity.Error);
+        }
+    }
+
     private static Color LifecycleColor(BikeLifecycle lifecycle) => lifecycle switch
     {
         BikeLifecycle.Active => Color.Success,

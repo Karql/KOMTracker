@@ -58,9 +58,13 @@ else
                             </CardHeaderActions>
                         </MudCardHeader>
                         <MudCardContent>
-                            <div class="d-flex align-center" style="gap: 8px;">
+                            <div class="d-flex align-center flex-wrap" style="gap: 8px;">
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@bike.Type</MudChip>
                                 <MudChip T="string" Size="Size.Small" Color="LifecycleColor(bike.Lifecycle)">@bike.Lifecycle</MudChip>
+                                @if (bike.StravaGearId is not null)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Link">Strava</MudChip>
+                                }
                             </div>
                         </MudCardContent>
                         <MudCardActions>
@@ -91,6 +95,10 @@ else
                 <MudTd DataLabel="Model">@context.Model</MudTd>
                 <MudTd DataLabel="Status">
                     <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
+                    @if (context.StravaGearId is not null)
+                    {
+                        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Link">Strava</MudChip>
+                    }
                 </MudTd>
                 <MudTd Style="text-align: right;">@BikeMenu(context)</MudTd>
             </RowTemplate>
@@ -113,6 +121,10 @@ else
         @if (bike.Lifecycle != BikeLifecycle.Sold)
         {
             <MudMenuItem Icon="@Icons.Material.Filled.Sell" OnClick="@(() => SellAsync(bike))">Mark as sold</MudMenuItem>
+        }
+        @if (bike.StravaGearId is not null)
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.LinkOff" OnClick="@(() => UnlinkAsync(bike))">Unlink from Strava</MudMenuItem>
         }
         <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => DeleteAsync(bike))">Delete</MudMenuItem>
     </MudMenu>;

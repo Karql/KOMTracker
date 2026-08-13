@@ -46,6 +46,9 @@
     /// <summary>Null = add; non-null = edit.</summary>
     [Parameter] public BikeViewModel? Bike { get; set; }
 
+    /// <summary>Optional pre-filled model for "add" (e.g. created from a Strava bike; may carry StravaGearId).</summary>
+    [Parameter] public SaveBikeViewModel? Prefill { get; set; }
+
     [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
@@ -74,6 +77,11 @@
                 InitialElevationM = Bike.InitialElevationM
             };
             _purchaseDate = Bike.PurchaseDate;
+        }
+        else if (Prefill is not null)
+        {
+            _model = Prefill;
+            _purchaseDate = Prefill.PurchaseDate;
         }
     }
 

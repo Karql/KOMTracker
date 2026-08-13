@@ -120,4 +120,17 @@ public class SyncActivitiesCommandHandlerTests
         await _activityRepo.Received().UpsertAthleteActivitiesAsync(1, Arg.Any<IReadOnlyCollection<ActivityEntity>>(), after);
         _historyRepo.Received().Add(Arg.Is<ActivitySyncHistoryEntity>(h => h.Status == "Ok" && h.SyncFrom == after));
     }
+
+    [Fact]
+    public async Task AthleteId_set_processes_only_that_athlete()
+    {
+        // The enabled-list must NOT be consulted when a specific athlete is requested.
+        SetupAthlete(5);
+
+        var res = await _handler.Handle(new SyncActivitiesCommand { After = null, AthleteId = 5 }, CancellationToken.None);
+
+        res.Should().BeSuccess();
+        await _athleteSyncRepo.DidNotReceive().GetActivitiesEnabledAthleteIdsAsync();
+        await _activityRepo.Received().UpsertAthleteActivitiesAsync(5, Arg.Any<IReadOnlyCollection<ActivityEntity>>(), null);
+    }
 }

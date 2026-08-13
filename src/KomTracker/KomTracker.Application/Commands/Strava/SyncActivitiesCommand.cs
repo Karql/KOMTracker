@@ -18,6 +18,9 @@ namespace KomTracker.Application.Commands.Strava;
 public class SyncActivitiesCommand : IRequest<Result>
 {
     public DateTime? After { get; set; }
+
+    /// <summary>When set, sync only this athlete (used for opt-in backfill); null = all opted-in athletes.</summary>
+    public int? AthleteId { get; set; }
 }
 
 public class SyncActivitiesCommandHandler : IRequestHandler<SyncActivitiesCommand, Result>
@@ -44,7 +47,9 @@ public class SyncActivitiesCommandHandler : IRequestHandler<SyncActivitiesComman
         var activityRepo = _komUoW.GetRepository<IActivityRepository>();
         var historyRepo = _komUoW.GetRepository<IActivitySyncHistoryRepository>();
 
-        var athleteIds = await athleteSyncRepo.GetActivitiesEnabledAthleteIdsAsync();
+        var athleteIds = request.AthleteId.HasValue
+            ? new[] { request.AthleteId.Value }.AsEnumerable()
+            : await athleteSyncRepo.GetActivitiesEnabledAthleteIdsAsync();
 
         foreach (var athleteId in athleteIds)
         {

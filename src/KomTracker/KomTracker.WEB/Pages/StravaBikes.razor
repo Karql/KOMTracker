@@ -1,0 +1,170 @@
+@page "/bike-tracker/strava-bikes"
+@attribute [Authorize]
+@using KomTracker.API.Shared.ViewModels.BikeTracker
+@using KomTracker.WEB.Models.Preference
+
+<PageTitle>Strava bikes</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudText Typo="Typo.h5">Strava bikes</MudText>
+        <MudSpacer />
+        @if (_status.BikesEnabled)
+        {
+            <MudChip T="string" Size="Size.Small" Icon="@Icons.Material.Filled.DirectionsBike"
+                     Color="@(_status.ActivitiesEnabled ? Color.Success : Color.Default)">
+                Activity sync @(_status.ActivitiesEnabled ? "on" : "off")
+            </MudChip>
+        }
+        <MudButton StartIcon="@Icons.Material.Filled.CloudSync" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="SyncAsync" Disabled="_syncing">
+            @(_status.BikesEnabled ? "Sync from Strava" : "Enable Strava sync")
+        </MudButton>
+    </div>
+
+    @if (!_status.HasActivityReadAll)
+    {
+        <MudAlert Severity="Severity.Info" Class="mb-4">
+            Private / "Only You" rides won't sync yet — a full reconnect for broader access is coming.
+        </MudAlert>
+    }
+
+    @if (!_status.BikesEnabled)
+    {
+        <MudPaper Outlined="true" Class="pa-8 d-flex flex-column align-center" Style="gap: 12px;">
+            <MudIcon Icon="@Icons.Material.Filled.CloudSync" Size="Size.Large" Color="Color.Primary" />
+            <MudText Typo="Typo.h6">Sync your bikes from Strava</MudText>
+            <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                Import your Strava bikes and turn on activity tracking. You can then create or link
+                BikeTracker bikes from them.
+            </MudText>
+            <MudButton StartIcon="@Icons.Material.Filled.CloudSync" Variant="Variant.Filled" Color="Color.Primary"
+                       OnClick="SyncAsync" Disabled="_syncing">Sync from Strava</MudButton>
+        </MudPaper>
+    }
+    else if (!_bikes.Any())
+    {
+        <MudAlert Severity="Severity.Info">No bikes found on your Strava account.</MudAlert>
+    }
+    else
+    {
+        <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+            <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Margin="Margin.Dense"
+                          Immediate="true" Style="max-width: 220px;" />
+            <MudSwitch T="bool" @bind-Value="_showRetired" Color="Color.Primary" Label="Show retired" />
+            <MudSpacer />
+            <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+                <MudIconButton Icon="@Icons.Material.Filled.GridView"
+                               Color="@(_view == ListViewMode.Card ? Color.Primary : Color.Default)"
+                               OnClick="@(() => SetViewAsync(ListViewMode.Card))" />
+                <MudIconButton Icon="@Icons.Material.Filled.TableRows"
+                               Color="@(_view == ListViewMode.Table ? Color.Primary : Color.Default)"
+                               OnClick="@(() => SetViewAsync(ListViewMode.Table))" />
+            </MudButtonGroup>
+        </div>
+
+        @if (!FilteredBikes.Any())
+        {
+            <MudAlert Severity="Severity.Info">No bikes match the current filter.</MudAlert>
+        }
+        else if (_view == ListViewMode.Card)
+        {
+            <MudGrid>
+                @foreach (var bike in FilteredBikes)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudCard Outlined="true">
+                            <MudCardHeader>
+                                <CardHeaderAvatar>
+                                    <MudIcon Icon="@Icons.Material.Filled.DirectionsBike" />
+                                </CardHeaderAvatar>
+                                <CardHeaderContent>
+                                    <MudText Typo="Typo.h6">@DisplayName(bike)</MudText>
+                                    <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                                        @($"{bike.BrandName} {bike.ModelName}".Trim())
+                                    </MudText>
+                                </CardHeaderContent>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <div class="d-flex align-center flex-wrap" style="gap: 8px;">
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@bike.SuggestedType</MudChip>
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@FormatKm(bike.DistanceKm)</MudChip>
+                                    @if (bike.Primary)
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Primary">Primary</MudChip>
+                                    }
+                                    @if (bike.Retired)
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Default">Retired</MudChip>
+                                    }
+                                </div>
+                            </MudCardContent>
+                            <MudCardActions>
+                                @BikeActions(bike)
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+        else
+        {
+            <MudTable Items="FilteredBikes" Hover="true" Dense="true" Breakpoint="Breakpoint.Sm">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Brand</MudTh>
+                    <MudTh>Model</MudTh>
+                    <MudTh>Distance</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh Style="text-align: right;"></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">@DisplayName(context)</MudTd>
+                    <MudTd DataLabel="Brand">@context.BrandName</MudTd>
+                    <MudTd DataLabel="Model">@context.ModelName</MudTd>
+                    <MudTd DataLabel="Distance">@FormatKm(context.DistanceKm)</MudTd>
+                    <MudTd DataLabel="Status">
+                        @if (context.Primary)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Primary">Primary</MudChip>
+                        }
+                        @if (context.Retired)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Default">Retired</MudChip>
+                        }
+                    </MudTd>
+                    <MudTd Style="text-align: right;">@BikeActions(context)</MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    }
+}
+
+@code {
+    private RenderFragment BikeActions(StravaBikeViewModel bike) =>@<text>
+        @if (bike.LinkedBikeId is int linkedId)
+        {
+            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Success"
+                       StartIcon="@Icons.Material.Filled.Link" OnClick="@(() => OpenBike(linkedId))">
+                Linked@(string.IsNullOrWhiteSpace(bike.LinkedBikeName) ? "" : $": {bike.LinkedBikeName}")
+            </MudButton>
+            <MudTooltip Text="Unlink">
+                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.LinkOff" Color="Color.Error"
+                               OnClick="@(() => UnlinkAsync(bike))" />
+            </MudTooltip>
+        }
+        else
+        {
+            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => CreateAsync(bike))">Create bike</MudButton>
+            <MudButton Size="Size.Small" Variant="Variant.Text"
+                       StartIcon="@Icons.Material.Filled.Link" OnClick="@(() => LinkAsync(bike))">Link</MudButton>
+        }
+    </text>;
+}
