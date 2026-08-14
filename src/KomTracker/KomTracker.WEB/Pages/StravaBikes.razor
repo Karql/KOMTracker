@@ -30,7 +30,11 @@ else
     @if (!_status.HasActivityReadAll)
     {
         <MudAlert Severity="Severity.Info" Class="mb-4">
-            Private / "Only You" rides won't sync yet — a full reconnect for broader access is coming.
+            <div class="d-flex align-center justify-space-between flex-wrap" style="gap: 8px;">
+                <span>Private / "Only You" rides aren't synced until you allow private-rides access, so bike mileage may be under-counted.</span>
+                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Inherit"
+                           OnClick="ManageStravaAccess">Manage Strava access</MudButton>
+            </div>
         </MudAlert>
     }
 

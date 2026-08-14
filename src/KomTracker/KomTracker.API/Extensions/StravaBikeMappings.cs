@@ -35,6 +35,7 @@ public static class StravaBikeMappings
         BikesEnabled = m.BikesEnabled,
         ActivitiesEnabled = m.ActivitiesEnabled,
         HasActivityReadAll = m.HasActivityReadAll,
-        StravaBikeCount = m.StravaBikeCount
+        StravaBikeCount = m.StravaBikeCount,
+        Scopes = m.Scopes
     };
 }

@@ -10,7 +10,7 @@ else
 {
     <MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">Account</MudText>
 
-    <MudTabs Elevation="1" Rounded="true" TabPanelsClass="mt-6">
+    <MudTabs Elevation="1" Rounded="true" TabPanelsClass="mt-6" @bind-ActivePanelIndex="_activeTab">
         <MudTabPanel Text="General">
             <MudGrid>
                 <MudItem xs="12" sm="4" md="3">
@@ -63,6 +63,62 @@ else
                     </MudCard>
                 </MudItem>
             </MudGrid>
+        </MudTabPanel>
+        <MudTabPanel Text="Strava">
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText>Strava access</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <div class="d-flex align-center mb-3" style="gap: 8px; flex-wrap: wrap;">
+                        <MudText>Activity access:</MudText>
+                        @if (_stravaStatus.HasActivityReadAll)
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle">All rides (incl. private)</MudChip>
+                        }
+                        else
+                        {
+                            <MudChip T="string" Size="Size.Small" Color="Color.Warning">Public rides only</MudChip>
+                        }
+                    </div>
+
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary mb-1">Granted Strava scopes (read-only)</MudText>
+                    <div class="d-flex flex-wrap mb-4" style="gap: 6px;">
+                        @if (_stravaStatus.Scopes.Any())
+                        {
+                            @foreach (var scope in _stravaStatus.Scopes)
+                            {
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@scope</MudChip>
+                            }
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.body2">—</MudText>
+                        }
+                    </div>
+
+                    @if (!_stravaStatus.HasActivityReadAll)
+                    {
+                        <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3">
+                            Allowing access to your <b>private and "Only You" rides</b> (Strava's <code>activity:read_all</code>, read-only)
+                            also brings more precise start/finish points, so bike mileage is counted accurately. Your activities are
+                            never shown to other users.
+                        </MudAlert>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Link"
+                                   OnClick="AllowPrivateRides">Allow private rides</MudButton>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Success" Dense="true" Class="mb-3">
+                            Private and "Only You" rides are synced — mileage is counted accurately.
+                        </MudAlert>
+                        <MudButton Variant="Variant.Outlined" Color="Color.Default" StartIcon="@Icons.Material.Filled.LinkOff"
+                                   OnClick="RevokePrivateRides">Revoke private rides access</MudButton>
+                    }
+                </MudCardContent>
+            </MudCard>
         </MudTabPanel>
         @*<MudTabPanel Text="Notifications">
             <MudCard>

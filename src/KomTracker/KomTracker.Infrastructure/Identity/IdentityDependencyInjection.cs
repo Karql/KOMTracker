@@ -56,6 +56,8 @@ public static class IdentityDependencyInjection
             .AddEndpoint<LoginEndpoint>(EndpointNames.Login, ProtocolRoutePaths.Loing)
             .AddEndpoint<LogoutEndpoint>(EndpointNames.Logout, ProtocolRoutePaths.Logout)
             .AddEndpoint<ConnectEndpoint>(EndpointNames.Connect, ProtocolRoutePaths.Connect)
+            .AddEndpoint<UpgradeEndpoint>(EndpointNames.Upgrade, ProtocolRoutePaths.Upgrade)
+            .AddEndpoint<ConnectUpgradeEndpoint>(EndpointNames.ConnectUpgrade, ProtocolRoutePaths.ConnectUpgrade)
             .AddEndpoint<ConfirmEmailChangeEndpoint>(EndpointNames.ConfirmEmailChange, ProtocolRoutePaths.ConfirmEmailChange);
 
         // Remove BasicAuthenticationSecretParser

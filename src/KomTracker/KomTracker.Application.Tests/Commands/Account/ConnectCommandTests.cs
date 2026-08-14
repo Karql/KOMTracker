@@ -28,7 +28,9 @@ public class ConnectCommandTests
     private const string TEST_EXISTING_ATHLETE_CODE = "exist";
     private const string TEST_NEW_ATHLETE_CODE = "new";
     private const string TEST_INVALID_SCOPE = "read";
+    private const string TEST_NO_ACTIVITY_SCOPE = "read,profile:read_all";
     private const string TEST_VALID_SCOPE = "read,activity:read,profile:read_all";
+    private const string TEST_READALL_SCOPE = "read,activity:read_all,profile:read_all";
 
     private AthleteEntity TestExistingAthlete = new AthleteEntity
     {
@@ -125,6 +127,26 @@ public class ConnectCommandTests
         res.Should().BeSuccess();
     }
 
+    [Fact]
+    public async Task Connect_accepts_activity_read_all_in_lieu_of_activity_read()
+    {
+        // A user who escalated to activity:read_all may log in with a callback scope lacking literal activity:read.
+        var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_EXISTING_ATHLETE_CODE, TEST_READALL_SCOPE), _cancellationToken);
+
+        res.Should().BeSuccess();
+        await _athleteService.Received().AddOrUpdateTokenAsync(TestToken);
+    }
+
+    [Fact]
+    public async Task Connect_fails_when_no_activity_scope_at_all()
+    {
+        var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_INVALID_CODE, TEST_NO_ACTIVITY_SCOPE), _cancellationToken);
+
+        res.Should().BeFailure();
+        res.HasError<ConnectCommandError>(x => x.Message == ConnectCommandError.NoRequiredScope).Should().BeTrue();
+        await AssertConnectNoUpdate();
+    }
+
     private void PrepareMocks()
     {
         _userService.IsUserExistsAsync(TestNewAthlete.AthleteId).Returns(false);
@@ -134,6 +156,7 @@ public class ConnectCommandTests
         _stravaTokenService.ExchangeAsync(TEST_INVALID_CODE, TEST_VALID_SCOPE).Returns(Result.Fail(new ExchangeError(ExchangeError.InvalidCode)));
         _stravaTokenService.ExchangeAsync(TEST_EXISTING_ATHLETE_CODE, TEST_VALID_SCOPE).Returns(Result.Ok((TestExistingAthlete, TestToken)));
         _stravaTokenService.ExchangeAsync(TEST_NEW_ATHLETE_CODE, TEST_VALID_SCOPE).Returns(Result.Ok((TestNewAthlete, TestToken)));
+        _stravaTokenService.ExchangeAsync(TEST_EXISTING_ATHLETE_CODE, TEST_READALL_SCOPE).Returns(Result.Ok((TestExistingAthlete, TestToken)));
     }
 
     private async Task AssertConnectNoUpdate()

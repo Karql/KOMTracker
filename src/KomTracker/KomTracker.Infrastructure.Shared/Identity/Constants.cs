@@ -19,6 +19,8 @@ public static class Constants
         public const string Logout = "Logout";
         public const string Connect = "Connect";
         public const string ConfirmEmailChange = "ConfirmEmailChange";
+        public const string Upgrade = "Upgrade";
+        public const string ConnectUpgrade = "ConnectUpgrade";
     }
 
     public static class ProtocolRoutePaths
@@ -27,6 +29,8 @@ public static class Constants
         public const string Logout = "/account/logout";
         public const string Connect = "/account/connect";
         public const string ConfirmEmailChange = "/account/confirm-email-change";
+        public const string Upgrade = "/account/upgrade";
+        public const string ConnectUpgrade = "/account/connect-upgrade";
     }
 
     public static class ConfigurationSections

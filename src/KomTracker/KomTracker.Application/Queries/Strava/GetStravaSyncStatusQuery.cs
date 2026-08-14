@@ -14,8 +14,6 @@ public class GetStravaSyncStatusQuery : IRequest<StravaSyncStatusModel>
 
 public class GetStravaSyncStatusQueryHandler : IRequestHandler<GetStravaSyncStatusQuery, StravaSyncStatusModel>
 {
-    private const string ScopeActivityReadAll = "activity:read_all";
-
     private readonly IKOMUnitOfWork _komUoW;
     private readonly IAthleteService _athleteService;
 
@@ -34,15 +32,17 @@ public class GetStravaSyncStatusQueryHandler : IRequestHandler<GetStravaSyncStat
         var stravaBikeCount = (await stravaBikeRepo.GetByAthleteAsync(request.AthleteId)).Count();
 
         var tokenRes = await _athleteService.GetValidTokenAsync(request.AthleteId);
-        var hasActivityReadAll = tokenRes.IsSuccess
-            && (tokenRes.Value.Scope?.Split(',').Contains(ScopeActivityReadAll) ?? false);
+        var scopes = tokenRes.IsSuccess
+            ? (tokenRes.Value.Scope?.Split(',') ?? Array.Empty<string>())
+            : Array.Empty<string>();
 
         return new StravaSyncStatusModel
         {
             BikesEnabled = athleteSync?.BikesEnabled ?? false,
             ActivitiesEnabled = athleteSync?.ActivitiesEnabled ?? false,
-            HasActivityReadAll = hasActivityReadAll,
-            StravaBikeCount = stravaBikeCount
+            HasActivityReadAll = scopes.Contains(Constants.Strava.ScopeActivityReadAll),
+            StravaBikeCount = stravaBikeCount,
+            Scopes = scopes
         };
     }
 }

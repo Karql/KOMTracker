@@ -117,6 +117,8 @@ public partial class StravaBikes
 
     private void OpenBike(int id) => Navigation.NavigateTo($"bikes/{id}");
 
+    private void ManageStravaAccess() => Navigation.NavigateTo("account?tab=strava");
+
     private async Task CreateAsync(StravaBikeViewModel bike)
     {
         // Note: no InitialDistanceKm seeding — mileage is derived from synced activities later (1d).

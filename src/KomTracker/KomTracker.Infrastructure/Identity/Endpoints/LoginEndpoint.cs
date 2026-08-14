@@ -34,13 +34,13 @@ internal class LoginEndpoint : IEndpointHandler
 
     private string GetStravaAuthUrl(HttpContext context, string returnUrl)
     {
-        var request = context.Request;
-
-        var clientId = _stravaApiClientConfiguration.ClientID;
-        var scope = string.Join(",", KomTracker.Application.Constants.Strava.RequiredScopes);
         var connectRedirectUri = $"{_identityConfiguration.IdentityUrl}{ProtocolRoutePaths.Connect}";
-        var appReturnUrlBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(returnUrl));
 
-        return $"https://www.strava.com/oauth/authorize?approval_prompt=auto&scope={scope}&client_id={clientId}&response_type=code&redirect_uri={connectRedirectUri}&state={appReturnUrlBase64}";
+        return StravaAuthorizeUrl.Build(
+            _stravaApiClientConfiguration.ClientID,
+            KomTracker.Application.Constants.Strava.AuthorizeScopes,
+            approvalPrompt: "auto",
+            redirectUri: connectRedirectUri,
+            returnUrl: returnUrl);
     }
 }

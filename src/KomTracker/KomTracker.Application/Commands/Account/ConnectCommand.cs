@@ -94,8 +94,13 @@ public class ConnectCommandHandler : IRequestHandler<ConnectCommand, Result<Conn
 
     protected bool VerifyRequiredScope(string scope)
     {
-        var scopes = scope?.Split(",") ?? Enumerable.Empty<string>();
+        var scopes = (scope?.Split(",") ?? Enumerable.Empty<string>()).ToHashSet();
 
-        return Constants.Strava.RequiredScopes.All(x => scopes.Contains(x));
+        // read + profile:read_all are mandatory; the activity requirement is satisfied by
+        // activity:read OR activity:read_all (the latter is a superset — an escalated user must
+        // still be able to log in even if the callback scope lacks the literal activity:read).
+        return scopes.Contains(Constants.Strava.ScopeRead)
+            && scopes.Contains(Constants.Strava.ScopeProfileReadAll)
+            && (scopes.Contains(Constants.Strava.ScopeActivityRead) || scopes.Contains(Constants.Strava.ScopeActivityReadAll));
     }
 }
