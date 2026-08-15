@@ -20,11 +20,8 @@ else
                      Color="@(_status.ActivitiesEnabled ? Color.Success : Color.Default)">
                 Activity sync @(_status.ActivitiesEnabled ? "on" : "off")
             </MudChip>
+            @SyncButton
         }
-        <MudButton StartIcon="@Icons.Material.Filled.CloudSync" Variant="Variant.Filled" Color="Color.Primary"
-                   OnClick="SyncAsync" Disabled="_syncing">
-            @(_status.BikesEnabled ? "Sync from Strava" : "Enable Strava sync")
-        </MudButton>
     </div>
 
     @if (!_status.HasActivityReadAll)
@@ -47,8 +44,7 @@ else
                 Import your Strava bikes and turn on activity tracking. You can then create or link
                 BikeTracker bikes from them.
             </MudText>
-            <MudButton StartIcon="@Icons.Material.Filled.CloudSync" Variant="Variant.Filled" Color="Color.Primary"
-                       OnClick="SyncAsync" Disabled="_syncing">Sync from Strava</MudButton>
+            @SyncButton
         </MudPaper>
     }
     else if (!_bikes.Any())
@@ -151,6 +147,19 @@ else
 }
 
 @code {
+    private RenderFragment SyncButton =>@<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SyncAsync" Disabled="_syncing">
+        @if (_syncing)
+        {
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            <span>Syncing…</span>
+        }
+        else
+        {
+            <MudIcon Icon="@Icons.Material.Filled.CloudSync" Size="Size.Small" Class="mr-2" />
+            <span>Sync from Strava</span>
+        }
+    </MudButton>;
+
     private RenderFragment BikeActions(StravaBikeViewModel bike) =>@<text>
         @if (bike.LinkedBikeId is int linkedId)
         {

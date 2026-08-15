@@ -10,6 +10,23 @@
 {
     <MudProgressCircular Indeterminate="true" />
 }
+else if (!_bikes.Any())
+{
+    <MudPaper Outlined="true" Class="pa-8 d-flex flex-column align-center" Style="gap: 12px;">
+        <MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Large" Color="Color.Primary" />
+        <MudText Typo="Typo.h6">Your garage is empty</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+            Add a bike to start tracking it — or create one from your Strava gear on the
+            <MudLink Href="bike-tracker/strava-bikes">Strava bikes</MudLink> page.
+        </MudText>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add bike</MudButton>
+        @if (!_includeInactive)
+        {
+            <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="ShowArchivedAsync">Show archived / sold</MudButton>
+        }
+    </MudPaper>
+}
 else
 {
     <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
@@ -34,7 +51,7 @@ else
 
     @if (!FilteredBikes.Any())
     {
-        <MudAlert Severity="Severity.Info">No bikes yet. Add your first one.</MudAlert>
+        <MudAlert Severity="Severity.Info">No bikes match the current filter.</MudAlert>
     }
     else if (_view == ListViewMode.Card)
     {

@@ -60,6 +60,12 @@ public partial class Bikes
             ?? Enumerable.Empty<BikeViewModel>();
     }
 
+    private async Task ShowArchivedAsync()
+    {
+        _includeInactive = true;
+        await LoadBikesAsync();
+    }
+
     private bool Search(BikeViewModel bike)
     {
         if (string.IsNullOrWhiteSpace(_searchString))
