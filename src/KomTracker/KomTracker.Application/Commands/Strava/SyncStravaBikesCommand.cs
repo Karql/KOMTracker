@@ -38,7 +38,11 @@ public class SyncStravaBikesCommandHandler : IRequestHandler<SyncStravaBikesComm
             return Result.Fail($"No valid Strava token for athlete {request.AthleteId}.");
         }
 
-        var bikesRes = await _gearService.GetAthleteBikesAsync(request.AthleteId, tokenRes.Value.AccessToken);
+        // Also hydrate bikes seen in past activities (retired bikes aren't in GET /athlete bikes[]).
+        var activityRepo = _komUoW.GetRepository<IActivityRepository>();
+        var extraGearIds = (await activityRepo.GetDistinctBikeGearIdsAsync(request.AthleteId)).ToList();
+
+        var bikesRes = await _gearService.GetAthleteBikesAsync(request.AthleteId, tokenRes.Value.AccessToken, extraGearIds);
         if (bikesRes.IsFailed)
         {
             return Result.Fail(bikesRes.Errors);

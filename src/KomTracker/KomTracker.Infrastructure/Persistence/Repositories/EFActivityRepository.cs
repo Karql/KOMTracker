@@ -58,4 +58,14 @@ public class EFActivityRepository : EFBaseRepository, IActivityRepository
 
     public Task<int> CountAthleteActivitiesAsync(int athleteId)
         => _context.Activity.AsNoTracking().CountAsync(x => x.AthleteId == athleteId);
+
+    public async Task<IEnumerable<string>> GetDistinctBikeGearIdsAsync(int athleteId)
+    {
+        // Strava gear ids: bikes "b…", shoes "g…". Filter to bikes so run activities don't drag shoes in.
+        return await _context.Activity.AsNoTracking()
+            .Where(x => x.AthleteId == athleteId && x.GearId != null && x.GearId.StartsWith("b"))
+            .Select(x => x.GearId!)
+            .Distinct()
+            .ToListAsync();
+    }
 }

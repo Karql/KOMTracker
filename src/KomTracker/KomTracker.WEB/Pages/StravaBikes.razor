@@ -69,6 +69,14 @@ else
             </MudButtonGroup>
         </div>
 
+        @if (_showRetired)
+        {
+            <MudText Typo="Typo.caption" Class="d-block mb-3 mud-text-secondary">
+                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" Style="vertical-align: text-bottom;" />
+                Strava doesn't list retired bikes — they're discovered from your synced activities. If some are missing, sync again after your rides have imported.
+            </MudText>
+        }
+
         @if (!FilteredBikes.Any())
         {
             <MudAlert Severity="Severity.Info">No bikes match the current filter.</MudAlert>

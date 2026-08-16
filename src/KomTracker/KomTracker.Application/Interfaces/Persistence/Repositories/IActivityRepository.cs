@@ -15,4 +15,10 @@ public interface IActivityRepository : IRepository
 
     /// <summary>Total activities currently stored for the athlete (running snapshot for sync-history diagnostics).</summary>
     Task<int> CountAthleteActivitiesAsync(int athleteId);
+
+    /// <summary>
+    /// Distinct <b>bike</b> gear ids (Strava "b…" prefix) seen in the athlete's stored activities.
+    /// Used to also import retired/historical bikes (absent from GET /athlete bikes[]) at gear-sync time.
+    /// </summary>
+    Task<IEnumerable<string>> GetDistinctBikeGearIdsAsync(int athleteId);
 }
