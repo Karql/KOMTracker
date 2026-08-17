@@ -57,4 +57,20 @@ public class BikeEntity : BaseEntity
     /// (keeps the update path clean; bike_link is written only via its own repo).</summary>
     [NotMapped]
     public IReadOnlyList<BikeLinkEntity> Links { get; set; } = new List<BikeLinkEntity>();
+
+    // Computed read-model totals (initial + Σ attributed activities), set by the bike queries — NOT persisted.
+    // Default to the initial seed so a manual/unlinked bike shows its own numbers.
+
+    [NotMapped]
+    public decimal TotalDistanceKm { get; set; }
+
+    [NotMapped]
+    public decimal TotalMovingHours { get; set; }
+
+    [NotMapped]
+    public decimal TotalElevationM { get; set; }
+
+    /// <summary>How many synced Strava activities are attributed to this bike (via its links).</summary>
+    [NotMapped]
+    public int AttributedActivityCount { get; set; }
 }

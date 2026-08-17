@@ -1,5 +1,6 @@
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Services;
 using KomTracker.Domain.Entities.Bike;
 using MediatR;
 
@@ -32,6 +33,17 @@ public class GetBikeQueryHandler : IRequestHandler<GetBikeQuery, BikeEntity?>
 
         bike.Links = (await _komUoW.GetRepository<IBikeLinkRepository>()
             .GetByBikeIdsAsync(new[] { bike.Id })).ToList();
+
+        var gearIds = bike.Links
+            .Where(l => l.ExternalService == ExternalService.Strava)
+            .Select(l => l.ExternalId)
+            .Distinct()
+            .ToList();
+
+        var totalsByGearId = (await _komUoW.GetRepository<IActivityRepository>().GetGearTotalsAsync(gearIds))
+            .ToDictionary(x => x.GearId);
+
+        BikeTotalsCalculator.Apply(bike, totalsByGearId);
 
         return bike;
     }

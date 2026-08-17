@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Json;
 using KomTracker.API.Shared.ViewModels.Bike;
 using KomTracker.Domain.Entities.Bike;
@@ -196,6 +197,8 @@ public partial class Bikes
             Snackbar.Add($"Unlink failed ({(int)response.StatusCode}).", Severity.Error);
         }
     }
+
+    private static string Km(decimal km) => $"{km.ToString("N0", CultureInfo.InvariantCulture)} km";
 
     private static Color LifecycleColor(BikeLifecycle lifecycle) => lifecycle switch
     {

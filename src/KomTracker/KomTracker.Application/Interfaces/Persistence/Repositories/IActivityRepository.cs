@@ -1,3 +1,4 @@
+using KomTracker.Application.Models.Strava;
 using KomTracker.Domain.Entities.Strava;
 using Utils.UnitOfWork.Abstract;
 
@@ -21,4 +22,7 @@ public interface IActivityRepository : IRepository
     /// Used to also import retired/historical bikes (absent from GET /athlete bikes[]) at gear-sync time.
     /// </summary>
     Task<IEnumerable<string>> GetDistinctBikeGearIdsAsync(int athleteId);
+
+    /// <summary>Per-gear activity aggregates (distance/moving-time/elevation/count) for the given gear ids — source for bike mileage.</summary>
+    Task<IEnumerable<GearTotalsModel>> GetGearTotalsAsync(IReadOnlyCollection<string> gearIds);
 }

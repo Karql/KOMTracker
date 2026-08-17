@@ -83,6 +83,9 @@ else
                                     <MudChip T="string" Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Link">Strava</MudChip>
                                 }
                             </div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Straighten" Size="Size.Small" Class="mr-1" Style="vertical-align: text-bottom;" />@Km(bike.TotalDistanceKm)
+                            </MudText>
                         </MudCardContent>
                         <MudCardActions>
                             <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => OpenDetails(bike.Id))">Details</MudButton>
@@ -100,6 +103,7 @@ else
                 <MudTh>Type</MudTh>
                 <MudTh>Brand</MudTh>
                 <MudTh>Model</MudTh>
+                <MudTh>Distance</MudTh>
                 <MudTh>Status</MudTh>
                 <MudTh Style="text-align: right;"></MudTh>
             </HeaderContent>
@@ -110,6 +114,7 @@ else
                 <MudTd DataLabel="Type">@context.Type</MudTd>
                 <MudTd DataLabel="Brand">@context.Brand</MudTd>
                 <MudTd DataLabel="Model">@context.Model</MudTd>
+                <MudTd DataLabel="Distance">@Km(context.TotalDistanceKm)</MudTd>
                 <MudTd DataLabel="Status">
                     <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
                     @if (context.StravaGearId is not null)

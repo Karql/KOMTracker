@@ -23,7 +23,11 @@ public static class BikeViewModelMappings
         Lifecycle = e.Lifecycle,
         SaleDate = e.SaleDate,
         SalePrice = e.SalePrice,
-        StravaGearId = e.Links.FirstOrDefault(l => l.ExternalService == ExternalService.Strava)?.ExternalId
+        StravaGearId = e.Links.FirstOrDefault(l => l.ExternalService == ExternalService.Strava)?.ExternalId,
+        TotalDistanceKm = e.TotalDistanceKm,
+        TotalMovingHours = e.TotalMovingHours,
+        TotalElevationM = e.TotalElevationM,
+        AttributedActivityCount = e.AttributedActivityCount
     };
 
     public static IEnumerable<BikeViewModel> ToViewModels(this IEnumerable<BikeEntity> bikes)

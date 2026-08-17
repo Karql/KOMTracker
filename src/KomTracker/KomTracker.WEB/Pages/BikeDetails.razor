@@ -72,6 +72,20 @@ else
 
         <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Mileage</MudText>
+                @Field("Distance", $"{_bike.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture)} km")
+                @Field("Moving time", $"{_bike.TotalMovingHours.ToString("N1", CultureInfo.InvariantCulture)} h")
+                @Field("Elevation", $"{_bike.TotalElevationM.ToString("N0", CultureInfo.InvariantCulture)} m")
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                    @(_bike.AttributedActivityCount > 0
+                        ? $"incl. {_bike.AttributedActivityCount} Strava ride(s)"
+                        : "manual only — no Strava rides yet")
+                </MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
                 <MudText Typo="Typo.subtitle1" Class="mb-2">Initial metrics</MudText>
                 @Field("Distance", $"{_bike.InitialDistanceKm.ToString(CultureInfo.InvariantCulture)} km")
                 @Field("Moving time", _bike.InitialMovingHours is { } h ? $"{h.ToString(CultureInfo.InvariantCulture)} h" : null)

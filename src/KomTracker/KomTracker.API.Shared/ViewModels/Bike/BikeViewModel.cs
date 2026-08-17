@@ -23,4 +23,10 @@ public class BikeViewModel
 
     /// <summary>Linked Strava gear id (bt.bike_link), or null when the bike isn't linked to Strava.</summary>
     public string? StravaGearId { get; set; }
+
+    // Computed mileage totals (initial + Σ attributed activities).
+    public decimal TotalDistanceKm { get; set; }
+    public decimal TotalMovingHours { get; set; }
+    public decimal TotalElevationM { get; set; }
+    public int AttributedActivityCount { get; set; }
 }

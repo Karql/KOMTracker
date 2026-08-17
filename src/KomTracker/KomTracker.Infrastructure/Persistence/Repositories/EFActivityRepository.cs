@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using EFCore.BulkExtensions;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Models.Strava;
 using KomTracker.Domain.Entities.Strava;
 using Microsoft.EntityFrameworkCore;
 
@@ -66,6 +67,27 @@ public class EFActivityRepository : EFBaseRepository, IActivityRepository
             .Where(x => x.AthleteId == athleteId && x.GearId != null && x.GearId.StartsWith("b"))
             .Select(x => x.GearId!)
             .Distinct()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<GearTotalsModel>> GetGearTotalsAsync(IReadOnlyCollection<string> gearIds)
+    {
+        if (gearIds is null || gearIds.Count == 0)
+        {
+            return Enumerable.Empty<GearTotalsModel>();
+        }
+
+        return await _context.Activity.AsNoTracking()
+            .Where(x => x.GearId != null && gearIds.Contains(x.GearId))
+            .GroupBy(x => x.GearId!)
+            .Select(g => new GearTotalsModel
+            {
+                GearId = g.Key,
+                DistanceMeters = g.Sum(x => x.Distance),
+                MovingTimeSeconds = g.Sum(x => (long)x.MovingTime),
+                ElevationMeters = g.Sum(x => x.TotalElevationGain),
+                ActivityCount = g.Count()
+            })
             .ToListAsync();
     }
 }
