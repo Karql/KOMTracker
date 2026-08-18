@@ -24,6 +24,7 @@ public static class BikeViewModelMappings
         SaleDate = e.SaleDate,
         SalePrice = e.SalePrice,
         StravaGearId = e.Links.FirstOrDefault(l => l.ExternalService == ExternalService.Strava)?.ExternalId,
+        StravaBikeName = e.StravaBikeName,
         TotalDistanceKm = e.TotalDistanceKm,
         TotalMovingHours = e.TotalMovingHours,
         TotalElevationM = e.TotalElevationM,

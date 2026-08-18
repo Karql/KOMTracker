@@ -49,11 +49,29 @@ public class GetBikesQueryHandler : IRequestHandler<GetBikesQuery, IEnumerable<B
         var totalsByGearId = (await _komUoW.GetRepository<IActivityRepository>().GetGearTotalsAsync(gearIds))
             .ToDictionary(x => x.GearId);
 
+        var stravaBikeNameByGearId = (await _komUoW.GetRepository<IStravaBikeRepository>().GetByIdsAsync(gearIds))
+            .Where(b => b.Name is not null)
+            .ToDictionary(b => b.Id, b => b.Name!);
+
         foreach (var bike in bikes)
         {
             BikeTotalsCalculator.Apply(bike, totalsByGearId);
+            bike.StravaBikeName = ResolveStravaBikeName(bike, stravaBikeNameByGearId);
         }
 
         return bikes;
+    }
+
+    private static string? ResolveStravaBikeName(BikeEntity bike, IReadOnlyDictionary<string, string> namesByGearId)
+    {
+        foreach (var link in bike.Links)
+        {
+            if (link.ExternalService == ExternalService.Strava && namesByGearId.TryGetValue(link.ExternalId, out var name))
+            {
+                return name;
+            }
+        }
+
+        return null;
     }
 }

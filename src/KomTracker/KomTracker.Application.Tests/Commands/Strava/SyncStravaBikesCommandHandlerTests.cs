@@ -59,9 +59,8 @@ public class SyncStravaBikesCommandHandlerTests
         res.Should().BeSuccess();
         await _stravaBikeRepo.Received().UpsertAthleteBikesAsync(1,
             Arg.Is<IReadOnlyCollection<StravaBikeEntity>>(x => x.Count == 1 && x.First().Id == "b1"));
-        await _athleteSyncRepo.Received().SetBikesEnabledAsync(1, true);
-        // Never toggles activity sync.
-        await _athleteSyncRepo.DidNotReceive().UpsertAsync(Arg.Any<AthleteSyncEntity>());
+        // Manual sync never flips any auto-sync flag.
+        await _athleteSyncRepo.DidNotReceive().SetBikesEnabledAsync(Arg.Any<int>(), Arg.Any<bool>());
     }
 
     [Fact]

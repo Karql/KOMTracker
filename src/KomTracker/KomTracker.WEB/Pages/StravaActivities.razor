@@ -1,0 +1,101 @@
+@page "/bike-tracker/strava-activities"
+@attribute [Authorize]
+@using System.Globalization
+@using KomTracker.API.Shared.ViewModels.BikeTracker
+
+<PageTitle>Strava activities</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    @if (_status.ActivityCount > 0)
+    {
+        <div class="d-flex align-center mb-4">
+            <MudSpacer />
+            <MudButton Variant="Variant.Text" Size="Size.Small" StartIcon="@Icons.Material.Filled.History"
+                       OnClick="ShowHistoryAsync">
+                @(_lastUpdated is not null ? $"Last updated {_lastUpdated:yyyy-MM-dd HH:mm}" : "Sync history")
+            </MudButton>
+        </div>
+    }
+
+    @if (!_status.ActivitiesEnabled && _status.ActivityCount == 0)
+    {
+        <MudPaper Outlined="true" Class="pa-8 d-flex flex-column align-center" Style="gap: 12px;">
+            <MudIcon Icon="@Icons.Material.Filled.DirectionsBike" Size="Size.Large" Color="Color.Primary" />
+            <MudText Typo="Typo.h6">No activities yet</MudText>
+            <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+                Turn on activity sync to import your Strava rides and attribute their mileage to your bikes.
+            </MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Sync"
+                       OnClick="GoToAccount">Enable activity sync</MudButton>
+        </MudPaper>
+    }
+    else
+    {
+        @if (!_status.ActivitiesEnabled)
+        {
+            <MudAlert Severity="Severity.Info" Class="mb-4">
+                <div class="d-flex align-center justify-space-between flex-wrap" style="gap: 8px;">
+                    <span>Automatic activity sync is off — these activities won't refresh. You can enable it on your Account.</span>
+                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Inherit"
+                               OnClick="GoToAccount">Manage on Account</MudButton>
+                </div>
+            </MudAlert>
+        }
+
+        <MudTable ServerData="LoadServerData" @ref="_table" Hover="true" Striped="true" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Date</MudTh>
+                <MudTh>Activity</MudTh>
+                <MudTh>Distance</MudTh>
+                <MudTh>Time</MudTh>
+                <MudTh>Avg speed</MudTh>
+                <MudTh>Elevation</MudTh>
+                <MudTh>Bike</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Date">
+                    <MudLink Target="_blank" Href="@ActivityUrl(context.Id)">@FormatDate(context.StartDateLocal)</MudLink>
+                </MudTd>
+                <MudTd DataLabel="Activity">
+                    <div>@context.Name</div>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@context.SportType</MudText>
+                </MudTd>
+                <MudTd DataLabel="Distance">@context.DistanceKm.ToString("N1", CultureInfo.InvariantCulture) km</MudTd>
+                <MudTd DataLabel="Time">@FormatMovingTime(context.MovingTimeSeconds)</MudTd>
+                <MudTd DataLabel="Avg speed">@context.AverageSpeedKmh.ToString("N1", CultureInfo.InvariantCulture) km/h</MudTd>
+                <MudTd DataLabel="Elevation">@context.ElevationM.ToString("N0", CultureInfo.InvariantCulture) m</MudTd>
+                <MudTd DataLabel="Bike">
+                    @if (!context.IsBikeRide)
+                    {
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">—</MudText>
+                    }
+                    else if (context.LinkedBikeId is int bikeId)
+                    {
+                        <MudLink OnClick="@(() => OpenBike(bikeId))">@context.LinkedBikeName</MudLink>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column">
+                            @if (context.StravaBikeName is not null)
+                            {
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary">@context.StravaBikeName</MudText>
+                            }
+                            <MudLink Typo="Typo.caption" Color="Color.Warning" OnClick="GoToStravaBikes">Unassigned</MudLink>
+                        </div>
+                    }
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>No activities.</MudText>
+            </NoRecordsContent>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new[] { 20, 50, 100 }" />
+            </PagerContent>
+        </MudTable>
+    }
+}

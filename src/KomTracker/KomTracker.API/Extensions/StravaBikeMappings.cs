@@ -1,5 +1,8 @@
+using KomTracker.API.Shared.ViewModels;
 using KomTracker.API.Shared.ViewModels.BikeTracker;
+using KomTracker.Application.Models;
 using KomTracker.Application.Models.Strava;
+using KomTracker.Domain.Entities.Strava;
 using KomTracker.Infrastructure.Strava.Mappings;
 
 namespace KomTracker.API.Extensions;
@@ -36,6 +39,43 @@ public static class StravaBikeMappings
         ActivitiesEnabled = m.ActivitiesEnabled,
         HasActivityReadAll = m.HasActivityReadAll,
         StravaBikeCount = m.StravaBikeCount,
+        ActivityCount = m.ActivityCount,
         Scopes = m.Scopes
     };
+
+    public static ActivityViewModel ToViewModel(this ActivityListItemModel a) => new()
+    {
+        Id = a.Id,
+        Name = a.Name,
+        SportType = a.SportType,
+        DistanceKm = a.DistanceMeters / 1000.0,
+        MovingTimeSeconds = a.MovingTimeSeconds,
+        AverageSpeedKmh = a.AverageSpeedMps * 3.6,
+        ElevationM = a.ElevationMeters,
+        StartDateLocal = a.StartDateUtc.AddSeconds(a.UtcOffset),
+        GearId = a.GearId,
+        LinkedBikeId = a.LinkedBikeId,
+        LinkedBikeName = a.LinkedBikeName,
+        StravaBikeName = a.StravaBikeName
+    };
+
+    public static PagedResultViewModel<ActivityViewModel> ToViewModel(this PagedResultModel<ActivityListItemModel> page) => new()
+    {
+        Items = page.Items.Select(ToViewModel).ToArray(),
+        TotalCount = page.TotalCount
+    };
+
+    public static ActivitySyncHistoryViewModel ToViewModel(this ActivitySyncHistoryEntity h) => new()
+    {
+        RunAt = h.RunAt,
+        Duration = h.Duration,
+        SyncFrom = h.SyncFrom,
+        Status = h.Status,
+        UpsertedCount = h.UpsertedCount,
+        DeletedCount = h.DeletedCount,
+        ActivitiesCount = h.ActivitiesCount
+    };
+
+    public static IEnumerable<ActivitySyncHistoryViewModel> ToViewModels(this IEnumerable<ActivitySyncHistoryEntity> history)
+        => history.Select(ToViewModel);
 }

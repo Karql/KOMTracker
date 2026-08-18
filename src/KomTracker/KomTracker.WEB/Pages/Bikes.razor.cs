@@ -83,6 +83,8 @@ public partial class Bikes
 
     private void OpenDetails(int id) => Navigation.NavigateTo($"bikes/{id}");
 
+    private void GoToStravaBikes() => Navigation.NavigateTo("bike-tracker/strava-bikes");
+
     private async Task AddAsync()
     {
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };

@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using KomTracker.API.Shared.Models.User;
 using KomTracker.API.Shared.ViewModels.BikeTracker;
+using KomTracker.WEB.Infrastructure;
 using KomTracker.WEB.Infrastructure.Services.User;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
@@ -103,6 +104,60 @@ public partial class Account
             {
                 Snackbar.Add("Strava access updated.", Severity.Success);
             }
+        }
+    }
+
+    private bool _togglingActivity;
+    private bool _togglingBike;
+
+    private async Task OnActivitySyncChanged(bool enabled)
+    {
+        _togglingActivity = true;
+        try
+        {
+            var response = await Http.PutAsync($"bike-tracker/strava/activity-sync?enabled={enabled}", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                await response.ShowProblemAsync(Snackbar);
+                return;
+            }
+
+            var result = await response.Content.ReadFromJsonAsync<ActivitySyncToggleResultViewModel>();
+            if (result?.BackfillStarted == true)
+            {
+                Snackbar.Add("Activity sync started — importing your history may take a while.", Severity.Info);
+            }
+            else
+            {
+                Snackbar.Add(enabled ? "Activity sync enabled." : "Activity sync disabled.", Severity.Success);
+            }
+
+            await LoadStravaStatusAsync();
+        }
+        finally
+        {
+            _togglingActivity = false;
+        }
+    }
+
+    private async Task OnBikeSyncChanged(bool enabled)
+    {
+        _togglingBike = true;
+        try
+        {
+            var response = await Http.PutAsync($"bike-tracker/strava/bike-sync?enabled={enabled}", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                await response.ShowProblemAsync(Snackbar);
+                return;
+            }
+
+            Snackbar.Add(enabled ? "Automatic bike sync enabled." : "Automatic bike sync disabled.", Severity.Success);
+            await LoadStravaStatusAsync();
+        }
+        finally
+        {
+            _togglingBike = false;
         }
     }
 

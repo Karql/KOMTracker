@@ -74,6 +74,8 @@ public class Startup
         services.AddTransient<RefreshAthletesJob>();
         services.AddTransient<SyncActivitiesFullJob>();
         services.AddTransient<SyncActivitiesRecentJob>();
+        services.AddTransient<SyncBikesJob>();
+        services.AddTransient<BackfillActivitiesJob>();
 
         services.AddQuartz(q =>
         {
@@ -108,6 +110,13 @@ public class Startup
 
                 q.ScheduleJob<SyncActivitiesFullJob>(trigger => trigger
                     .WithCronSchedule("0 35 1 ? * SUN", action => action.InTimeZone(tz)));
+            }
+
+            if (_applicationConfiguration.SyncBikesJobEnabled)
+            {
+                // Automatic bike (gear) sync for bike-auto-sync-enabled athletes, daily 02:35.
+                q.ScheduleJob<SyncBikesJob>(trigger => trigger
+                    .WithCronSchedule("0 35 2 * * ?", action => action.InTimeZone(tz)));
             }
 
             if (_applicationConfiguration.RefreshStatsJobEnabled)

@@ -63,4 +63,16 @@ public class EFStravaBikeRepository : EFBaseRepository, IStravaBikeRepository
         return _context.StravaBike.AsNoTracking()
             .FirstOrDefaultAsync(x => x.AthleteId == athleteId && x.Id == gearId);
     }
+
+    public async Task<IEnumerable<StravaBikeEntity>> GetByIdsAsync(IReadOnlyCollection<string> ids)
+    {
+        if (ids is null || ids.Count == 0)
+        {
+            return System.Array.Empty<StravaBikeEntity>();
+        }
+
+        return await _context.StravaBike.AsNoTracking()
+            .Where(x => ids.Contains(x.Id))
+            .ToListAsync();
+    }
 }

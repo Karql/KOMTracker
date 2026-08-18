@@ -45,6 +45,10 @@ public class GetBikeQueryHandler : IRequestHandler<GetBikeQuery, BikeEntity?>
 
         BikeTotalsCalculator.Apply(bike, totalsByGearId);
 
+        var stravaBike = (await _komUoW.GetRepository<IStravaBikeRepository>().GetByIdsAsync(gearIds))
+            .FirstOrDefault(b => b.Name is not null);
+        bike.StravaBikeName = stravaBike?.Name;
+
         return bike;
     }
 }

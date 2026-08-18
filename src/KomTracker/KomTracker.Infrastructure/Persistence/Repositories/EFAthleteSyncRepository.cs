@@ -19,14 +19,27 @@ public class EFAthleteSyncRepository : EFBaseRepository, IAthleteSyncRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<int>> GetBikesEnabledAthleteIdsAsync()
+    {
+        return await _context.AthleteSync
+            .Where(x => x.BikesEnabled)
+            .Select(x => x.AthleteId)
+            .ToListAsync();
+    }
+
     public Task<AthleteSyncEntity?> GetAsync(int athleteId)
     {
         return _context.AthleteSync.FirstOrDefaultAsync(x => x.AthleteId == athleteId);
     }
 
-    public Task UpsertAsync(AthleteSyncEntity athleteSync)
+    public Task SetActivitiesEnabledAsync(int athleteId, bool enabled)
     {
-        athleteSync.AuditCD = DateTime.UtcNow;
+        var athleteSync = new AthleteSyncEntity
+        {
+            AthleteId = athleteId,
+            ActivitiesEnabled = enabled,
+            AuditCD = DateTime.UtcNow
+        };
 
         return _context.AthleteSync
             .Upsert(athleteSync)

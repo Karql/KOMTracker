@@ -73,11 +73,11 @@ public class AdminController : BaseApiController<AdminController>
         return new NoContentResult();
     }
 
-    /// <summary>Enable/disable Strava activity sync for one athlete (temporary opt-in until the 1c UI).</summary>
+    /// <summary>Enable/disable Strava activity sync for one athlete (ops override; users self-manage on Account).</summary>
     [HttpPut("athlete-sync")]
     public async Task<ActionResult> SetAthleteSync([FromQuery] int athleteId, [FromQuery] bool enabled, CancellationToken cancellationToken)
     {
-        await _mediator.Send(new SetAthleteSyncCommand { AthleteId = athleteId, Enabled = enabled }, cancellationToken);
+        await _mediator.Send(new SetActivitySyncCommand { AthleteId = athleteId, Enabled = enabled }, cancellationToken);
 
         return new NoContentResult();
     }

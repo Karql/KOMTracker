@@ -27,9 +27,11 @@ public class GetStravaSyncStatusQueryHandler : IRequestHandler<GetStravaSyncStat
     {
         var athleteSyncRepo = _komUoW.GetRepository<IAthleteSyncRepository>();
         var stravaBikeRepo = _komUoW.GetRepository<IStravaBikeRepository>();
+        var activityRepo = _komUoW.GetRepository<IActivityRepository>();
 
         var athleteSync = await athleteSyncRepo.GetAsync(request.AthleteId);
         var stravaBikeCount = (await stravaBikeRepo.GetByAthleteAsync(request.AthleteId)).Count();
+        var activityCount = await activityRepo.CountAthleteActivitiesAsync(request.AthleteId);
 
         var tokenRes = await _athleteService.GetValidTokenAsync(request.AthleteId);
         var scopes = tokenRes.IsSuccess
@@ -42,6 +44,7 @@ public class GetStravaSyncStatusQueryHandler : IRequestHandler<GetStravaSyncStat
             ActivitiesEnabled = athleteSync?.ActivitiesEnabled ?? false,
             HasActivityReadAll = scopes.Contains(Constants.Strava.ScopeActivityReadAll),
             StravaBikeCount = stravaBikeCount,
+            ActivityCount = activityCount,
             Scopes = scopes
         };
     }

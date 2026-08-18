@@ -70,11 +70,11 @@ public partial class StravaBikes
 
         try
         {
-            var response = await Http.PostAsync("bike-tracker/strava/sync", null);
+            var response = await Http.PostAsync("bike-tracker/strava/sync-bikes", null);
 
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Synced from Strava", Severity.Success);
+                Snackbar.Add("Bikes synced from Strava", Severity.Success);
                 await LoadAsync();
             }
             else

@@ -30,8 +30,6 @@ else if (!_bikes.Any())
 else
 {
     <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
-        <MudText Typo="Typo.h5">Bikes</MudText>
-        <MudSpacer />
         <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Margin="Margin.Dense"
                       Immediate="true" Style="max-width: 220px;" />
@@ -80,7 +78,8 @@ else
                                 <MudChip T="string" Size="Size.Small" Color="LifecycleColor(bike.Lifecycle)">@bike.Lifecycle</MudChip>
                                 @if (bike.StravaGearId is not null)
                                 {
-                                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Link">Strava</MudChip>
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.Link"
+                                             OnClick="GoToStravaBikes">@(bike.StravaBikeName is null ? "Strava" : $"Strava: {bike.StravaBikeName}")</MudChip>
                                 }
                             </div>
                             <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2">
@@ -97,7 +96,7 @@ else
     }
     else
     {
-        <MudTable Items="FilteredBikes" Hover="true" Dense="true" Breakpoint="Breakpoint.Sm">
+        <MudTable Items="FilteredBikes" Hover="true" Striped="true" Dense="true" Breakpoint="Breakpoint.Sm">
             <HeaderContent>
                 <MudTh>Name</MudTh>
                 <MudTh>Type</MudTh>
@@ -119,7 +118,8 @@ else
                     <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
                     @if (context.StravaGearId is not null)
                     {
-                        <MudChip T="string" Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Link">Strava</MudChip>
+                        <MudChip T="string" Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.Link"
+                                 OnClick="GoToStravaBikes">@(context.StravaBikeName is null ? "Strava" : $"Strava: {context.StravaBikeName}")</MudChip>
                     }
                 </MudTd>
                 <MudTd Style="text-align: right;">@BikeMenu(context)</MudTd>

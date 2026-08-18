@@ -8,9 +8,9 @@ using IStravaGearService = KomTracker.Application.Interfaces.Services.Strava.IGe
 namespace KomTracker.Application.Commands.Strava;
 
 /// <summary>
-/// Sync one athlete's Strava gear (bikes, incl. retired) into strava.bike (1:1 mirror) and mark
-/// bikes_enabled. Gear only — does NOT touch activity sync (that's a separate opt-in). Surfaces
-/// rate-limit / auth failures to the caller.
+/// Sync one athlete's Strava gear (bikes, incl. retired) into strava.bike (1:1 mirror). Gear only —
+/// does NOT touch any auto-sync flag (bike auto-sync is toggled on Account) nor activity sync.
+/// Surfaces rate-limit / auth failures to the caller.
 /// </summary>
 public class SyncStravaBikesCommand : IRequest<Result>
 {
@@ -49,10 +49,8 @@ public class SyncStravaBikesCommandHandler : IRequestHandler<SyncStravaBikesComm
         }
 
         var stravaBikeRepo = _komUoW.GetRepository<IStravaBikeRepository>();
-        var athleteSyncRepo = _komUoW.GetRepository<IAthleteSyncRepository>();
 
         await stravaBikeRepo.UpsertAthleteBikesAsync(request.AthleteId, bikesRes.Value.ToList());
-        await athleteSyncRepo.SetBikesEnabledAsync(request.AthleteId, true);
 
         return Result.Ok();
     }

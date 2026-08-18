@@ -1,0 +1,68 @@
+@using System.Net.Http.Json
+@using KomTracker.API.Shared.ViewModels.BikeTracker
+
+<MudDialog>
+    <DialogContent>
+        @if (_history is null)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (!_history.Any())
+        {
+            <MudAlert Severity="Severity.Info">No sync runs yet.</MudAlert>
+        }
+        else
+        {
+            <MudTable Items="_history" Hover="true" Striped="true" Dense="true" Breakpoint="Breakpoint.Sm">
+                <HeaderContent>
+                    <MudTh>Run</MudTh>
+                    <MudTh>Window</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh>Fetched</MudTh>
+                    <MudTh>Deleted</MudTh>
+                    <MudTh>Total</MudTh>
+                    <MudTh>Duration</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Run">@context.RunAt.ToString("yyyy-MM-dd HH:mm")</MudTd>
+                    <MudTd DataLabel="Window">@(context.SyncFrom is null ? "Full" : $"From {context.SyncFrom:yyyy-MM-dd}")</MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Size="Size.Small" Color="StatusColor(context.Status)">@context.Status</MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Upserted">@context.UpsertedCount</MudTd>
+                    <MudTd DataLabel="Deleted">@context.DeletedCount</MudTd>
+                    <MudTd DataLabel="Total">@(context.ActivitiesCount?.ToString() ?? "—")</MudTd>
+                    <MudTd DataLabel="Duration">@context.Duration.ToString(@"hh\:mm\:ss")</MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+
+    private ActivitySyncHistoryViewModel[]? _history;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _history = await Http.GetFromJsonAsync<ActivitySyncHistoryViewModel[]>("bike-tracker/strava/activity-sync-history")
+            ?? Array.Empty<ActivitySyncHistoryViewModel>();
+    }
+
+    private static Color StatusColor(string status) => status switch
+    {
+        "Ok" => Color.Success,
+        "RateLimited" => Color.Warning,
+        "NoValidToken" => Color.Warning,
+        _ => Color.Error
+    };
+
+    private void Close() => MudDialog.Close();
+}

@@ -15,4 +15,7 @@ public interface IStravaBikeRepository : IRepository
 
     /// <summary>The stored Strava bike for the athlete, or null (used to validate a link request).</summary>
     Task<StravaBikeEntity?> GetAsync(int athleteId, string gearId);
+
+    /// <summary>Stored Strava bikes by gear id (globally unique) — to resolve linked-gear display names.</summary>
+    Task<IEnumerable<StravaBikeEntity>> GetByIdsAsync(IReadOnlyCollection<string> ids);
 }

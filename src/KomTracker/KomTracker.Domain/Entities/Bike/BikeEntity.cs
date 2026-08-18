@@ -73,4 +73,8 @@ public class BikeEntity : BaseEntity
     /// <summary>How many synced Strava activities are attributed to this bike (via its links).</summary>
     [NotMapped]
     public int AttributedActivityCount { get; set; }
+
+    /// <summary>Name of the linked Strava bike (strava.bike), for display; set by the bike queries.</summary>
+    [NotMapped]
+    public string? StravaBikeName { get; set; }
 }

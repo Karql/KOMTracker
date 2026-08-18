@@ -70,6 +70,16 @@ public class EFActivityRepository : EFBaseRepository, IActivityRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<ActivityEntity>> GetActivitiesPageAsync(int athleteId, int skip, int take)
+    {
+        return await _context.Activity.AsNoTracking()
+            .Where(x => x.AthleteId == athleteId)
+            .OrderByDescending(x => x.StartDate)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<GearTotalsModel>> GetGearTotalsAsync(IReadOnlyCollection<string> gearIds)
     {
         if (gearIds is null || gearIds.Count == 0)
