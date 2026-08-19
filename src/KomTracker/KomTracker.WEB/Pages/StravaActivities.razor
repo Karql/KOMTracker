@@ -56,6 +56,7 @@ else
                 <MudTh>Avg speed</MudTh>
                 <MudTh>Elevation</MudTh>
                 <MudTh>Bike</MudTh>
+                <MudTh Style="text-align: right;"></MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Date">
@@ -87,6 +88,20 @@ else
                             }
                             <MudLink Typo="Typo.caption" Color="Color.Warning" OnClick="GoToStravaBikes">Unassigned</MudLink>
                         </div>
+                    }
+                </MudTd>
+                <MudTd Style="text-align: right;">
+                    @if (_refreshingId == context.Id)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        <MudTooltip Text="Refresh from Strava">
+                            <MudIconButton Icon="@Icons.Material.Filled.Refresh" Size="Size.Small"
+                                           Disabled="_refreshingId is not null"
+                                           OnClick="@(() => RefreshAsync(context.Id))" />
+                        </MudTooltip>
                     }
                 </MudTd>
             </RowTemplate>

@@ -100,4 +100,52 @@ public class ActivityApi : IActivityApi
 
         return Result.Fail<IEnumerable<ActivitySummaryModel>>(new GetActivitiesError(GetActivitiesError.UnknownError));
     }
+
+    public async Task<Result<ActivityDetailedModel>> GetActivityAsync(long activityId, string token)
+    {
+        var url = $"https://www.strava.com/api/v3/activities/{activityId}";
+
+        var logPrefix = $"{nameof(GetActivityAsync)} ";
+        var httpClient = _httpClientFactory.CreateClient();
+        httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", token);
+
+        using var response = await httpClient.GetAsync(url);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var activity = await response.Content.ReadFromJsonAsync<ActivityDetailedModel>();
+            return Result.Ok(activity);
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            _logger.LogWarning(logPrefix + "Unauthorized! Activity Id: {activityId}", activityId);
+            return Result.Fail<ActivityDetailedModel>(new GetActivityError(GetActivityError.Unauthorized));
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            IEnumerable<string> values;
+            var rateLimitLimit = response.Headers.TryGetValues("X-RateLimit-Limit", out values) ? values.FirstOrDefault() : null;
+            var rateLimitUsage = response.Headers.TryGetValues("X-RateLimit-Usage", out values) ? values.FirstOrDefault() : null;
+            var readRateLimitLimit = response.Headers.TryGetValues("X-ReadRateLimit-Limit", out values) ? values.FirstOrDefault() : null;
+            var readRateLimitUsage = response.Headers.TryGetValues("X-ReadRateLimit-Usage", out values) ? values.FirstOrDefault() : null;
+
+            _logger.LogError(logPrefix + "Rate Limit Exceeded! Activity Id: {activityId}, X-RateLimit-Limit: {rateLimitLimit}, X-RateLimit-Usage: {rateLimitUsage}, X-ReadRateLimit-Limit: {readRateLimitLimit}, X-ReadRateLimit-Usage: {readRateLimitUsage}",
+                activityId, rateLimitLimit, rateLimitUsage, readRateLimitLimit, readRateLimitUsage);
+            return Result.Fail<ActivityDetailedModel>(new GetActivityError(GetActivityError.TooManyRequests));
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            _logger.LogWarning(logPrefix + "Not Found! Activity Id: {activityId}", activityId);
+            return Result.Fail<ActivityDetailedModel>(new GetActivityError(GetActivityError.NotFound));
+        }
+
+        _logger.LogError(logPrefix + "failed! Activity Id: {activityId}, SatusCode: {statusCode}, Response: {response}",
+            activityId, (int)response.StatusCode, await response.Content.ReadAsStringAsync());
+
+        return Result.Fail<ActivityDetailedModel>(new GetActivityError(GetActivityError.UnknownError));
+    }
 }

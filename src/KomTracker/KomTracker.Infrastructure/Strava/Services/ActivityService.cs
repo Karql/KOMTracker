@@ -41,4 +41,31 @@ public class ActivityService : IActivityService
 
         return Result.Fail<IEnumerable<ActivityEntity>>(new GetAthleteActivitiesError(mappedErrorMessage));
     }
+
+    public async Task<Result<ActivityEntity>> GetAthleteActivityAsync(int athleteId, string token, long activityId)
+    {
+        var getActivityRes = await _activityApi.GetActivityAsync(activityId, token);
+
+        if (getActivityRes.IsSuccess)
+        {
+            // Guard: only persist the activity when it actually belongs to the requesting athlete — the id comes
+            // from the client, so without this a caller could pull another athlete's public ride under their own id.
+            if (getActivityRes.Value.Athlete?.Id != athleteId)
+            {
+                return Result.Fail<ActivityEntity>(new GetAthleteActivitiesError(GetAthleteActivitiesError.NotFound));
+            }
+
+            return Result.Ok(getActivityRes.Value.ToEntity(athleteId));
+        }
+
+        var mappedErrorMessage = getActivityRes.Errors.OfType<ApiModel.Activity.Error.GetActivityError>().FirstOrDefault()?.Message switch
+        {
+            ApiModel.Activity.Error.GetActivityError.Unauthorized => GetAthleteActivitiesError.Unauthorized,
+            ApiModel.Activity.Error.GetActivityError.TooManyRequests => GetAthleteActivitiesError.TooManyRequests,
+            ApiModel.Activity.Error.GetActivityError.NotFound => GetAthleteActivitiesError.NotFound,
+            _ => GetAthleteActivitiesError.UnknownError
+        };
+
+        return Result.Fail<ActivityEntity>(new GetAthleteActivitiesError(mappedErrorMessage));
+    }
 }

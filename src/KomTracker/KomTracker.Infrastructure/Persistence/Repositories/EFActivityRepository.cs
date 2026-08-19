@@ -70,6 +70,30 @@ public class EFActivityRepository : EFBaseRepository, IActivityRepository
             .ToListAsync();
     }
 
+    public async Task UpsertActivityAsync(ActivityEntity activity)
+    {
+        // Targeted single-row upsert — NO delete-detection (that belongs to the windowed batch sync). Bulk ops
+        // bypass the change tracker, so stamp audit manually: AuditCD on insert, AuditMD on update.
+        var exists = await _context.Activity.AsNoTracking().AnyAsync(x => x.Id == activity.Id);
+
+        var now = DateTime.UtcNow;
+        if (exists)
+        {
+            activity.AuditMD = now;
+        }
+        else
+        {
+            activity.AuditCD = now;
+        }
+
+        await _context.BulkInsertOrUpdateAsync(new List<ActivityEntity> { activity }, new BulkConfig
+        {
+            PropertiesToExcludeOnUpdate = new List<string> { nameof(ActivityEntity.AuditCD) },
+            PreserveInsertOrder = false,
+            SetOutputIdentity = false
+        });
+    }
+
     public async Task<IEnumerable<ActivityEntity>> GetActivitiesPageAsync(int athleteId, int skip, int take)
     {
         return await _context.Activity.AsNoTracking()

@@ -15,12 +15,14 @@ public partial class StravaActivities
     private StravaSyncStatusViewModel _status = new();
     private DateTime? _lastUpdated;
     private MudTable<ActivityViewModel> _table = default!;
+    private long? _refreshingId;
 
     [CascadingParameter]
     public required MainLayout Layout { get; set; }
 
     [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private IDialogService DialogService { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
@@ -56,6 +58,29 @@ public partial class StravaActivities
             Items = result?.Items ?? Array.Empty<ActivityViewModel>(),
             TotalItems = result?.TotalCount ?? 0
         };
+    }
+
+    private async Task RefreshAsync(long id)
+    {
+        _refreshingId = id;
+        try
+        {
+            var response = await Http.PostAsync($"bike-tracker/strava/activities/{id}/refresh", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Activity refreshed", Severity.Success);
+                await _table.ReloadServerData();
+            }
+            else
+            {
+                Snackbar.Add($"Refresh failed ({(int)response.StatusCode}).", Severity.Error);
+            }
+        }
+        finally
+        {
+            _refreshingId = null;
+        }
     }
 
     private async Task ShowHistoryAsync()

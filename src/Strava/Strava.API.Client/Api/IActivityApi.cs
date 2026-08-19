@@ -12,4 +12,7 @@ public interface IActivityApi
     /// <paramref name="after"/>/<paramref name="before"/> are epoch seconds (inclusive/exclusive window).
     /// </summary>
     Task<Result<IEnumerable<ActivitySummaryModel>>> GetActivitiesAsync(string token, long? after = null, long? before = null);
+
+    /// <summary>Fetch a single activity (GET /activities/{id}) as a full DetailedActivity.</summary>
+    Task<Result<ActivityDetailedModel>> GetActivityAsync(long activityId, string token);
 }

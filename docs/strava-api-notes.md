@@ -92,6 +92,40 @@ Strava exposes **two independent buckets**, each formatted `<15-minute>,<daily>`
 - Two-tier poll of `GET /athlete/activities?...&per_page=200`, loop pages until a short/empty page: **recent-window** (`after=now-7d`) frequently + **full** (no `after`) on a slow cadence — the full pass is what catches edited/deleted old rides. **Upsert into `strava.activity` 1:1** (all fields), **no gear/sport filter** at sync (D-10); filter only at attribution. Only athletes with `strava.athlete_sync.Enabled` are synced.
 - Mind the **shared** rate buckets; the **read** bucket (600/15 min, 30 000/day) is the tighter one for our reads.
 
+## Get Activity — `GET /activities/{id}` → **DetailedActivity**
+The single-activity endpoint returns a **superset of the `SummaryActivity`** from the list. On top of the summary fields it adds: `description`, `calories`, `perceived_exertion` / `prefer_perceived_exertion`, `device_name`, `embed_token`, `hide_from_home`, `leaderboard_opt_out` / `segment_leaderboard_opt_out`, `available_zones[]`, an embedded `gear` (SummaryGear), and the nested collections `segment_efforts[]`, `best_efforts[]`, `splits_metric[]`, `splits_standard[]`, `laps[]`, `photos`, `similar_activities`, `stats_visibility[]`.
+
+- **Our client models the FULL payload** (`ActivityDetailedModel : ActivitySummaryModel`, reusing `SegmentEffortDetailedModel`/`GearSummaryModel`) — the Strava client is a universal connector, so it mirrors the API even where BikeTracker doesn't consume a field yet.
+- **BikeTracker persists only the summary fields** (`ActivityDetailedModel` IS-A `ActivitySummaryModel`, so the existing summary→`ActivityEntity` mapping applies) — the single-activity refresh writes the same columns as the list sync, **no new columns**.
+- Same date gotcha as the list (D-15): `start_date` is UTC, `start_date_local` carries a bogus `Z`; the nested `laps[]`/`segment_efforts[]` repeat this.
+
+```jsonc
+// GET /activities/{id} (real, polyline / long arrays truncated)
+{
+  "resource_state": 3,
+  "athlete": { "id": 2394302, "resource_state": 1 },
+  "name": "Afternoon Ride", "distance": 3830.6, "moving_time": 629, "elapsed_time": 675,
+  "type": "Ride", "sport_type": "Ride", "id": 19598505831,
+  "start_date": "2026-08-06T13:44:38Z", "start_date_local": "2026-08-06T15:44:38Z",
+  "timezone": "(GMT+01:00) Europe/Warsaw", "utc_offset": 7200.0,
+  "gear_id": "b10707658", "average_speed": 6.09, "max_speed": 10.34,
+  "description": "nice one", "calories": 420.5, "perceived_exertion": 5,
+  "device_name": "Garmin fēnix 7x", "embed_token": "…",
+  "available_zones": ["heartrate","power"],
+  "gear": { "id": "b10707658", "primary": false, "name": "Sensa", "nickname": "Sensa",
+            "resource_state": 2, "retired": false, "distance": 29143765, "converted_distance": 29143.8 },
+  "segment_efforts": [ { "id": 111, "name": "…", "elapsed_time": 60, "moving_time": 60,
+                         "distance": 300, "segment": { "id": 555, "name": "…", "activity_type": "Ride" }, … } ],
+  "best_efforts":   [ { "id": 222, "name": "1k", "distance": 1000, … } ],
+  "splits_metric":  [ { "distance": 1000, "elapsed_time": 160, "moving_time": 160, "split": 1, "average_speed": 6.25, "pace_zone": 0 } ],
+  "splits_standard":[ { "distance": 1609.34, … } ],
+  "laps":           [ { "id": 333, "name": "Lap 1", "lap_index": 1, "distance": 3830.6, "moving_time": 629, … } ],
+  "photos": { "count": 1, "primary": { "unique_id": "…", "urls": { "100": "…", "600": "…" }, "source": 1 } },
+  "similar_activities": { "effort_count": 3, "average_speed": 6.0, "trend": { "speeds": [ … ], "direction": 0 } },
+  "stats_visibility": [ { "type": "heart_rate", "visibility": "everyone" } ]
+}
+```
+
 ## Athlete & gear — real payloads (2026-08, our account)
 
 ### Token exchange athlete — `POST /oauth/token` (`athlete`)
@@ -121,6 +155,8 @@ Superset of the exchange athlete; adds `blocked`, `can_follow`, `follower_count`
 - **Gear `distance` is metres and can be huge** (21 207 353 m ≈ 21 207 km) → **use `double`, not `float`** (float ~7 sig digits would drop the last digit). `converted_distance` = km.
 - `nickname`, `retired`, `converted_distance` are **real but undocumented** (not in the spec's `SummaryGear`). `retired` is useful for gear import (Phase 1c).
 - Gear import (1c): `bikes[]` here gives the summary; `GET /gear/{id}` adds `brand_name`/`model_name`/`frame_type` (int)/`description`/**`weight`** (→ `GearDetailedModel`). `id` is a **string**; `frame_type` is an **int**; distances are **metres** (float in spec, but treat as double).
+- **`bikes[]` returns only ACTIVE gear — retired bikes are OMITTED.** `GET /athlete` (and the exchange athlete) list only non-retired bikes/shoes, so retired gear is invisible there. The **only** way to fetch a retired bike is `GET /gear/{id}` (returns it with `retired: true`). BikeTracker therefore discovers retired bike ids from synced activities (`gear_id` on old rides) and pulls each via `GET /gear/{id}` — see Phase 1c.
+- **`frame_type` int → type map** (Strava's web combo): `1 = Mountain`, `2 = Cross (Cyclocross)`, `3 = Road`, `4 = Time Trial (TT)`, `5 = Gravel`, anything else → `Other`.
 
 ### Get Equipment — `GET /gear/{id}` → **DetailedGear** (`resource_state: 3`)
 Adds `brand_name`, `model_name`, `frame_type` (int), `description`, and **`weight`** (kg — undocumented; can seed `Bike.WeightKg` in 1c) over the summary gear:

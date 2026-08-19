@@ -94,6 +94,22 @@ public class StravaBikesController : BaseApiController<StravaBikesController>
         return Ok(result.ToViewModel());
     }
 
+    /// <summary>Refresh a single activity from Strava (GET /activities/{id}) and upsert it — targeted, no delete-detection.</summary>
+    [HttpPost]
+    [Route("activities/{id}/refresh")]
+    public async Task<IActionResult> RefreshActivity([FromRoute] long id)
+    {
+        var user = GetCurrentUser();
+        if (user?.UserId is null)
+        {
+            return Unauthorized();
+        }
+
+        var result = await _mediator.Send(new SyncActivityCommand { AthleteId = user.AthleteId, ActivityId = id });
+
+        return this.ToActionResult(result);
+    }
+
     [HttpGet]
     [Route("activity-sync-history")]
     [SwaggerResponse(StatusCodes.Status200OK, type: typeof(IEnumerable<ActivitySyncHistoryViewModel>))]

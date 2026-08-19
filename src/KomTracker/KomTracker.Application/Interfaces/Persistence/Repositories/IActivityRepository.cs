@@ -28,4 +28,11 @@ public interface IActivityRepository : IRepository
 
     /// <summary>One page of the athlete's activities, newest first (by StartDate).</summary>
     Task<IEnumerable<ActivityEntity>> GetActivitiesPageAsync(int athleteId, int skip, int take);
+
+    /// <summary>
+    /// Upsert a single activity (insert or update by Id), audit-stamped. Unlike
+    /// <see cref="UpsertAthleteActivitiesAsync"/> this does <b>no</b> delete-detection — it only touches its own row
+    /// (targeted refresh / future webhook create-update).
+    /// </summary>
+    Task UpsertActivityAsync(ActivityEntity activity);
 }
