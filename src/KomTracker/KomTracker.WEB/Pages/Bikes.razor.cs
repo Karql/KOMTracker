@@ -123,7 +123,18 @@ public partial class Bikes
         }
     }
 
-    private Task ArchiveAsync(BikeViewModel bike) => ChangeLifecycleAsync(bike, BikeLifecycle.Archived);
+    private async Task ArchiveAsync(BikeViewModel bike)
+    {
+        var parameters = new DialogParameters<ArchiveBikeDialog> { { x => x.Bike, bike } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<ArchiveBikeDialog>("Archive bike", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadBikesAsync();
+        }
+    }
 
     private Task ActivateAsync(BikeViewModel bike) => ChangeLifecycleAsync(bike, BikeLifecycle.Active);
 

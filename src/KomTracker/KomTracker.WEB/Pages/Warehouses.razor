@@ -1,0 +1,95 @@
+@page "/warehouses"
+@attribute [Authorize]
+@using KomTracker.API.Shared.ViewModels.Warehouse
+@using KomTracker.WEB.Models.Preference
+
+<PageTitle>Warehouses</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (!_warehouses.Any())
+{
+    <MudPaper Outlined="true" Class="pa-8 d-flex flex-column align-center" Style="gap: 12px;">
+        <MudIcon Icon="@Icons.Material.Filled.Warehouse" Size="Size.Large" Color="Color.Primary" />
+        <MudText Typo="Typo.h6">No warehouses yet</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+            A warehouse is a place that holds your components when they're not installed (Home, Garage, a drawer…).
+        </MudText>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add warehouse</MudButton>
+    </MudPaper>
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Margin="Margin.Dense"
+                      Immediate="true" Style="max-width: 220px;" />
+        <MudSpacer />
+        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+            <MudIconButton Icon="@Icons.Material.Filled.GridView"
+                           Color="@(_view == ListViewMode.Card ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Card))" />
+            <MudIconButton Icon="@Icons.Material.Filled.TableRows"
+                           Color="@(_view == ListViewMode.Table ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Table))" />
+        </MudButtonGroup>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add warehouse</MudButton>
+    </div>
+
+    @if (!FilteredWarehouses.Any())
+    {
+        <MudAlert Severity="Severity.Info">No warehouses match the current filter.</MudAlert>
+    }
+    else if (_view == ListViewMode.Card)
+    {
+        <MudGrid>
+            @foreach (var warehouse in FilteredWarehouses)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true">
+                        <MudCardHeader>
+                            <CardHeaderAvatar>
+                                <MudIcon Icon="@Icons.Material.Filled.Warehouse" />
+                            </CardHeaderAvatar>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">@warehouse.Name</MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <MudTooltip Text="Edit">
+                                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditAsync(warehouse))" />
+                                </MudTooltip>
+                                <MudTooltip Text="Delete">
+                                    <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteAsync(warehouse))" />
+                                </MudTooltip>
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudTable Items="FilteredWarehouses" Hover="true" Striped="true" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh Style="text-align: right;"></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd Style="text-align: right;">
+                    <MudTooltip Text="Edit">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditAsync(context))" />
+                    </MudTooltip>
+                    <MudTooltip Text="Delete">
+                        <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteAsync(context))" />
+                    </MudTooltip>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+}

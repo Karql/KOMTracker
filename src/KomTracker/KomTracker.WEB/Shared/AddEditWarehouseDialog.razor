@@ -1,0 +1,73 @@
+@using System.Net.Http.Json
+@using KomTracker.API.Shared.ViewModels.Warehouse
+@using KomTracker.WEB.Infrastructure
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudTextField @bind-Value="_model.Name" Label="Name" Required="true" RequiredError="Name is required"
+                          MaxLength="200" Immediate="true" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    /// <summary>Null = add; non-null = edit.</summary>
+    [Parameter] public WarehouseViewModel? Warehouse { get; set; }
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private MudForm _form = default!;
+    private SaveWarehouseViewModel _model = new();
+    private bool _saving;
+
+    protected override void OnInitialized()
+    {
+        if (Warehouse is not null)
+        {
+            _model = new SaveWarehouseViewModel { Name = Warehouse.Name };
+        }
+    }
+
+    private async Task SubmitAsync()
+    {
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        _saving = true;
+
+        try
+        {
+            var response = Warehouse is null
+                ? await Http.PostAsJsonAsync("warehouses", _model)
+                : await Http.PutAsJsonAsync($"warehouses/{Warehouse.Id}", _model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var saved = await response.Content.ReadFromJsonAsync<WarehouseViewModel>();
+                Snackbar.Add(Warehouse is null ? "Warehouse added" : "Warehouse updated", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(saved));
+                return;
+            }
+
+            await response.ShowProblemAsync(Snackbar);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

@@ -5,17 +5,14 @@
 
 <MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.body2" Class="mb-3">Mark <b>@Bike.Name</b> as sold.</MudText>
+        <MudText Typo="Typo.body2" Class="mb-3">Archive <b>@Bike.Name</b> — it stays yours but drops out of the active garage.</MudText>
         <MudForm @ref="_form">
-            <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Required="true" RequiredError="Sale date is required" />
-            <MudNumericField @bind-Value="_salePrice" Label="Sale price" Min="0" Required="true"
-                             RequiredError="Sale price is required" Class="mt-3" />
-            <MudTextField @bind-Value="_notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
+            <MudTextField @bind-Value="_notes" Label="Notes" Lines="3" MaxLength="2000" />
         </MudForm>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Mark as sold</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Archive</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -29,8 +26,6 @@
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
     private MudForm _form = default!;
-    private DateTime? _saleDate = DateTime.UtcNow.Date;
-    private decimal? _salePrice;
     private string? _notes;
     private bool _saving;
 
@@ -38,21 +33,13 @@
 
     private async Task SubmitAsync()
     {
-        await _form.Validate();
-        if (!_form.IsValid)
-        {
-            return;
-        }
-
         _saving = true;
 
         try
         {
             var body = new ChangeBikeLifecycleViewModel
             {
-                Lifecycle = BikeLifecycle.Sold,
-                SaleDate = _saleDate,
-                SalePrice = _salePrice,
+                Lifecycle = BikeLifecycle.Archived,
                 Notes = _notes ?? string.Empty
             };
 
@@ -60,7 +47,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Bike marked as sold", Severity.Success);
+                Snackbar.Add("Bike archived", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
                 return;
             }

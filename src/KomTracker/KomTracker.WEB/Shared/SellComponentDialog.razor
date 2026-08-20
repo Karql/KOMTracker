@@ -1,11 +1,11 @@
 @using System.Net.Http.Json
-@using KomTracker.API.Shared.ViewModels.Bike
-@using KomTracker.Domain.Entities.Bike
+@using KomTracker.API.Shared.ViewModels.Component
+@using KomTracker.Domain.Entities.Component
 @using KomTracker.WEB.Infrastructure
 
 <MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.body2" Class="mb-3">Mark <b>@Bike.Name</b> as sold.</MudText>
+        <MudText Typo="Typo.body2" Class="mb-3">Mark <b>@Component.Name</b> as sold.</MudText>
         <MudForm @ref="_form">
             <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Required="true" RequiredError="Sale date is required" />
             <MudNumericField @bind-Value="_salePrice" Label="Sale price" Min="0" Required="true"
@@ -23,7 +23,7 @@
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    [Parameter] public BikeViewModel Bike { get; set; } = default!;
+    [Parameter] public ComponentViewModel Component { get; set; } = default!;
 
     [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
@@ -34,7 +34,7 @@
     private string? _notes;
     private bool _saving;
 
-    protected override void OnInitialized() => _notes = Bike.Notes;
+    protected override void OnInitialized() => _notes = Component.Notes;
 
     private async Task SubmitAsync()
     {
@@ -48,19 +48,19 @@
 
         try
         {
-            var body = new ChangeBikeLifecycleViewModel
+            var body = new ChangeComponentLifecycleViewModel
             {
-                Lifecycle = BikeLifecycle.Sold,
+                Lifecycle = ComponentLifecycle.Sold,
                 SaleDate = _saleDate,
                 SalePrice = _salePrice,
                 Notes = _notes ?? string.Empty
             };
 
-            var response = await Http.PutAsJsonAsync($"bikes/{Bike.Id}/lifecycle", body);
+            var response = await Http.PutAsJsonAsync($"components/{Component.Id}/lifecycle", body);
 
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Bike marked as sold", Severity.Success);
+                Snackbar.Add("Component marked as sold", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
                 return;
             }

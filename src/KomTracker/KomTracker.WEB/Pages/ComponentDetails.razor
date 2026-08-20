@@ -1,0 +1,98 @@
+@page "/components/{Id:int}"
+@attribute [Authorize]
+@using System.Globalization
+@using KomTracker.API.Shared.ViewModels.Component
+@using KomTracker.Domain.Entities.Component
+@using KomTracker.WEB.Models.Component
+
+<PageTitle>Component</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_component is null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">Component not found.</MudAlert>
+    <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Href="components">Back to components</MudButton>
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudIcon Icon="@ComponentCategoryIcons.Icon(_component.Category)" Size="Size.Large" />
+        <div>
+            <MudText Typo="Typo.h5">@_component.Name</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">@($"{_component.Brand} {_component.Model}".Trim())</MudText>
+        </div>
+        <MudChip T="string" Size="Size.Small" Color="LifecycleColor(_component.Lifecycle)">@_component.Lifecycle</MudChip>
+        <MudSpacer />
+        <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Primary" OnClick="EditAsync">Edit</MudButton>
+        @if (_component.Lifecycle == ComponentLifecycle.Active)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Archive" OnClick="ArchiveAsync">Archive</MudButton>
+        }
+        else
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Unarchive" OnClick="ActivateAsync">Set active</MudButton>
+        }
+        @if (_component.Lifecycle != ComponentLifecycle.Sold)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Sell" OnClick="SellAsync">Mark as sold</MudButton>
+        }
+        <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="DeleteAsync">Delete</MudButton>
+    </div>
+
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Identity</MudText>
+                @Field("Category", ComponentCategoryMetadata.DisplayName(_component.Category))
+                @Field("Group", ComponentCategoryMetadata.DisplayName(_component.CategoryGroup))
+                @Field("Brand", _component.Brand)
+                @Field("Model", _component.Model)
+                @Field("Weight", _component.WeightKg is { } w ? $"{w.ToString(CultureInfo.InvariantCulture)} kg" : null)
+                @Field("Warehouse", _component.WarehouseName)
+                @Field("Notes", _component.Notes)
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Purchase</MudText>
+                @Field("Price", _component.Price?.ToString(CultureInfo.InvariantCulture))
+                @Field("Place", _component.PurchasePlace)
+                @Field("Date", _component.PurchaseDate?.ToString("yyyy-MM-dd"))
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Initial metrics</MudText>
+                @Field("Distance", $"{_component.InitialDistanceKm.ToString(CultureInfo.InvariantCulture)} km")
+                @Field("Moving time", _component.InitialMovingHours is { } h ? $"{h.ToString(CultureInfo.InvariantCulture)} h" : null)
+                @Field("Elevation", _component.InitialElevationM is { } e ? $"{e.ToString(CultureInfo.InvariantCulture)} m" : null)
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                    Ride mileage (installed on a bike) — coming in a later phase.
+                </MudText>
+            </MudPaper>
+        </MudItem>
+
+        @if (_component.Lifecycle == ComponentLifecycle.Sold)
+        {
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-4" Outlined="true">
+                    <MudText Typo="Typo.subtitle1" Class="mb-2">Sale</MudText>
+                    @Field("Sale date", _component.SaleDate?.ToString("yyyy-MM-dd"))
+                    @Field("Sale price", _component.SalePrice?.ToString(CultureInfo.InvariantCulture))
+                </MudPaper>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private RenderFragment Field(string label, string? value) =>@<div class="d-flex py-1" style="gap: 8px;">
+        <MudText Typo="Typo.body2" Class="mud-text-secondary" Style="min-width: 110px;">@label</MudText>
+        <MudText Typo="Typo.body2">@(string.IsNullOrWhiteSpace(value) ? "—" : value)</MudText>
+    </div>;
+}

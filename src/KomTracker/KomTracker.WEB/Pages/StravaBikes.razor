@@ -61,8 +61,8 @@ else
             <MudTextField @bind-Value="_searchString" Placeholder="Search" Adornment="Adornment.Start"
                           AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small" Margin="Margin.Dense"
                           Immediate="true" Style="max-width: 220px;" />
-            <MudSwitch T="bool" @bind-Value="_showRetired" Color="Color.Primary" Label="Show retired" />
             <MudSpacer />
+            <MudSwitch T="bool" @bind-Value="_showRetired" Color="Color.Primary" Label="Show retired" />
             <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
                 <MudIconButton Icon="@Icons.Material.Filled.GridView"
                                Color="@(_view == ListViewMode.Card ? Color.Primary : Color.Default)"

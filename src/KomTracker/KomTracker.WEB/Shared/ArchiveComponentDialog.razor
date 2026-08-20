@@ -1,0 +1,64 @@
+@using System.Net.Http.Json
+@using KomTracker.API.Shared.ViewModels.Component
+@using KomTracker.Domain.Entities.Component
+@using KomTracker.WEB.Infrastructure
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">Archive <b>@Component.Name</b> — it stays yours but drops out of the active list.</MudText>
+        <MudForm @ref="_form">
+            <MudTextField @bind-Value="_notes" Label="Notes" Lines="3" MaxLength="2000" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Archive</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public ComponentViewModel Component { get; set; } = default!;
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private MudForm _form = default!;
+    private string? _notes;
+    private bool _saving;
+
+    protected override void OnInitialized() => _notes = Component.Notes;
+
+    private async Task SubmitAsync()
+    {
+        _saving = true;
+
+        try
+        {
+            var body = new ChangeComponentLifecycleViewModel
+            {
+                Lifecycle = ComponentLifecycle.Archived,
+                Notes = _notes ?? string.Empty
+            };
+
+            var response = await Http.PutAsJsonAsync($"components/{Component.Id}/lifecycle", body);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Component archived", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+                return;
+            }
+
+            await response.ShowProblemAsync(Snackbar);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

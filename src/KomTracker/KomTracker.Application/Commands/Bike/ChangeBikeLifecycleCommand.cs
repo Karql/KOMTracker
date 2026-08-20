@@ -15,6 +15,9 @@ public class ChangeBikeLifecycleCommand : IRequest<Result>
     public BikeLifecycle Lifecycle { get; set; }
     public DateTime? SaleDate { get; set; }
     public decimal? SalePrice { get; set; }
+
+    /// <summary>Optional note to save alongside the transition (e.g. why it was archived/sold). Null = leave unchanged.</summary>
+    public string? Notes { get; set; }
 }
 
 public class ChangeBikeLifecycleCommandValidator : AbstractValidator<ChangeBikeLifecycleCommand>
@@ -56,6 +59,11 @@ public class ChangeBikeLifecycleCommandHandler : IRequestHandler<ChangeBikeLifec
         }
 
         bike.Lifecycle = request.Lifecycle;
+
+        if (request.Notes is not null)
+        {
+            bike.Notes = request.Notes;
+        }
 
         if (request.Lifecycle == BikeLifecycle.Sold)
         {

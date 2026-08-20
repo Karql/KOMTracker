@@ -73,7 +73,8 @@ public class BikesController : BaseApiController<BikesController>
             UserId = userId,
             Lifecycle = model.Lifecycle,
             SaleDate = model.SaleDate,
-            SalePrice = model.SalePrice
+            SalePrice = model.SalePrice,
+            Notes = model.Notes
         });
 
         return this.ToActionResult(result);

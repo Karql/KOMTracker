@@ -1,0 +1,162 @@
+@page "/components"
+@attribute [Authorize]
+@using KomTracker.API.Shared.ViewModels.Component
+@using KomTracker.API.Shared.ViewModels.Warehouse
+@using KomTracker.Domain.Entities.Component
+@using KomTracker.WEB.Models.Component
+@using KomTracker.WEB.Models.Preference
+
+<PageTitle>Components</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (!_components.Any())
+{
+    <MudPaper Outlined="true" Class="pa-8 d-flex flex-column align-center" Style="gap: 12px;">
+        <MudIcon Icon="@Icons.Material.Filled.Build" Size="Size.Large" Color="Color.Primary" />
+        <MudText Typo="Typo.h6">No components yet</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+            Add a component (chain, tyre, wheel…) to start tracking it. Store it in a
+            <MudLink Href="warehouses">warehouse</MudLink> until you install it.
+        </MudText>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add component</MudButton>
+        @if (!_includeInactive)
+        {
+            <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="ShowArchivedAsync">Show archived / sold</MudButton>
+        }
+    </MudPaper>
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudTextField @bind-Value="_searchString" Placeholder="Search"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"
+                      Margin="Margin.Dense" Immediate="true" Style="max-width: 220px; margin-top: 16px;" />
+        <MudSelect T="ComponentCategoryGroup?" @bind-Value="_groupFilter" Label="Group" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 180px;">
+            @foreach (var group in Enum.GetValues<ComponentCategoryGroup>())
+            {
+                <MudSelectItem T="ComponentCategoryGroup?" Value="@group">@ComponentCategoryMetadata.DisplayName(group)</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect T="int?" @bind-Value="_warehouseFilter" Label="Warehouse" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 180px;">
+            @foreach (var warehouse in _warehouses)
+            {
+                <MudSelectItem T="int?" Value="@warehouse.Id">@warehouse.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSpacer />
+        <MudSwitch T="bool" @bind-Value="_includeInactive" @bind-Value:after="LoadComponentsAsync"
+                   Color="Color.Primary" Label="Show archived/sold" />
+        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+            <MudIconButton Icon="@Icons.Material.Filled.GridView"
+                           Color="@(_view == ListViewMode.Card ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Card))" />
+            <MudIconButton Icon="@Icons.Material.Filled.TableRows"
+                           Color="@(_view == ListViewMode.Table ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Table))" />
+        </MudButtonGroup>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add component</MudButton>
+    </div>
+
+    @if (!FilteredComponents.Any())
+    {
+        <MudAlert Severity="Severity.Info">No components match the current filter.</MudAlert>
+    }
+    else if (_view == ListViewMode.Card)
+    {
+        <MudGrid>
+            @foreach (var component in FilteredComponents)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true">
+                        <MudCardHeader>
+                            <CardHeaderAvatar>
+                                <MudIcon Icon="@ComponentCategoryIcons.Icon(component.Category)" />
+                            </CardHeaderAvatar>
+                            <CardHeaderContent>
+                                <MudText Typo="Typo.h6">@component.Name</MudText>
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                                    @($"{component.Brand} {component.Model}".Trim())
+                                </MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                @ComponentMenu(component)
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <div class="d-flex align-center flex-wrap" style="gap: 8px;">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@ComponentCategoryMetadata.DisplayName(component.Category)</MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="LifecycleColor(component.Lifecycle)">@component.Lifecycle</MudChip>
+                                @if (component.WarehouseName is not null)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Icon="@Icons.Material.Filled.Warehouse">@component.WarehouseName</MudChip>
+                                }
+                            </div>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => OpenDetails(component.Id))">Details</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudTable Items="FilteredComponents" Hover="true" Striped="true" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Category</MudTh>
+                <MudTh>Brand</MudTh>
+                <MudTh>Model</MudTh>
+                <MudTh>Warehouse</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh Style="text-align: right;"></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">
+                    <MudLink OnClick="@(() => OpenDetails(context.Id))">@context.Name</MudLink>
+                </MudTd>
+                <MudTd DataLabel="Category">
+                    <div class="d-flex align-center" style="gap: 6px;">
+                        <MudIcon Icon="@ComponentCategoryIcons.Icon(context.Category)" Size="Size.Small" />
+                        <span>@ComponentCategoryMetadata.DisplayName(context.Category)</span>
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="Brand">@context.Brand</MudTd>
+                <MudTd DataLabel="Model">@context.Model</MudTd>
+                <MudTd DataLabel="Warehouse">@(context.WarehouseName ?? "—")</MudTd>
+                <MudTd DataLabel="Status">
+                    <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
+                </MudTd>
+                <MudTd Style="text-align: right;">@ComponentMenu(context)</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+}
+
+@code {
+    private RenderFragment ComponentMenu(ComponentViewModel component) =>@<MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+        <MudMenuItem Icon="@Icons.Material.Filled.Visibility" OnClick="@(() => OpenDetails(component.Id))">Details</MudMenuItem>
+        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditAsync(component))">Edit</MudMenuItem>
+        @if (component.Lifecycle == ComponentLifecycle.Active)
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.Archive" OnClick="@(() => ArchiveAsync(component))">Archive</MudMenuItem>
+        }
+        else
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.Unarchive" OnClick="@(() => ActivateAsync(component))">Set active</MudMenuItem>
+        }
+        @if (component.Lifecycle != ComponentLifecycle.Sold)
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.Sell" OnClick="@(() => SellAsync(component))">Mark as sold</MudMenuItem>
+        }
+        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => DeleteAsync(component))">Delete</MudMenuItem>
+    </MudMenu>;
+}
