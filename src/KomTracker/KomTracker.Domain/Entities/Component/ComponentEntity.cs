@@ -60,4 +60,16 @@ public class ComponentEntity : BaseEntity
     /// <summary>Name of the current warehouse, for display; set by the component queries — NOT persisted.</summary>
     [NotMapped]
     public string? WarehouseName { get; set; }
+
+    // Current active Tracked installation (where it's mounted now), set by the component queries — NOT persisted.
+    // Takes display priority over the warehouse: installed-on-bike ▸ warehouse ▸ unassigned.
+
+    [NotMapped]
+    public int? InstalledOnBikeId { get; set; }
+
+    [NotMapped]
+    public string? InstalledOnBikeName { get; set; }
+
+    [NotMapped]
+    public InstallationPosition? InstalledPosition { get; set; }
 }

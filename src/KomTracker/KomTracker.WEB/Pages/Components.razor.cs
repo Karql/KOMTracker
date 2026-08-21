@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using KomTracker.API.Shared.ViewModels.Bike;
 using KomTracker.API.Shared.ViewModels.Component;
 using KomTracker.API.Shared.ViewModels.Warehouse;
 using KomTracker.Domain.Entities.Component;
@@ -15,14 +16,20 @@ public partial class Components
     // localStorage key for this page's card/table preference.
     private const string ViewPreferenceKey = "components";
 
+    /// <summary>Install-state filter options.</summary>
+    private enum InstallState { Installed, NotInstalled }
+
     private bool _loaded;
     private bool _includeInactive;
     private ListViewMode _view = ListViewMode.Card;
     private string _searchString = "";
     private ComponentCategoryGroup? _groupFilter;
     private int? _warehouseFilter;
+    private InstallState? _installFilter;
+    private int? _bikeFilter;
     private IEnumerable<ComponentViewModel> _components = Enumerable.Empty<ComponentViewModel>();
     private IEnumerable<WarehouseViewModel> _warehouses = Enumerable.Empty<WarehouseViewModel>();
+    private IEnumerable<BikeViewModel> _bikes = Enumerable.Empty<BikeViewModel>();
 
     [CascadingParameter]
     public required MainLayout Layout { get; set; }
@@ -44,6 +51,8 @@ public partial class Components
 
         _warehouses = await Http.GetFromJsonAsync<WarehouseViewModel[]>("warehouses")
             ?? Enumerable.Empty<WarehouseViewModel>();
+        _bikes = await Http.GetFromJsonAsync<BikeViewModel[]>("bikes")
+            ?? Enumerable.Empty<BikeViewModel>();
 
         await LoadComponentsAsync();
 
@@ -89,7 +98,10 @@ public partial class Components
     private IEnumerable<ComponentViewModel> FilteredComponents => _components
         .Where(Search)
         .Where(c => _groupFilter is null || c.CategoryGroup == _groupFilter)
-        .Where(c => _warehouseFilter is null || c.WarehouseId == _warehouseFilter);
+        .Where(c => _warehouseFilter is null || c.WarehouseId == _warehouseFilter)
+        .Where(c => _installFilter is null
+            || (_installFilter == InstallState.Installed) == (c.InstalledOnBikeId is not null))
+        .Where(c => _bikeFilter is null || c.InstalledOnBikeId == _bikeFilter);
 
     private void OpenDetails(int id) => Navigation.NavigateTo($"components/{id}");
 
@@ -97,6 +109,23 @@ public partial class Components
     {
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
         var dialog = await DialogService.ShowAsync<AddEditComponentDialog>("Add component", options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadComponentsAsync();
+        }
+    }
+
+    private async Task InstallAsync(ComponentViewModel component)
+    {
+        var parameters = new DialogParameters<InstallComponentDialog>
+        {
+            { x => x.ComponentId, component.Id },
+            { x => x.ComponentName, component.Name }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<InstallComponentDialog>("Install on bike", parameters, options);
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)

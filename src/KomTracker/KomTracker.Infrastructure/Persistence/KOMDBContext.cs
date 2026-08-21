@@ -70,6 +70,8 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
 
     public virtual DbSet<ComponentEntity> Component { get; set; }
 
+    public virtual DbSet<InstallationEntity> Installation { get; set; }
+
     // Strava
     public virtual DbSet<ActivityEntity> Activity { get; set; }
 
@@ -126,6 +128,7 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
         builder.ApplyConfiguration(new BikeLinkEntityTypeConfiguration());
         builder.ApplyConfiguration(new WarehouseEntityTypeConfiguration());
         builder.ApplyConfiguration(new ComponentEntityTypeConfiguration());
+        builder.ApplyConfiguration(new InstallationEntityTypeConfiguration());
 
         // Strava
         builder.ApplyConfiguration(new ActivityEntityTypeConfiguration());

@@ -1,0 +1,137 @@
+@using System.Net.Http.Json
+@using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.API.Shared.ViewModels.Installation
+@using KomTracker.Domain.Entities.Component
+@using KomTracker.WEB.Infrastructure
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">
+            Edit the <b>@Installation.Type</b> installation of <b>@Installation.ComponentName</b>.
+        </MudText>
+        <MudForm @ref="_form">
+            <MudSelect T="int?" @bind-Value="_bikeId" Label="Bike" Required="true" RequiredError="Pick a bike">
+                @foreach (var bike in _bikes)
+                {
+                    <MudSelectItem T="int?" Value="@bike.Id">@bike.Name</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="InstallationPosition?" @bind-Value="_position" Label="Position" Clearable="true" Class="mt-3">
+                @foreach (var pos in Enum.GetValues<InstallationPosition>())
+                {
+                    <MudSelectItem T="InstallationPosition?" Value="@pos">@pos</MudSelectItem>
+                }
+            </MudSelect>
+
+            @if (Installation.Type == ComponentInstallationType.Tracked)
+            {
+                <div class="d-flex" style="gap: 12px;">
+                    <MudDatePicker @bind-Date="_dateFrom" Label="Install date" Required="true"
+                                   RequiredError="Install date is required" Class="mt-3" Style="flex: 2;" />
+                    <MudTimePicker @bind-Time="_dateFromTime" Label="Time" Class="mt-3" Style="flex: 1;" />
+                </div>
+                <div class="d-flex" style="gap: 12px;">
+                    <MudDatePicker @bind-Date="_dateTo" Label="Removal date" Clearable="true" Class="mt-3" Style="flex: 2;" />
+                    <MudTimePicker @bind-Time="_dateToTime" Label="Time" Class="mt-3" Style="flex: 1;" />
+                </div>
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">Leave the removal date empty to keep it currently installed.</MudText>
+            }
+            else
+            {
+                <MudNumericField @bind-Value="_manualDistanceKm" Label="Distance (km)" Min="0" Class="mt-3" />
+                <MudNumericField @bind-Value="_manualMovingHours" Label="Moving time (h)" Min="0" Class="mt-3" />
+                <MudNumericField @bind-Value="_manualElevationM" Label="Elevation (m)" Min="0" Class="mt-3" />
+            }
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public InstallationViewModel Installation { get; set; } = default!;
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private MudForm _form = default!;
+    private int? _bikeId;
+    private InstallationPosition? _position;
+    private DateTime? _dateFrom;
+    private TimeSpan? _dateFromTime;
+    private DateTime? _dateTo;
+    private TimeSpan? _dateToTime;
+    private decimal? _manualDistanceKm;
+    private decimal? _manualMovingHours;
+    private decimal? _manualElevationM;
+    private bool _saving;
+    private IEnumerable<BikeViewModel> _bikes = Enumerable.Empty<BikeViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _bikes = await Http.GetFromJsonAsync<BikeViewModel[]>("bikes")
+            ?? Enumerable.Empty<BikeViewModel>();
+
+        _bikeId = Installation.BikeId;
+        _position = Installation.Position;
+
+        _dateFrom = Installation.DateFrom?.Date;
+        _dateFromTime = Installation.DateFrom?.TimeOfDay ?? TimeSpan.Zero;
+        _dateTo = Installation.DateTo?.Date;
+        _dateToTime = Installation.DateTo?.TimeOfDay ?? TimeSpan.Zero;
+
+        _manualDistanceKm = Installation.ManualDistanceKm;
+        _manualMovingHours = Installation.ManualMovingHours;
+        _manualElevationM = Installation.ManualElevationM;
+    }
+
+    private async Task SubmitAsync()
+    {
+        await _form.Validate();
+        if (!_form.IsValid || _bikeId is null)
+        {
+            return;
+        }
+
+        var tracked = Installation.Type == ComponentInstallationType.Tracked;
+
+        var body = new UpdateInstallationViewModel
+        {
+            BikeId = _bikeId.Value,
+            Position = _position,
+            DateFrom = tracked ? _dateFrom?.Date + (_dateFromTime ?? TimeSpan.Zero) : null,
+            DateTo = tracked && _dateTo is not null ? _dateTo.Value.Date + (_dateToTime ?? TimeSpan.Zero) : null,
+            ManualDistanceKm = tracked ? null : _manualDistanceKm,
+            ManualMovingHours = tracked ? null : _manualMovingHours,
+            ManualElevationM = tracked ? null : _manualElevationM
+        };
+
+        _saving = true;
+
+        try
+        {
+            var response = await Http.PutAsJsonAsync($"installations/{Installation.Id}", body);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Installation updated", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+                return;
+            }
+
+            await response.ShowProblemAsync(Snackbar);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

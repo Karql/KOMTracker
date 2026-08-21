@@ -25,6 +25,9 @@ public static class ComponentViewModelMappings
         InitialElevationM = e.InitialElevationM,
         WarehouseId = e.WarehouseId,
         WarehouseName = e.WarehouseName,
+        InstalledOnBikeId = e.InstalledOnBikeId,
+        InstalledOnBikeName = e.InstalledOnBikeName,
+        InstalledPosition = e.InstalledPosition,
         Lifecycle = e.Lifecycle,
         SaleDate = e.SaleDate,
         SalePrice = e.SalePrice

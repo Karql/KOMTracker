@@ -1,0 +1,206 @@
+@using System.Net.Http.Json
+@using System.Threading
+@using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.API.Shared.ViewModels.Component
+@using KomTracker.API.Shared.ViewModels.Installation
+@using KomTracker.Domain.Entities.Component
+@using KomTracker.WEB.Infrastructure
+@using KomTracker.WEB.Models.Component
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            @* Fixed side (context) vs. the side the user picks. *@
+            @if (BikeId is not null)
+            {
+                <MudText Typo="Typo.body2" Class="mb-3">Install a component on <b>@BikeName</b>.</MudText>
+
+                <MudAutocomplete T="ComponentViewModel" @bind-Value="_component" Label="Component" Required="true"
+                                 RequiredError="Pick a component" Placeholder="Search component"
+                                 SearchFunc="SearchComponents" MaxItems="@((int?)null)"
+                                 ResetValueOnEmptyText="true" CoerceValue="false" SelectValueOnTab="true"
+                                 ToStringFunc="@(c => c is null ? string.Empty : c.Name)">
+                    <ItemTemplate Context="component">
+                        <div class="d-flex align-center" style="gap: 8px; width: 100%;">
+                            <MudIcon Icon="@ComponentCategoryIcons.Icon(component.Category)" Size="Size.Small" />
+                            <span>@component.Name</span>
+                            <MudSpacer />
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">@ComponentCategoryMetadata.DisplayName(component.Category)</MudText>
+                        </div>
+                    </ItemTemplate>
+                </MudAutocomplete>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2" Class="mb-3">Install <b>@ComponentName</b> on a bike.</MudText>
+
+                <MudSelect T="int?" @bind-Value="_bikeId" Label="Bike" Required="true" RequiredError="Pick a bike">
+                    @foreach (var bike in _bikes)
+                    {
+                        <MudSelectItem T="int?" Value="@bike.Id">@bike.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                @if (!_bikes.Any())
+                {
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                        No active bikes — <MudLink Href="bikes" Typo="Typo.caption">add one</MudLink> first.
+                    </MudText>
+                }
+            }
+
+            <MudRadioGroup T="ComponentInstallationType" @bind-Value="_type" Class="mt-3">
+                <MudRadio T="ComponentInstallationType" Value="ComponentInstallationType.Tracked" Color="Color.Primary" Dense="true">Tracked (dated)</MudRadio>
+                <MudRadio T="ComponentInstallationType" Value="ComponentInstallationType.Manual" Color="Color.Primary" Dense="true">Manual (historical)</MudRadio>
+            </MudRadioGroup>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                @(_type == ComponentInstallationType.Tracked
+                    ? "Live install — ride mileage will attribute to it from the install date (Phase 3)."
+                    : "Dateless past usage with static totals you type in — never computed.")
+            </MudText>
+
+            <MudSelect T="InstallationPosition?" @bind-Value="_position" Label="Position" Clearable="true" Class="mt-3">
+                @foreach (var pos in Enum.GetValues<InstallationPosition>())
+                {
+                    <MudSelectItem T="InstallationPosition?" Value="@pos">@pos</MudSelectItem>
+                }
+            </MudSelect>
+
+            @if (_type == ComponentInstallationType.Tracked)
+            {
+                <div class="d-flex" style="gap: 12px;">
+                    <MudDatePicker @bind-Date="_dateFrom" Label="Install date" Required="true"
+                                   RequiredError="Install date is required" Class="mt-3" Style="flex: 2;" />
+                    <MudTimePicker @bind-Time="_dateFromTime" Label="Time" Class="mt-3" Style="flex: 1;" />
+                </div>
+            }
+            else
+            {
+                <MudNumericField @bind-Value="_manualDistanceKm" Label="Distance (km)" Min="0" Class="mt-3" />
+                <MudNumericField @bind-Value="_manualMovingHours" Label="Moving time (h)" Min="0" Class="mt-3" />
+                <MudNumericField @bind-Value="_manualElevationM" Label="Elevation (m)" Min="0" Class="mt-3" />
+            }
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Install</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    /// <summary>Opened from a bike → component is picked. Mutually exclusive with <see cref="ComponentId"/>.</summary>
+    [Parameter] public int? BikeId { get; set; }
+    [Parameter] public string? BikeName { get; set; }
+
+    /// <summary>Opened from a component → bike is picked. Mutually exclusive with <see cref="BikeId"/>.</summary>
+    [Parameter] public int? ComponentId { get; set; }
+    [Parameter] public string? ComponentName { get; set; }
+
+    /// <summary>Preselect the install type (e.g. Manual for "Add manual usage").</summary>
+    [Parameter] public ComponentInstallationType DefaultType { get; set; } = ComponentInstallationType.Tracked;
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private MudForm _form = default!;
+    private ComponentInstallationType _type;
+    private InstallationPosition? _position;
+    private DateTime? _dateFrom = DateTime.UtcNow.Date;
+    private TimeSpan? _dateFromTime = TimeSpan.Zero;
+    private decimal? _manualDistanceKm;
+    private decimal? _manualMovingHours;
+    private decimal? _manualElevationM;
+    private bool _saving;
+
+    // Picked side.
+    private ComponentViewModel? _component;   // when opened from a bike
+    private int? _bikeId;                      // when opened from a component
+
+    private IEnumerable<ComponentViewModel> _components = Enumerable.Empty<ComponentViewModel>();
+    private IEnumerable<BikeViewModel> _bikes = Enumerable.Empty<BikeViewModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _type = DefaultType;
+
+        if (BikeId is not null)
+        {
+            _components = await Http.GetFromJsonAsync<ComponentViewModel[]>("components")
+                ?? Enumerable.Empty<ComponentViewModel>();
+        }
+        else
+        {
+            _bikes = await Http.GetFromJsonAsync<BikeViewModel[]>("bikes")
+                ?? Enumerable.Empty<BikeViewModel>();
+        }
+    }
+
+    private Task<IEnumerable<ComponentViewModel>> SearchComponents(string value, CancellationToken token)
+    {
+        var all = _components;
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            all = all.Where(c =>
+                c.Name.Contains(value, StringComparison.OrdinalIgnoreCase)
+                || ComponentCategoryMetadata.DisplayName(c.Category).Contains(value, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return Task.FromResult(all);
+    }
+
+    private async Task SubmitAsync()
+    {
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        var componentId = BikeId is not null ? _component?.Id : ComponentId;
+        var bikeId = BikeId ?? _bikeId;
+
+        if (componentId is null || bikeId is null)
+        {
+            return;
+        }
+
+        var tracked = _type == ComponentInstallationType.Tracked;
+
+        var body = new InstallComponentViewModel
+        {
+            ComponentId = componentId.Value,
+            BikeId = bikeId.Value,
+            Type = _type,
+            Position = _position,
+            DateFrom = tracked ? _dateFrom?.Date + (_dateFromTime ?? TimeSpan.Zero) : null,
+            ManualDistanceKm = tracked ? null : _manualDistanceKm,
+            ManualMovingHours = tracked ? null : _manualMovingHours,
+            ManualElevationM = tracked ? null : _manualElevationM
+        };
+
+        _saving = true;
+
+        try
+        {
+            var response = await Http.PostAsJsonAsync("installations", body);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Component installed", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+                return;
+            }
+
+            await response.ShowProblemAsync(Snackbar);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

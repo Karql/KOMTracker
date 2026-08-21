@@ -2,7 +2,10 @@
 @attribute [Authorize]
 @using System.Globalization
 @using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.API.Shared.ViewModels.Installation
 @using KomTracker.Domain.Entities.Bike
+@using KomTracker.Domain.Entities.Component
+@using KomTracker.WEB.Models.Component
 
 <PageTitle>Bike</PageTitle>
 
@@ -106,8 +109,73 @@ else
 
         <MudItem xs="12">
             <MudPaper Class="pa-4" Outlined="true">
-                <MudText Typo="Typo.subtitle1" Class="mb-1">Components</MudText>
-                <MudText Typo="Typo.body2" Class="mud-text-secondary">Coming soon.</MudText>
+                <div class="d-flex align-center mb-2" style="gap: 8px;">
+                    <MudText Typo="Typo.subtitle1">Installed components</MudText>
+                    <MudSpacer />
+                    <MudButton StartIcon="@Icons.Material.Filled.AddCircleOutline" Size="Size.Small"
+                               Variant="Variant.Filled" Color="Color.Primary" OnClick="InstallAsync">Install component</MudButton>
+                </div>
+
+                @if (!_installations.Any())
+                {
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">Nothing installed yet.</MudText>
+                }
+                else
+                {
+                    <MudTable Items="_installations" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0"
+                              RowStyleFunc="RowStyle">
+                        <HeaderContent>
+                            <MudTh>Component</MudTh>
+                            <MudTh>Type</MudTh>
+                            <MudTh>Position</MudTh>
+                            <MudTh>Period</MudTh>
+                            <MudTh Style="text-align: right;">Manual usage</MudTh>
+                            <MudTh Style="text-align: right;">Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Component">
+                                <div class="d-flex align-center" style="gap: 6px;">
+                                    <MudIcon Icon="@ComponentCategoryIcons.Icon(context.ComponentCategory ?? ComponentCategory.Other)" Size="Size.Small" />
+                                    <MudLink OnClick="@(() => OpenComponent(context.ComponentId))">@context.ComponentName</MudLink>
+                                </div>
+                            </MudTd>
+                            <MudTd DataLabel="Type">
+                                <div class="d-flex align-center" style="gap: 6px;">
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text"
+                                             Color="@(context.Type == ComponentInstallationType.Manual ? Color.Info : Color.Default)">@context.Type</MudChip>
+                                    @if (context.IsCurrent)
+                                    {
+                                        <MudChip T="string" Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle">Current</MudChip>
+                                    }
+                                </div>
+                            </MudTd>
+                            <MudTd DataLabel="Position">@(context.Position?.ToString() ?? "—")</MudTd>
+                            <MudTd DataLabel="Period">
+                                @(context.Type == ComponentInstallationType.Manual
+                                    ? "—"
+                                    : $"{context.DateFrom?.ToString("yyyy-MM-dd HH:mm") ?? "?"} → {context.DateTo?.ToString("yyyy-MM-dd HH:mm") ?? "…"}")
+                            </MudTd>
+                            <MudTd DataLabel="Manual usage" Style="text-align: right;">@ManualUsage(context)</MudTd>
+                            <MudTd Style="text-align: right;">
+                                <MudTooltip Text="Edit">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => EditInstallationAsync(context))" />
+                                </MudTooltip>
+                                @if (context.IsCurrent)
+                                {
+                                    <MudTooltip Text="Move to another bike">
+                                        <MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small" OnClick="@(() => MoveAsync(context))" />
+                                    </MudTooltip>
+                                    <MudTooltip Text="Remove">
+                                        <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" Size="Size.Small" OnClick="@(() => RemoveAsync(context))" />
+                                    </MudTooltip>
+                                }
+                                <MudTooltip Text="Delete record">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteInstallationAsync(context))" />
+                                </MudTooltip>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                }
             </MudPaper>
         </MudItem>
     </MudGrid>
@@ -118,4 +186,22 @@ else
         <MudText Typo="Typo.body2" Class="mud-text-secondary" Style="min-width: 110px;">@label</MudText>
         <MudText Typo="Typo.body2">@(string.IsNullOrWhiteSpace(value) ? "—" : value)</MudText>
     </div>;
+
+    // Highlight the currently-installed row.
+    private string RowStyle(InstallationViewModel i, int _)
+        => i.IsCurrent ? "background-color: rgba(76, 175, 80, 0.14);" : string.Empty;
+
+    private static string ManualUsage(InstallationViewModel i)
+    {
+        if (i.Type != ComponentInstallationType.Manual)
+        {
+            return "—";
+        }
+
+        var parts = new List<string>();
+        if (i.ManualDistanceKm is { } km) parts.Add($"{km.ToString("N0", CultureInfo.InvariantCulture)} km");
+        if (i.ManualMovingHours is { } h) parts.Add($"{h.ToString("N1", CultureInfo.InvariantCulture)} h");
+        if (i.ManualElevationM is { } m) parts.Add($"{m.ToString("N0", CultureInfo.InvariantCulture)} m");
+        return parts.Count == 0 ? "—" : string.Join(" · ", parts);
+    }
 }

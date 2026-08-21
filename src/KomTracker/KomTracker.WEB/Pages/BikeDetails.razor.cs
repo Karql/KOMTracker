@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using KomTracker.API.Shared.ViewModels.Bike;
+using KomTracker.API.Shared.ViewModels.Installation;
 using KomTracker.Domain.Entities.Bike;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
@@ -14,6 +15,7 @@ public partial class BikeDetails
 
     private bool _loaded;
     private BikeViewModel? _bike;
+    private IReadOnlyList<InstallationViewModel> _installations = Array.Empty<InstallationViewModel>();
 
     [CascadingParameter]
     public required MainLayout Layout { get; set; }
@@ -47,6 +49,98 @@ public partial class BikeDetails
         }
 
         _bike = await response.Content.ReadFromJsonAsync<BikeViewModel>();
+
+        _installations = await Http.GetFromJsonAsync<InstallationViewModel[]>($"installations?bikeId={Id}")
+            ?? Array.Empty<InstallationViewModel>();
+    }
+
+    private void OpenComponent(int componentId) => Navigation.NavigateTo($"components/{componentId}");
+
+    private async Task InstallAsync()
+    {
+        if (_bike is null)
+        {
+            return;
+        }
+
+        var parameters = new DialogParameters<InstallComponentDialog>
+        {
+            { x => x.BikeId, _bike.Id },
+            { x => x.BikeName, _bike.Name }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<InstallComponentDialog>("Install component", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadAsync();
+        }
+    }
+
+    private async Task MoveAsync(InstallationViewModel installation)
+    {
+        var parameters = new DialogParameters<MoveInstallationDialog> { { x => x.Installation, installation } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<MoveInstallationDialog>("Move component", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadAsync();
+        }
+    }
+
+    private async Task RemoveAsync(InstallationViewModel installation)
+    {
+        var parameters = new DialogParameters<RemoveInstallationDialog> { { x => x.Installation, installation } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<RemoveInstallationDialog>("Remove component", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadAsync();
+        }
+    }
+
+    private async Task EditInstallationAsync(InstallationViewModel installation)
+    {
+        var parameters = new DialogParameters<EditInstallationDialog> { { x => x.Installation, installation } };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<EditInstallationDialog>("Edit installation", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadAsync();
+        }
+    }
+
+    private async Task DeleteInstallationAsync(InstallationViewModel installation)
+    {
+        var confirmed = await DialogService.ShowMessageBoxAsync(
+            "Delete installation record",
+            "Delete this installation record? This cannot be undone.",
+            yesText: "Delete",
+            cancelText: "Cancel");
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        var response = await Http.DeleteAsync($"installations/{installation.Id}");
+
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Installation record deleted", Severity.Success);
+            await LoadAsync();
+        }
+        else
+        {
+            Snackbar.Add($"Delete failed ({(int)response.StatusCode}).", Severity.Error);
+        }
     }
 
     private async Task EditAsync()

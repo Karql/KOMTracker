@@ -36,8 +36,9 @@ public class DeleteBikeCommandHandler : IRequestHandler<DeleteBikeCommand, Resul
             return Result.Fail(new ForbiddenError("Bike does not belong to the current user."));
         }
 
-        // Phase 0: no child history exists yet, so a hard delete is safe.
-        // From Phase 2 (components/installations) this guards on history (D-18).
+        // Remove the bike's installations first (frees the components) — mirrors ClearWarehouseAsync (D-2b1-6).
+        await _komUoW.GetRepository<IInstallationRepository>().DeleteByBikeAsync(bike.Id);
+
         repo.DeleteBike(bike);
         await _komUoW.SaveChangesAsync();
 

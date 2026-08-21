@@ -39,6 +39,17 @@ public class GetComponentQueryHandler : IRequestHandler<GetComponentQuery, Compo
             }
         }
 
+        // Current active installation (where it's mounted now).
+        var installation = await _komUoW.GetRepository<IInstallationRepository>()
+            .GetActiveTrackedByComponentAsync(component.Id);
+        if (installation?.BikeId is int bikeId)
+        {
+            component.InstalledOnBikeId = bikeId;
+            component.InstalledPosition = installation.Position;
+            var bike = await _komUoW.GetRepository<IBikeRepository>().GetBikeAsync(bikeId);
+            component.InstalledOnBikeName = bike?.Name;
+        }
+
         return component;
     }
 }

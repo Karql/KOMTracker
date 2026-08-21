@@ -27,6 +27,11 @@ public class ComponentViewModel
     public int? WarehouseId { get; set; }
     public string? WarehouseName { get; set; }
 
+    /// <summary>Current active Tracked installation (where it's mounted now), if any — takes display priority over the warehouse.</summary>
+    public int? InstalledOnBikeId { get; set; }
+    public string? InstalledOnBikeName { get; set; }
+    public InstallationPosition? InstalledPosition { get; set; }
+
     public ComponentLifecycle Lifecycle { get; set; }
     public DateTime? SaleDate { get; set; }
     public decimal? SalePrice { get; set; }

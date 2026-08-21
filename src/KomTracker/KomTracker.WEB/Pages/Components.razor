@@ -1,5 +1,6 @@
 @page "/components"
 @attribute [Authorize]
+@using KomTracker.API.Shared.ViewModels.Bike
 @using KomTracker.API.Shared.ViewModels.Component
 @using KomTracker.API.Shared.ViewModels.Warehouse
 @using KomTracker.Domain.Entities.Component
@@ -49,6 +50,18 @@ else
                 <MudSelectItem T="int?" Value="@warehouse.Id">@warehouse.Name</MudSelectItem>
             }
         </MudSelect>
+        <MudSelect T="InstallState?" @bind-Value="_installFilter" Label="Install state" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 160px;">
+            <MudSelectItem T="InstallState?" Value="@InstallState.Installed">Installed</MudSelectItem>
+            <MudSelectItem T="InstallState?" Value="@InstallState.NotInstalled">Not installed</MudSelectItem>
+        </MudSelect>
+        <MudSelect T="int?" @bind-Value="_bikeFilter" Label="Bike" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 180px;">
+            @foreach (var bike in _bikes)
+            {
+                <MudSelectItem T="int?" Value="@bike.Id">@bike.Name</MudSelectItem>
+            }
+        </MudSelect>
         <MudSpacer />
         <MudSwitch T="bool" @bind-Value="_includeInactive" @bind-Value:after="LoadComponentsAsync"
                    Color="Color.Primary" Label="Show archived/sold" />
@@ -93,7 +106,11 @@ else
                             <div class="d-flex align-center flex-wrap" style="gap: 8px;">
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@ComponentCategoryMetadata.DisplayName(component.Category)</MudChip>
                                 <MudChip T="string" Size="Size.Small" Color="LifecycleColor(component.Lifecycle)">@component.Lifecycle</MudChip>
-                                @if (component.WarehouseName is not null)
+                                @if (component.InstalledOnBikeName is not null)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text" Icon="@Icons.Material.Filled.PedalBike">On @component.InstalledOnBikeName</MudChip>
+                                }
+                                else if (component.WarehouseName is not null)
                                 {
                                     <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Icon="@Icons.Material.Filled.Warehouse">@component.WarehouseName</MudChip>
                                 }
@@ -115,7 +132,7 @@ else
                 <MudTh>Category</MudTh>
                 <MudTh>Brand</MudTh>
                 <MudTh>Model</MudTh>
-                <MudTh>Warehouse</MudTh>
+                <MudTh>Location</MudTh>
                 <MudTh>Status</MudTh>
                 <MudTh Style="text-align: right;"></MudTh>
             </HeaderContent>
@@ -131,7 +148,19 @@ else
                 </MudTd>
                 <MudTd DataLabel="Brand">@context.Brand</MudTd>
                 <MudTd DataLabel="Model">@context.Model</MudTd>
-                <MudTd DataLabel="Warehouse">@(context.WarehouseName ?? "—")</MudTd>
+                <MudTd DataLabel="Location">
+                    @if (context.InstalledOnBikeName is not null)
+                    {
+                        <div class="d-flex align-center" style="gap: 6px;">
+                            <MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Small" Color="Color.Primary" />
+                            <span>@context.InstalledOnBikeName</span>
+                        </div>
+                    }
+                    else
+                    {
+                        @(context.WarehouseName ?? "—")
+                    }
+                </MudTd>
                 <MudTd DataLabel="Status">
                     <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
                 </MudTd>
@@ -145,6 +174,10 @@ else
     private RenderFragment ComponentMenu(ComponentViewModel component) =>@<MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
         <MudMenuItem Icon="@Icons.Material.Filled.Visibility" OnClick="@(() => OpenDetails(component.Id))">Details</MudMenuItem>
         <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditAsync(component))">Edit</MudMenuItem>
+        @if (component.Lifecycle == ComponentLifecycle.Active && component.InstalledOnBikeId is null)
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.AddCircleOutline" OnClick="@(() => InstallAsync(component))">Install on bike</MudMenuItem>
+        }
         @if (component.Lifecycle == ComponentLifecycle.Active)
         {
             <MudMenuItem Icon="@Icons.Material.Filled.Archive" OnClick="@(() => ArchiveAsync(component))">Archive</MudMenuItem>
