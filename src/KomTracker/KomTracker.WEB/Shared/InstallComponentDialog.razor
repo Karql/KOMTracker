@@ -32,19 +32,52 @@
             }
             else
             {
-                <MudText Typo="Typo.body2" Class="mb-3">Install <b>@ComponentName</b> on a bike.</MudText>
+                <MudText Typo="Typo.body2" Class="mb-3">Install <b>@ComponentName</b>.</MudText>
 
-                <MudSelect T="int?" @bind-Value="_bikeId" Label="Bike" Required="true" RequiredError="Pick a bike">
-                    @foreach (var bike in _bikes)
-                    {
-                        <MudSelectItem T="int?" Value="@bike.Id">@bike.Name</MudSelectItem>
-                    }
-                </MudSelect>
-                @if (!_bikes.Any())
+                <MudRadioGroup T="TargetKind" @bind-Value="_targetKind">
+                    <MudRadio T="TargetKind" Value="TargetKind.Bike" Color="Color.Primary" Dense="true">On a bike</MudRadio>
+                    <MudRadio T="TargetKind" Value="TargetKind.Component" Color="Color.Primary" Dense="true">In a component</MudRadio>
+                </MudRadioGroup>
+
+                @if (_targetKind == TargetKind.Bike)
                 {
-                    <MudText Typo="Typo.caption" Class="mud-text-secondary">
-                        No active bikes — <MudLink Href="bikes" Typo="Typo.caption">add one</MudLink> first.
-                    </MudText>
+                    <MudSelect T="int?" @bind-Value="_bikeId" Label="Bike" Required="true" RequiredError="Pick a bike" Class="mt-2">
+                        @foreach (var bike in _bikes)
+                        {
+                            <MudSelectItem T="int?" Value="@bike.Id">@bike.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                    @if (!_bikes.Any())
+                    {
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                            No active bikes — <MudLink Href="bikes" Typo="Typo.caption">add one</MudLink> first.
+                        </MudText>
+                    }
+                }
+                else
+                {
+                    <MudAutocomplete T="ComponentViewModel" @bind-Value="_parentComponent" Label="Parent component" Required="true"
+                                     RequiredError="Pick a component" Placeholder="Search component" Class="mt-2"
+                                     SearchFunc="SearchParentComponents" MaxItems="@((int?)null)"
+                                     ResetValueOnEmptyText="true" CoerceValue="false" SelectValueOnTab="true"
+                                     ToStringFunc="@(c => c is null ? string.Empty : c.Name)">
+                        <ItemTemplate Context="component">
+                            <div class="d-flex align-center" style="gap: 8px; width: 100%;">
+                                <MudIcon Icon="@ComponentCategoryIcons.Icon(component.Category)" Size="Size.Small" />
+                                <span>@component.Name</span>
+                                <MudSpacer />
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary">@ComponentCategoryMetadata.DisplayName(component.Category)</MudText>
+                            </div>
+                        </ItemTemplate>
+                    </MudAutocomplete>
+                    @if (!_components.Any(c => c.IsMetaComponent))
+                    {
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">No meta components yet — edit a component and turn on "Meta component" to use it as a container.</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Only meta components are listed. Nesting is limited to one level (e.g. a tyre in a wheel on a bike).</MudText>
+                    }
                 }
             }
 
@@ -88,14 +121,16 @@
 </MudDialog>
 
 @code {
+    private enum TargetKind { Bike, Component }
+
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    /// <summary>Opened from a bike → component is picked. Mutually exclusive with <see cref="ComponentId"/>.</summary>
+    /// <summary>Opened from a bike → component is picked, target is this bike. Mutually exclusive with <see cref="ComponentId"/>.</summary>
     [Parameter] public int? BikeId { get; set; }
     [Parameter] public string? BikeName { get; set; }
 
-    /// <summary>Opened from a component → bike is picked. Mutually exclusive with <see cref="BikeId"/>.</summary>
+    /// <summary>Opened from a component → the target (a bike or a parent component) is picked. Mutually exclusive with <see cref="BikeId"/>.</summary>
     [Parameter] public int? ComponentId { get; set; }
     [Parameter] public string? ComponentName { get; set; }
 
@@ -106,6 +141,7 @@
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
     private MudForm _form = default!;
+    private TargetKind _targetKind = TargetKind.Bike;
     private ComponentInstallationType _type;
     private InstallationPosition? _position;
     private DateTime? _dateFrom = DateTime.UtcNow.Date;
@@ -116,8 +152,9 @@
     private bool _saving;
 
     // Picked side.
-    private ComponentViewModel? _component;   // when opened from a bike
-    private int? _bikeId;                      // when opened from a component
+    private ComponentViewModel? _component;        // when opened from a bike (the component to install)
+    private int? _bikeId;                           // when opened from a component + target = bike
+    private ComponentViewModel? _parentComponent;   // when opened from a component + target = component
 
     private IEnumerable<ComponentViewModel> _components = Enumerable.Empty<ComponentViewModel>();
     private IEnumerable<BikeViewModel> _bikes = Enumerable.Empty<BikeViewModel>();
@@ -133,22 +170,34 @@
         }
         else
         {
+            // Component context — need both bikes and components (candidate parents).
             _bikes = await Http.GetFromJsonAsync<BikeViewModel[]>("bikes")
                 ?? Enumerable.Empty<BikeViewModel>();
+            _components = await Http.GetFromJsonAsync<ComponentViewModel[]>("components")
+                ?? Enumerable.Empty<ComponentViewModel>();
         }
     }
 
     private Task<IEnumerable<ComponentViewModel>> SearchComponents(string value, CancellationToken token)
+        => Task.FromResult(Filter(_components, value));
+
+    // Candidate parents: not self, and not already nested inside another component (one-level rule — server-enforced too).
+    private Task<IEnumerable<ComponentViewModel>> SearchParentComponents(string value, CancellationToken token)
     {
-        var all = _components;
-        if (!string.IsNullOrWhiteSpace(value))
+        var candidates = _components.Where(c => c.IsMetaComponent && c.Id != ComponentId && c.ParentComponentId is null);
+        return Task.FromResult(Filter(candidates, value));
+    }
+
+    private static IEnumerable<ComponentViewModel> Filter(IEnumerable<ComponentViewModel> source, string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
         {
-            all = all.Where(c =>
-                c.Name.Contains(value, StringComparison.OrdinalIgnoreCase)
-                || ComponentCategoryMetadata.DisplayName(c.Category).Contains(value, StringComparison.OrdinalIgnoreCase));
+            return source;
         }
 
-        return Task.FromResult(all);
+        return source.Where(c =>
+            c.Name.Contains(value, StringComparison.OrdinalIgnoreCase)
+            || ComponentCategoryMetadata.DisplayName(c.Category).Contains(value, StringComparison.OrdinalIgnoreCase));
     }
 
     private async Task SubmitAsync()
@@ -160,9 +209,31 @@
         }
 
         var componentId = BikeId is not null ? _component?.Id : ComponentId;
-        var bikeId = BikeId ?? _bikeId;
+        if (componentId is null)
+        {
+            return;
+        }
 
-        if (componentId is null || bikeId is null)
+        // Resolve the target (bike XOR parent component).
+        int? bikeId;
+        int? parentComponentId;
+        if (BikeId is not null)
+        {
+            bikeId = BikeId;
+            parentComponentId = null;
+        }
+        else if (_targetKind == TargetKind.Bike)
+        {
+            bikeId = _bikeId;
+            parentComponentId = null;
+        }
+        else
+        {
+            bikeId = null;
+            parentComponentId = _parentComponent?.Id;
+        }
+
+        if (bikeId is null && parentComponentId is null)
         {
             return;
         }
@@ -172,7 +243,8 @@
         var body = new InstallComponentViewModel
         {
             ComponentId = componentId.Value,
-            BikeId = bikeId.Value,
+            BikeId = bikeId,
+            ParentComponentId = parentComponentId,
             Type = _type,
             Position = _position,
             DateFrom = tracked ? _dateFrom?.Date + (_dateFromTime ?? TimeSpan.Zero) : null,

@@ -26,8 +26,20 @@ public partial class ComponentDetails
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync()
+    // Tracks the component currently loaded, so navigating between component-detail pages (parent/child links)
+    // re-fetches instead of showing stale data (same page component, Id parameter changes).
+    private int _loadedId;
+
+    protected override async Task OnParametersSetAsync()
     {
+        if (_loadedId == Id)
+        {
+            return;
+        }
+
+        _loadedId = Id;
+        _loaded = false;
+
         Layout.SetBreadCrumbs(new List<BreadcrumbItem>
         {
             new BreadcrumbItem("Components", href: "components"),
@@ -62,6 +74,8 @@ public partial class ComponentDetails
             .ToArray();
         _current = _installations.FirstOrDefault(i => i.IsCurrent);
     }
+
+    private void OpenComponent(int componentId) => Navigation.NavigateTo($"components/{componentId}");
 
     private async Task InstallAsync()
     {

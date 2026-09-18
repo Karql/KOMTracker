@@ -26,6 +26,10 @@ else
             <MudText Typo="Typo.body2" Class="mud-text-secondary">@($"{_component.Brand} {_component.Model}".Trim())</MudText>
         </div>
         <MudChip T="string" Size="Size.Small" Color="LifecycleColor(_component.Lifecycle)">@_component.Lifecycle</MudChip>
+        @if (_component.IsMetaComponent)
+        {
+            <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Text" Icon="@Icons.Material.Filled.AccountTree">Meta</MudChip>
+        }
         <MudSpacer />
         <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Primary" OnClick="EditAsync">Edit</MudButton>
         @if (_component.Lifecycle == ComponentLifecycle.Active)
@@ -54,10 +58,22 @@ else
                 @Field("Weight", _component.WeightKg is { } w ? $"{w.ToString(CultureInfo.InvariantCulture)} kg" : null)
                 <div class="d-flex py-1" style="gap: 8px;">
                     <MudText Typo="Typo.body2" Class="mud-text-secondary" Style="min-width: 110px;">Location</MudText>
-                    @if (_component.InstalledOnBikeId is not null)
+                    @if (_component.ParentComponentId is not null)
                     {
                         <MudText Typo="Typo.body2">
-                            On <MudLink Typo="Typo.body2" Href="@($"bikes/{_component.InstalledOnBikeId}")">@_component.InstalledOnBikeName</MudLink>@(_component.InstalledPosition is not null ? $" ({_component.InstalledPosition})" : "")
+                            In <MudLink Typo="Typo.body2" Href="@($"components/{_component.ParentComponentId}")">@_component.ParentComponentName</MudLink>@(_component.InstalledPosition is not null ? $" ({_component.InstalledPosition})" : "")
+                        </MudText>
+                    }
+                    else if (_component.InstalledBikeCount > 0)
+                    {
+                        <MudText Typo="Typo.body2">
+                            On
+                            @{ var bikePlacements = _component.CurrentPlacements.Where(p => p.BikeId is not null).ToList(); }
+                            @for (var i = 0; i < bikePlacements.Count; i++)
+                            {
+                                var p = bikePlacements[i];
+                                <MudLink Typo="Typo.body2" Href="@($"bikes/{p.BikeId}")">@p.BikeName</MudLink>@(p.Position is not null ? $" ({p.Position})" : "")@(i < bikePlacements.Count - 1 ? ", " : "")
+                            }
                         </MudText>
                     }
                     else
@@ -106,10 +122,10 @@ else
                 <div class="d-flex align-center mb-2" style="gap: 8px; flex-wrap: wrap;">
                     <MudText Typo="Typo.subtitle1">Installations</MudText>
                     <MudSpacer />
-                    @if (_current is null && _component.Lifecycle == ComponentLifecycle.Active)
+                    @if (_component.Lifecycle == ComponentLifecycle.Active)
                     {
                         <MudButton StartIcon="@Icons.Material.Filled.AddCircleOutline" Size="Size.Small"
-                                   Variant="Variant.Filled" Color="Color.Primary" OnClick="InstallAsync">Install on bike</MudButton>
+                                   Variant="Variant.Filled" Color="Color.Primary" OnClick="InstallAsync">Install</MudButton>
                     }
                     <MudButton StartIcon="@Icons.Material.Filled.History" Size="Size.Small" OnClick="AddManualAsync">Add manual usage</MudButton>
                 </div>
@@ -123,7 +139,7 @@ else
                     <MudTable Items="_installations" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0"
                               RowStyleFunc="RowStyle">
                         <HeaderContent>
-                            <MudTh>Bike</MudTh>
+                            <MudTh>Parent</MudTh>
                             <MudTh>Type</MudTh>
                             <MudTh>Position</MudTh>
                             <MudTh>Period</MudTh>
@@ -131,10 +147,20 @@ else
                             <MudTh Style="text-align: right;">Actions</MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd DataLabel="Bike">
+                            <MudTd DataLabel="Parent">
                                 @if (context.BikeId is not null)
                                 {
-                                    <MudLink Href="@($"bikes/{context.BikeId}")">@context.BikeName</MudLink>
+                                    <div class="d-flex align-center" style="gap: 6px;">
+                                        <MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Small" />
+                                        <MudLink Href="@($"bikes/{context.BikeId}")">@context.BikeName</MudLink>
+                                    </div>
+                                }
+                                else if (context.ParentComponentId is not null)
+                                {
+                                    <div class="d-flex align-center" style="gap: 6px;">
+                                        <MudIcon Icon="@ComponentCategoryIcons.Icon(context.ParentComponentCategory ?? ComponentCategory.Other)" Size="Size.Small" />
+                                        <MudLink Href="@($"components/{context.ParentComponentId}")">@context.ParentComponentName</MudLink>
+                                    </div>
                                 }
                                 else
                                 {
@@ -164,7 +190,7 @@ else
                                 </MudTooltip>
                                 @if (context.IsCurrent)
                                 {
-                                    <MudTooltip Text="Move to another bike">
+                                    <MudTooltip Text="Move to another parent">
                                         <MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small" OnClick="@(() => MoveAsync(context))" />
                                     </MudTooltip>
                                     <MudTooltip Text="Remove">
@@ -180,6 +206,74 @@ else
                 }
             </MudPaper>
         </MudItem>
+
+        @if (_component.IsMetaComponent || _component.Children.Any())
+        {
+            <MudItem xs="12">
+                <MudPaper Class="pa-4" Outlined="true">
+                    <MudText Typo="Typo.subtitle1" Class="mb-2">Contains</MudText>
+
+                    @if (!_component.Children.Any())
+                    {
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">Nothing installed inside yet.</MudText>
+                    }
+                    else
+                    {
+                        <MudTable Items="_component.Children" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0"
+                                  RowStyleFunc="RowStyle">
+                            <HeaderContent>
+                                <MudTh>Component</MudTh>
+                                <MudTh>Type</MudTh>
+                                <MudTh>Position</MudTh>
+                                <MudTh>Period</MudTh>
+                                <MudTh Style="text-align: right;">Actions</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Component">
+                                    <div class="d-flex align-center" style="gap: 6px;">
+                                        <MudIcon Icon="@ComponentCategoryIcons.Icon(context.ComponentCategory ?? ComponentCategory.Other)" Size="Size.Small" />
+                                        <MudLink Href="@($"components/{context.ComponentId}")">@context.ComponentName</MudLink>
+                                    </div>
+                                </MudTd>
+                                <MudTd DataLabel="Type">
+                                    <div class="d-flex align-center" style="gap: 6px;">
+                                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text"
+                                                 Color="@(context.Type == ComponentInstallationType.Manual ? Color.Info : Color.Default)">@context.Type</MudChip>
+                                        @if (context.IsCurrent)
+                                        {
+                                            <MudChip T="string" Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle">Current</MudChip>
+                                        }
+                                    </div>
+                                </MudTd>
+                                <MudTd DataLabel="Position">@(context.Position?.ToString() ?? "—")</MudTd>
+                                <MudTd DataLabel="Period">
+                                    @(context.Type == ComponentInstallationType.Manual
+                                        ? "—"
+                                        : $"{context.DateFrom?.ToString("yyyy-MM-dd HH:mm") ?? "?"} → {context.DateTo?.ToString("yyyy-MM-dd HH:mm") ?? "…"}")
+                                </MudTd>
+                                <MudTd Style="text-align: right;">
+                                    <MudTooltip Text="Edit">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => EditInstallationAsync(context))" />
+                                    </MudTooltip>
+                                    @if (context.IsCurrent)
+                                    {
+                                        <MudTooltip Text="Move to another parent">
+                                            <MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small" OnClick="@(() => MoveAsync(context))" />
+                                        </MudTooltip>
+                                        <MudTooltip Text="Remove">
+                                            <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" Size="Size.Small" OnClick="@(() => RemoveAsync(context))" />
+                                        </MudTooltip>
+                                    }
+                                    <MudTooltip Text="Delete record">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => DeleteInstallationAsync(context))" />
+                                    </MudTooltip>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
+                </MudPaper>
+            </MudItem>
+        }
     </MudGrid>
 }
 

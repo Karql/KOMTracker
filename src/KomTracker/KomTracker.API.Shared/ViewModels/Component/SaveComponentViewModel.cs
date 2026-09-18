@@ -14,6 +14,7 @@ public class SaveComponentViewModel
     public string? Brand { get; set; }
     public string? Model { get; set; }
     public ComponentCategory Category { get; set; }
+    public bool IsMetaComponent { get; set; }
     public decimal? WeightKg { get; set; }
     public string? Notes { get; set; }
     public decimal? Price { get; set; }

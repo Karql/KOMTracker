@@ -78,8 +78,59 @@ public class ChangeComponentLifecycleCommandHandler : IRequestHandler<ChangeComp
         }
 
         repo.UpdateComponent(component);
+
+        // D-18: going off-active closes the component's own active windows and cascades/detaches its children.
+        if (request.Lifecycle == ComponentLifecycle.Sold)
+        {
+            await ApplyLifecycleToInstallationsAsync(
+                repo, component.Id, component.SaleDate ?? ComponentDateHelper.EnsureUtc(request.SaleDate)!.Value,
+                cascadeSoldToChildren: true);
+        }
+        else if (request.Lifecycle == ComponentLifecycle.Archived)
+        {
+            await ApplyLifecycleToInstallationsAsync(
+                repo, component.Id, DateTime.UtcNow, cascadeSoldToChildren: false);
+        }
+
         await _komUoW.SaveChangesAsync();
 
         return Result.Ok();
+    }
+
+    /// <summary>
+    /// D-18: close the component's own active Tracked windows at <paramref name="closeDate"/>, then handle children
+    /// currently installed into it — either cascade Sold (windows closed + child marked Sold) or detach (windows
+    /// closed → child becomes unassigned, lifecycle untouched). One-level nesting means one pass suffices.
+    /// </summary>
+    private async Task ApplyLifecycleToInstallationsAsync(
+        IComponentRepository componentRepo, int componentId, DateTime closeDate, bool cascadeSoldToChildren)
+    {
+        var installationRepo = _komUoW.GetRepository<IInstallationRepository>();
+
+        // Close the component's own active windows (remove it from wherever it currently sits).
+        foreach (var own in await installationRepo.GetActiveTrackedInstallationsByComponentAsync(componentId))
+        {
+            own.DateTo = closeDate;
+            installationRepo.Update(own);
+        }
+
+        // Handle still-installed children (components installed INTO this one).
+        var children = await installationRepo.GetActiveChildrenByParentComponentsAsync(new[] { componentId });
+        foreach (var childInstall in children)
+        {
+            childInstall.DateTo = closeDate;
+            installationRepo.Update(childInstall);
+
+            if (cascadeSoldToChildren)
+            {
+                var child = await componentRepo.GetComponentAsync(childInstall.ComponentId);
+                if (child is not null && child.Lifecycle != ComponentLifecycle.Sold)
+                {
+                    child.Lifecycle = ComponentLifecycle.Sold;
+                    child.SaleDate = closeDate;
+                    componentRepo.UpdateComponent(child);
+                }
+            }
+        }
     }
 }

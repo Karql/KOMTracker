@@ -111,6 +111,7 @@ public class ComponentsController : BaseApiController<ComponentsController>
             Brand = model.Brand,
             Model = model.Model,
             Category = model.Category,
+            IsMetaComponent = model.IsMetaComponent,
             WeightKg = model.WeightKg,
             Notes = model.Notes,
             Price = model.Price,

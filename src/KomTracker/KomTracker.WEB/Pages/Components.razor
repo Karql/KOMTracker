@@ -62,6 +62,11 @@ else
                 <MudSelectItem T="int?" Value="@bike.Id">@bike.Name</MudSelectItem>
             }
         </MudSelect>
+        <MudSelect T="bool?" @bind-Value="_metaFilter" Label="Type" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 150px;">
+            <MudSelectItem T="bool?" Value="@(true)">Meta</MudSelectItem>
+            <MudSelectItem T="bool?" Value="@(false)">Regular</MudSelectItem>
+        </MudSelect>
         <MudSpacer />
         <MudSwitch T="bool" @bind-Value="_includeInactive" @bind-Value:after="LoadComponentsAsync"
                    Color="Color.Primary" Label="Show archived/sold" />
@@ -105,10 +110,22 @@ else
                         <MudCardContent>
                             <div class="d-flex align-center flex-wrap" style="gap: 8px;">
                                 <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@ComponentCategoryMetadata.DisplayName(component.Category)</MudChip>
+                                @if (component.IsMetaComponent)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Text" Icon="@Icons.Material.Filled.AccountTree">Meta</MudChip>
+                                }
                                 <MudChip T="string" Size="Size.Small" Color="LifecycleColor(component.Lifecycle)">@component.Lifecycle</MudChip>
-                                @if (component.InstalledOnBikeName is not null)
+                                @if (component.ParentComponentId is not null)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text" Icon="@Icons.Material.Filled.Link">In @component.ParentComponentName</MudChip>
+                                }
+                                else if (component.InstalledBikeCount == 1)
                                 {
                                     <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text" Icon="@Icons.Material.Filled.PedalBike">On @component.InstalledOnBikeName</MudChip>
+                                }
+                                else if (component.InstalledBikeCount > 1)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Color="Color.Primary" Variant="Variant.Text" Icon="@Icons.Material.Filled.PedalBike">On @component.InstalledBikeCount bikes</MudChip>
                                 }
                                 else if (component.WarehouseName is not null)
                                 {
@@ -138,7 +155,15 @@ else
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Name">
-                    <MudLink OnClick="@(() => OpenDetails(context.Id))">@context.Name</MudLink>
+                    <div class="d-flex align-center" style="gap: 6px;">
+                        <MudLink OnClick="@(() => OpenDetails(context.Id))">@context.Name</MudLink>
+                        @if (context.IsMetaComponent)
+                        {
+                            <MudTooltip Text="Meta component (can contain other components)">
+                                <MudChip T="string" Size="Size.Small" Color="Color.Secondary" Variant="Variant.Text" Icon="@Icons.Material.Filled.AccountTree">Meta</MudChip>
+                            </MudTooltip>
+                        }
+                    </div>
                 </MudTd>
                 <MudTd DataLabel="Category">
                     <div class="d-flex align-center" style="gap: 6px;">
@@ -149,11 +174,25 @@ else
                 <MudTd DataLabel="Brand">@context.Brand</MudTd>
                 <MudTd DataLabel="Model">@context.Model</MudTd>
                 <MudTd DataLabel="Location">
-                    @if (context.InstalledOnBikeName is not null)
+                    @if (context.ParentComponentId is not null)
+                    {
+                        <div class="d-flex align-center" style="gap: 6px;">
+                            <MudIcon Icon="@Icons.Material.Filled.Link" Size="Size.Small" Color="Color.Primary" />
+                            <span>In @context.ParentComponentName</span>
+                        </div>
+                    }
+                    else if (context.InstalledBikeCount == 1)
                     {
                         <div class="d-flex align-center" style="gap: 6px;">
                             <MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Small" Color="Color.Primary" />
                             <span>@context.InstalledOnBikeName</span>
+                        </div>
+                    }
+                    else if (context.InstalledBikeCount > 1)
+                    {
+                        <div class="d-flex align-center" style="gap: 6px;">
+                            <MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Small" Color="Color.Primary" />
+                            <span>@context.InstalledBikeCount bikes</span>
                         </div>
                     }
                     else
@@ -174,9 +213,9 @@ else
     private RenderFragment ComponentMenu(ComponentViewModel component) =>@<MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
         <MudMenuItem Icon="@Icons.Material.Filled.Visibility" OnClick="@(() => OpenDetails(component.Id))">Details</MudMenuItem>
         <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditAsync(component))">Edit</MudMenuItem>
-        @if (component.Lifecycle == ComponentLifecycle.Active && component.InstalledOnBikeId is null)
+        @if (component.Lifecycle == ComponentLifecycle.Active)
         {
-            <MudMenuItem Icon="@Icons.Material.Filled.AddCircleOutline" OnClick="@(() => InstallAsync(component))">Install on bike</MudMenuItem>
+            <MudMenuItem Icon="@Icons.Material.Filled.AddCircleOutline" OnClick="@(() => InstallAsync(component))">Install</MudMenuItem>
         }
         @if (component.Lifecycle == ComponentLifecycle.Active)
         {

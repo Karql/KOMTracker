@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using KomTracker.Domain.Contracts;
 
@@ -25,6 +26,12 @@ public class ComponentEntity : BaseEntity
     public string? Model { get; set; }
 
     public ComponentCategory Category { get; set; }
+
+    /// <summary>
+    /// Meta component = a container that other components can be installed INTO (e.g. a wheel holding a tyre).
+    /// Only meta components are offered as install targets; can't be turned off while it has installation history as a parent.
+    /// </summary>
+    public bool IsMetaComponent { get; set; }
 
     /// <summary>Optional weight in kilograms.</summary>
     public decimal? WeightKg { get; set; }
@@ -61,9 +68,30 @@ public class ComponentEntity : BaseEntity
     [NotMapped]
     public string? WarehouseName { get; set; }
 
-    // Current active Tracked installation (where it's mounted now), set by the component queries — NOT persisted.
-    // Takes display priority over the warehouse: installed-on-bike ▸ warehouse ▸ unassigned.
+    // Current active Tracked placement(s) (where it's mounted now), set by the component queries — NOT persisted.
+    // Display priority: installed (on bike(s) ▸ in a parent component) ▸ warehouse ▸ unassigned.
+    // A component is homogeneous (D-7): either in ONE parent component, or on one-or-more distinct bikes — never both.
 
+    /// <summary>All current active Tracked placements (names resolved). Drives the location chip/field.</summary>
+    [NotMapped]
+    public IReadOnlyList<InstallationEntity> CurrentPlacements { get; set; } = Array.Empty<InstallationEntity>();
+
+    /// <summary>The parent component this is currently installed into (if any). Mutually exclusive with bike placements.</summary>
+    [NotMapped]
+    public int? ParentComponentId { get; set; }
+
+    [NotMapped]
+    public string? ParentComponentName { get; set; }
+
+    /// <summary>Number of distinct bikes this is currently installed on (0 when in a parent component or unassigned).</summary>
+    [NotMapped]
+    public int InstalledBikeCount { get; set; }
+
+    /// <summary>Installations of components INTO this one (current + historical, one level; names resolved). Set by queries.</summary>
+    [NotMapped]
+    public IReadOnlyList<InstallationEntity> Children { get; set; } = Array.Empty<InstallationEntity>();
+
+    // First bike placement — convenience/back-compat for single-bike UI (chip, location field).
     [NotMapped]
     public int? InstalledOnBikeId { get; set; }
 

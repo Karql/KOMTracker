@@ -22,7 +22,10 @@ public class GetComponentQueryHandler : IRequestHandler<GetComponentQuery, Compo
 
     public async Task<ComponentEntity?> Handle(GetComponentQuery request, CancellationToken cancellationToken)
     {
-        var component = await _komUoW.GetRepository<IComponentRepository>().GetComponentAsync(request.Id);
+        var componentRepo = _komUoW.GetRepository<IComponentRepository>();
+        var installationRepo = _komUoW.GetRepository<IInstallationRepository>();
+
+        var component = await componentRepo.GetComponentAsync(request.Id);
 
         // Scope to the caller — hide other users' components (looks like "not found").
         if (component is null || component.UserId != request.UserId)
@@ -39,16 +42,62 @@ public class GetComponentQueryHandler : IRequestHandler<GetComponentQuery, Compo
             }
         }
 
-        // Current active installation (where it's mounted now).
-        var installation = await _komUoW.GetRepository<IInstallationRepository>()
-            .GetActiveTrackedByComponentAsync(component.Id);
-        if (installation?.BikeId is int bikeId)
+        // Current active placements (multi-bike, or a single parent component — D-7).
+        var placements = (await installationRepo.GetActiveTrackedInstallationsByComponentAsync(component.Id)).ToList();
+
+        // Immediate children (components installed INTO this one) — current + historical, one level.
+        var children = (await installationRepo.GetByParentComponentAsync(component.Id)).ToList();
+
+        // Batch name lookups for bikes + components referenced by placements/children.
+        var bikesById = (await _komUoW.GetRepository<IBikeRepository>().GetBikesAsync(request.UserId, includeInactive: true))
+            .ToDictionary(b => b.Id, b => b.Name);
+        var componentsById = (await componentRepo.GetComponentsAsync(request.UserId, includeInactive: true))
+            .ToDictionary(c => c.Id);
+
+        foreach (var placement in placements)
         {
-            component.InstalledOnBikeId = bikeId;
-            component.InstalledPosition = installation.Position;
-            var bike = await _komUoW.GetRepository<IBikeRepository>().GetBikeAsync(bikeId);
-            component.InstalledOnBikeName = bike?.Name;
+            if (placement.BikeId is int bId && bikesById.TryGetValue(bId, out var bName))
+            {
+                placement.BikeName = bName;
+            }
+            else if (placement.ParentComponentId is int pId && componentsById.TryGetValue(pId, out var parent))
+            {
+                placement.ParentComponentName = parent.Name;
+            }
         }
+
+        component.CurrentPlacements = placements;
+
+        var parentPlacement = placements.FirstOrDefault(p => p.ParentComponentId is not null);
+        if (parentPlacement is not null)
+        {
+            component.ParentComponentId = parentPlacement.ParentComponentId;
+            component.ParentComponentName = parentPlacement.ParentComponentName;
+            component.InstalledPosition = parentPlacement.Position;
+        }
+        else
+        {
+            var bikePlacements = placements.Where(p => p.BikeId is not null).ToList();
+            component.InstalledBikeCount = bikePlacements.Select(p => p.BikeId).Distinct().Count();
+            var first = bikePlacements.FirstOrDefault();
+            if (first is not null)
+            {
+                component.InstalledOnBikeId = first.BikeId;
+                component.InstalledOnBikeName = first.BikeName;
+                component.InstalledPosition = first.Position;
+            }
+        }
+
+        foreach (var child in children)
+        {
+            if (componentsById.TryGetValue(child.ComponentId, out var childComponent))
+            {
+                child.ComponentName = childComponent.Name;
+                child.ComponentCategory = childComponent.Category;
+            }
+        }
+
+        component.Children = children;
 
         return component;
     }

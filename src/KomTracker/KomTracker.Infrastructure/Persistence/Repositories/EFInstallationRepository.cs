@@ -28,6 +28,12 @@ public class EFInstallationRepository : EFBaseRepository, IInstallationRepositor
                 && x.Type == ComponentInstallationType.Tracked && x.DateTo == null)
             .FirstOrDefaultAsync();
 
+    public async Task<IEnumerable<InstallationEntity>> GetActiveTrackedInstallationsByComponentAsync(int componentId)
+        => await _context.Installation.AsNoTracking()
+            .Where(x => x.ComponentId == componentId
+                && x.Type == ComponentInstallationType.Tracked && x.DateTo == null)
+            .ToListAsync();
+
     public async Task<IEnumerable<InstallationEntity>> GetActiveTrackedByComponentsAsync(IReadOnlyCollection<int> componentIds)
     {
         if (componentIds is null || componentIds.Count == 0)
@@ -41,11 +47,30 @@ public class EFInstallationRepository : EFBaseRepository, IInstallationRepositor
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<InstallationEntity>> GetByParentComponentAsync(int parentComponentId)
+        => await Ordered(_context.Installation.AsNoTracking().Where(x => x.ParentComponentId == parentComponentId)).ToListAsync();
+
+    public async Task<IEnumerable<InstallationEntity>> GetActiveChildrenByParentComponentsAsync(IReadOnlyCollection<int> parentComponentIds)
+    {
+        if (parentComponentIds is null || parentComponentIds.Count == 0)
+        {
+            return Enumerable.Empty<InstallationEntity>();
+        }
+
+        return await _context.Installation.AsNoTracking()
+            .Where(x => x.ParentComponentId != null && parentComponentIds.Contains(x.ParentComponentId.Value)
+                && x.Type == ComponentInstallationType.Tracked && x.DateTo == null)
+            .ToListAsync();
+    }
+
     public async Task<InstallationEntity?> GetAsync(int id)
         => await _context.Installation.FirstOrDefaultAsync(x => x.Id == id);
 
     public async Task<bool> AnyByComponentAsync(int componentId)
         => await _context.Installation.AsNoTracking().AnyAsync(x => x.ComponentId == componentId);
+
+    public async Task<bool> AnyByParentComponentAsync(int parentComponentId)
+        => await _context.Installation.AsNoTracking().AnyAsync(x => x.ParentComponentId == parentComponentId);
 
     public void Add(InstallationEntity installation) => _context.Installation.Add(installation);
 

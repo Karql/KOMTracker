@@ -52,6 +52,11 @@ public class ComponentEntityTypeConfiguration
             .HasMaxLength(50)
             .IsRequired(true);
 
+        builder.Property(x => x.IsMetaComponent)
+            .HasColumnName("is_meta_component")
+            .HasDefaultValue(false)
+            .IsRequired(true);
+
         builder.Property(x => x.WeightKg)
             .HasColumnName("weight_kg");
 

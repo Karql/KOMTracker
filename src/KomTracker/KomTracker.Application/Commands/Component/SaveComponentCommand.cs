@@ -20,6 +20,7 @@ public class SaveComponentCommand : IRequest<Result<ComponentEntity>>
     public string? Brand { get; set; }
     public string? Model { get; set; }
     public ComponentCategory Category { get; set; }
+    public bool IsMetaComponent { get; set; }
     public decimal? WeightKg { get; set; }
     public string? Notes { get; set; }
     public decimal? Price { get; set; }
@@ -97,6 +98,14 @@ public class SaveComponentCommandHandler : IRequestHandler<SaveComponentCommand,
                 return Result.Fail(new ForbiddenError("Component does not belong to the current user."));
             }
 
+            // Can't stop being a meta component while things are (or were) installed inside it.
+            if (existing.IsMetaComponent && !request.IsMetaComponent
+                && await _komUoW.GetRepository<IInstallationRepository>().AnyByParentComponentAsync(existing.Id))
+            {
+                return Result.Fail(new ConflictError(
+                    "This component has other components installed in it — remove them before turning off 'meta component'."));
+            }
+
             Apply(request, existing);
             repo.UpdateComponent(existing);
             component = existing;
@@ -113,6 +122,7 @@ public class SaveComponentCommandHandler : IRequestHandler<SaveComponentCommand,
         component.Brand = request.Brand;
         component.Model = request.Model;
         component.Category = request.Category;
+        component.IsMetaComponent = request.IsMetaComponent;
         component.WeightKg = request.WeightKg;
         component.Notes = request.Notes;
         component.Price = request.Price;

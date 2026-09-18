@@ -21,8 +21,11 @@ public class InstallationEntity : BaseEntity
     /// <summary>The installed component (FK to bt.component).</summary>
     public int ComponentId { get; set; }
 
-    /// <summary>Parent bike (FK to bt.bike). Required in 2b-i; nullable for the 2b-ii component-parent case.</summary>
+    /// <summary>Parent bike (FK to bt.bike). Mutually exclusive with <see cref="ParentComponentId"/> — exactly one is set.</summary>
     public int? BikeId { get; set; }
+
+    /// <summary>Parent component (FK to bt.component) for the component-in-component case (2b-ii). XOR with <see cref="BikeId"/>.</summary>
+    public int? ParentComponentId { get; set; }
 
     public ComponentInstallationType Type { get; set; }
 
@@ -50,6 +53,14 @@ public class InstallationEntity : BaseEntity
 
     [NotMapped]
     public string? BikeName { get; set; }
+
+    /// <summary>Parent component's name (when <see cref="ParentComponentId"/> is set), for display. Set by queries.</summary>
+    [NotMapped]
+    public string? ParentComponentName { get; set; }
+
+    /// <summary>Parent component's category (for its icon), when <see cref="ParentComponentId"/> is set. Set by queries.</summary>
+    [NotMapped]
+    public ComponentCategory? ParentComponentCategory { get; set; }
 
     /// <summary>Currently installed = an active Tracked window (no DateTo). Manual is never "current".</summary>
     [NotMapped]

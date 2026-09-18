@@ -11,16 +11,28 @@ public interface IInstallationRepository : IRepository
     /// <summary>All installations of a component, newest first (current before historical).</summary>
     Task<IEnumerable<InstallationEntity>> GetByComponentAsync(int componentId);
 
-    /// <summary>The component's active Tracked installation (DateTo == null), or null.</summary>
+    /// <summary>The component's active Tracked installation (DateTo == null), or null. (Legacy single-placement helper.)</summary>
     Task<InstallationEntity?> GetActiveTrackedByComponentAsync(int componentId);
+
+    /// <summary>ALL active Tracked installations of a component (DateTo == null) — multi-bike (2b-ii). Used by the D-7 invariant.</summary>
+    Task<IEnumerable<InstallationEntity>> GetActiveTrackedInstallationsByComponentAsync(int componentId);
 
     /// <summary>Active Tracked installations for the given components (batch), for list resolution.</summary>
     Task<IEnumerable<InstallationEntity>> GetActiveTrackedByComponentsAsync(IReadOnlyCollection<int> componentIds);
 
+    /// <summary>All installations whose parent is this component (component-in-component history), newest first.</summary>
+    Task<IEnumerable<InstallationEntity>> GetByParentComponentAsync(int parentComponentId);
+
+    /// <summary>Active Tracked children (installed INTO the given parent components) — batch, for list/detail resolution.</summary>
+    Task<IEnumerable<InstallationEntity>> GetActiveChildrenByParentComponentsAsync(IReadOnlyCollection<int> parentComponentIds);
+
     Task<InstallationEntity?> GetAsync(int id);
 
-    /// <summary>Whether the component has any installation record (for the delete guard — D-18).</summary>
+    /// <summary>Whether the component has any installation record as the installed component (delete guard — D-18).</summary>
     Task<bool> AnyByComponentAsync(int componentId);
+
+    /// <summary>Whether the component is the parent of any installation (delete guard — D-18, meta-component).</summary>
+    Task<bool> AnyByParentComponentAsync(int parentComponentId);
 
     void Add(InstallationEntity installation);
     void Update(InstallationEntity installation);

@@ -3,11 +3,12 @@ using KomTracker.Domain.Entities.Component;
 
 namespace KomTracker.API.Shared.ViewModels.Installation;
 
-/// <summary>Install a component on a bike — Tracked (dated) or Manual (dateless historical, static totals).</summary>
+/// <summary>Install a component onto a bike (<see cref="BikeId"/>) XOR into a parent component (<see cref="ParentComponentId"/>) — Tracked or Manual.</summary>
 public class InstallComponentViewModel
 {
     public int ComponentId { get; set; }
-    public int BikeId { get; set; }
+    public int? BikeId { get; set; }
+    public int? ParentComponentId { get; set; }
     public ComponentInstallationType Type { get; set; }
 
     public DateTime? DateFrom { get; set; }

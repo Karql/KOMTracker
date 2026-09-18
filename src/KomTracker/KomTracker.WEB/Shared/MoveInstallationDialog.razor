@@ -1,21 +1,40 @@
 @using System.Net.Http.Json
+@using System.Threading
 @using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.API.Shared.ViewModels.Component
 @using KomTracker.API.Shared.ViewModels.Installation
 @using KomTracker.Domain.Entities.Component
 @using KomTracker.WEB.Infrastructure
+@using KomTracker.WEB.Models.Component
 
 <MudDialog>
     <DialogContent>
         <MudText Typo="Typo.body2" Class="mb-3">
-            Move <b>@Installation.ComponentName</b> to another bike. The current window is closed and a new one opens on the move date.
+            Move <b>@Installation.ComponentName</b> to a new parent. The current window is closed and a new one opens on the move date.
         </MudText>
         <MudForm @ref="_form">
-            <MudSelect T="int?" @bind-Value="_newBikeId" Label="New bike" Required="true" RequiredError="Pick a bike">
-                @foreach (var bike in _bikes)
-                {
-                    <MudSelectItem T="int?" Value="@bike.Id">@bike.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudRadioGroup T="TargetKind" @bind-Value="_targetKind">
+                <MudRadio T="TargetKind" Value="TargetKind.Bike" Color="Color.Primary" Dense="true">On a bike</MudRadio>
+                <MudRadio T="TargetKind" Value="TargetKind.Component" Color="Color.Primary" Dense="true">In a component</MudRadio>
+            </MudRadioGroup>
+
+            @if (_targetKind == TargetKind.Bike)
+            {
+                <MudSelect T="int?" @bind-Value="_newBikeId" Label="New bike" Required="true" RequiredError="Pick a bike" Class="mt-2">
+                    @foreach (var bike in _bikes)
+                    {
+                        <MudSelectItem T="int?" Value="@bike.Id">@bike.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+            else
+            {
+                <MudAutocomplete T="ComponentViewModel" @bind-Value="_newParentComponent" Label="Parent component" Required="true"
+                                 RequiredError="Pick a component" Placeholder="Search component" Class="mt-2"
+                                 SearchFunc="SearchParentComponents" MaxItems="@((int?)null)"
+                                 ResetValueOnEmptyText="true" CoerceValue="false" SelectValueOnTab="true"
+                                 ToStringFunc="@(c => c is null ? string.Empty : c.Name)" />
+            }
 
             <MudSelect T="InstallationPosition?" @bind-Value="_position" Label="Position" Clearable="true" Class="mt-3">
                 @foreach (var pos in Enum.GetValues<InstallationPosition>())
@@ -38,6 +57,8 @@
 </MudDialog>
 
 @code {
+    private enum TargetKind { Bike, Component }
+
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
 
@@ -47,31 +68,58 @@
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
     private MudForm _form = default!;
+    private TargetKind _targetKind = TargetKind.Bike;
     private int? _newBikeId;
+    private ComponentViewModel? _newParentComponent;
     private InstallationPosition? _position;
     private DateTime? _moveDate = DateTime.UtcNow.Date;
     private TimeSpan? _moveTime = TimeSpan.Zero;
     private bool _saving;
     private IEnumerable<BikeViewModel> _bikes = Enumerable.Empty<BikeViewModel>();
+    private IEnumerable<ComponentViewModel> _components = Enumerable.Empty<ComponentViewModel>();
 
     protected override async Task OnInitializedAsync()
     {
         _bikes = await Http.GetFromJsonAsync<BikeViewModel[]>("bikes")
             ?? Enumerable.Empty<BikeViewModel>();
+        _components = await Http.GetFromJsonAsync<ComponentViewModel[]>("components")
+            ?? Enumerable.Empty<ComponentViewModel>();
         _position = Installation.Position;
+    }
+
+    private Task<IEnumerable<ComponentViewModel>> SearchParentComponents(string value, CancellationToken token)
+    {
+        var candidates = _components.Where(c => c.IsMetaComponent && c.Id != Installation.ComponentId && c.ParentComponentId is null);
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            candidates = candidates.Where(c =>
+                c.Name.Contains(value, StringComparison.OrdinalIgnoreCase)
+                || ComponentCategoryMetadata.DisplayName(c.Category).Contains(value, StringComparison.OrdinalIgnoreCase));
+        }
+
+        return Task.FromResult(candidates);
     }
 
     private async Task SubmitAsync()
     {
         await _form.Validate();
-        if (!_form.IsValid || _newBikeId is null)
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        var newBikeId = _targetKind == TargetKind.Bike ? _newBikeId : null;
+        var newParentComponentId = _targetKind == TargetKind.Component ? _newParentComponent?.Id : null;
+
+        if (newBikeId is null && newParentComponentId is null)
         {
             return;
         }
 
         var body = new MoveInstallationViewModel
         {
-            NewBikeId = _newBikeId.Value,
+            NewBikeId = newBikeId,
+            NewParentComponentId = newParentComponentId,
             NewPosition = _position,
             MoveDate = _moveDate!.Value.Date + (_moveTime ?? TimeSpan.Zero)
         };

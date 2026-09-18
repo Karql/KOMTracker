@@ -56,6 +56,7 @@ public class InstallationsController : BaseApiController<InstallationsController
             UserId = userId,
             ComponentId = model.ComponentId,
             BikeId = model.BikeId,
+            ParentComponentId = model.ParentComponentId,
             Type = model.Type,
             DateFrom = model.DateFrom,
             Position = model.Position,
@@ -82,6 +83,7 @@ public class InstallationsController : BaseApiController<InstallationsController
             UserId = userId,
             InstallationId = id,
             BikeId = model.BikeId,
+            ParentComponentId = model.ParentComponentId,
             Position = model.Position,
             DateFrom = model.DateFrom,
             DateTo = model.DateTo,
@@ -108,6 +110,7 @@ public class InstallationsController : BaseApiController<InstallationsController
             UserId = userId,
             InstallationId = id,
             NewBikeId = model.NewBikeId,
+            NewParentComponentId = model.NewParentComponentId,
             NewPosition = model.NewPosition,
             MoveDate = model.MoveDate
         });

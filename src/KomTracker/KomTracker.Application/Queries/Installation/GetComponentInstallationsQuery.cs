@@ -36,6 +36,10 @@ public class GetComponentInstallationsQueryHandler : IRequestHandler<GetComponen
             .GetBikesAsync(request.UserId, includeInactive: true))
             .ToDictionary(b => b.Id, b => b.Name);
 
+        var componentsById = (await _komUoW.GetRepository<IComponentRepository>()
+            .GetComponentsAsync(request.UserId, includeInactive: true))
+            .ToDictionary(c => c.Id);
+
         foreach (var installation in installations)
         {
             installation.ComponentName = component.Name;
@@ -43,6 +47,11 @@ public class GetComponentInstallationsQueryHandler : IRequestHandler<GetComponen
             if (installation.BikeId is int bikeId && bikeNamesById.TryGetValue(bikeId, out var name))
             {
                 installation.BikeName = name;
+            }
+            else if (installation.ParentComponentId is int parentId && componentsById.TryGetValue(parentId, out var parent))
+            {
+                installation.ParentComponentName = parent.Name;
+                installation.ParentComponentCategory = parent.Category;
             }
         }
 

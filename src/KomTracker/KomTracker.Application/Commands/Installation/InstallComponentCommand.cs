@@ -8,13 +8,22 @@ using MediatR;
 
 namespace KomTracker.Application.Commands.Installation;
 
-/// <summary>Installs a component on a bike — Tracked (dated) or Manual (dateless historical, static totals).</summary>
+/// <summary>
+/// Installs a component onto a parent — a bike (<see cref="BikeId"/>) XOR a parent component
+/// (<see cref="ParentComponentId"/>, 2b-ii). Tracked (dated) or Manual (dateless historical, static totals).
+/// </summary>
 public class InstallComponentCommand : IRequest<Result<InstallationEntity>>
 {
     public string UserId { get; set; } = default!;
 
     public int ComponentId { get; set; }
-    public int BikeId { get; set; }
+
+    /// <summary>Target bike. XOR with <see cref="ParentComponentId"/>.</summary>
+    public int? BikeId { get; set; }
+
+    /// <summary>Target parent component (component-in-component). XOR with <see cref="BikeId"/>.</summary>
+    public int? ParentComponentId { get; set; }
+
     public ComponentInstallationType Type { get; set; }
 
     public DateTime? DateFrom { get; set; }
@@ -31,9 +40,14 @@ public class InstallComponentCommandValidator : AbstractValidator<InstallCompone
     public InstallComponentCommandValidator()
     {
         RuleFor(x => x.ComponentId).GreaterThan(0);
-        RuleFor(x => x.BikeId).GreaterThan(0);
         RuleFor(x => x.Type).IsInEnum();
         RuleFor(x => x.Position).IsInEnum().When(x => x.Position.HasValue);
+
+        // Exactly one target — a bike or a parent component.
+        RuleFor(x => x).Must(x => x.BikeId.HasValue ^ x.ParentComponentId.HasValue)
+            .WithMessage("Exactly one of BikeId or ParentComponentId must be set.");
+        RuleFor(x => x.BikeId).GreaterThan(0).When(x => x.BikeId.HasValue);
+        RuleFor(x => x.ParentComponentId).GreaterThan(0).When(x => x.ParentComponentId.HasValue);
 
         When(x => x.Type == ComponentInstallationType.Tracked, () =>
         {
@@ -72,26 +86,57 @@ public class InstallComponentCommandHandler : IRequestHandler<InstallComponentCo
             return Result.Fail(new ForbiddenError("Component does not belong to the current user."));
         }
 
-        var bike = await bikeRepo.GetBikeAsync(request.BikeId);
-        if (bike is null)
-        {
-            return Result.Fail(new NotFoundError($"Bike {request.BikeId} not found."));
-        }
+        // Resolve + own the target (bike XOR parent component) and capture its display name.
+        string? bikeName = null;
+        string? parentComponentName = null;
 
-        if (bike.UserId != request.UserId)
+        if (request.BikeId is int bikeId)
         {
-            return Result.Fail(new ForbiddenError("Bike does not belong to the current user."));
+            var bike = await bikeRepo.GetBikeAsync(bikeId);
+            if (bike is null)
+            {
+                return Result.Fail(new NotFoundError($"Bike {bikeId} not found."));
+            }
+
+            if (bike.UserId != request.UserId)
+            {
+                return Result.Fail(new ForbiddenError("Bike does not belong to the current user."));
+            }
+
+            bikeName = bike.Name;
+        }
+        else
+        {
+            var parent = await componentRepo.GetComponentAsync(request.ParentComponentId!.Value);
+            if (parent is null)
+            {
+                return Result.Fail(new NotFoundError($"Component {request.ParentComponentId} not found."));
+            }
+
+            if (parent.UserId != request.UserId)
+            {
+                return Result.Fail(new ForbiddenError("Parent component does not belong to the current user."));
+            }
+
+            if (!parent.IsMetaComponent)
+            {
+                return Result.Fail(new ConflictError(
+                    "Target is not a meta component — mark it as one to install components inside it."));
+            }
+
+            parentComponentName = parent.Name;
         }
 
         var tracked = request.Type == ComponentInstallationType.Tracked;
 
         if (tracked)
         {
-            // Invariant (D-7 subset): at most one active Tracked installation per component.
-            var active = await installationRepo.GetActiveTrackedByComponentAsync(request.ComponentId);
-            if (active is not null)
+            // D-7 linkage invariant (homogeneity, distinct bikes, one-level comp-in-comp, no cycle).
+            var invariant = await InstallationInvariant.CheckAsync(
+                installationRepo, request.ComponentId, request.BikeId, request.ParentComponentId);
+            if (invariant.IsFailed)
             {
-                return Result.Fail(new ConflictError("Component is already installed — remove or move it first."));
+                return invariant.ToResult<InstallationEntity>();
             }
         }
 
@@ -100,6 +145,7 @@ public class InstallComponentCommandHandler : IRequestHandler<InstallComponentCo
             UserId = request.UserId,
             ComponentId = request.ComponentId,
             BikeId = request.BikeId,
+            ParentComponentId = request.ParentComponentId,
             Type = request.Type,
             Position = request.Position,
             DateFrom = tracked ? InstallationDateHelper.EnsureUtc(request.DateFrom) : null,
@@ -111,7 +157,7 @@ public class InstallComponentCommandHandler : IRequestHandler<InstallComponentCo
 
         installationRepo.Add(installation);
 
-        // Installing (Tracked) moves the component onto the bike — it's no longer sitting in a warehouse (D-2b1-5).
+        // Installing (Tracked) places the component — it's no longer sitting in a warehouse (D-2b1-5).
         if (tracked && component.WarehouseId is not null)
         {
             component.WarehouseId = null;
@@ -123,7 +169,8 @@ public class InstallComponentCommandHandler : IRequestHandler<InstallComponentCo
         // Read-model fields for the response VM.
         installation.ComponentName = component.Name;
         installation.ComponentCategory = component.Category;
-        installation.BikeName = bike.Name;
+        installation.BikeName = bikeName;
+        installation.ParentComponentName = parentComponentName;
 
         return Result.Ok(installation);
     }

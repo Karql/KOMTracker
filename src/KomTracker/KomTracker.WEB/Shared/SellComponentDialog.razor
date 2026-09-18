@@ -6,6 +6,13 @@
 <MudDialog>
     <DialogContent>
         <MudText Typo="Typo.body2" Class="mb-3">Mark <b>@Component.Name</b> as sold.</MudText>
+        @{ var activeChildren = Component.Children.Count(c => c.IsCurrent); }
+        @if (activeChildren > 0)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3">
+                @activeChildren component(s) currently inside it will also be marked <b>sold</b> (sold together).
+            </MudAlert>
+        }
         <MudForm @ref="_form">
             <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Required="true" RequiredError="Sale date is required" />
             <MudNumericField @bind-Value="_salePrice" Label="Sale price" Min="0" Required="true"

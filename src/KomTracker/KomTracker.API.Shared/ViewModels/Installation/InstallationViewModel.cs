@@ -15,6 +15,11 @@ public class InstallationViewModel
     public int? BikeId { get; set; }
     public string? BikeName { get; set; }
 
+    /// <summary>Parent component (component-in-component). Mutually exclusive with <see cref="BikeId"/>.</summary>
+    public int? ParentComponentId { get; set; }
+    public string? ParentComponentName { get; set; }
+    public ComponentCategory? ParentComponentCategory { get; set; }
+
     public ComponentInstallationType Type { get; set; }
     public DateTime? DateFrom { get; set; }
     public DateTime? DateTo { get; set; }

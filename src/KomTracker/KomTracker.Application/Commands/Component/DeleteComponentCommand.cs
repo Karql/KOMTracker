@@ -36,8 +36,10 @@ public class DeleteComponentCommandHandler : IRequestHandler<DeleteComponentComm
             return Result.Fail(new ForbiddenError("Component does not belong to the current user."));
         }
 
-        // D-18: never hard-delete a component that has installation history — prefer archiving it.
-        if (await _komUoW.GetRepository<IInstallationRepository>().AnyByComponentAsync(component.Id))
+        // D-18: never hard-delete a component with installation history — as the installed component OR as a parent.
+        var installationRepo = _komUoW.GetRepository<IInstallationRepository>();
+        if (await installationRepo.AnyByComponentAsync(component.Id)
+            || await installationRepo.AnyByParentComponentAsync(component.Id))
         {
             return Result.Fail(new ConflictError(
                 "Component has installation history — archive it instead of deleting."));

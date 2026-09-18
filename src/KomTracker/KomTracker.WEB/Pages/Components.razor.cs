@@ -27,6 +27,7 @@ public partial class Components
     private int? _warehouseFilter;
     private InstallState? _installFilter;
     private int? _bikeFilter;
+    private bool? _metaFilter;
     private IEnumerable<ComponentViewModel> _components = Enumerable.Empty<ComponentViewModel>();
     private IEnumerable<WarehouseViewModel> _warehouses = Enumerable.Empty<WarehouseViewModel>();
     private IEnumerable<BikeViewModel> _bikes = Enumerable.Empty<BikeViewModel>();
@@ -100,8 +101,12 @@ public partial class Components
         .Where(c => _groupFilter is null || c.CategoryGroup == _groupFilter)
         .Where(c => _warehouseFilter is null || c.WarehouseId == _warehouseFilter)
         .Where(c => _installFilter is null
-            || (_installFilter == InstallState.Installed) == (c.InstalledOnBikeId is not null))
-        .Where(c => _bikeFilter is null || c.InstalledOnBikeId == _bikeFilter);
+            || (_installFilter == InstallState.Installed) == IsInstalled(c))
+        .Where(c => _bikeFilter is null || c.CurrentPlacements.Any(p => p.BikeId == _bikeFilter))
+        .Where(c => _metaFilter is null || c.IsMetaComponent == _metaFilter);
+
+    // Installed = has any current active placement (on a bike or inside a parent component).
+    private static bool IsInstalled(ComponentViewModel c) => c.ParentComponentId is not null || c.InstalledBikeCount > 0;
 
     private void OpenDetails(int id) => Navigation.NavigateTo($"components/{id}");
 

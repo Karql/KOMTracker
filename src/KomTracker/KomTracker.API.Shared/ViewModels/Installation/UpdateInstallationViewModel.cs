@@ -6,7 +6,8 @@ namespace KomTracker.API.Shared.ViewModels.Installation;
 /// <summary>Edit an existing installation record (corrections). Type is immutable; fields apply per the row's type.</summary>
 public class UpdateInstallationViewModel
 {
-    public int BikeId { get; set; }
+    public int? BikeId { get; set; }
+    public int? ParentComponentId { get; set; }
     public InstallationPosition? Position { get; set; }
 
     // Tracked only

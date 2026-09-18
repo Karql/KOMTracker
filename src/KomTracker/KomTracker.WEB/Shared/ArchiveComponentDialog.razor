@@ -6,6 +6,13 @@
 <MudDialog>
     <DialogContent>
         <MudText Typo="Typo.body2" Class="mb-3">Archive <b>@Component.Name</b> — it stays yours but drops out of the active list.</MudText>
+        @{ var activeChildren = Component.Children.Count(c => c.IsCurrent); }
+        @if (activeChildren > 0)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-3">
+                @activeChildren component(s) currently inside it will be <b>detached</b> (their windows close; history kept).
+            </MudAlert>
+        }
         <MudForm @ref="_form">
             <MudTextField @bind-Value="_notes" Label="Notes" Lines="3" MaxLength="2000" />
         </MudForm>

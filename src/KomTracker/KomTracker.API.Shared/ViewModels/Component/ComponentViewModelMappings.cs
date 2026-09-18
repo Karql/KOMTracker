@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using KomTracker.API.Shared.ViewModels.Installation;
 using KomTracker.Domain.Entities.Component;
 
 namespace KomTracker.API.Shared.ViewModels.Component;
@@ -15,6 +16,7 @@ public static class ComponentViewModelMappings
         Model = e.Model,
         Category = e.Category,
         CategoryGroup = ComponentCategoryMetadata.Group(e.Category),
+        IsMetaComponent = e.IsMetaComponent,
         WeightKg = e.WeightKg,
         Notes = e.Notes,
         Price = e.Price,
@@ -28,6 +30,11 @@ public static class ComponentViewModelMappings
         InstalledOnBikeId = e.InstalledOnBikeId,
         InstalledOnBikeName = e.InstalledOnBikeName,
         InstalledPosition = e.InstalledPosition,
+        InstalledBikeCount = e.InstalledBikeCount,
+        ParentComponentId = e.ParentComponentId,
+        ParentComponentName = e.ParentComponentName,
+        CurrentPlacements = e.CurrentPlacements.Select(InstallationViewModelMappings.ToViewModel).ToArray(),
+        Children = e.Children.Select(InstallationViewModelMappings.ToViewModel).ToArray(),
         Lifecycle = e.Lifecycle,
         SaleDate = e.SaleDate,
         SalePrice = e.SalePrice

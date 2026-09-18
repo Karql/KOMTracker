@@ -25,6 +25,9 @@ public class InstallationEntityTypeConfiguration
             .OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<BikeEntity>().WithMany().HasForeignKey(x => x.BikeId)
             .OnDelete(DeleteBehavior.Restrict);
+        // Parent component (component-in-component, 2b-ii) — referenceless, Restrict; detach/cascade handled in app logic (D-18).
+        builder.HasOne<ComponentEntity>().WithMany().HasForeignKey(x => x.ParentComponentId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasKey(x => x.Id);
 
@@ -41,6 +44,9 @@ public class InstallationEntityTypeConfiguration
 
         builder.Property(x => x.BikeId)
             .HasColumnName("bike_id");
+
+        builder.Property(x => x.ParentComponentId)
+            .HasColumnName("parent_component_id");
 
         builder.Property(x => x.Type)
             .HasColumnName("type")
@@ -71,5 +77,6 @@ public class InstallationEntityTypeConfiguration
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.ComponentId);
         builder.HasIndex(x => x.BikeId);
+        builder.HasIndex(x => x.ParentComponentId);
     }
 }
