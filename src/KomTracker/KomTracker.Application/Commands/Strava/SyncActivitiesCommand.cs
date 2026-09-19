@@ -1,6 +1,7 @@
 using FluentResults;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Notifications.Strava;
 using KomTracker.Application.Services;
 using KomTracker.Domain.Entities.Strava;
 using MediatR;
@@ -28,13 +29,15 @@ public class SyncActivitiesCommandHandler : IRequestHandler<SyncActivitiesComman
     private readonly IKOMUnitOfWork _komUoW;
     private readonly IAthleteService _athleteService;
     private readonly IStravaActivityService _activityService;
+    private readonly IMediator _mediator;
     private readonly ILogger<SyncActivitiesCommandHandler> _logger;
 
-    public SyncActivitiesCommandHandler(IKOMUnitOfWork komUoW, IAthleteService athleteService, IStravaActivityService activityService, ILogger<SyncActivitiesCommandHandler> logger)
+    public SyncActivitiesCommandHandler(IKOMUnitOfWork komUoW, IAthleteService athleteService, IStravaActivityService activityService, IMediator mediator, ILogger<SyncActivitiesCommandHandler> logger)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
         _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
         _activityService = activityService ?? throw new ArgumentNullException(nameof(activityService));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -93,6 +96,10 @@ public class SyncActivitiesCommandHandler : IRequestHandler<SyncActivitiesComman
                 var total = await activityRepo.CountAthleteActivitiesAsync(athleteId);
 
                 await RecordHistoryAsync(historyRepo, athleteId, runStartedAt, after, "Ok", activities.Count, deleted, total);
+
+                // New/removed rides change component mileage — announce the sync; the projection updater recomputes
+                // the components on this athlete's bikes (it owns the athlete → bikes → components resolution).
+                await _mediator.Publish(new AthleteActivitiesSyncedNotification { AthleteId = athleteId }, cancellationToken);
             }
             catch (Exception ex)
             {

@@ -9,6 +9,7 @@ using KomTracker.Domain.Entities.Component;
 using NSubstitute;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -21,6 +22,7 @@ public class InstallationCommandHandlersTests
     private readonly IInstallationRepository _installationRepo;
     private readonly IComponentRepository _componentRepo;
     private readonly IBikeRepository _bikeRepo;
+    private readonly MediatR.IMediator _mediator;
 
     public InstallationCommandHandlersTests()
     {
@@ -28,6 +30,7 @@ public class InstallationCommandHandlersTests
         _installationRepo = Substitute.For<IInstallationRepository>();
         _componentRepo = Substitute.For<IComponentRepository>();
         _bikeRepo = Substitute.For<IBikeRepository>();
+        _mediator = Substitute.For<MediatR.IMediator>();
         _komUoW.GetRepository<IInstallationRepository>().Returns(_installationRepo);
         _komUoW.GetRepository<IComponentRepository>().Returns(_componentRepo);
         _komUoW.GetRepository<IBikeRepository>().Returns(_bikeRepo);
@@ -61,7 +64,7 @@ public class InstallationCommandHandlersTests
         OwnComponent(5, warehouseId: 9);
         OwnBike(3);
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, BikeId = 3,
@@ -76,13 +79,30 @@ public class InstallationCommandHandlersTests
     }
 
     [Fact]
+    public async Task Install_triggers_mileage_recompute_for_the_component()
+    {
+        OwnComponent(5);
+        OwnBike(3);
+
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
+        await handler.Handle(new InstallComponentCommand
+        {
+            UserId = "u1", ComponentId = 5, BikeId = 3, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
+        }, CancellationToken.None);
+
+        await _mediator.Received().Publish(
+            Arg.Is<KomTracker.Application.Notifications.Component.InstallationChangedNotification>(n => n.ComponentId == 5),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Install_onto_same_bike_twice_conflicts()
     {
         OwnComponent(5);
         OwnBike(3);
         ActiveTracked(5, OnBike(5, 3, id: 1));
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, BikeId = 3, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
@@ -99,7 +119,7 @@ public class InstallationCommandHandlersTests
         OwnBike(4);
         ActiveTracked(5, OnBike(5, 3, id: 1));   // already on bike 3
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, BikeId = 4, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
@@ -116,7 +136,7 @@ public class InstallationCommandHandlersTests
         OwnBike(3);
         ActiveTracked(5, InComponent(5, 8, id: 1));   // currently inside component 8
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, BikeId = 3, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
@@ -132,7 +152,7 @@ public class InstallationCommandHandlersTests
         OwnComponent(5);
         OwnBike(3);
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, BikeId = 3, Type = ComponentInstallationType.Manual,
@@ -151,7 +171,7 @@ public class InstallationCommandHandlersTests
     {
         OwnComponent(5, userId: "other");
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, BikeId = 3, Type = ComponentInstallationType.Manual
@@ -168,7 +188,7 @@ public class InstallationCommandHandlersTests
         OwnComponent(5);            // tyre
         OwnComponent(8);            // wheel (parent)
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, ParentComponentId = 8,
@@ -186,7 +206,7 @@ public class InstallationCommandHandlersTests
         OwnComponent(5);
         OwnComponent(8, isMeta: false);   // target is not a meta component
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, ParentComponentId = 8, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
@@ -203,7 +223,7 @@ public class InstallationCommandHandlersTests
         OwnComponent(8);
         ActiveTracked(5, OnBike(5, 3, id: 1));   // exclusive: can't go into a component while on a bike
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, ParentComponentId = 8, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
@@ -218,7 +238,7 @@ public class InstallationCommandHandlersTests
     {
         OwnComponent(5);
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, ParentComponentId = 5, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
@@ -234,7 +254,7 @@ public class InstallationCommandHandlersTests
         OwnComponent(8);
         ActiveTracked(8, InComponent(8, 9, id: 2));   // parent 8 is itself inside component 9
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, ParentComponentId = 8, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
@@ -252,7 +272,7 @@ public class InstallationCommandHandlersTests
         _installationRepo.GetActiveChildrenByParentComponentsAsync(Arg.Any<IReadOnlyCollection<int>>())
             .Returns(new[] { InComponent(6, 5, id: 3) });
 
-        var handler = new InstallComponentCommandHandler(_komUoW);
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new InstallComponentCommand
         {
             UserId = "u1", ComponentId = 5, ParentComponentId = 8, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
@@ -270,7 +290,7 @@ public class InstallationCommandHandlersTests
         _installationRepo.GetAsync(7).Returns(current);
         OwnBike(4);
 
-        var handler = new MoveInstallationCommandHandler(_komUoW);
+        var handler = new MoveInstallationCommandHandler(_komUoW, _mediator);
         var moveDate = new DateTime(2026, 6, 1);
         var res = await handler.Handle(new MoveInstallationCommand
         {
@@ -291,7 +311,7 @@ public class InstallationCommandHandlersTests
         OwnComponent(8);
         ActiveTracked(5, current);   // only the row being moved is active → excluded
 
-        var handler = new MoveInstallationCommandHandler(_komUoW);
+        var handler = new MoveInstallationCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new MoveInstallationCommand
         {
             UserId = "u1", InstallationId = 7, NewParentComponentId = 8, MoveDate = new DateTime(2026, 6, 1)
@@ -309,7 +329,7 @@ public class InstallationCommandHandlersTests
             Id = 7, UserId = "u1", ComponentId = 5, BikeId = 3, Type = ComponentInstallationType.Tracked, DateTo = new DateTime(2026, 1, 1)
         });
 
-        var handler = new MoveInstallationCommandHandler(_komUoW);
+        var handler = new MoveInstallationCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new MoveInstallationCommand
         {
             UserId = "u1", InstallationId = 7, NewBikeId = 4, MoveDate = new DateTime(2026, 6, 1)
@@ -326,7 +346,7 @@ public class InstallationCommandHandlersTests
     {
         _installationRepo.GetAsync(7).Returns(OnBike(5, 3, id: 7));
 
-        var handler = new RemoveInstallationCommandHandler(_komUoW);
+        var handler = new RemoveInstallationCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new RemoveInstallationCommand
         {
             UserId = "u1", InstallationId = 7, DateTo = new DateTime(2026, 7, 1)
@@ -344,7 +364,7 @@ public class InstallationCommandHandlersTests
         ActiveTracked(5, row);   // only self is active → invariant excludes it
         OwnBike(4);
 
-        var handler = new UpdateInstallationCommandHandler(_komUoW);
+        var handler = new UpdateInstallationCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new UpdateInstallationCommand
         {
             UserId = "u1", InstallationId = 7, BikeId = 4, Position = InstallationPosition.Front,
@@ -368,7 +388,7 @@ public class InstallationCommandHandlersTests
         ActiveTracked(5, OnBike(5, 3, id: 9));
         OwnBike(4);
 
-        var handler = new UpdateInstallationCommandHandler(_komUoW);
+        var handler = new UpdateInstallationCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new UpdateInstallationCommand
         {
             UserId = "u1", InstallationId = 7, ParentComponentId = 8, DateFrom = new DateTime(2026, 1, 1), DateTo = null
@@ -387,7 +407,7 @@ public class InstallationCommandHandlersTests
         });
         OwnBike(4);
 
-        var handler = new UpdateInstallationCommandHandler(_komUoW);
+        var handler = new UpdateInstallationCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new UpdateInstallationCommand
         {
             UserId = "u1", InstallationId = 7, BikeId = 4, ManualDistanceKm = 999
@@ -405,7 +425,7 @@ public class InstallationCommandHandlersTests
     {
         _installationRepo.GetAsync(7).Returns(new InstallationEntity { Id = 7, UserId = "other", ComponentId = 5 });
 
-        var handler = new DeleteInstallationCommandHandler(_komUoW);
+        var handler = new DeleteInstallationCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new DeleteInstallationCommand { UserId = "u1", InstallationId = 7 }, CancellationToken.None);
 
         res.Should().BeFailure().Which.HasError<ForbiddenError>();
@@ -417,7 +437,7 @@ public class InstallationCommandHandlersTests
     {
         _installationRepo.GetAsync(7).Returns(new InstallationEntity { Id = 7, UserId = "u1", ComponentId = 5 });
 
-        var handler = new DeleteInstallationCommandHandler(_komUoW);
+        var handler = new DeleteInstallationCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new DeleteInstallationCommand { UserId = "u1", InstallationId = 7 }, CancellationToken.None);
 
         res.Should().BeSuccess();
@@ -472,7 +492,7 @@ public class InstallationCommandHandlersTests
         });
         _installationRepo.AnyByParentComponentAsync(8).Returns(true);
 
-        var handler = new KomTracker.Application.Commands.Component.SaveComponentCommandHandler(_komUoW);
+        var handler = new KomTracker.Application.Commands.Component.SaveComponentCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new KomTracker.Application.Commands.Component.SaveComponentCommand
         {
             Id = 8, UserId = "u1", Name = "Wheel", Category = ComponentCategory.Wheel, IsMetaComponent = false
@@ -516,7 +536,7 @@ public class InstallationCommandHandlersTests
             Id = 5, UserId = "u1", Name = "Tyre", Category = ComponentCategory.Tire, Lifecycle = ComponentLifecycle.Active
         });
 
-        var handler = new KomTracker.Application.Commands.Component.ChangeComponentLifecycleCommandHandler(_komUoW);
+        var handler = new KomTracker.Application.Commands.Component.ChangeComponentLifecycleCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new KomTracker.Application.Commands.Component.ChangeComponentLifecycleCommand
         {
             Id = 8, UserId = "u1", Lifecycle = ComponentLifecycle.Sold, SaleDate = new DateTime(2026, 5, 1), SalePrice = 100
@@ -540,7 +560,7 @@ public class InstallationCommandHandlersTests
         _installationRepo.GetActiveChildrenByParentComponentsAsync(Arg.Any<IReadOnlyCollection<int>>())
             .Returns(new[] { InComponent(5, 8, id: 21) });
 
-        var handler = new KomTracker.Application.Commands.Component.ChangeComponentLifecycleCommandHandler(_komUoW);
+        var handler = new KomTracker.Application.Commands.Component.ChangeComponentLifecycleCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new KomTracker.Application.Commands.Component.ChangeComponentLifecycleCommand
         {
             Id = 8, UserId = "u1", Lifecycle = ComponentLifecycle.Archived

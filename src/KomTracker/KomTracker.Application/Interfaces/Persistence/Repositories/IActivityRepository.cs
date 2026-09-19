@@ -26,6 +26,12 @@ public interface IActivityRepository : IRepository
     /// <summary>Per-gear activity aggregates (distance/moving-time/elevation/count) for the given gear ids — source for bike mileage.</summary>
     Task<IEnumerable<GearTotalsModel>> GetGearTotalsAsync(IReadOnlyCollection<string> gearIds);
 
+    /// <summary>
+    /// Projected activity rows (gear/start/distance/time/elevation) for the given gear ids — the source rows bucketed
+    /// into installation windows in memory during component-mileage recompute (one query for a whole batch).
+    /// </summary>
+    Task<IEnumerable<ActivityAttributionModel>> GetActivitiesByGearAsync(IReadOnlyCollection<string> gearIds);
+
     /// <summary>One page of the athlete's activities, newest first (by StartDate).</summary>
     Task<IEnumerable<ActivityEntity>> GetActivitiesPageAsync(int athleteId, int skip, int take);
 

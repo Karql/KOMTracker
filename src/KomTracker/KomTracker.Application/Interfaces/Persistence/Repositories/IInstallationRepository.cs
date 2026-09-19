@@ -11,6 +11,12 @@ public interface IInstallationRepository : IRepository
     /// <summary>All installations of a component, newest first (current before historical).</summary>
     Task<IEnumerable<InstallationEntity>> GetByComponentAsync(int componentId);
 
+    /// <summary>All installations of the given components (batch) — for mileage recompute.</summary>
+    Task<IEnumerable<InstallationEntity>> GetByComponentsAsync(IReadOnlyCollection<int> componentIds);
+
+    /// <summary>Distinct component ids installed (ever) on the given bikes — for post-sync recompute targeting.</summary>
+    Task<IEnumerable<int>> GetComponentIdsByBikesAsync(IReadOnlyCollection<int> bikeIds);
+
     /// <summary>The component's active Tracked installation (DateTo == null), or null. (Legacy single-placement helper.)</summary>
     Task<InstallationEntity?> GetActiveTrackedByComponentAsync(int componentId);
 
@@ -25,6 +31,9 @@ public interface IInstallationRepository : IRepository
 
     /// <summary>Active Tracked children (installed INTO the given parent components) — batch, for list/detail resolution.</summary>
     Task<IEnumerable<InstallationEntity>> GetActiveChildrenByParentComponentsAsync(IReadOnlyCollection<int> parentComponentIds);
+
+    /// <summary>Distinct component ids EVER installed into the given parent components (current + historical) — for mileage recompute expansion.</summary>
+    Task<IEnumerable<int>> GetChildComponentIdsByParentsAsync(IReadOnlyCollection<int> parentComponentIds);
 
     Task<InstallationEntity?> GetAsync(int id);
 

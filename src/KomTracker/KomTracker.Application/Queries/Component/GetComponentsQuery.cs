@@ -26,6 +26,11 @@ public class GetComponentsQueryHandler : IRequestHandler<GetComponentsQuery, IEn
 
         var components = (await componentRepo.GetComponentsAsync(request.UserId, request.IncludeInactive)).ToList();
 
+        // Stored mileage projection (Phase 3) — read, don't compute.
+        var mileageById = (await _komUoW.GetRepository<IComponentMileageRepository>()
+            .GetByComponentIdsAsync(components.Select(c => c.Id).ToList()))
+            .ToDictionary(m => m.ComponentId);
+
         var warehouseNamesById = (await _komUoW.GetRepository<IWarehouseRepository>()
             .GetWarehousesAsync(request.UserId))
             .ToDictionary(w => w.Id, w => w.Name);
@@ -47,6 +52,14 @@ public class GetComponentsQueryHandler : IRequestHandler<GetComponentsQuery, IEn
 
         foreach (var component in components)
         {
+            if (mileageById.TryGetValue(component.Id, out var mileage))
+            {
+                component.TotalDistanceKm = mileage.TotalDistanceKm;
+                component.TotalMovingHours = mileage.TotalMovingHours;
+                component.TotalElevationM = mileage.TotalElevationM;
+                component.AttributedActivityCount = mileage.AttributedActivityCount;
+            }
+
             if (component.WarehouseId is int id && warehouseNamesById.TryGetValue(id, out var name))
             {
                 component.WarehouseName = name;

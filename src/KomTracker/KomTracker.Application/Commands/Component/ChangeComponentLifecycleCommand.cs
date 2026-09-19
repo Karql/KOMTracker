@@ -3,6 +3,7 @@ using FluentValidation;
 using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Notifications.Component;
 using KomTracker.Domain.Entities.Component;
 using MediatR;
 
@@ -37,10 +38,12 @@ public class ChangeComponentLifecycleCommandValidator : AbstractValidator<Change
 public class ChangeComponentLifecycleCommandHandler : IRequestHandler<ChangeComponentLifecycleCommand, Result>
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator;
 
-    public ChangeComponentLifecycleCommandHandler(IKOMUnitOfWork komUoW)
+    public ChangeComponentLifecycleCommandHandler(IKOMUnitOfWork komUoW, IMediator mediator)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task<Result> Handle(ChangeComponentLifecycleCommand request, CancellationToken cancellationToken)
@@ -93,6 +96,10 @@ public class ChangeComponentLifecycleCommandHandler : IRequestHandler<ChangeComp
         }
 
         await _komUoW.SaveChangesAsync();
+
+        // Announce the change; the projection updater recomputes the component and its children — current AND the ones
+        // this transition just detached/sold (they remain this component's children, so historical expansion covers them).
+        await _mediator.Publish(new ComponentChangedNotification { ComponentId = component.Id }, cancellationToken);
 
         return Result.Ok();
     }

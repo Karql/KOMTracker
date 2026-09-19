@@ -1,6 +1,7 @@
 ﻿using KomTracker.API.Attributes;
 using KomTracker.Application.Commands.Account;
 using KomTracker.Application.Commands.Club;
+using KomTracker.Application.Commands.Component;
 using KomTracker.Application.Commands.Segment;
 using KomTracker.Application.Commands.Stats;
 using KomTracker.Application.Commands.Strava;
@@ -69,6 +70,15 @@ public class AdminController : BaseApiController<AdminController>
     {
         var after = afterDays.HasValue ? DateTime.UtcNow.AddDays(-afterDays.Value) : (DateTime?)null;
         await _mediator.Send(new SyncActivitiesCommand { After = after }, cancellationToken);
+
+        return new NoContentResult();
+    }
+
+    /// <summary>Backfill/rebuild the mileage projection for the given components (+ their active children).</summary>
+    [HttpPut("recalculate-component-mileage")]
+    public async Task<ActionResult> RecalculateComponentMileage([FromBody] IReadOnlyCollection<int> componentIds, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new RecalculateComponentsMileageCommand { ComponentIds = componentIds ?? Array.Empty<int>() }, cancellationToken);
 
         return new NoContentResult();
     }

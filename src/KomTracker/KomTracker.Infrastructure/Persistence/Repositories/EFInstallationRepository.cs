@@ -22,6 +22,32 @@ public class EFInstallationRepository : EFBaseRepository, IInstallationRepositor
     public async Task<IEnumerable<InstallationEntity>> GetByComponentAsync(int componentId)
         => await Ordered(_context.Installation.AsNoTracking().Where(x => x.ComponentId == componentId)).ToListAsync();
 
+    public async Task<IEnumerable<InstallationEntity>> GetByComponentsAsync(IReadOnlyCollection<int> componentIds)
+    {
+        if (componentIds is null || componentIds.Count == 0)
+        {
+            return Enumerable.Empty<InstallationEntity>();
+        }
+
+        return await _context.Installation.AsNoTracking()
+            .Where(x => componentIds.Contains(x.ComponentId))
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<int>> GetComponentIdsByBikesAsync(IReadOnlyCollection<int> bikeIds)
+    {
+        if (bikeIds is null || bikeIds.Count == 0)
+        {
+            return Enumerable.Empty<int>();
+        }
+
+        return await _context.Installation.AsNoTracking()
+            .Where(x => x.BikeId != null && bikeIds.Contains(x.BikeId.Value))
+            .Select(x => x.ComponentId)
+            .Distinct()
+            .ToListAsync();
+    }
+
     public async Task<InstallationEntity?> GetActiveTrackedByComponentAsync(int componentId)
         => await _context.Installation
             .Where(x => x.ComponentId == componentId
@@ -60,6 +86,20 @@ public class EFInstallationRepository : EFBaseRepository, IInstallationRepositor
         return await _context.Installation.AsNoTracking()
             .Where(x => x.ParentComponentId != null && parentComponentIds.Contains(x.ParentComponentId.Value)
                 && x.Type == ComponentInstallationType.Tracked && x.DateTo == null)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<int>> GetChildComponentIdsByParentsAsync(IReadOnlyCollection<int> parentComponentIds)
+    {
+        if (parentComponentIds is null || parentComponentIds.Count == 0)
+        {
+            return Enumerable.Empty<int>();
+        }
+
+        return await _context.Installation.AsNoTracking()
+            .Where(x => x.ParentComponentId != null && parentComponentIds.Contains(x.ParentComponentId.Value))
+            .Select(x => x.ComponentId)
+            .Distinct()
             .ToListAsync();
     }
 

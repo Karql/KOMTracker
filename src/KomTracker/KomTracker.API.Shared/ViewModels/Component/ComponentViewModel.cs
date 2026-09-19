@@ -55,4 +55,10 @@ public class ComponentViewModel
     public ComponentLifecycle Lifecycle { get; set; }
     public DateTime? SaleDate { get; set; }
     public decimal? SalePrice { get; set; }
+
+    // Computed mileage (Phase 3) — from the stored bt.component_mileage projection.
+    public decimal TotalDistanceKm { get; set; }
+    public decimal TotalMovingHours { get; set; }
+    public decimal TotalElevationM { get; set; }
+    public int AttributedActivityCount { get; set; }
 }

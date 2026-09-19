@@ -31,4 +31,10 @@ public class InstallationViewModel
 
     /// <summary>Currently installed = an active Tracked window (no DateTo). Manual is never current.</summary>
     public bool IsCurrent { get; set; }
+
+    // Per-window computed mileage (Phase 3) — this Tracked row's own contribution (0 for Manual rows).
+    public decimal WindowDistanceKm { get; set; }
+    public decimal WindowMovingHours { get; set; }
+    public decimal WindowElevationM { get; set; }
+    public int WindowActivityCount { get; set; }
 }

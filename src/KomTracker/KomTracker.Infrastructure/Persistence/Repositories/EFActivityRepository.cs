@@ -124,4 +124,24 @@ public class EFActivityRepository : EFBaseRepository, IActivityRepository
             })
             .ToListAsync();
     }
+
+    public async Task<IEnumerable<ActivityAttributionModel>> GetActivitiesByGearAsync(IReadOnlyCollection<string> gearIds)
+    {
+        if (gearIds is null || gearIds.Count == 0)
+        {
+            return Enumerable.Empty<ActivityAttributionModel>();
+        }
+
+        return await _context.Activity.AsNoTracking()
+            .Where(x => x.GearId != null && gearIds.Contains(x.GearId))
+            .Select(x => new ActivityAttributionModel
+            {
+                GearId = x.GearId!,
+                StartDate = x.StartDate,
+                DistanceMeters = x.Distance,
+                MovingTimeSeconds = x.MovingTime,
+                ElevationMeters = x.TotalElevationGain
+            })
+            .ToListAsync();
+    }
 }

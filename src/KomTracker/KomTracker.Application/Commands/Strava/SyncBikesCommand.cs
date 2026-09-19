@@ -1,6 +1,7 @@
 using FluentResults;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using StravaGearError = KomTracker.Application.Interfaces.Services.Strava.GetAthleteBikesError;
@@ -20,13 +21,13 @@ public class SyncBikesCommand : IRequest<Result>
 public class SyncBikesCommandHandler : IRequestHandler<SyncBikesCommand, Result>
 {
     private readonly IKOMUnitOfWork _komUoW;
-    private readonly IMediator _mediator;
+    private readonly IStravaBikeSyncService _bikeSyncService;
     private readonly ILogger<SyncBikesCommandHandler> _logger;
 
-    public SyncBikesCommandHandler(IKOMUnitOfWork komUoW, IMediator mediator, ILogger<SyncBikesCommandHandler> logger)
+    public SyncBikesCommandHandler(IKOMUnitOfWork komUoW, IStravaBikeSyncService bikeSyncService, ILogger<SyncBikesCommandHandler> logger)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+        _bikeSyncService = bikeSyncService ?? throw new ArgumentNullException(nameof(bikeSyncService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -49,7 +50,7 @@ public class SyncBikesCommandHandler : IRequestHandler<SyncBikesCommand, Result>
 
             try
             {
-                var res = await _mediator.Send(new SyncStravaBikesCommand { AthleteId = athleteId }, cancellationToken);
+                var res = await _bikeSyncService.SyncAthleteBikesAsync(athleteId, cancellationToken);
                 if (res.IsFailed)
                 {
                     var rateLimited = res.Errors

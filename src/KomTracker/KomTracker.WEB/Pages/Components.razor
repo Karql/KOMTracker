@@ -1,5 +1,6 @@
 @page "/components"
 @attribute [Authorize]
+@using System.Globalization
 @using KomTracker.API.Shared.ViewModels.Bike
 @using KomTracker.API.Shared.ViewModels.Component
 @using KomTracker.API.Shared.ViewModels.Warehouse
@@ -132,6 +133,10 @@ else
                                     <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Icon="@Icons.Material.Filled.Warehouse">@component.WarehouseName</MudChip>
                                 }
                             </div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2" Style="display: flex; align-items: center; gap: 4px;">
+                                <MudIcon Icon="@Icons.Material.Filled.Straighten" Size="Size.Small" />
+                                @component.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture) km
+                            </MudText>
                         </MudCardContent>
                         <MudCardActions>
                             <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => OpenDetails(component.Id))">Details</MudButton>
@@ -150,6 +155,7 @@ else
                 <MudTh>Brand</MudTh>
                 <MudTh>Model</MudTh>
                 <MudTh>Location</MudTh>
+                <MudTh Style="text-align: right;">Distance</MudTh>
                 <MudTh>Status</MudTh>
                 <MudTh Style="text-align: right;"></MudTh>
             </HeaderContent>
@@ -200,6 +206,7 @@ else
                         @(context.WarehouseName ?? "—")
                     }
                 </MudTd>
+                <MudTd DataLabel="Distance" Style="text-align: right;">@context.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture) km</MudTd>
                 <MudTd DataLabel="Status">
                     <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
                 </MudTd>

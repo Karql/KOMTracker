@@ -38,8 +38,9 @@ public class SyncActivityCommandHandlerTests
         _activityRepo = Substitute.For<IActivityRepository>();
 
         _komUoW.GetRepository<IActivityRepository>().Returns(_activityRepo);
-
+        // Phase 3 recompute is decoupled via ActivitySyncedNotification — a substitute mediator swallows the publish.
         _handler = new SyncActivityCommandHandler(_komUoW, _athleteService, _activityService,
+            Substitute.For<MediatR.IMediator>(),
             Substitute.For<ILogger<SyncActivityCommandHandler>>());
     }
 

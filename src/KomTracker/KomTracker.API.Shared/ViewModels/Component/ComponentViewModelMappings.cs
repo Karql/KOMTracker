@@ -37,7 +37,11 @@ public static class ComponentViewModelMappings
         Children = e.Children.Select(InstallationViewModelMappings.ToViewModel).ToArray(),
         Lifecycle = e.Lifecycle,
         SaleDate = e.SaleDate,
-        SalePrice = e.SalePrice
+        SalePrice = e.SalePrice,
+        TotalDistanceKm = e.TotalDistanceKm,
+        TotalMovingHours = e.TotalMovingHours,
+        TotalElevationM = e.TotalElevationM,
+        AttributedActivityCount = e.AttributedActivityCount
     };
 
     public static IEnumerable<ComponentViewModel> ToViewModels(this IEnumerable<ComponentEntity> components)

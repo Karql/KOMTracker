@@ -3,6 +3,7 @@ using FluentValidation;
 using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Notifications.Component;
 using KomTracker.Domain.Entities.Component;
 using MediatR;
 
@@ -53,10 +54,12 @@ public class SaveComponentCommandValidator : AbstractValidator<SaveComponentComm
 public class SaveComponentCommandHandler : IRequestHandler<SaveComponentCommand, Result<ComponentEntity>>
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator;
 
-    public SaveComponentCommandHandler(IKOMUnitOfWork komUoW)
+    public SaveComponentCommandHandler(IKOMUnitOfWork komUoW, IMediator mediator)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task<Result<ComponentEntity>> Handle(SaveComponentCommand request, CancellationToken cancellationToken)
@@ -112,6 +115,9 @@ public class SaveComponentCommandHandler : IRequestHandler<SaveComponentCommand,
         }
 
         await _komUoW.SaveChangesAsync();
+
+        // The seed affects the stored mileage projection — announce the change; the projection updater recomputes.
+        await _mediator.Publish(new ComponentChangedNotification { ComponentId = component.Id }, cancellationToken);
 
         return Result.Ok(component);
     }

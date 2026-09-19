@@ -14,10 +14,12 @@ public class GetComponentQuery : IRequest<ComponentEntity?>
 public class GetComponentQueryHandler : IRequestHandler<GetComponentQuery, ComponentEntity?>
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly Services.ComponentMileageService _mileageService;
 
-    public GetComponentQueryHandler(IKOMUnitOfWork komUoW)
+    public GetComponentQueryHandler(IKOMUnitOfWork komUoW, Services.ComponentMileageService mileageService)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _mileageService = mileageService ?? throw new ArgumentNullException(nameof(mileageService));
     }
 
     public async Task<ComponentEntity?> Handle(GetComponentQuery request, CancellationToken cancellationToken)
@@ -40,6 +42,16 @@ public class GetComponentQueryHandler : IRequestHandler<GetComponentQuery, Compo
             {
                 component.WarehouseName = warehouse.Name;
             }
+        }
+
+        // Stored mileage projection (Phase 3).
+        var mileage = await _komUoW.GetRepository<IComponentMileageRepository>().GetAsync(component.Id);
+        if (mileage is not null)
+        {
+            component.TotalDistanceKm = mileage.TotalDistanceKm;
+            component.TotalMovingHours = mileage.TotalMovingHours;
+            component.TotalElevationM = mileage.TotalElevationM;
+            component.AttributedActivityCount = mileage.AttributedActivityCount;
         }
 
         // Current active placements (multi-bike, or a single parent component — D-7).
@@ -96,6 +108,9 @@ public class GetComponentQueryHandler : IRequestHandler<GetComponentQuery, Compo
                 child.ComponentCategory = childComponent.Category;
             }
         }
+
+        // Per-window mileage each child accrued while inside this component (Phase 3, live) — one batch.
+        await _mileageService.ResolveWindowTotalsAsync(children);
 
         component.Children = children;
 

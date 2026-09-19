@@ -3,6 +3,7 @@ using FluentValidation;
 using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Notifications.Component;
 using KomTracker.Domain.Entities.Component;
 using MediatR;
 
@@ -63,10 +64,12 @@ public class InstallComponentCommandValidator : AbstractValidator<InstallCompone
 public class InstallComponentCommandHandler : IRequestHandler<InstallComponentCommand, Result<InstallationEntity>>
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator;
 
-    public InstallComponentCommandHandler(IKOMUnitOfWork komUoW)
+    public InstallComponentCommandHandler(IKOMUnitOfWork komUoW, IMediator mediator)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task<Result<InstallationEntity>> Handle(InstallComponentCommand request, CancellationToken cancellationToken)
@@ -165,6 +168,8 @@ public class InstallComponentCommandHandler : IRequestHandler<InstallComponentCo
         }
 
         await _komUoW.SaveChangesAsync();
+
+        await _mediator.Publish(new InstallationChangedNotification { ComponentId = request.ComponentId }, cancellationToken);
 
         // Read-model fields for the response VM.
         installation.ComponentName = component.Name;

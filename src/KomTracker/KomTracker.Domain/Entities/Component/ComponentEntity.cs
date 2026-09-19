@@ -100,4 +100,17 @@ public class ComponentEntity : BaseEntity
 
     [NotMapped]
     public InstallationPosition? InstalledPosition { get; set; }
+
+    // Computed mileage (Phase 3) — read from the bt.component_mileage projection by the component queries. NOT persisted here.
+    [NotMapped]
+    public decimal TotalDistanceKm { get; set; }
+
+    [NotMapped]
+    public decimal TotalMovingHours { get; set; }
+
+    [NotMapped]
+    public decimal TotalElevationM { get; set; }
+
+    [NotMapped]
+    public int AttributedActivityCount { get; set; }
 }

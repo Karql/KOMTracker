@@ -65,4 +65,18 @@ public class InstallationEntity : BaseEntity
     /// <summary>Currently installed = an active Tracked window (no DateTo). Manual is never "current".</summary>
     [NotMapped]
     public bool IsCurrent => Type == ComponentInstallationType.Tracked && DateTo is null;
+
+    // Per-window computed mileage (Phase 3) — this Tracked row's own contribution over its window; set live by
+    // the installation queries (Manual rows keep the static Manual* values instead). NOT persisted.
+    [NotMapped]
+    public decimal WindowDistanceKm { get; set; }
+
+    [NotMapped]
+    public decimal WindowMovingHours { get; set; }
+
+    [NotMapped]
+    public decimal WindowElevationM { get; set; }
+
+    [NotMapped]
+    public int WindowActivityCount { get; set; }
 }

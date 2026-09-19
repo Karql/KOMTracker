@@ -19,18 +19,20 @@ public class ComponentCommandHandlersTests
     private readonly IKOMUnitOfWork _komUoW;
     private readonly IComponentRepository _componentRepo;
     private readonly IWarehouseRepository _warehouseRepo;
+    private readonly MediatR.IMediator _mediator;
 
     public ComponentCommandHandlersTests()
     {
         _komUoW = Substitute.For<IKOMUnitOfWork>();
         _componentRepo = Substitute.For<IComponentRepository>();
         _warehouseRepo = Substitute.For<IWarehouseRepository>();
+        _mediator = Substitute.For<MediatR.IMediator>();
 
         _komUoW.GetRepository<IComponentRepository>().Returns(_componentRepo);
         _komUoW.GetRepository<IWarehouseRepository>().Returns(_warehouseRepo);
     }
 
-    private SaveComponentCommandHandler SaveHandler => new(_komUoW);
+    private SaveComponentCommandHandler SaveHandler => new(_komUoW, _mediator);
 
     [Fact]
     public async Task Create_adds_component()
@@ -98,7 +100,7 @@ public class ComponentCommandHandlersTests
     {
         _componentRepo.GetComponentAsync(5).Returns(new ComponentEntity { Id = 5, UserId = "u1", Name = "Chain" });
 
-        var handler = new ChangeComponentLifecycleCommandHandler(_komUoW);
+        var handler = new ChangeComponentLifecycleCommandHandler(_komUoW, _mediator);
         var res = await handler.Handle(new ChangeComponentLifecycleCommand
         {
             Id = 5,

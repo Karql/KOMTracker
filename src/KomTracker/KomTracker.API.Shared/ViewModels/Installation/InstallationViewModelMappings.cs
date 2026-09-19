@@ -25,7 +25,11 @@ public static class InstallationViewModelMappings
         ManualDistanceKm = e.ManualDistanceKm,
         ManualMovingHours = e.ManualMovingHours,
         ManualElevationM = e.ManualElevationM,
-        IsCurrent = e.IsCurrent
+        IsCurrent = e.IsCurrent,
+        WindowDistanceKm = e.WindowDistanceKm,
+        WindowMovingHours = e.WindowMovingHours,
+        WindowElevationM = e.WindowElevationM,
+        WindowActivityCount = e.WindowActivityCount
     };
 
     public static IEnumerable<InstallationViewModel> ToViewModels(this IEnumerable<InstallationEntity> installations)

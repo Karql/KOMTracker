@@ -20,6 +20,8 @@ public class GetComponentQueryTests
     private readonly IInstallationRepository _installationRepo;
     private readonly IWarehouseRepository _warehouseRepo;
     private readonly IBikeRepository _bikeRepo;
+    private readonly IComponentMileageRepository _mileageRepo;
+    private readonly KomTracker.Application.Services.ComponentMileageService _mileageService;
 
     public GetComponentQueryTests()
     {
@@ -28,10 +30,13 @@ public class GetComponentQueryTests
         _installationRepo = Substitute.For<IInstallationRepository>();
         _warehouseRepo = Substitute.For<IWarehouseRepository>();
         _bikeRepo = Substitute.For<IBikeRepository>();
+        _mileageRepo = Substitute.For<IComponentMileageRepository>();
         _komUoW.GetRepository<IComponentRepository>().Returns(_componentRepo);
         _komUoW.GetRepository<IInstallationRepository>().Returns(_installationRepo);
         _komUoW.GetRepository<IWarehouseRepository>().Returns(_warehouseRepo);
         _komUoW.GetRepository<IBikeRepository>().Returns(_bikeRepo);
+        _komUoW.GetRepository<IComponentMileageRepository>().Returns(_mileageRepo);
+        _mileageService = new KomTracker.Application.Services.ComponentMileageService(_komUoW);
     }
 
     [Fact]
@@ -49,7 +54,7 @@ public class GetComponentQueryTests
             new InstallationEntity { Id = 1, UserId = "u1", ComponentId = 5, ParentComponentId = 8, Type = ComponentInstallationType.Tracked }
         });
 
-        var handler = new GetComponentQueryHandler(_komUoW);
+        var handler = new GetComponentQueryHandler(_komUoW, _mileageService);
         var result = await handler.Handle(new GetComponentQuery { Id = 5, UserId = "u1" }, CancellationToken.None);
 
         result.Should().NotBeNull();
@@ -82,7 +87,7 @@ public class GetComponentQueryTests
             new InstallationEntity { Id = 9, UserId = "u1", ComponentId = 5, ParentComponentId = 8, Type = ComponentInstallationType.Tracked }
         });
 
-        var handler = new GetComponentQueryHandler(_komUoW);
+        var handler = new GetComponentQueryHandler(_komUoW, _mileageService);
         var result = await handler.Handle(new GetComponentQuery { Id = 8, UserId = "u1" }, CancellationToken.None);
 
         result.Should().NotBeNull();
@@ -97,7 +102,7 @@ public class GetComponentQueryTests
     {
         _componentRepo.GetComponentAsync(5).Returns(new ComponentEntity { Id = 5, UserId = "other", Name = "Tyre", Category = ComponentCategory.Tire });
 
-        var handler = new GetComponentQueryHandler(_komUoW);
+        var handler = new GetComponentQueryHandler(_komUoW, _mileageService);
         var result = await handler.Handle(new GetComponentQuery { Id = 5, UserId = "u1" }, CancellationToken.None);
 
         result.Should().BeNull();

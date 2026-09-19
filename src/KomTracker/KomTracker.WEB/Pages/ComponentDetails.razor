@@ -100,8 +100,20 @@ else
                 @Field("Distance", $"{_component.InitialDistanceKm.ToString(CultureInfo.InvariantCulture)} km")
                 @Field("Moving time", _component.InitialMovingHours is { } h ? $"{h.ToString(CultureInfo.InvariantCulture)} h" : null)
                 @Field("Elevation", _component.InitialElevationM is { } e ? $"{e.ToString(CultureInfo.InvariantCulture)} m" : null)
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">The seed usage before tracking started.</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Mileage</MudText>
+                @Field("Distance", $"{_component.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture)} km")
+                @Field("Moving time", $"{_component.TotalMovingHours.ToString("N1", CultureInfo.InvariantCulture)} h")
+                @Field("Elevation", $"{_component.TotalElevationM.ToString("N0", CultureInfo.InvariantCulture)} m")
                 <MudText Typo="Typo.caption" Class="mud-text-secondary">
-                    Ride mileage from installed windows — coming in a later phase.
+                    @(_component.AttributedActivityCount > 0
+                        ? $"seed + manual + {_component.AttributedActivityCount} attributed ride(s)"
+                        : "seed + manual only — no attributed rides yet")
                 </MudText>
             </MudPaper>
         </MudItem>
@@ -143,7 +155,7 @@ else
                             <MudTh>Type</MudTh>
                             <MudTh>Position</MudTh>
                             <MudTh>Period</MudTh>
-                            <MudTh Style="text-align: right;">Manual usage</MudTh>
+                            <MudTh Style="text-align: right;">Mileage</MudTh>
                             <MudTh Style="text-align: right;">Actions</MudTh>
                         </HeaderContent>
                         <RowTemplate>
@@ -183,7 +195,7 @@ else
                                     ? "—"
                                     : $"{context.DateFrom?.ToString("yyyy-MM-dd HH:mm") ?? "?"} → {context.DateTo?.ToString("yyyy-MM-dd HH:mm") ?? "…"}")
                             </MudTd>
-                            <MudTd DataLabel="Manual usage" Style="text-align: right;">@ManualUsage(context)</MudTd>
+                            <MudTd DataLabel="Mileage" Style="text-align: right;">@Mileage(context)</MudTd>
                             <MudTd Style="text-align: right;">
                                 <MudTooltip Text="Edit">
                                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => EditInstallationAsync(context))" />
@@ -226,6 +238,7 @@ else
                                 <MudTh>Type</MudTh>
                                 <MudTh>Position</MudTh>
                                 <MudTh>Period</MudTh>
+                                <MudTh Style="text-align: right;">Mileage</MudTh>
                                 <MudTh Style="text-align: right;">Actions</MudTh>
                             </HeaderContent>
                             <RowTemplate>
@@ -251,6 +264,7 @@ else
                                         ? "—"
                                         : $"{context.DateFrom?.ToString("yyyy-MM-dd HH:mm") ?? "?"} → {context.DateTo?.ToString("yyyy-MM-dd HH:mm") ?? "…"}")
                                 </MudTd>
+                                <MudTd DataLabel="Mileage" Style="text-align: right;">@Mileage(context)</MudTd>
                                 <MudTd Style="text-align: right;">
                                     <MudTooltip Text="Edit">
                                         <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => EditInstallationAsync(context))" />
@@ -298,6 +312,21 @@ else
         if (i.ManualDistanceKm is { } km) parts.Add($"{km.ToString("N0", CultureInfo.InvariantCulture)} km");
         if (i.ManualMovingHours is { } h) parts.Add($"{h.ToString("N1", CultureInfo.InvariantCulture)} h");
         if (i.ManualElevationM is { } m) parts.Add($"{m.ToString("N0", CultureInfo.InvariantCulture)} m");
+        return parts.Count == 0 ? "—" : string.Join(" · ", parts);
+    }
+
+    // Per-window computed mileage for a Tracked row; static hand-entered totals for a Manual row.
+    private static string Mileage(InstallationViewModel i)
+    {
+        if (i.Type == ComponentInstallationType.Manual)
+        {
+            return ManualUsage(i);
+        }
+
+        var parts = new List<string>();
+        if (i.WindowDistanceKm > 0) parts.Add($"{i.WindowDistanceKm.ToString("N0", CultureInfo.InvariantCulture)} km");
+        if (i.WindowMovingHours > 0) parts.Add($"{i.WindowMovingHours.ToString("N1", CultureInfo.InvariantCulture)} h");
+        if (i.WindowElevationM > 0) parts.Add($"{i.WindowElevationM.ToString("N0", CultureInfo.InvariantCulture)} m");
         return parts.Count == 0 ? "—" : string.Join(" · ", parts);
     }
 }

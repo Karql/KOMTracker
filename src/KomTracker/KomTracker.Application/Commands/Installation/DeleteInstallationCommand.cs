@@ -2,6 +2,7 @@ using FluentResults;
 using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Notifications.Component;
 using MediatR;
 
 namespace KomTracker.Application.Commands.Installation;
@@ -16,10 +17,12 @@ public class DeleteInstallationCommand : IRequest<Result>
 public class DeleteInstallationCommandHandler : IRequestHandler<DeleteInstallationCommand, Result>
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator;
 
-    public DeleteInstallationCommandHandler(IKOMUnitOfWork komUoW)
+    public DeleteInstallationCommandHandler(IKOMUnitOfWork komUoW, IMediator mediator)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task<Result> Handle(DeleteInstallationCommand request, CancellationToken cancellationToken)
@@ -37,8 +40,11 @@ public class DeleteInstallationCommandHandler : IRequestHandler<DeleteInstallati
             return Result.Fail(new ForbiddenError("Installation does not belong to the current user."));
         }
 
+        var componentId = installation.ComponentId;
         installationRepo.Delete(installation);
         await _komUoW.SaveChangesAsync();
+
+        await _mediator.Publish(new InstallationChangedNotification { ComponentId = componentId }, cancellationToken);
 
         return Result.Ok();
     }

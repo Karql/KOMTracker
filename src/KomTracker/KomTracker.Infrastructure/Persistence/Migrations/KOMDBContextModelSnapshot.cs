@@ -484,6 +484,45 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("component", "bt");
                 });
 
+            modelBuilder.Entity("KomTracker.Domain.Entities.Component.ComponentMileageEntity", b =>
+                {
+                    b.Property<int>("ComponentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("component_id");
+
+                    b.Property<int>("AttributedActivityCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("attributed_activity_count");
+
+                    b.Property<DateTime>("AuditCD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_cd");
+
+                    b.Property<DateTime?>("AuditMD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_md");
+
+                    b.Property<DateTime>("ComputedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("computed_at");
+
+                    b.Property<decimal>("TotalDistanceKm")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_distance_km");
+
+                    b.Property<decimal>("TotalElevationM")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_elevation_m");
+
+                    b.Property<decimal>("TotalMovingHours")
+                        .HasColumnType("numeric")
+                        .HasColumnName("total_moving_hours");
+
+                    b.HasKey("ComponentId");
+
+                    b.ToTable("component_mileage", "bt");
+                });
+
             modelBuilder.Entity("KomTracker.Domain.Entities.Component.InstallationEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -1692,6 +1731,15 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("WarehouseId")
                         .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("KomTracker.Domain.Entities.Component.ComponentMileageEntity", b =>
+                {
+                    b.HasOne("KomTracker.Domain.Entities.Component.ComponentEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ComponentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("KomTracker.Domain.Entities.Component.InstallationEntity", b =>

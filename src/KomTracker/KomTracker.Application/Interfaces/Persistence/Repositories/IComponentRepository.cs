@@ -7,6 +7,9 @@ public interface IComponentRepository : IRepository
 {
     Task<IEnumerable<ComponentEntity>> GetComponentsAsync(string userId, bool includeInactive);
     Task<ComponentEntity?> GetComponentAsync(int id);
+
+    /// <summary>Components by id (batch) — for mileage recompute (not user-scoped).</summary>
+    Task<IEnumerable<ComponentEntity>> GetByIdsAsync(IReadOnlyCollection<int> componentIds);
     void AddComponent(ComponentEntity component);
     void UpdateComponent(ComponentEntity component);
     void DeleteComponent(ComponentEntity component);

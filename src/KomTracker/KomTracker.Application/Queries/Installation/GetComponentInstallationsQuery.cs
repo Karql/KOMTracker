@@ -15,10 +15,12 @@ public class GetComponentInstallationsQuery : IRequest<IEnumerable<InstallationE
 public class GetComponentInstallationsQueryHandler : IRequestHandler<GetComponentInstallationsQuery, IEnumerable<InstallationEntity>>
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly Services.ComponentMileageService _mileageService;
 
-    public GetComponentInstallationsQueryHandler(IKOMUnitOfWork komUoW)
+    public GetComponentInstallationsQueryHandler(IKOMUnitOfWork komUoW, Services.ComponentMileageService mileageService)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _mileageService = mileageService ?? throw new ArgumentNullException(nameof(mileageService));
     }
 
     public async Task<IEnumerable<InstallationEntity>> Handle(GetComponentInstallationsQuery request, CancellationToken cancellationToken)
@@ -54,6 +56,9 @@ public class GetComponentInstallationsQueryHandler : IRequestHandler<GetComponen
                 installation.ParentComponentCategory = parent.Category;
             }
         }
+
+        // Per-window mileage (Phase 3, live) — one batch for the whole list; Manual rows keep their static totals.
+        await _mileageService.ResolveWindowTotalsAsync(installations);
 
         return installations;
     }

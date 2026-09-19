@@ -2,6 +2,7 @@ using FluentResults;
 using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Notifications.Strava;
 using KomTracker.Application.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -27,13 +28,15 @@ public class SyncActivityCommandHandler : IRequestHandler<SyncActivityCommand, R
     private readonly IKOMUnitOfWork _komUoW;
     private readonly IAthleteService _athleteService;
     private readonly IStravaActivityService _activityService;
+    private readonly IMediator _mediator;
     private readonly ILogger<SyncActivityCommandHandler> _logger;
 
-    public SyncActivityCommandHandler(IKOMUnitOfWork komUoW, IAthleteService athleteService, IStravaActivityService activityService, ILogger<SyncActivityCommandHandler> logger)
+    public SyncActivityCommandHandler(IKOMUnitOfWork komUoW, IAthleteService athleteService, IStravaActivityService activityService, IMediator mediator, ILogger<SyncActivityCommandHandler> logger)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
         _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
         _activityService = activityService ?? throw new ArgumentNullException(nameof(activityService));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -59,8 +62,17 @@ public class SyncActivityCommandHandler : IRequestHandler<SyncActivityCommand, R
             return Result.Fail($"{nameof(SyncActivityCommand)} failed ({msg ?? "unknown"}).");
         }
 
+        var activity = activityRes.Value;
         var activityRepo = _komUoW.GetRepository<IActivityRepository>();
-        await activityRepo.UpsertActivityAsync(activityRes.Value);
+        await activityRepo.UpsertActivityAsync(activity);
+
+        // Announce the sync; the projection updater recomputes the components on this ride's bike (gear → bike → components).
+        await _mediator.Publish(new ActivitySyncedNotification
+        {
+            AthleteId = request.AthleteId,
+            ActivityId = request.ActivityId,
+            GearId = activity.GearId
+        }, cancellationToken);
 
         return Result.Ok();
     }

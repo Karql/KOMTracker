@@ -31,6 +31,18 @@ public class EFComponentRepository : EFBaseRepository, IComponentRepository
         return await _context.Component.FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task<IEnumerable<ComponentEntity>> GetByIdsAsync(IReadOnlyCollection<int> componentIds)
+    {
+        if (componentIds is null || componentIds.Count == 0)
+        {
+            return Enumerable.Empty<ComponentEntity>();
+        }
+
+        return await _context.Component.AsNoTracking()
+            .Where(x => componentIds.Contains(x.Id))
+            .ToListAsync();
+    }
+
     public void AddComponent(ComponentEntity component)
     {
         _context.Component.Add(component);

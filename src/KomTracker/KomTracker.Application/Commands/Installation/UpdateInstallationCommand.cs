@@ -3,6 +3,7 @@ using FluentValidation;
 using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
+using KomTracker.Application.Notifications.Component;
 using KomTracker.Domain.Entities.Component;
 using MediatR;
 
@@ -51,10 +52,12 @@ public class UpdateInstallationCommandValidator : AbstractValidator<UpdateInstal
 public class UpdateInstallationCommandHandler : IRequestHandler<UpdateInstallationCommand, Result>
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator;
 
-    public UpdateInstallationCommandHandler(IKOMUnitOfWork komUoW)
+    public UpdateInstallationCommandHandler(IKOMUnitOfWork komUoW, IMediator mediator)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task<Result> Handle(UpdateInstallationCommand request, CancellationToken cancellationToken)
@@ -141,6 +144,8 @@ public class UpdateInstallationCommandHandler : IRequestHandler<UpdateInstallati
         installationRepo.Update(installation);
 
         await _komUoW.SaveChangesAsync();
+
+        await _mediator.Publish(new InstallationChangedNotification { ComponentId = installation.ComponentId }, cancellationToken);
 
         return Result.Ok();
     }
