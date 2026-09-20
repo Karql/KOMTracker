@@ -1,8 +1,10 @@
+using System.Net;
 using System.Net.Http.Json;
 using KomTracker.API.Shared.ViewModels.Bike;
 using KomTracker.API.Shared.ViewModels.Component;
 using KomTracker.API.Shared.ViewModels.Warehouse;
 using KomTracker.Domain.Entities.Component;
+using KomTracker.WEB.Infrastructure;
 using KomTracker.WEB.Infrastructure.Services.Preference;
 using KomTracker.WEB.Models.Preference;
 using KomTracker.WEB.Shared;
@@ -192,7 +194,7 @@ public partial class Components
         }
         else
         {
-            Snackbar.Add($"Failed ({(int)response.StatusCode}).", Severity.Error);
+            await response.ShowProblemAsync(Snackbar);
         }
     }
 
@@ -211,6 +213,30 @@ public partial class Components
 
         var response = await Http.DeleteAsync($"components/{component.Id}");
 
+        if (response.StatusCode == HttpStatusCode.Conflict)
+        {
+            // A meta component may hold parts whose history a force-delete must not wipe — never force those from here
+            // (a non-meta component can never be a parent, so it's safe to offer). Precise handling is on the detail page.
+            if (component.IsMetaComponent)
+            {
+                await response.ShowProblemAsync(Snackbar);
+                return;
+            }
+
+            var forceConfirmed = await DialogService.ShowMessageBoxAsync(
+                "Delete component and its history?",
+                $"\"{component.Name}\" has installation history. Deleting it will also remove those installation records. This cannot be undone.",
+                yesText: "Delete anyway",
+                cancelText: "Cancel");
+
+            if (forceConfirmed != true)
+            {
+                return;
+            }
+
+            response = await Http.DeleteAsync($"components/{component.Id}?force=true");
+        }
+
         if (response.IsSuccessStatusCode)
         {
             Snackbar.Add("Component deleted", Severity.Success);
@@ -218,7 +244,7 @@ public partial class Components
         }
         else
         {
-            Snackbar.Add($"Delete failed ({(int)response.StatusCode}).", Severity.Error);
+            await response.ShowProblemAsync(Snackbar);
         }
     }
 

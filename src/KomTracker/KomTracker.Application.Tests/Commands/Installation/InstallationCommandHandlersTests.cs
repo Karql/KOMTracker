@@ -484,6 +484,51 @@ public class InstallationCommandHandlersTests
     }
 
     [Fact]
+    public async Task Force_delete_removes_own_history_and_deletes_the_component()
+    {
+        _componentRepo.GetComponentAsync(5).Returns(new ComponentEntity
+        {
+            Id = 5, UserId = "u1", Name = "Chain", Category = ComponentCategory.Chain
+        });
+        _installationRepo.AnyByComponentAsync(5).Returns(true);
+        _installationRepo.GetByComponentAsync(5).Returns(new[]
+        {
+            new InstallationEntity { Id = 11, ComponentId = 5, BikeId = 3, Type = ComponentInstallationType.Tracked }
+        });
+
+        var handler = new KomTracker.Application.Commands.Component.DeleteComponentCommandHandler(_komUoW);
+        var res = await handler.Handle(new KomTracker.Application.Commands.Component.DeleteComponentCommand
+        {
+            Id = 5, UserId = "u1", Force = true
+        }, CancellationToken.None);
+
+        res.Should().BeSuccess();
+        _installationRepo.Received().Delete(Arg.Is<InstallationEntity>(i => i.Id == 11));
+        _componentRepo.Received().DeleteComponent(Arg.Is<ComponentEntity>(c => c.Id == 5));
+    }
+
+    [Fact]
+    public async Task Force_delete_of_component_with_parts_inside_still_conflicts()
+    {
+        // A meta component that holds/held parts can't be forced away — its as-parent rows are the children's history.
+        _componentRepo.GetComponentAsync(8).Returns(new ComponentEntity
+        {
+            Id = 8, UserId = "u1", Name = "Wheel", Category = ComponentCategory.Wheel, IsMetaComponent = true
+        });
+        _installationRepo.AnyByParentComponentAsync(8).Returns(true);
+
+        var handler = new KomTracker.Application.Commands.Component.DeleteComponentCommandHandler(_komUoW);
+        var res = await handler.Handle(new KomTracker.Application.Commands.Component.DeleteComponentCommand
+        {
+            Id = 8, UserId = "u1", Force = true
+        }, CancellationToken.None);
+
+        res.Should().BeFailure().Which.HasError<ConflictError>();
+        _installationRepo.DidNotReceive().Delete(Arg.Any<InstallationEntity>());
+        _componentRepo.DidNotReceive().DeleteComponent(Arg.Any<ComponentEntity>());
+    }
+
+    [Fact]
     public async Task Turning_off_meta_while_it_has_children_conflicts()
     {
         _componentRepo.GetComponentAsync(8).Returns(new ComponentEntity

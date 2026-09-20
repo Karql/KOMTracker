@@ -82,7 +82,7 @@ public class ComponentsController : BaseApiController<ComponentsController>
 
     [HttpDelete]
     [Route("{id}")]
-    public async Task<IActionResult> DeleteComponent([FromRoute] int id)
+    public async Task<IActionResult> DeleteComponent([FromRoute] int id, [FromQuery] bool force = false)
     {
         var userId = GetCurrentUser()?.UserId;
         if (userId is null)
@@ -90,7 +90,7 @@ public class ComponentsController : BaseApiController<ComponentsController>
             return Unauthorized();
         }
 
-        var result = await _mediator.Send(new DeleteComponentCommand { Id = id, UserId = userId });
+        var result = await _mediator.Send(new DeleteComponentCommand { Id = id, UserId = userId, Force = force });
 
         return this.ToActionResult(result);
     }
