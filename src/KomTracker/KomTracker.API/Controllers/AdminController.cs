@@ -64,12 +64,15 @@ public class AdminController : BaseApiController<AdminController>
         return new NoContentResult();
     }
 
-    /// <summary>Sync Strava activities for all opted-in athletes. Omit afterDays ⇒ full pull; else last N days.</summary>
+    /// <summary>
+    /// Sync Strava activities. Omit afterDays ⇒ full pull; else last N days. Omit athleteId ⇒ all opted-in athletes;
+    /// else just that one.
+    /// </summary>
     [HttpPut("sync-activities")]
-    public async Task<ActionResult> SyncActivities([FromQuery] int? afterDays, CancellationToken cancellationToken)
+    public async Task<ActionResult> SyncActivities([FromQuery] int? afterDays, [FromQuery] int? athleteId, CancellationToken cancellationToken)
     {
         var after = afterDays.HasValue ? DateTime.UtcNow.AddDays(-afterDays.Value) : (DateTime?)null;
-        await _mediator.Send(new SyncActivitiesCommand { After = after }, cancellationToken);
+        await _mediator.Send(new SyncActivitiesCommand { After = after, AthleteId = athleteId }, cancellationToken);
 
         return new NoContentResult();
     }
