@@ -109,11 +109,16 @@ else
 
         <MudItem xs="12">
             <MudPaper Class="pa-4" Outlined="true">
-                <div class="d-flex align-center mb-2" style="gap: 8px;">
+                <div class="d-flex align-center mb-2" style="gap: 8px; flex-wrap: wrap;">
                     <MudText Typo="Typo.subtitle1">Installed components</MudText>
                     <MudSpacer />
+                    <MudMenu Label="Add component" StartIcon="@Icons.Material.Filled.Add" EndIcon="@Icons.Material.Filled.ArrowDropDown"
+                             Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small">
+                        <MudMenuItem OnClick="AddComponentAsync">Add component</MudMenuItem>
+                        <MudMenuItem OnClick="AddOemComponentAsync">Add OEM component</MudMenuItem>
+                    </MudMenu>
                     <MudButton StartIcon="@Icons.Material.Filled.AddCircleOutline" Size="Size.Small"
-                               Variant="Variant.Filled" Color="Color.Primary" OnClick="InstallAsync">Install component</MudButton>
+                               Variant="Variant.Outlined" Color="Color.Primary" OnClick="InstallAsync">Install component</MudButton>
                 </div>
 
                 @if (!_installations.Any())
@@ -165,7 +170,7 @@ else
                                     <MudTooltip Text="Move to another parent">
                                         <MudIconButton Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small" OnClick="@(() => MoveAsync(context))" />
                                     </MudTooltip>
-                                    <MudTooltip Text="Remove">
+                                    <MudTooltip Text="Uninstall">
                                         <MudIconButton Icon="@Icons.Material.Filled.RemoveCircleOutline" Size="Size.Small" OnClick="@(() => RemoveAsync(context))" />
                                     </MudTooltip>
                                 }

@@ -28,6 +28,11 @@ public class InstallComponentCommand : IRequest<Result<InstallationEntity>>
     public ComponentInstallationType Type { get; set; }
 
     public DateTime? DateFrom { get; set; }
+
+    /// <summary>Optional (Tracked only). Set ⇒ this installation is created already closed (a historical window) —
+    /// no active-exclusivity check, and the component's warehouse location is left untouched.</summary>
+    public DateTime? DateTo { get; set; }
+
     public InstallationPosition? Position { get; set; }
 
     // Manual only
@@ -53,6 +58,9 @@ public class InstallComponentCommandValidator : AbstractValidator<InstallCompone
         When(x => x.Type == ComponentInstallationType.Tracked, () =>
         {
             RuleFor(x => x.DateFrom).NotNull();
+            RuleFor(x => x)
+                .Must(x => x.DateTo is null || (x.DateFrom.HasValue && x.DateTo > x.DateFrom))
+                .WithMessage("Uninstall date must be after the install date.");
         });
 
         RuleFor(x => x.ManualDistanceKm).GreaterThanOrEqualTo(0).When(x => x.ManualDistanceKm.HasValue);
@@ -132,7 +140,9 @@ public class InstallComponentCommandHandler : IRequestHandler<InstallComponentCo
 
         var tracked = request.Type == ComponentInstallationType.Tracked;
 
-        if (tracked)
+        // Only an ACTIVE placement (open window) needs the D-7 invariant; a closed historical window (DateTo set) is
+        // never "active", so it can't violate active-exclusivity — mirrors UpdateInstallationCommand.
+        if (tracked && request.DateTo is null)
         {
             // D-7 linkage invariant (homogeneity, distinct bikes, one-level comp-in-comp, no cycle).
             var invariant = await InstallationInvariant.CheckAsync(
@@ -152,7 +162,7 @@ public class InstallComponentCommandHandler : IRequestHandler<InstallComponentCo
             Type = request.Type,
             Position = request.Position,
             DateFrom = tracked ? InstallationDateHelper.EnsureUtc(request.DateFrom) : null,
-            DateTo = null,
+            DateTo = tracked ? InstallationDateHelper.EnsureUtc(request.DateTo) : null,
             ManualDistanceKm = tracked ? null : request.ManualDistanceKm,
             ManualMovingHours = tracked ? null : request.ManualMovingHours,
             ManualElevationM = tracked ? null : request.ManualElevationM
@@ -160,8 +170,9 @@ public class InstallComponentCommandHandler : IRequestHandler<InstallComponentCo
 
         installationRepo.Add(installation);
 
-        // Installing (Tracked) places the component — it's no longer sitting in a warehouse (D-2b1-5).
-        if (tracked && component.WarehouseId is not null)
+        // Installing (Tracked, active) places the component — it's no longer sitting in a warehouse (D-2b1-5).
+        // A closed historical window (DateTo set) doesn't change where the component sits now.
+        if (tracked && request.DateTo is null && component.WarehouseId is not null)
         {
             component.WarehouseId = null;
             componentRepo.UpdateComponent(component);

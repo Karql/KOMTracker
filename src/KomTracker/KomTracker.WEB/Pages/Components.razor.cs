@@ -115,13 +115,24 @@ public partial class Components
     private async Task AddAsync()
     {
         var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
-        var dialog = await DialogService.ShowAsync<AddEditComponentDialog>("Add component", options);
-        var result = await dialog.Result;
+        var addDialog = await DialogService.ShowAsync<AddEditComponentDialog>("Add component", options);
+        var addResult = await addDialog.Result;
 
-        if (result is not null && !result.Canceled)
+        if (addResult is null || addResult.Canceled || addResult.Data is not ComponentViewModel saved)
         {
-            await LoadComponentsAsync();
+            return;
         }
+
+        // Chain straight into installing the just-created component (Cancel leaves it created, uninstalled).
+        var installParameters = new DialogParameters<InstallComponentDialog>
+        {
+            { x => x.ComponentId, saved.Id },
+            { x => x.ComponentName, saved.Name }
+        };
+        var installDialog = await DialogService.ShowAsync<InstallComponentDialog>("Install component", installParameters, options);
+        await installDialog.Result;
+
+        await LoadComponentsAsync();
     }
 
     private async Task InstallAsync(ComponentViewModel component)

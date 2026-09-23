@@ -12,6 +12,10 @@ public class InstallComponentViewModel
     public ComponentInstallationType Type { get; set; }
 
     public DateTime? DateFrom { get; set; }
+
+    /// <summary>Optional (Tracked only): set to record an already-closed historical window in one step.</summary>
+    public DateTime? DateTo { get; set; }
+
     public InstallationPosition? Position { get; set; }
 
     // Manual only

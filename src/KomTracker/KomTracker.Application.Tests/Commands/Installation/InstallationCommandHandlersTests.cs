@@ -79,6 +79,26 @@ public class InstallationCommandHandlersTests
     }
 
     [Fact]
+    public async Task Install_with_removal_date_creates_a_closed_window_and_keeps_warehouse()
+    {
+        OwnComponent(5, warehouseId: 9);
+        OwnBike(3);
+
+        var handler = new InstallComponentCommandHandler(_komUoW, _mediator);
+        var res = await handler.Handle(new InstallComponentCommand
+        {
+            UserId = "u1", ComponentId = 5, BikeId = 3, Type = ComponentInstallationType.Tracked,
+            DateFrom = new DateTime(2026, 1, 1), DateTo = new DateTime(2026, 6, 1)
+        }, CancellationToken.None);
+
+        res.Should().BeSuccess();
+        _installationRepo.Received().Add(Arg.Is<InstallationEntity>(i =>
+            i.ComponentId == 5 && i.BikeId == 3 && i.DateTo != null));
+        // A closed historical window doesn't move the component out of its warehouse.
+        _componentRepo.DidNotReceive().UpdateComponent(Arg.Any<ComponentEntity>());
+    }
+
+    [Fact]
     public async Task Install_triggers_mileage_recompute_for_the_component()
     {
         OwnComponent(5);

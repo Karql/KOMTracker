@@ -5,20 +5,20 @@
 <MudDialog>
     <DialogContent>
         <MudText Typo="Typo.body2" Class="mb-3">
-            Remove <b>@Installation.ComponentName</b>@(string.IsNullOrEmpty(Installation.BikeName) ? "" : $" from {Installation.BikeName}").
+            Uninstall <b>@Installation.ComponentName</b>@(string.IsNullOrEmpty(Installation.BikeName) ? "" : $" from {Installation.BikeName}").
             The installation window is closed; the component becomes unassigned.
         </MudText>
         <MudForm @ref="_form">
             <div class="d-flex" style="gap: 12px;">
-                <MudDatePicker @bind-Date="_dateTo" Label="Removal date" Required="true"
-                               RequiredError="Removal date is required" Style="flex: 2;" />
+                <MudDatePicker @bind-Date="_dateTo" Label="Uninstall date" Required="true"
+                               RequiredError="Uninstall date is required" Style="flex: 2;" />
                 <MudTimePicker @bind-Time="_dateToTime" Label="Time" Style="flex: 1;" />
             </div>
         </MudForm>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Remove</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Uninstall</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -54,7 +54,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                Snackbar.Add("Component removed", Severity.Success);
+                Snackbar.Add("Component uninstalled", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
                 return;
             }

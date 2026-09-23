@@ -140,7 +140,7 @@ public partial class ComponentDetails
     {
         var parameters = new DialogParameters<RemoveInstallationDialog> { { x => x.Installation, installation } };
         var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true, CloseButton = true };
-        var dialog = await DialogService.ShowAsync<RemoveInstallationDialog>("Remove component", parameters, options);
+        var dialog = await DialogService.ShowAsync<RemoveInstallationDialog>("Uninstall component", parameters, options);
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)

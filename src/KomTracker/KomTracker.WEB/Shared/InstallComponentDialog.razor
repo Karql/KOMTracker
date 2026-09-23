@@ -105,6 +105,12 @@
                                    RequiredError="Install date is required" Class="mt-3" Style="flex: 2;" />
                     <MudTimePicker @bind-Time="_dateFromTime" Label="Time" Class="mt-3" Style="flex: 1;" />
                 </div>
+                <div class="d-flex" style="gap: 12px;">
+                    <MudDatePicker @bind-Date="_dateTo" Label="Uninstall date (optional)" Clearable="true"
+                                   Class="mt-3" Style="flex: 2;" />
+                    <MudTimePicker @bind-Time="_dateToTime" Label="Time" Class="mt-3" Style="flex: 1;" />
+                </div>
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">Set it to record a historical, already-removed installation in one step.</MudText>
             }
             else
             {
@@ -137,6 +143,12 @@
     /// <summary>Preselect the install type (e.g. Manual for "Add manual usage").</summary>
     [Parameter] public ComponentInstallationType DefaultType { get; set; } = ComponentInstallationType.Tracked;
 
+    /// <summary>Component-context mode: preselect this bike as the target (user can still change it).</summary>
+    [Parameter] public int? PreselectBikeId { get; set; }
+
+    /// <summary>Prefill the install date (e.g. a bike's purchase date for an OEM component).</summary>
+    [Parameter] public DateTime? DefaultDateFrom { get; set; }
+
     [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
@@ -146,6 +158,8 @@
     private InstallationPosition? _position;
     private DateTime? _dateFrom = DateTime.UtcNow.Date;
     private TimeSpan? _dateFromTime = TimeSpan.Zero;
+    private DateTime? _dateTo;
+    private TimeSpan? _dateToTime = TimeSpan.Zero;
     private decimal? _manualDistanceKm;
     private decimal? _manualMovingHours;
     private decimal? _manualElevationM;
@@ -162,6 +176,19 @@
     protected override async Task OnInitializedAsync()
     {
         _type = DefaultType;
+
+        if (DefaultDateFrom is not null)
+        {
+            _dateFrom = DefaultDateFrom.Value.Date;
+            _dateFromTime = DefaultDateFrom.Value.TimeOfDay;
+        }
+
+        // Component-context mode: preselect the given bike as the target.
+        if (BikeId is null && PreselectBikeId is not null)
+        {
+            _targetKind = TargetKind.Bike;
+            _bikeId = PreselectBikeId;
+        }
 
         if (BikeId is not null)
         {
@@ -248,6 +275,7 @@
             Type = _type,
             Position = _position,
             DateFrom = tracked ? _dateFrom?.Date + (_dateFromTime ?? TimeSpan.Zero) : null,
+            DateTo = tracked && _dateTo is not null ? _dateTo.Value.Date + (_dateToTime ?? TimeSpan.Zero) : null,
             ManualDistanceKm = tracked ? null : _manualDistanceKm,
             ManualMovingHours = tracked ? null : _manualMovingHours,
             ManualElevationM = tracked ? null : _manualElevationM

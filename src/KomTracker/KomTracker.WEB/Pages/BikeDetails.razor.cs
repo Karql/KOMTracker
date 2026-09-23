@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using KomTracker.API.Shared.ViewModels.Bike;
+using KomTracker.API.Shared.ViewModels.Component;
 using KomTracker.API.Shared.ViewModels.Installation;
 using KomTracker.Domain.Entities.Bike;
 using KomTracker.WEB.Shared;
@@ -78,6 +79,54 @@ public partial class BikeDetails
         }
     }
 
+    private Task AddComponentAsync() => AddThenInstallAsync(oem: false);
+
+    private Task AddOemComponentAsync() => AddThenInstallAsync(oem: true);
+
+    // Create a component then chain straight into installing it on THIS bike (preselected). OEM copies the bike's
+    // purchase info onto the component (price 0) and prefills the install date with the bike's purchase date.
+    private async Task AddThenInstallAsync(bool oem)
+    {
+        if (_bike is null)
+        {
+            return;
+        }
+
+        var addParameters = new DialogParameters<AddEditComponentDialog>();
+        if (oem)
+        {
+            addParameters.Add(x => x.DefaultPurchaseDate, _bike.PurchaseDate);
+            addParameters.Add(x => x.DefaultPurchasePlace, _bike.PurchasePlace);
+            addParameters.Add(x => x.DefaultPrice, 0m);
+        }
+
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var addDialog = await DialogService.ShowAsync<AddEditComponentDialog>(
+            oem ? "Add OEM component" : "Add component", addParameters, options);
+        var addResult = await addDialog.Result;
+
+        if (addResult is null || addResult.Canceled || addResult.Data is not ComponentViewModel saved)
+        {
+            return;
+        }
+
+        var installParameters = new DialogParameters<InstallComponentDialog>
+        {
+            { x => x.ComponentId, saved.Id },
+            { x => x.ComponentName, saved.Name },
+            { x => x.PreselectBikeId, _bike.Id }
+        };
+        if (oem)
+        {
+            installParameters.Add(x => x.DefaultDateFrom, _bike.PurchaseDate);
+        }
+
+        var installDialog = await DialogService.ShowAsync<InstallComponentDialog>("Install component", installParameters, options);
+        await installDialog.Result;
+
+        await LoadAsync();
+    }
+
     private async Task MoveAsync(InstallationViewModel installation)
     {
         var parameters = new DialogParameters<MoveInstallationDialog> { { x => x.Installation, installation } };
@@ -95,7 +144,7 @@ public partial class BikeDetails
     {
         var parameters = new DialogParameters<RemoveInstallationDialog> { { x => x.Installation, installation } };
         var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, FullWidth = true, CloseButton = true };
-        var dialog = await DialogService.ShowAsync<RemoveInstallationDialog>("Remove component", parameters, options);
+        var dialog = await DialogService.ShowAsync<RemoveInstallationDialog>("Uninstall component", parameters, options);
         var result = await dialog.Result;
 
         if (result is not null && !result.Canceled)

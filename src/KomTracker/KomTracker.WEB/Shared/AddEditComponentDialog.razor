@@ -49,7 +49,7 @@
             }
 
             <MudExpansionPanels Elevation="0" Class="mt-3">
-                <MudExpansionPanel Text="Additional details">
+                <MudExpansionPanel Text="Additional details" @bind-Expanded="_detailsExpanded">
                     <MudNumericField @bind-Value="_model.WeightKg" Label="Weight (kg)" Min="0" />
                     <MudNumericField @bind-Value="_model.Price" Label="Price" Min="0" Class="mt-3" />
                     <MudTextField @bind-Value="_model.PurchasePlace" Label="Purchase place" MaxLength="200" Class="mt-3" />
@@ -75,6 +75,11 @@
     /// <summary>Null = add; non-null = edit.</summary>
     [Parameter] public ComponentViewModel? Component { get; set; }
 
+    // Create-only prefills (e.g. "Add OEM component" copies the bike's purchase info; price defaults to 0).
+    [Parameter] public DateTime? DefaultPurchaseDate { get; set; }
+    [Parameter] public string? DefaultPurchasePlace { get; set; }
+    [Parameter] public decimal? DefaultPrice { get; set; }
+
     [Inject] private HttpClient Http { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
@@ -82,6 +87,7 @@
     private SaveComponentViewModel _model = new();
     private ComponentCategory? _categoryValue;   // null until the user picks one (placeholder shown; Required-guarded)
     private DateTime? _purchaseDate;
+    private bool _detailsExpanded;
     private IEnumerable<WarehouseViewModel> _warehouses = Enumerable.Empty<WarehouseViewModel>();
     private bool _saving;
 
@@ -111,6 +117,15 @@
             };
             _categoryValue = Component.Category;
             _purchaseDate = Component.PurchaseDate;
+        }
+        else if (DefaultPurchaseDate is not null || DefaultPurchasePlace is not null || DefaultPrice is not null)
+        {
+            // OEM preset — copy the bike's purchase info so it's visible/editable up front.
+            _model.PurchaseDate = DefaultPurchaseDate;
+            _model.PurchasePlace = DefaultPurchasePlace;
+            _model.Price = DefaultPrice;
+            _purchaseDate = DefaultPurchaseDate;
+            _detailsExpanded = true;
         }
     }
 

@@ -59,6 +59,7 @@ public class InstallationsController : BaseApiController<InstallationsController
             ParentComponentId = model.ParentComponentId,
             Type = model.Type,
             DateFrom = model.DateFrom,
+            DateTo = model.DateTo,
             Position = model.Position,
             ManualDistanceKm = model.ManualDistanceKm,
             ManualMovingHours = model.ManualMovingHours,
