@@ -45,4 +45,15 @@ public class EFBikeRepository : EFBaseRepository, IBikeRepository
     {
         _context.Bike.Remove(bike);
     }
+
+    public async Task<(IReadOnlyList<string> Brands, IReadOnlyList<string> Models, IReadOnlyList<string> PurchasePlaces)> GetDistinctPurchaseFieldsAsync(string userId)
+    {
+        var scoped = _context.Bike.AsNoTracking().Where(x => x.UserId == userId);
+
+        var brands = await scoped.Where(x => x.Brand != null && x.Brand != "").Select(x => x.Brand!).Distinct().ToListAsync();
+        var models = await scoped.Where(x => x.Model != null && x.Model != "").Select(x => x.Model!).Distinct().ToListAsync();
+        var places = await scoped.Where(x => x.PurchasePlace != null && x.PurchasePlace != "").Select(x => x.PurchasePlace!).Distinct().ToListAsync();
+
+        return (brands, models, places);
+    }
 }
