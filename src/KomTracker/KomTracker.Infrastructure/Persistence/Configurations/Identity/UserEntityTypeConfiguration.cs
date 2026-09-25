@@ -69,5 +69,11 @@ public class UserEntityTypeConfiguration
 
         builder.Property(x => x.AthleteId)
             .HasColumnName("athlete_id");
+
+        builder.Property(x => x.Currency)
+            .HasColumnName("currency")
+            .HasMaxLength(3)
+            .IsRequired()
+            .HasDefaultValue("PLN");
     }
 }

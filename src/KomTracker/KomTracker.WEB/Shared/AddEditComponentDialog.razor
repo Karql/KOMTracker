@@ -53,14 +53,14 @@
 
             <MudExpansionPanels Elevation="0" Class="mt-3">
                 <MudExpansionPanel Text="Additional details" @bind-Expanded="_detailsExpanded">
-                    <MudNumericField @bind-Value="_model.WeightKg" Label="Weight (kg)" Min="0" />
-                    <MudNumericField @bind-Value="_model.Price" Label="Price" Min="0" Class="mt-3" />
+                    <MudNumericField @bind-Value="_model.WeightKg" Label="Weight (kg)" Min="0" Converter="InputConverters.Decimal" />
+                    <MudNumericField @bind-Value="_model.Price" Label="Price" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
                     <MudAutocomplete T="string" @bind-Value="_model.PurchasePlace" Label="Purchase place" Class="mt-3"
                                      SearchFunc="SearchPlaces" CoerceValue="true" Clearable="true" MaxItems="@((int?)null)" />
-                    <MudDatePicker @bind-Date="_purchaseDate" Label="Purchase date" Class="mt-3" />
-                    <MudNumericField @bind-Value="_model.InitialDistanceKm" Label="Initial distance (km)" Min="0" Class="mt-3" />
-                    <MudNumericField @bind-Value="_model.InitialMovingHours" Label="Initial moving time (h)" Min="0" Class="mt-3" />
-                    <MudNumericField @bind-Value="_model.InitialElevationM" Label="Initial elevation (m)" Min="0" Class="mt-3" />
+                    <MudDatePicker @bind-Date="_purchaseDate" Label="Purchase date" Class="mt-3" DateFormat="yyyy-MM-dd" Editable="true" />
+                    <MudNumericField @bind-Value="_model.InitialDistanceKm" Label="Initial distance (km)" Min="0" Class="mt-3" Converter="InputConverters.DecimalRequired" />
+                    <MudNumericField @bind-Value="_model.InitialMovingHours" Label="Initial moving time (h)" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
+                    <MudNumericField @bind-Value="_model.InitialElevationM" Label="Initial elevation (m)" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
                     <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
                 </MudExpansionPanel>
             </MudExpansionPanels>

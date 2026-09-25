@@ -11,4 +11,7 @@ public class UserEntity : IdentityUser
 {
     public int AthleteId { get; set; }
     public virtual AthleteEntity Athlete { get; set; }
+
+    /// <summary>Preferred display currency (ISO code, e.g. "PLN"). NOT NULL, defaults to PLN.</summary>
+    public string Currency { get; set; } = "PLN";
 }

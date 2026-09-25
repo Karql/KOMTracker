@@ -11,7 +11,7 @@
         <MudForm @ref="_form">
             <div class="d-flex" style="gap: 12px;">
                 <MudDatePicker @bind-Date="_dateTo" Label="Uninstall date" Required="true"
-                               RequiredError="Uninstall date is required" Style="flex: 2;" />
+                               RequiredError="Uninstall date is required" Style="flex: 2;" DateFormat="yyyy-MM-dd" Editable="true" />
                 <MudTimePicker @bind-Time="_dateToTime" Label="Time" Style="flex: 1;" />
             </div>
         </MudForm>

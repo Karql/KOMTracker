@@ -2,6 +2,7 @@
 using KomTracker.API.Shared.Models.User;
 using KomTracker.API.Shared.ViewModels.BikeTracker;
 using KomTracker.WEB.Infrastructure;
+using KomTracker.WEB.Infrastructure.Services.Currency;
 using KomTracker.WEB.Infrastructure.Services.User;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
@@ -38,6 +39,9 @@ public partial class Account
     [Inject]
     private IConfiguration Configuration { get; set; } = default!;
 
+    [Inject]
+    private ICurrencyPreference CurrencyPreference { get; set; } = default!;
+
     //public bool KomsChangesNotification { get; set; } = true;
     //public bool NotificationEmail_2 { get; set; }
     //public bool NotificationEmail_3 { get; set; }
@@ -45,6 +49,7 @@ public partial class Account
 
     private bool _profileDetailsValid = false;
     private string? _email;
+    private string _currency = Currencies.Default;
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,6 +61,7 @@ public partial class Account
         _user = await UserService.GetCurrentUser();
 
         _email = _user.Email;
+        _currency = await CurrencyPreference.GetAsync();
 
         await LoadStravaStatusAsync();
 
@@ -172,6 +178,23 @@ public partial class Account
         var upgradeUrl = $"{authority}/account/upgrade?mode={mode}&returnUrl={Uri.EscapeDataString(returnUrl)}";
 
         Navigation.NavigateTo(upgradeUrl, forceLoad: true);
+    }
+
+    private async Task OnCurrencyChangedAsync(string currency)
+    {
+        _currency = currency;
+
+        var res = await Http.PutAsync($"athletes/{_user.AthleteId}/currency/{currency}", null);
+
+        if (res.IsSuccessStatusCode)
+        {
+            CurrencyPreference.Set(currency);
+            Snackbar.Add("Currency updated.", Severity.Success);
+        }
+        else
+        {
+            await res.ShowProblemAsync(Snackbar);
+        }
     }
 
     private async Task ChangeEmailAsync()

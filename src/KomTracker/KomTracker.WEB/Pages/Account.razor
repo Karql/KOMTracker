@@ -1,5 +1,6 @@
 ﻿@page "/account"
 @using System.ComponentModel.DataAnnotations
+@using KomTracker.WEB.Infrastructure
 @attribute [Authorize]
 
 @if (!_loaded)
@@ -51,8 +52,17 @@ else
                                     </MudItem>
                                     <MudItem xs="12" md="6">
                                         @*TODO: Validate Disabled same address*@
-                                        <MudTextField @bind-Value="_email" Label="Email" Variant="Variant.Outlined" HelperText="For notifications"                                             
+                                        <MudTextField @bind-Value="_email" Label="Email" Variant="Variant.Outlined" HelperText="For notifications"
                                             Required="true" Validation="@(new EmailAddressAttribute() {ErrorMessage = "The email address is invalid"})" InputType="InputType.Email" />
+                                    </MudItem>
+                                    <MudItem xs="12" md="6">
+                                        <MudSelect T="string" Value="_currency" ValueChanged="OnCurrencyChangedAsync"
+                                                   Label="Currency" Variant="Variant.Outlined" HelperText="Shown next to prices">
+                                            @foreach (var c in Currencies.All)
+                                            {
+                                                <MudSelectItem T="string" Value="@c.Code">@Currencies.Display(c)</MudSelectItem>
+                                            }
+                                        </MudSelect>
                                     </MudItem>
                                 </MudGrid>
                             </MudForm>

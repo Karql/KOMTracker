@@ -4,6 +4,7 @@
 @using KomTracker.API.Shared.ViewModels.Component
 @using KomTracker.API.Shared.ViewModels.Installation
 @using KomTracker.Domain.Entities.Component
+@using KomTracker.WEB.Infrastructure
 @using KomTracker.WEB.Models.Component
 
 <PageTitle>Component</PageTitle>
@@ -88,7 +89,7 @@ else
         <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Outlined="true">
                 <MudText Typo="Typo.subtitle1" Class="mb-2">Purchase</MudText>
-                @Field("Price", _component.Price?.ToString(CultureInfo.InvariantCulture))
+                @Field("Price", _component.Price is { } price ? Currencies.Format(price, _currency) : null)
                 @Field("Place", _component.PurchasePlace)
                 @Field("Date", _component.PurchaseDate?.ToString("yyyy-MM-dd"))
             </MudPaper>
@@ -124,7 +125,7 @@ else
                 <MudPaper Class="pa-4" Outlined="true">
                     <MudText Typo="Typo.subtitle1" Class="mb-2">Sale</MudText>
                     @Field("Sale date", _component.SaleDate?.ToString("yyyy-MM-dd"))
-                    @Field("Sale price", _component.SalePrice?.ToString(CultureInfo.InvariantCulture))
+                    @Field("Sale price", _component.SalePrice is { } salePrice ? Currencies.Format(salePrice, _currency) : null)
                 </MudPaper>
             </MudItem>
         }

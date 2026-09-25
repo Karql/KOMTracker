@@ -91,6 +91,23 @@ public class UserService : IUserService
         return Result.Fail(new ConfirmEmailChangeError(ConfirmEmailChangeError.ChangeEmailFailed) { ChangeEmailFailedMsg = error.Description });
     }
 
+    public async Task<Result> UpdateCurrencyAsync(int athleteId, string currency)
+    {
+        var user = await GetUserByAthleteIdAsync(athleteId);
+
+        if (user == null)
+        {
+            return Result.Fail(new Application.Errors.NotFoundError($"User for athlete {athleteId} not found."));
+        }
+
+        user.Currency = currency;
+        var res = await _userManager.UpdateAsync(user);
+
+        return res.Succeeded
+            ? Result.Ok()
+            : Result.Fail(string.Join("; ", res.Errors.Select(e => e.Description)));
+    }
+
     private Task<UserEntity> GetUserByAthleteIdAsync(int athleteId)
     {
         return _userManager.Users.FirstOrDefaultAsync(x => x.AthleteId == athleteId);

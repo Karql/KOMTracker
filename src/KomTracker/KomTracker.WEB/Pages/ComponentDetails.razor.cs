@@ -4,6 +4,7 @@ using KomTracker.API.Shared.ViewModels.Component;
 using KomTracker.API.Shared.ViewModels.Installation;
 using KomTracker.Domain.Entities.Component;
 using KomTracker.WEB.Infrastructure;
+using KomTracker.WEB.Infrastructure.Services.Currency;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -18,6 +19,7 @@ public partial class ComponentDetails
     private ComponentViewModel? _component;
     private IReadOnlyList<InstallationViewModel> _installations = Array.Empty<InstallationViewModel>();
     private InstallationViewModel? _current;
+    private string _currency = Currencies.Default;
 
     [CascadingParameter]
     public required MainLayout Layout { get; set; }
@@ -26,6 +28,7 @@ public partial class ComponentDetails
     [Inject] private IDialogService DialogService { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private ICurrencyPreference CurrencyPreference { get; set; } = default!;
 
     // Tracks the component currently loaded, so navigating between component-detail pages (parent/child links)
     // re-fetches instead of showing stale data (same page component, Id parameter changes).
@@ -40,6 +43,8 @@ public partial class ComponentDetails
 
         _loadedId = Id;
         _loaded = false;
+
+        _currency = await CurrencyPreference.GetAsync();
 
         Layout.SetBreadCrumbs(new List<BreadcrumbItem>
         {

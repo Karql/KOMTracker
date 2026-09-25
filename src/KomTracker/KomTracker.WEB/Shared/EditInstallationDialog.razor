@@ -47,20 +47,20 @@
             {
                 <div class="d-flex" style="gap: 12px;">
                     <MudDatePicker @bind-Date="_dateFrom" Label="Install date" Required="true"
-                                   RequiredError="Install date is required" Class="mt-3" Style="flex: 2;" />
+                                   RequiredError="Install date is required" Class="mt-3" Style="flex: 2;" DateFormat="yyyy-MM-dd" Editable="true" />
                     <MudTimePicker @bind-Time="_dateFromTime" Label="Time" Class="mt-3" Style="flex: 1;" />
                 </div>
                 <div class="d-flex" style="gap: 12px;">
-                    <MudDatePicker @bind-Date="_dateTo" Label="Removal date" Clearable="true" Class="mt-3" Style="flex: 2;" />
+                    <MudDatePicker @bind-Date="_dateTo" Label="Uninstall date" Clearable="true" Class="mt-3" Style="flex: 2;" DateFormat="yyyy-MM-dd" Editable="true" />
                     <MudTimePicker @bind-Time="_dateToTime" Label="Time" Class="mt-3" Style="flex: 1;" />
                 </div>
                 <MudText Typo="Typo.caption" Class="mud-text-secondary">Leave the removal date empty to keep it currently installed.</MudText>
             }
             else
             {
-                <MudNumericField @bind-Value="_manualDistanceKm" Label="Distance (km)" Min="0" Class="mt-3" />
-                <MudNumericField @bind-Value="_manualMovingHours" Label="Moving time (h)" Min="0" Class="mt-3" />
-                <MudNumericField @bind-Value="_manualElevationM" Label="Elevation (m)" Min="0" Class="mt-3" />
+                <MudNumericField @bind-Value="_manualDistanceKm" Label="Distance (km)" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
+                <MudNumericField @bind-Value="_manualMovingHours" Label="Moving time (h)" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
+                <MudNumericField @bind-Value="_manualElevationM" Label="Elevation (m)" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
             }
         </MudForm>
     </DialogContent>

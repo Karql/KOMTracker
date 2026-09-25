@@ -12,4 +12,5 @@ public class UserModel
     public int AthleteId { get; set; }
     public string? Email { get; set; }
     public bool EmailConfirmed { get; set; }
+    public string Currency { get; set; } = "PLN";
 }

@@ -4,6 +4,8 @@ using KomTracker.API.Shared.ViewModels.Bike;
 using KomTracker.API.Shared.ViewModels.Component;
 using KomTracker.API.Shared.ViewModels.Installation;
 using KomTracker.Domain.Entities.Bike;
+using KomTracker.WEB.Infrastructure;
+using KomTracker.WEB.Infrastructure.Services.Currency;
 using KomTracker.WEB.Shared;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -17,6 +19,7 @@ public partial class BikeDetails
     private bool _loaded;
     private BikeViewModel? _bike;
     private IReadOnlyList<InstallationViewModel> _installations = Array.Empty<InstallationViewModel>();
+    private string _currency = Currencies.Default;
 
     [CascadingParameter]
     public required MainLayout Layout { get; set; }
@@ -25,6 +28,7 @@ public partial class BikeDetails
     [Inject] private IDialogService DialogService { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private ICurrencyPreference CurrencyPreference { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -33,6 +37,8 @@ public partial class BikeDetails
             new BreadcrumbItem("Bikes", href: "bikes"),
             new BreadcrumbItem("Details", href: $"bikes/{Id}"),
         });
+
+        _currency = await CurrencyPreference.GetAsync();
 
         await LoadAsync();
 

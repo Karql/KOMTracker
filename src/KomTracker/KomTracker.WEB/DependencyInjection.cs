@@ -1,6 +1,7 @@
 ﻿using Blazored.LocalStorage;
 using FisSst.BlazorMaps.DependencyInjection;
 using KomTracker.WEB.Infrastructure;
+using KomTracker.WEB.Infrastructure.Services.Currency;
 using KomTracker.WEB.Infrastructure.Services.Preference;
 using KomTracker.WEB.Infrastructure.Services.User;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
@@ -30,6 +31,7 @@ public static class DependencyInjection
 
         services.AddScoped<IPreferenceService, PreferenceService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ICurrencyPreference, CurrencyPreference>();
 
         services.AddBlazoredLocalStorage();
 

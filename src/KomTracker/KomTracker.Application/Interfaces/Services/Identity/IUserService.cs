@@ -11,6 +11,7 @@ public interface IUserService
     Task AddUserAsync(AthleteEntity athlete);
     Task<Result<string>> GenerateChangeEmailUrlAsync(int athleteId, string newEmail);
     Task<Result> ConfirmEmailChangeAsync(int athleteId, string newEmail, string token);
+    Task<Result> UpdateCurrencyAsync(int athleteId, string currency);
 }
 
 public class GenerateChangeEmailUrlError : FluentResults.Error

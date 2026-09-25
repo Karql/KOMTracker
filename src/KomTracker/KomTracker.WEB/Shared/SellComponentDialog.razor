@@ -14,9 +14,9 @@
             </MudAlert>
         }
         <MudForm @ref="_form">
-            <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Required="true" RequiredError="Sale date is required" />
+            <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Required="true" RequiredError="Sale date is required" DateFormat="yyyy-MM-dd" Editable="true" />
             <MudNumericField @bind-Value="_salePrice" Label="Sale price" Min="0" Required="true"
-                             RequiredError="Sale price is required" Class="mt-3" />
+                             RequiredError="Sale price is required" Class="mt-3" Converter="InputConverters.Decimal" />
             <MudTextField @bind-Value="_notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
         </MudForm>
     </DialogContent>

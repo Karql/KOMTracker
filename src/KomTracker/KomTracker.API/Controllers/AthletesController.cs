@@ -1,7 +1,10 @@
 ﻿using KomTracker.API.Attributes;
+using KomTracker.API.Extensions;
+using KomTracker.API.Shared.ViewModels.Account;
 using KomTracker.API.Shared.ViewModels.Club;
 using KomTracker.API.Shared.ViewModels.Segment;
 using KomTracker.Application.Commands.Account;
+using KomTracker.Application.Queries.Account;
 using KomTracker.Application.Queries.Athlete;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -74,5 +77,38 @@ public class AthletesController : BaseApiController<AthletesController>
 
         // TODO: error handling
         return BadRequest();
+    }
+
+    [HttpGet]
+    [Route("{athleteId}/currency")]
+    [SwaggerResponse(StatusCodes.Status200OK, type: typeof(CurrencyViewModel))]
+    public async Task<IActionResult> GetCurrency([FromRoute] int athleteId)
+    {
+        var user = GetCurrentUser();
+
+        if (user?.AthleteId != athleteId)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+
+        var currency = await _mediator.Send(new GetCurrencyQuery { AthleteId = athleteId });
+
+        return Ok(new CurrencyViewModel { Currency = currency });
+    }
+
+    [HttpPut]
+    [Route("{athleteId}/currency/{currency}")]
+    public async Task<IActionResult> UpdateCurrency([FromRoute][Required] int athleteId, [FromRoute][Required] string currency)
+    {
+        var user = GetCurrentUser();
+
+        if (user?.AthleteId != athleteId)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+
+        var res = await _mediator.Send(new UpdateCurrencyCommand { AthleteId = athleteId, Currency = currency });
+
+        return this.ToActionResult(res);
     }
 }
