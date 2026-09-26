@@ -56,6 +56,7 @@ A **first-class Strava record** in `strava.*`, synced raw — *not* a generic en
 
 ### Webhook event (`strava.webhook_event`) — inbox
 Raw Strava webhook notification, persisted on receipt for async processing (§6). Fields: raw payload, `object_type` (activity|athlete), `object_id`, `aspect_type` (create|update|delete), `owner_id`, `subscription_id`, `event_time`, `received_at`, `processed`, `attempts`, `error`.
+- **As built (step 1, 2026-09):** a minimal inbox — typed columns `object_type`, `object_id` (bigint), `aspect_type`, `owner_id` (bigint), `subscription_id`, `event_time` (unix) + `updates` (the raw hash as **jsonb**, null when absent) + `processed` (default false); `audit_cd` is the received-at. **No** `attempts`/`error` yet (they arrive with the draining worker) and **no FK** to athlete (raw Strava ids may not map to a tracked athlete). This step only collects for analysis; nothing is processed.
 
 ### Strava sync state (`strava.athlete_sync`)
 Whether an athlete's Strava **activities are being synced** — a **generic `strava.*` capability** (not Bike-specific: synced activities may feed other features later), which **BikeTracker only *toggles*** (activation, D-16). **1 row per athlete with sync on.** Fields: `AthleteId` (key; joins to `token` + `strava.activity.athlete_id`), `Enabled` (the sync-job gate), `ActivatedAt`; optional `LastSyncAt`/`LastStatus` for telemetry only. **No incremental cursor** — sync is window-based (§6), so nothing needs persisting between runs.
@@ -109,6 +110,7 @@ Precomputed totals per bike/component (mileage/hours/elevation), maintained by j
 - **One subscription per app** (shared `client_id`), **registered once by hand** (curl/Postman) — *not* built into the app. `POST /push_subscriptions` (`client_id`, `client_secret`, `callback_url` ≤255, `verify_token`); view/delete the same way, ad-hoc. The single public HTTPS callback then receives events for **all** authorized athletes (KOM + Bike).
 - **The app implements only the callback** (+ worker + polling): the one-time **validation handshake** — Strava GETs the callback with `hub.mode=subscribe` + `hub.challenge` + `hub.verify_token` → reply `200 {"hub.challenge": <value>}` within **2 s** (check `verify_token` from config) — and the event **receipt** (below).
 - **Receive = validate + persist + ACK fast, NEVER process inline.** The callback must return **200 within 2 s** (Strava retries up to 3× if not, and one athlete "save" can emit several events). So the endpoint only: checks `subscription_id`/`verify_token`, writes the raw event to the **`strava.webhook_event`** inbox (`processed=false`), returns 200.
+  - **As built (step 1):** the callback lives at `strava/callback/{secret}` (`StravaWebhookController`, unauthenticated — Strava requests are unsigned) and the private `{secret}` (config `StravaApiClientConfiguration.WebhookSecret`) is checked on every GET/POST; the GET validation handshake checks `verify_token` (config `WebhookVerifyToken`). The `subscription_id` match is deferred to a code TODO (the id is known only after the subscription is created). Processing (the draining worker) + `attempts`/`error` retries are the next step.
 - **`strava.webhook_event`** (inbox row): raw payload + `object_type` (activity|athlete), `object_id`, `aspect_type` (create|update|delete), `owner_id` (athlete), `subscription_id`, `event_time` (unix), `received_at`, `processed`, `attempts`, `error`. Gives durability, retries, dedup, and survival across restarts.
 - **Async worker** drains unprocessed events → each becomes a **command/task**:
   - activity `create`/`update` → fetch + upsert `strava.activity` (1:1), then recompute affected bike/component projections;
@@ -173,7 +175,7 @@ OQ-3 shared base for Bike/Component (defer) · OQ-8 service fields (labour/parts
 - **Expenses** — standalone cost entries: `bt.expense` CRUD + own list page (D-20). Minimal entity (Name/Amount/Date/Category?/Place?/Notes?), no bike link. Bulk import of the Excel backlog is a later follow-up.
 - **Phase 4** — Service, purchase & resale cost analysis (unions component costs + `bt.expense`).
 - **Phase 5** — Alerts (channel TBD — OQ-13).
-- **Phase 6 (optimization)** — Strava webhooks: push + inbox + async worker for lower-latency recalcs. No new logic — same command path as Phase 1's polling; only freshness improves.
+- **Phase 6 (optimization)** — Strava webhooks: push + inbox + async worker for lower-latency recalcs. No new logic — same command path as Phase 1's polling; only freshness improves. *(Step 1 — the callback + `strava.webhook_event` inbox — done 2026-09; the async worker/processing is the remaining step.)*
 
 ## 13. Parked ideas (competitor scan — post-v1 candidates)
 Noted from a scan of the existing tools; not committed, just captured so we don't forget:

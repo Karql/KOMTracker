@@ -83,6 +83,8 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
 
     public virtual DbSet<ActivitySyncHistoryEntity> ActivitySyncHistory { get; set; }
 
+    public virtual DbSet<WebhookEventEntity> WebhookEvent { get; set; }
+
     public KOMDBContext(DbContextOptions<KOMDBContext> options, ILoggerFactory loggerFactory)
         : base(options)
     {
@@ -138,5 +140,6 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
         builder.ApplyConfiguration(new StravaBikeEntityTypeConfiguration());
         builder.ApplyConfiguration(new AthleteSyncEntityTypeConfiguration());
         builder.ApplyConfiguration(new ActivitySyncHistoryEntityTypeConfiguration());
+        builder.ApplyConfiguration(new WebhookEventEntityTypeConfiguration());
     }
 }
