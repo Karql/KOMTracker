@@ -1,5 +1,4 @@
 #nullable enable
-using FluentAssertions;
 using FluentResults;
 using FluentResults.Extensions.FluentAssertions;
 using KomTracker.Application.Commands.Strava;
@@ -8,14 +7,10 @@ using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Application.Services;
 using KomTracker.Domain.Entities.Strava;
-using KomTracker.Domain.Entities.Token;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using IStravaActivityService = KomTracker.Application.Interfaces.Services.Strava.IActivityService;
-using StravaActivitiesError = KomTracker.Application.Interfaces.Services.Strava.GetAthleteActivitiesError;
 
 namespace KomTracker.Application.Tests.Commands.Strava;
 
@@ -24,79 +19,51 @@ public class SyncActivityCommandHandlerTests
     private const int AthleteId = 7;
     private const long ActivityId = 19598505831;
 
-    private readonly IKOMUnitOfWork _komUoW;
-    private readonly IAthleteService _athleteService;
-    private readonly IStravaActivityService _activityService;
-    private readonly IActivityRepository _activityRepo;
+    private readonly IKOMUnitOfWork _komUoW = Substitute.For<IKOMUnitOfWork>();
+    private readonly IStravaActivitySyncService _activitySyncService = Substitute.For<IStravaActivitySyncService>();
+    private readonly IActivitySyncHistoryRepository _historyRepo = Substitute.For<IActivitySyncHistoryRepository>();
     private readonly SyncActivityCommandHandler _handler;
 
     public SyncActivityCommandHandlerTests()
     {
-        _komUoW = Substitute.For<IKOMUnitOfWork>();
-        _athleteService = Substitute.For<IAthleteService>();
-        _activityService = Substitute.For<IStravaActivityService>();
-        _activityRepo = Substitute.For<IActivityRepository>();
-
-        _komUoW.GetRepository<IActivityRepository>().Returns(_activityRepo);
-        // Phase 3 recompute is decoupled via ActivitySyncedNotification — a substitute mediator swallows the publish.
-        _handler = new SyncActivityCommandHandler(_komUoW, _athleteService, _activityService,
-            Substitute.For<MediatR.IMediator>(),
-            Substitute.For<ILogger<SyncActivityCommandHandler>>());
+        _komUoW.GetRepository<IActivitySyncHistoryRepository>().Returns(_historyRepo);
+        _handler = new SyncActivityCommandHandler(_komUoW, _activitySyncService);
     }
 
-    private void SetupToken() =>
-        _athleteService.GetValidTokenAsync(AthleteId).Returns(Result.Ok(new TokenEntity { AccessToken = "t" }));
-
     [Fact]
-    public async Task Fetches_and_upserts_single_activity()
+    public async Task Delegates_and_records_a_manual_history_row_on_success()
     {
-        SetupToken();
-        var entity = new ActivityEntity { Id = ActivityId, AthleteId = AthleteId };
-        _activityService.GetAthleteActivityAsync(AthleteId, "t", ActivityId).Returns(Result.Ok(entity));
+        _activitySyncService.SyncAthleteActivityAsync(AthleteId, ActivityId, Arg.Any<CancellationToken>()).Returns(Result.Ok());
 
         var res = await _handler.Handle(new SyncActivityCommand { AthleteId = AthleteId, ActivityId = ActivityId }, CancellationToken.None);
 
         res.Should().BeSuccess();
-        await _activityRepo.Received().UpsertActivityAsync(entity);
+        await _activitySyncService.Received().SyncAthleteActivityAsync(AthleteId, ActivityId, Arg.Any<CancellationToken>());
+        _historyRepo.Received().Add(Arg.Is<ActivitySyncHistoryEntity>(h =>
+            h.Type == ActivitySyncType.Manual && h.ActivityId == ActivityId && h.AthleteId == AthleteId && h.Status == "Ok"));
+        await _komUoW.Received().SaveChangesAsync();
     }
 
     [Fact]
-    public async Task Fails_without_valid_token_and_does_not_upsert()
+    public async Task Not_found_still_records_a_manual_history_row()
     {
-        _athleteService.GetValidTokenAsync(AthleteId).Returns(Result.Fail<TokenEntity>("no token"));
+        _activitySyncService.SyncAthleteActivityAsync(AthleteId, ActivityId, Arg.Any<CancellationToken>())
+            .Returns(Result.Fail(new NotFoundError("gone")));
 
         var res = await _handler.Handle(new SyncActivityCommand { AthleteId = AthleteId, ActivityId = ActivityId }, CancellationToken.None);
 
         res.Should().BeFailure();
-        await _activityService.DidNotReceiveWithAnyArgs().GetAthleteActivityAsync(default, default!, default);
-        await _activityRepo.DidNotReceiveWithAnyArgs().UpsertActivityAsync(default!);
+        _historyRepo.Received().Add(Arg.Is<ActivitySyncHistoryEntity>(h => h.Type == ActivitySyncType.Manual && h.Status == "NotFound"));
     }
 
     [Fact]
-    public async Task Maps_service_not_found_to_NotFoundError()
+    public async Task Transient_failure_is_surfaced_without_a_history_row()
     {
-        SetupToken();
-        _activityService.GetAthleteActivityAsync(AthleteId, "t", ActivityId)
-            .Returns(Result.Fail<ActivityEntity>(new StravaActivitiesError(StravaActivitiesError.NotFound)));
+        _activitySyncService.SyncAthleteActivityAsync(AthleteId, ActivityId, Arg.Any<CancellationToken>()).Returns(Result.Fail("rate limited"));
 
         var res = await _handler.Handle(new SyncActivityCommand { AthleteId = AthleteId, ActivityId = ActivityId }, CancellationToken.None);
 
         res.Should().BeFailure();
-        res.HasError<NotFoundError>().Should().BeTrue();
-        await _activityRepo.DidNotReceiveWithAnyArgs().UpsertActivityAsync(default!);
-    }
-
-    [Fact]
-    public async Task Maps_other_service_error_to_generic_failure()
-    {
-        SetupToken();
-        _activityService.GetAthleteActivityAsync(AthleteId, "t", ActivityId)
-            .Returns(Result.Fail<ActivityEntity>(new StravaActivitiesError(StravaActivitiesError.TooManyRequests)));
-
-        var res = await _handler.Handle(new SyncActivityCommand { AthleteId = AthleteId, ActivityId = ActivityId }, CancellationToken.None);
-
-        res.Should().BeFailure();
-        res.HasError<NotFoundError>().Should().BeFalse();
-        await _activityRepo.DidNotReceiveWithAnyArgs().UpsertActivityAsync(default!);
+        _historyRepo.DidNotReceiveWithAnyArgs().Add(default!);
     }
 }

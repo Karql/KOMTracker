@@ -13,6 +13,12 @@ public class ActivitySyncHistoryEntity : BaseEntity
     public int Id { get; set; }               // DB-generated
     public int AthleteId { get; set; }        // FK -> athlete
 
+    /// <summary>What triggered this run — a scheduled/manual Job, or a Strava Webhook event.</summary>
+    public ActivitySyncType Type { get; set; }
+
+    /// <summary>The single activity a Webhook run synced (null for Job runs).</summary>
+    public long? ActivityId { get; set; }
+
     public DateTime RunAt { get; set; }       // when the sync run happened, any outcome (UTC)
     public TimeSpan Duration { get; set; }    // how long the run took (diagnostics)
 

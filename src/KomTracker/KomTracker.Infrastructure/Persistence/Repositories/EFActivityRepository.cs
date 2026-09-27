@@ -94,6 +94,19 @@ public class EFActivityRepository : EFBaseRepository, IActivityRepository
         });
     }
 
+    public Task<ActivityEntity?> GetAsync(int athleteId, long activityId)
+    {
+        return _context.Activity.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == activityId && x.AthleteId == athleteId);
+    }
+
+    public async Task DeleteAsync(int athleteId, long activityId)
+    {
+        await _context.Activity
+            .Where(x => x.Id == activityId && x.AthleteId == athleteId)
+            .ExecuteDeleteAsync();
+    }
+
     public async Task<IEnumerable<ActivityEntity>> GetActivitiesPageAsync(int athleteId, int skip, int take)
     {
         return await _context.Activity.AsNoTracking()

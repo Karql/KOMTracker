@@ -2,19 +2,16 @@ using FluentResults;
 using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
-using KomTracker.Application.Notifications.Strava;
 using KomTracker.Application.Services;
+using KomTracker.Domain.Entities.Strava;
 using MediatR;
-using Microsoft.Extensions.Logging;
-using IStravaActivityService = KomTracker.Application.Interfaces.Services.Strava.IActivityService;
-using StravaActivitiesError = KomTracker.Application.Interfaces.Services.Strava.GetAthleteActivitiesError;
 
 namespace KomTracker.Application.Commands.Strava;
 
 /// <summary>
-/// Sync a single Strava activity (GET /activities/{id}) and upsert it — a targeted refresh of one row.
-/// Atomic primitive keyed only by ids, with its own token acquisition and no HTTP/session coupling, so it is
-/// reusable verbatim by a future Strava webhook handler (create/update events) — see the phase-1e-iter-2 spec.
+/// Sync a single Strava activity (GET /activities/{id}) and upsert it — a targeted manual refresh of one row (Refresh
+/// button). Delegates the sync to <see cref="IStravaActivitySyncService"/> (shared with the webhook drain) and records
+/// a <see cref="ActivitySyncType.Manual"/> row in the sync history.
 /// </summary>
 public class SyncActivityCommand : IRequest<Result>
 {
@@ -26,54 +23,39 @@ public class SyncActivityCommand : IRequest<Result>
 public class SyncActivityCommandHandler : IRequestHandler<SyncActivityCommand, Result>
 {
     private readonly IKOMUnitOfWork _komUoW;
-    private readonly IAthleteService _athleteService;
-    private readonly IStravaActivityService _activityService;
-    private readonly IMediator _mediator;
-    private readonly ILogger<SyncActivityCommandHandler> _logger;
+    private readonly IStravaActivitySyncService _activitySyncService;
 
-    public SyncActivityCommandHandler(IKOMUnitOfWork komUoW, IAthleteService athleteService, IStravaActivityService activityService, IMediator mediator, ILogger<SyncActivityCommandHandler> logger)
+    public SyncActivityCommandHandler(IKOMUnitOfWork komUoW, IStravaActivitySyncService activitySyncService)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
-        _athleteService = athleteService ?? throw new ArgumentNullException(nameof(athleteService));
-        _activityService = activityService ?? throw new ArgumentNullException(nameof(activityService));
-        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _activitySyncService = activitySyncService ?? throw new ArgumentNullException(nameof(activitySyncService));
     }
 
     public async Task<Result> Handle(SyncActivityCommand request, CancellationToken cancellationToken)
     {
-        var tokenRes = await _athleteService.GetValidTokenAsync(request.AthleteId);
-        if (tokenRes.IsFailed)
-        {
-            return Result.Fail($"{nameof(SyncActivityCommand)}: no valid token for athlete {request.AthleteId}.");
-        }
+        var runStartedAt = DateTime.UtcNow;
+        var res = await _activitySyncService.SyncAthleteActivityAsync(request.AthleteId, request.ActivityId, cancellationToken);
 
-        var activityRes = await _activityService.GetAthleteActivityAsync(request.AthleteId, tokenRes.Value.AccessToken, request.ActivityId);
-        if (activityRes.IsFailed)
+        // Record a Manual history row on terminal outcomes (Ok / NotFound); a transient failure is surfaced to the
+        // caller (snackbar) without a history entry.
+        if (res.IsSuccess || res.HasError<NotFoundError>())
         {
-            var msg = activityRes.Errors.OfType<StravaActivitiesError>().FirstOrDefault()?.Message;
-            if (msg == StravaActivitiesError.NotFound)
+            _komUoW.GetRepository<IActivitySyncHistoryRepository>().Add(new ActivitySyncHistoryEntity
             {
-                return Result.Fail(new NotFoundError($"Activity {request.ActivityId} not found for athlete {request.AthleteId}."));
-            }
-
-            _logger.LogError("{command} failed for athlete {athleteId}, activity {activityId}: {error}",
-                nameof(SyncActivityCommand), request.AthleteId, request.ActivityId, msg);
-            return Result.Fail($"{nameof(SyncActivityCommand)} failed ({msg ?? "unknown"}).");
+                AthleteId = request.AthleteId,
+                Type = ActivitySyncType.Manual,
+                ActivityId = request.ActivityId,
+                RunAt = runStartedAt,
+                Duration = DateTime.UtcNow - runStartedAt,
+                SyncFrom = null,
+                Status = res.IsSuccess ? "Ok" : "NotFound",
+                UpsertedCount = res.IsSuccess ? 1 : 0,
+                DeletedCount = 0,
+                ActivitiesCount = null
+            });
+            await _komUoW.SaveChangesAsync();
         }
 
-        var activity = activityRes.Value;
-        var activityRepo = _komUoW.GetRepository<IActivityRepository>();
-        await activityRepo.UpsertActivityAsync(activity);
-
-        // Announce the sync; the projection updater recomputes the components on this ride's bike (gear → bike → components).
-        await _mediator.Publish(new ActivitySyncedNotification
-        {
-            AthleteId = request.AthleteId,
-            ActivityId = request.ActivityId,
-            GearId = activity.GearId
-        }, cancellationToken);
-
-        return Result.Ok();
+        return res;
     }
 }

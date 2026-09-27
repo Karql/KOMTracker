@@ -76,6 +76,7 @@ public class Startup
         services.AddTransient<SyncActivitiesRecentJob>();
         services.AddTransient<SyncBikesJob>();
         services.AddTransient<BackfillActivitiesJob>();
+        services.AddTransient<ProcessStravaWebhookEventsJob>();
 
         services.AddQuartz(q =>
         {
@@ -129,6 +130,15 @@ public class Startup
             {
                 q.ScheduleJob<RefreshAthletesJob>(trigger => trigger
                     .WithCronSchedule("0 45 23 * * ?", action => action.InTimeZone(tz))); // 23:45 Europe/Warsaw
+            }
+
+            if (_applicationConfiguration.ProcessWebhookEventsJobEnabled)
+            {
+                // Drain the Strava webhook inbox hourly (backstop); also triggered on receipt via ISchedulerFactory.
+                // Fixed identity so the webhook controller can TriggerJob it.
+                q.ScheduleJob<ProcessStravaWebhookEventsJob>(
+                    trigger => trigger.WithCronSchedule("0 50 * * * ?", action => action.InTimeZone(tz)), // 50 past every hour (between other jobs)
+                    job => job.WithIdentity(ProcessStravaWebhookEventsJob.Key));
             }
         });
 

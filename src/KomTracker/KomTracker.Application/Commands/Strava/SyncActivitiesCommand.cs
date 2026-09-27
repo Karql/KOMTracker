@@ -115,6 +115,7 @@ public class SyncActivitiesCommandHandler : IRequestHandler<SyncActivitiesComman
         historyRepo.Add(new ActivitySyncHistoryEntity
         {
             AthleteId = athleteId,
+            Type = ActivitySyncType.Job,
             RunAt = runStartedAt,
             Duration = DateTime.UtcNow - runStartedAt,
             SyncFrom = syncFrom,

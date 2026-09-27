@@ -1,5 +1,6 @@
 @using System.Net.Http.Json
 @using KomTracker.API.Shared.ViewModels.BikeTracker
+@using KomTracker.Domain.Entities.Strava
 
 <MudDialog>
     <DialogContent>
@@ -16,7 +17,7 @@
             <MudTable Items="_history" Hover="true" Striped="true" Dense="true" Breakpoint="Breakpoint.Sm">
                 <HeaderContent>
                     <MudTh>Run</MudTh>
-                    <MudTh>Window</MudTh>
+                    <MudTh>Type</MudTh>
                     <MudTh>Status</MudTh>
                     <MudTh>Fetched</MudTh>
                     <MudTh>Deleted</MudTh>
@@ -25,7 +26,17 @@
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Run">@context.RunAt.ToString("yyyy-MM-dd HH:mm")</MudTd>
-                    <MudTd DataLabel="Window">@(context.SyncFrom is null ? "Full" : $"From {context.SyncFrom:yyyy-MM-dd}")</MudTd>
+                    <MudTd DataLabel="Type">
+                        @if (context.ActivityId is { } activityId)
+                        {
+                            <text>@context.Type - </text>
+                            <MudLink Href="@($"https://www.strava.com/activities/{activityId}")" Target="_blank" rel="noopener">@activityId</MudLink>
+                        }
+                        else
+                        {
+                            @(context.SyncFrom is null ? "Job - Full" : $"Job - From {context.SyncFrom:yyyy-MM-dd}")
+                        }
+                    </MudTd>
                     <MudTd DataLabel="Status">
                         <MudChip T="string" Size="Size.Small" Color="StatusColor(context.Status)">@context.Status</MudChip>
                     </MudTd>
@@ -59,8 +70,10 @@
     private static Color StatusColor(string status) => status switch
     {
         "Ok" => Color.Success,
+        "Deleted" => Color.Info,
         "RateLimited" => Color.Warning,
         "NoValidToken" => Color.Warning,
+        "NotFound" => Color.Warning,
         _ => Color.Error
     };
 

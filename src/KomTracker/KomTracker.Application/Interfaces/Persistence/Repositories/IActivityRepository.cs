@@ -1,3 +1,4 @@
+#nullable enable
 using KomTracker.Application.Models.Strava;
 using KomTracker.Domain.Entities.Strava;
 using Utils.UnitOfWork.Abstract;
@@ -41,4 +42,10 @@ public interface IActivityRepository : IRepository
     /// (targeted refresh / future webhook create-update).
     /// </summary>
     Task UpsertActivityAsync(ActivityEntity activity);
+
+    /// <summary>A single stored activity by athlete + id, or null (used to read GearId before a webhook delete).</summary>
+    Task<ActivityEntity?> GetAsync(int athleteId, long activityId);
+
+    /// <summary>Hard-delete a single stored activity by athlete + id (webhook delete event). No-op if absent.</summary>
+    Task DeleteAsync(int athleteId, long activityId);
 }

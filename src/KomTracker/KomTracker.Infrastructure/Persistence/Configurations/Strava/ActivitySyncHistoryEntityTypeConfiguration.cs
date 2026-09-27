@@ -20,6 +20,13 @@ public class ActivitySyncHistoryEntityTypeConfiguration : IEntityTypeConfigurati
         builder.Property(x => x.Id).HasColumnName("id"); // DB-generated
 
         builder.Property(x => x.AthleteId).HasColumnName("athlete_id");
+        builder.Property(x => x.Type)
+            .HasColumnName("type")
+            .HasConversion<string>()
+            .HasMaxLength(50)
+            .IsRequired(true)
+            .HasDefaultValue(ActivitySyncType.Job);
+        builder.Property(x => x.ActivityId).HasColumnName("activity_id");
         builder.Property(x => x.RunAt).HasColumnName("run_at");
         builder.Property(x => x.Duration).HasColumnName("duration");
         builder.Property(x => x.SyncFrom).HasColumnName("sync_from");

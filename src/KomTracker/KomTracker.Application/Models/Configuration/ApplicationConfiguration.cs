@@ -24,6 +24,7 @@ public class ApplicationConfiguration
     public bool RefreshAthletesJobEnabled { get; set; } = true;
     public bool SyncActivitiesJobEnabled { get; set; } = true;
     public bool SyncBikesJobEnabled { get; set; } = true;
+    public bool ProcessWebhookEventsJobEnabled { get; set; } = true;
 
     /// <summary>
     /// Athlete id using to queries for data like segment details

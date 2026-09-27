@@ -27,8 +27,8 @@ public class WebhookEventEntityTypeConfiguration : IEntityTypeConfiguration<Webh
         builder.Property(x => x.EventTime).HasColumnName("event_time");
         builder.Property(x => x.Processed).HasColumnName("processed").HasDefaultValue(false);
 
-        // The future worker queries unprocessed rows; event_time helps ad-hoc analysis.
-        builder.HasIndex(x => x.Processed);
+        // The drain job only ever queries unprocessed rows — a partial index keeps it tiny as the table grows.
+        builder.HasIndex(x => x.Processed).HasFilter("processed = false");
         builder.HasIndex(x => x.EventTime);
     }
 }

@@ -25,6 +25,7 @@ public static class DependencyInjection
         services.AddTransient<IClubService, ClubService>();
         services.AddTransient<ISegmentService, SegmentService>();
         services.AddTransient<IStravaBikeSyncService, StravaBikeSyncService>();
+        services.AddTransient<IStravaActivitySyncService, StravaActivitySyncService>();
 
         // Per-request so its bike-gear / parent-window caches are reused across a single list/recompute pass.
         services.AddScoped<ComponentMileageService>();

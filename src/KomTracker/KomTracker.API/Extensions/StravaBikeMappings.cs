@@ -69,6 +69,8 @@ public static class StravaBikeMappings
     {
         RunAt = h.RunAt,
         Duration = h.Duration,
+        Type = h.Type,
+        ActivityId = h.ActivityId,
         SyncFrom = h.SyncFrom,
         Status = h.Status,
         UpsertedCount = h.UpsertedCount,

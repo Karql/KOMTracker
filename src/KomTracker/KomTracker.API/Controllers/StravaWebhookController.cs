@@ -1,8 +1,11 @@
 using System.Text.Json;
+using KomTracker.API.Infrastructure.Jobs;
 using KomTracker.API.Shared.ViewModels.Strava;
 using KomTracker.Application.Commands.Strava;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Quartz;
 using Strava.API.Client.Configurations;
 
 namespace KomTracker.API.Controllers;
@@ -69,6 +72,25 @@ public class StravaWebhookController : BaseApiController<StravaWebhookController
             EventTime = model.EventTime
         });
 
+        await TriggerProcessingAsync();
+
         return Ok();
+    }
+
+    // Best-effort low-latency kick of the drain job. Unconditional (no "skip if running" guard): with
+    // [DisallowConcurrentExecution] a trigger fired mid-run is blocked and runs right after — never dropped — so a
+    // burst collapses without delaying events. The hourly job is the backstop if this throws or the job is disabled.
+    private async Task TriggerProcessingAsync()
+    {
+        try
+        {
+            var schedulerFactory = HttpContext.RequestServices.GetRequiredService<ISchedulerFactory>();
+            var scheduler = await schedulerFactory.GetScheduler();
+            await scheduler.TriggerJob(ProcessStravaWebhookEventsJob.Key);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Could not trigger {job} on webhook receipt.", nameof(ProcessStravaWebhookEventsJob));
+        }
     }
 }
