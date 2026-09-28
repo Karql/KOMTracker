@@ -72,7 +72,7 @@ Jeden komponent może być przypięty równocześnie do większej liczby roweró
 
 Możliwość śledzenia kosztów serwisu. Np. naprawa koła.
 
-- Rower / Komponent
+- Rower / Komponent (chyba lista, aby jeden serwis móc przypiąć do wielu elementów)
 - Data
 - Cena
 - Miejsce serwisu (analogicznie jak miejsce zakupu)
