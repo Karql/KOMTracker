@@ -14,6 +14,8 @@ services:
       ApplicationConfiguration__BrevoConfiguration__TrackKomsTemplateId: 3
       StravaApiClientConfiguration__ClientID: ${STRAVA_API_CLIENT_ID}
       StravaApiClientConfiguration__ClientSecret: ${STRAVA_API_CLIENT_SECRET}
+      StravaApiClientConfiguration__WebhookVerifyToken: ${STRAVA_API_WEBHOOK_VERIFY_TOKEN}
+      StravaApiClientConfiguration__WebhookSecret: ${STRAVA_API_WEBHOOK_SECRET}
       IdentityConfiguration__IdentityUrl: https://komtracker.karkula.pl/kom-tracker-api/identity
       IdentityConfiguration__Authority: https://komtracker.karkula.pl/kom-tracker-api/identity
       IdentityConfiguration__RequireHttpsMetadata: "true"
