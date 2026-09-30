@@ -31,6 +31,10 @@ public class SaveBikeCommand : IRequest<Result<BikeEntity>>
 
     /// <summary>When set on create, also links the new bike to this Strava gear (bt.bike_link). Ignored on update.</summary>
     public string? StravaGearId { get; set; }
+
+    // Sale details — applied only while the bike is Sold (edit a forgotten/wrong sale date/price). Ignored otherwise.
+    public DateTime? SaleDate { get; set; }
+    public decimal? SalePrice { get; set; }
 }
 
 public class SaveBikeCommandValidator : AbstractValidator<SaveBikeCommand>
@@ -48,6 +52,7 @@ public class SaveBikeCommandValidator : AbstractValidator<SaveBikeCommand>
         RuleFor(x => x.InitialDistanceKm).GreaterThanOrEqualTo(0);
         RuleFor(x => x.InitialMovingHours).GreaterThanOrEqualTo(0).When(x => x.InitialMovingHours.HasValue);
         RuleFor(x => x.InitialElevationM).GreaterThanOrEqualTo(0).When(x => x.InitialElevationM.HasValue);
+        RuleFor(x => x.SalePrice).GreaterThanOrEqualTo(0).When(x => x.SalePrice.HasValue);
     }
 }
 
@@ -110,6 +115,14 @@ public class SaveBikeCommandHandler : IRequestHandler<SaveBikeCommand, Result<Bi
             }
 
             Apply(request, existing);
+
+            // Sale date/price are editable only while the bike is Sold (corrections); the sell flow owns the transition.
+            if (existing.Lifecycle == BikeLifecycle.Sold)
+            {
+                existing.SaleDate = BikeDateHelper.EnsureUtc(request.SaleDate);
+                existing.SalePrice = request.SalePrice;
+            }
+
             repo.UpdateBike(existing);
             bike = existing;
         }

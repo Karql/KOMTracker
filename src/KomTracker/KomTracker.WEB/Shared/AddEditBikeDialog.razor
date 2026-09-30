@@ -24,7 +24,7 @@
                              SearchFunc="SearchModels" CoerceValue="true" Clearable="true" MaxItems="@((int?)null)" />
 
             <MudExpansionPanels Elevation="0" Class="mt-3">
-                <MudExpansionPanel Text="Additional details">
+                <MudExpansionPanel Text="Additional details" @bind-Expanded="_detailsExpanded">
                     <MudNumericField @bind-Value="_model.WeightKg" Label="Weight (kg)" Min="0" Converter="InputConverters.Decimal" />
                     <MudNumericField @bind-Value="_model.Price" Label="Price" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
                     <MudAutocomplete T="string" @bind-Value="_model.PurchasePlace" Label="Purchase place" Class="mt-3"
@@ -34,6 +34,13 @@
                     <MudNumericField @bind-Value="_model.InitialMovingHours" Label="Initial moving time (h)" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
                     <MudNumericField @bind-Value="_model.InitialElevationM" Label="Initial elevation (m)" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
                     <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
+                    @if (Bike?.Lifecycle == BikeLifecycle.Sold)
+                    {
+                        <MudDivider Class="my-3" />
+                        <MudText Typo="Typo.subtitle2">Sale</MudText>
+                        <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Class="mt-3" DateFormat="yyyy-MM-dd" Editable="true" />
+                        <MudNumericField @bind-Value="_model.SalePrice" Label="Sale price" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
+                    }
                 </MudExpansionPanel>
             </MudExpansionPanels>
         </MudForm>
@@ -60,6 +67,8 @@
     private MudForm _form = default!;
     private SaveBikeViewModel _model = new();
     private DateTime? _purchaseDate;
+    private DateTime? _saleDate;
+    private bool _detailsExpanded;
     private PurchaseSuggestionsViewModel _suggestions = new();
     private bool _saving;
 
@@ -83,9 +92,15 @@
                 PurchaseDate = Bike.PurchaseDate,
                 InitialDistanceKm = Bike.InitialDistanceKm,
                 InitialMovingHours = Bike.InitialMovingHours,
-                InitialElevationM = Bike.InitialElevationM
+                InitialElevationM = Bike.InitialElevationM,
+                SaleDate = Bike.SaleDate,
+                SalePrice = Bike.SalePrice
             };
             _purchaseDate = Bike.PurchaseDate;
+            _saleDate = Bike.SaleDate;
+
+            // Reveal the Sale fields straight away when editing a sold bike.
+            _detailsExpanded = Bike.Lifecycle == BikeLifecycle.Sold;
         }
         else if (Prefill is not null)
         {
@@ -103,6 +118,7 @@
         }
 
         _model.PurchaseDate = _purchaseDate;
+        _model.SaleDate = _saleDate;
         _saving = true;
 
         try

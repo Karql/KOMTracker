@@ -31,6 +31,11 @@ public class SaveComponentCommand : IRequest<Result<ComponentEntity>>
     public decimal? InitialMovingHours { get; set; }
     public decimal? InitialElevationM { get; set; }
     public int? WarehouseId { get; set; }
+
+    // Sale details — applied only while the component is Sold (edit a forgotten/wrong sale date/price without
+    // re-activating and re-selling). Ignored otherwise.
+    public DateTime? SaleDate { get; set; }
+    public decimal? SalePrice { get; set; }
 }
 
 public class SaveComponentCommandValidator : AbstractValidator<SaveComponentCommand>
@@ -48,6 +53,7 @@ public class SaveComponentCommandValidator : AbstractValidator<SaveComponentComm
         RuleFor(x => x.InitialDistanceKm).GreaterThanOrEqualTo(0);
         RuleFor(x => x.InitialMovingHours).GreaterThanOrEqualTo(0).When(x => x.InitialMovingHours.HasValue);
         RuleFor(x => x.InitialElevationM).GreaterThanOrEqualTo(0).When(x => x.InitialElevationM.HasValue);
+        RuleFor(x => x.SalePrice).GreaterThanOrEqualTo(0).When(x => x.SalePrice.HasValue);
     }
 }
 
@@ -110,6 +116,15 @@ public class SaveComponentCommandHandler : IRequestHandler<SaveComponentCommand,
             }
 
             Apply(request, existing);
+
+            // Sale date/price are editable only while the component is Sold (corrections); the sell flow owns the
+            // Active→Sold transition.
+            if (existing.Lifecycle == ComponentLifecycle.Sold)
+            {
+                existing.SaleDate = ComponentDateHelper.EnsureUtc(request.SaleDate);
+                existing.SalePrice = request.SalePrice;
+            }
+
             repo.UpdateComponent(existing);
             component = existing;
         }

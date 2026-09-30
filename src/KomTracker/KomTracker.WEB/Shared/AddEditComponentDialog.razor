@@ -62,6 +62,13 @@
                     <MudNumericField @bind-Value="_model.InitialMovingHours" Label="Initial moving time (h)" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
                     <MudNumericField @bind-Value="_model.InitialElevationM" Label="Initial elevation (m)" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
                     <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
+                    @if (Component?.Lifecycle == ComponentLifecycle.Sold)
+                    {
+                        <MudDivider Class="my-3" />
+                        <MudText Typo="Typo.subtitle2">Sale</MudText>
+                        <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Class="mt-3" DateFormat="yyyy-MM-dd" Editable="true" />
+                        <MudNumericField @bind-Value="_model.SalePrice" Label="Sale price" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
+                    }
                 </MudExpansionPanel>
             </MudExpansionPanels>
         </MudForm>
@@ -91,6 +98,7 @@
     private SaveComponentViewModel _model = new();
     private ComponentCategory? _categoryValue;   // null until the user picks one (placeholder shown; Required-guarded)
     private DateTime? _purchaseDate;
+    private DateTime? _saleDate;
     private bool _detailsExpanded;
     private IEnumerable<WarehouseViewModel> _warehouses = Enumerable.Empty<WarehouseViewModel>();
     private PurchaseSuggestionsViewModel _suggestions = new();
@@ -120,10 +128,16 @@
                 InitialDistanceKm = Component.InitialDistanceKm,
                 InitialMovingHours = Component.InitialMovingHours,
                 InitialElevationM = Component.InitialElevationM,
-                WarehouseId = Component.WarehouseId
+                WarehouseId = Component.WarehouseId,
+                SaleDate = Component.SaleDate,
+                SalePrice = Component.SalePrice
             };
             _categoryValue = Component.Category;
             _purchaseDate = Component.PurchaseDate;
+            _saleDate = Component.SaleDate;
+
+            // Reveal the Sale fields straight away when editing a sold component.
+            _detailsExpanded = Component.Lifecycle == ComponentLifecycle.Sold;
         }
         else if (DefaultPurchaseDate is not null || DefaultPurchasePlace is not null || DefaultPrice is not null)
         {
@@ -146,6 +160,7 @@
 
         _model.Category = _categoryValue!.Value;
         _model.PurchaseDate = _purchaseDate;
+        _model.SaleDate = _saleDate;
         _saving = true;
 
         try

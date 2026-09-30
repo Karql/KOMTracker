@@ -24,4 +24,8 @@ public class SaveComponentViewModel
     public decimal? InitialMovingHours { get; set; }
     public decimal? InitialElevationM { get; set; }
     public int? WarehouseId { get; set; }
+
+    /// <summary>Sale details — editable only while the component is Sold (correct a forgotten/wrong sale).</summary>
+    public DateTime? SaleDate { get; set; }
+    public decimal? SalePrice { get; set; }
 }

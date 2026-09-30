@@ -24,4 +24,8 @@ public class SaveBikeViewModel
 
     /// <summary>When set on create, links the new bike to this Strava gear id (bt.bike_link). Ignored on update.</summary>
     public string? StravaGearId { get; set; }
+
+    /// <summary>Sale details — editable only while the bike is Sold (correct a forgotten/wrong sale).</summary>
+    public DateTime? SaleDate { get; set; }
+    public decimal? SalePrice { get; set; }
 }

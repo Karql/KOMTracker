@@ -72,6 +72,47 @@ public class ComponentCommandHandlersTests
     }
 
     [Fact]
+    public async Task Edit_sold_component_updates_sale_date_and_price()
+    {
+        _componentRepo.GetComponentAsync(5).Returns(new ComponentEntity
+        {
+            Id = 5, UserId = "u1", Name = "Chain", Category = ComponentCategory.Chain, Lifecycle = ComponentLifecycle.Sold,
+            SaleDate = new DateTime(2026, 1, 1), SalePrice = 50
+        });
+
+        var cmd = new SaveComponentCommand
+        {
+            Id = 5, UserId = "u1", Name = "Chain", Category = ComponentCategory.Chain,
+            SaleDate = new DateTime(2026, 3, 3), SalePrice = 80
+        };
+
+        var res = await SaveHandler.Handle(cmd, CancellationToken.None);
+
+        res.Should().BeSuccess();
+        _componentRepo.Received().UpdateComponent(Arg.Is<ComponentEntity>(c => c.SalePrice == 80 && c.SaleDate!.Value.Date == new DateTime(2026, 3, 3)));
+    }
+
+    [Fact]
+    public async Task Edit_active_component_ignores_sale_fields()
+    {
+        _componentRepo.GetComponentAsync(5).Returns(new ComponentEntity
+        {
+            Id = 5, UserId = "u1", Name = "Chain", Category = ComponentCategory.Chain, Lifecycle = ComponentLifecycle.Active
+        });
+
+        var cmd = new SaveComponentCommand
+        {
+            Id = 5, UserId = "u1", Name = "Chain", Category = ComponentCategory.Chain,
+            SaleDate = new DateTime(2026, 3, 3), SalePrice = 80
+        };
+
+        var res = await SaveHandler.Handle(cmd, CancellationToken.None);
+
+        res.Should().BeSuccess();
+        _componentRepo.Received().UpdateComponent(Arg.Is<ComponentEntity>(c => c.SalePrice == null && c.SaleDate == null));
+    }
+
+    [Fact]
     public async Task Update_missing_component_returns_not_found()
     {
         _componentRepo.GetComponentAsync(5).Returns((ComponentEntity?)null);
