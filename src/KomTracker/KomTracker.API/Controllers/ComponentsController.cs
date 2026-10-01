@@ -74,6 +74,7 @@ public class ComponentsController : BaseApiController<ComponentsController>
             Lifecycle = model.Lifecycle,
             SaleDate = model.SaleDate,
             SalePrice = model.SalePrice,
+            SalePlace = model.SalePlace,
             Notes = model.Notes
         });
 

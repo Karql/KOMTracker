@@ -28,4 +28,5 @@ public class SaveBikeViewModel
     /// <summary>Sale details — editable only while the bike is Sold (correct a forgotten/wrong sale).</summary>
     public DateTime? SaleDate { get; set; }
     public decimal? SalePrice { get; set; }
+    public string? SalePlace { get; set; }
 }

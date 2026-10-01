@@ -74,6 +74,7 @@ public class BikesController : BaseApiController<BikesController>
             Lifecycle = model.Lifecycle,
             SaleDate = model.SaleDate,
             SalePrice = model.SalePrice,
+            SalePlace = model.SalePlace,
             Notes = model.Notes
         });
 

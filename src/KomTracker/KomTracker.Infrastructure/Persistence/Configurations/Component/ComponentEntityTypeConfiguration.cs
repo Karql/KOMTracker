@@ -98,6 +98,10 @@ public class ComponentEntityTypeConfiguration
         builder.Property(x => x.SalePrice)
             .HasColumnName("sale_price");
 
+        builder.Property(x => x.SalePlace)
+            .HasColumnName("sale_place")
+            .HasMaxLength(200);
+
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.WarehouseId);
     }

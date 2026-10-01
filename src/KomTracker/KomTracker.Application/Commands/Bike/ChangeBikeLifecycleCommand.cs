@@ -15,6 +15,7 @@ public class ChangeBikeLifecycleCommand : IRequest<Result>
     public BikeLifecycle Lifecycle { get; set; }
     public DateTime? SaleDate { get; set; }
     public decimal? SalePrice { get; set; }
+    public string? SalePlace { get; set; }
 
     /// <summary>Optional note to save alongside the transition (e.g. why it was archived/sold). Null = leave unchanged.</summary>
     public string? Notes { get; set; }
@@ -25,6 +26,8 @@ public class ChangeBikeLifecycleCommandValidator : AbstractValidator<ChangeBikeL
     public ChangeBikeLifecycleCommandValidator()
     {
         RuleFor(x => x.Lifecycle).IsInEnum();
+
+        RuleFor(x => x.SalePlace).MaximumLength(200);
 
         When(x => x.Lifecycle == BikeLifecycle.Sold, () =>
         {
@@ -69,12 +72,14 @@ public class ChangeBikeLifecycleCommandHandler : IRequestHandler<ChangeBikeLifec
         {
             bike.SaleDate = BikeDateHelper.EnsureUtc(request.SaleDate);
             bike.SalePrice = request.SalePrice;
+            bike.SalePlace = request.SalePlace;
         }
         else
         {
             // Leaving Sold clears the sale details.
             bike.SaleDate = null;
             bike.SalePrice = null;
+            bike.SalePlace = null;
         }
 
         repo.UpdateBike(bike);

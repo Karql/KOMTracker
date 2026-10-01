@@ -28,4 +28,5 @@ public class SaveComponentViewModel
     /// <summary>Sale details — editable only while the component is Sold (correct a forgotten/wrong sale).</summary>
     public DateTime? SaleDate { get; set; }
     public decimal? SalePrice { get; set; }
+    public string? SalePlace { get; set; }
 }

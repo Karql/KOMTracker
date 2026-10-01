@@ -104,6 +104,7 @@ else
                     <MudText Typo="Typo.subtitle1" Class="mb-2">Sale</MudText>
                     @Field("Sale date", _bike.SaleDate?.ToString("yyyy-MM-dd"))
                     @Field("Sale price", _bike.SalePrice is { } salePrice ? Currencies.Format(salePrice, _currency) : null)
+                    @Field("Sale place", _bike.SalePlace)
                 </MudPaper>
             </MudItem>
         }

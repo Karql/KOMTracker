@@ -17,6 +17,7 @@
             <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Required="true" RequiredError="Sale date is required" DateFormat="yyyy-MM-dd" Editable="true" />
             <MudNumericField @bind-Value="_salePrice" Label="Sale price" Min="0" Required="true"
                              RequiredError="Sale price is required" Class="mt-3" Converter="InputConverters.Decimal" />
+            <MudTextField @bind-Value="_salePlace" Label="Sale place" MaxLength="200" Class="mt-3" />
             <MudTextField @bind-Value="_notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
         </MudForm>
     </DialogContent>
@@ -38,6 +39,7 @@
     private MudForm _form = default!;
     private DateTime? _saleDate = DateTime.UtcNow.Date;
     private decimal? _salePrice;
+    private string? _salePlace;
     private string? _notes;
     private bool _saving;
 
@@ -60,6 +62,7 @@
                 Lifecycle = ComponentLifecycle.Sold,
                 SaleDate = _saleDate,
                 SalePrice = _salePrice,
+                SalePlace = _salePlace,
                 Notes = _notes ?? string.Empty
             };
 

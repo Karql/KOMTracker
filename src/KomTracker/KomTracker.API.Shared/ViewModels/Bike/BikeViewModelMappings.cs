@@ -23,6 +23,7 @@ public static class BikeViewModelMappings
         Lifecycle = e.Lifecycle,
         SaleDate = e.SaleDate,
         SalePrice = e.SalePrice,
+        SalePlace = e.SalePlace,
         StravaGearId = e.Links.FirstOrDefault(l => l.ExternalService == ExternalService.Strava)?.ExternalId,
         StravaBikeName = e.StravaBikeName,
         TotalDistanceKm = e.TotalDistanceKm,

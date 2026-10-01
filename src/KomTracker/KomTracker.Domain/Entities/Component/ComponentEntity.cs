@@ -64,6 +64,9 @@ public class ComponentEntity : BaseEntity
 
     public decimal? SalePrice { get; set; }
 
+    /// <summary>Where/to whom it was sold (free text). Set when Lifecycle == Sold.</summary>
+    public string? SalePlace { get; set; }
+
     /// <summary>Name of the current warehouse, for display; set by the component queries — NOT persisted.</summary>
     [NotMapped]
     public string? WarehouseName { get; set; }

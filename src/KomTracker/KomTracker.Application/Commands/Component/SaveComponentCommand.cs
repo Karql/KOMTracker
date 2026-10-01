@@ -32,10 +32,11 @@ public class SaveComponentCommand : IRequest<Result<ComponentEntity>>
     public decimal? InitialElevationM { get; set; }
     public int? WarehouseId { get; set; }
 
-    // Sale details — applied only while the component is Sold (edit a forgotten/wrong sale date/price without
+    // Sale details — applied only while the component is Sold (edit a forgotten/wrong sale date/price/place without
     // re-activating and re-selling). Ignored otherwise.
     public DateTime? SaleDate { get; set; }
     public decimal? SalePrice { get; set; }
+    public string? SalePlace { get; set; }
 }
 
 public class SaveComponentCommandValidator : AbstractValidator<SaveComponentCommand>
@@ -54,6 +55,7 @@ public class SaveComponentCommandValidator : AbstractValidator<SaveComponentComm
         RuleFor(x => x.InitialMovingHours).GreaterThanOrEqualTo(0).When(x => x.InitialMovingHours.HasValue);
         RuleFor(x => x.InitialElevationM).GreaterThanOrEqualTo(0).When(x => x.InitialElevationM.HasValue);
         RuleFor(x => x.SalePrice).GreaterThanOrEqualTo(0).When(x => x.SalePrice.HasValue);
+        RuleFor(x => x.SalePlace).MaximumLength(200);
     }
 }
 
@@ -123,6 +125,7 @@ public class SaveComponentCommandHandler : IRequestHandler<SaveComponentCommand,
             {
                 existing.SaleDate = ComponentDateHelper.EnsureUtc(request.SaleDate);
                 existing.SalePrice = request.SalePrice;
+                existing.SalePlace = request.SalePlace;
             }
 
             repo.UpdateComponent(existing);

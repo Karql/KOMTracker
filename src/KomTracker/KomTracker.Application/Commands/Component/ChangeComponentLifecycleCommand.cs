@@ -16,6 +16,7 @@ public class ChangeComponentLifecycleCommand : IRequest<Result>
     public ComponentLifecycle Lifecycle { get; set; }
     public DateTime? SaleDate { get; set; }
     public decimal? SalePrice { get; set; }
+    public string? SalePlace { get; set; }
 
     /// <summary>Optional note to save alongside the transition (e.g. why it was archived/sold). Null = leave unchanged.</summary>
     public string? Notes { get; set; }
@@ -26,6 +27,8 @@ public class ChangeComponentLifecycleCommandValidator : AbstractValidator<Change
     public ChangeComponentLifecycleCommandValidator()
     {
         RuleFor(x => x.Lifecycle).IsInEnum();
+
+        RuleFor(x => x.SalePlace).MaximumLength(200);
 
         When(x => x.Lifecycle == ComponentLifecycle.Sold, () =>
         {
@@ -72,12 +75,14 @@ public class ChangeComponentLifecycleCommandHandler : IRequestHandler<ChangeComp
         {
             component.SaleDate = ComponentDateHelper.EnsureUtc(request.SaleDate);
             component.SalePrice = request.SalePrice;
+            component.SalePlace = request.SalePlace;
         }
         else
         {
             // Leaving Sold clears the sale details.
             component.SaleDate = null;
             component.SalePrice = null;
+            component.SalePlace = null;
         }
 
         repo.UpdateComponent(component);

@@ -40,6 +40,7 @@
                         <MudText Typo="Typo.subtitle2">Sale</MudText>
                         <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Class="mt-3" DateFormat="yyyy-MM-dd" Editable="true" />
                         <MudNumericField @bind-Value="_model.SalePrice" Label="Sale price" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
+                        <MudTextField @bind-Value="_model.SalePlace" Label="Sale place" MaxLength="200" Class="mt-3" />
                     }
                 </MudExpansionPanel>
             </MudExpansionPanels>
@@ -94,7 +95,8 @@
                 InitialMovingHours = Bike.InitialMovingHours,
                 InitialElevationM = Bike.InitialElevationM,
                 SaleDate = Bike.SaleDate,
-                SalePrice = Bike.SalePrice
+                SalePrice = Bike.SalePrice,
+                SalePlace = Bike.SalePlace
             };
             _purchaseDate = Bike.PurchaseDate;
             _saleDate = Bike.SaleDate;

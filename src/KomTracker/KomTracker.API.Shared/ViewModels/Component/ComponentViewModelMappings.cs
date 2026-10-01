@@ -38,6 +38,7 @@ public static class ComponentViewModelMappings
         Lifecycle = e.Lifecycle,
         SaleDate = e.SaleDate,
         SalePrice = e.SalePrice,
+        SalePlace = e.SalePlace,
         TotalDistanceKm = e.TotalDistanceKm,
         TotalMovingHours = e.TotalMovingHours,
         TotalElevationM = e.TotalElevationM,

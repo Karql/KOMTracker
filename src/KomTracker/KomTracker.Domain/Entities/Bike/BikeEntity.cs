@@ -53,6 +53,9 @@ public class BikeEntity : BaseEntity
 
     public decimal? SalePrice { get; set; }
 
+    /// <summary>Where/to whom it was sold (free text). Set when Lifecycle == Sold.</summary>
+    public string? SalePlace { get; set; }
+
     /// <summary>External-service links (bt.bike_link). Loaded on demand by queries — NOT an EF navigation
     /// (keeps the update path clean; bike_link is written only via its own repo).</summary>
     [NotMapped]
