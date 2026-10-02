@@ -1,5 +1,7 @@
 @using System.Net.Http.Json
+@using System.Threading
 @using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.API.Shared.ViewModels.Suggestions
 @using KomTracker.Domain.Entities.Bike
 @using KomTracker.WEB.Infrastructure
 
@@ -10,7 +12,8 @@
             <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Required="true" RequiredError="Sale date is required" DateFormat="yyyy-MM-dd" Editable="true" />
             <MudNumericField @bind-Value="_salePrice" Label="Sale price" Min="0" Required="true"
                              RequiredError="Sale price is required" Class="mt-3" Converter="InputConverters.Decimal" />
-            <MudTextField @bind-Value="_salePlace" Label="Sale place" MaxLength="200" Class="mt-3" />
+            <MudAutocomplete T="string" @bind-Value="_salePlace" Label="Sale place" Class="mt-3"
+                             SearchFunc="SearchSalePlaces" CoerceValue="true" Clearable="true" MaxItems="@((int?)null)" />
             <MudTextField @bind-Value="_notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
         </MudForm>
     </DialogContent>
@@ -35,8 +38,14 @@
     private string? _salePlace;
     private string? _notes;
     private bool _saving;
+    private PurchaseSuggestionsViewModel _suggestions = new();
 
-    protected override void OnInitialized() => _notes = Bike.Notes;
+    protected override async Task OnInitializedAsync()
+    {
+        _notes = Bike.Notes;
+        _suggestions = await Http.GetFromJsonAsync<PurchaseSuggestionsViewModel>("bike-tracker/suggestions")
+            ?? new PurchaseSuggestionsViewModel();
+    }
 
     private async Task SubmitAsync()
     {
@@ -75,6 +84,11 @@
             _saving = false;
         }
     }
+
+    private Task<IEnumerable<string>> SearchSalePlaces(string value, CancellationToken token)
+        => Task.FromResult(string.IsNullOrWhiteSpace(value)
+            ? _suggestions.SalePlaces.AsEnumerable()
+            : _suggestions.SalePlaces.Where(s => s.Contains(value, StringComparison.OrdinalIgnoreCase)));
 
     private void Cancel() => MudDialog.Cancel();
 }

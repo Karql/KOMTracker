@@ -9,4 +9,5 @@ public class PurchaseSuggestionsViewModel
     public IReadOnlyCollection<string> Brands { get; set; } = Array.Empty<string>();
     public IReadOnlyCollection<string> Models { get; set; } = Array.Empty<string>();
     public IReadOnlyCollection<string> PurchasePlaces { get; set; } = Array.Empty<string>();
+    public IReadOnlyCollection<string> SalePlaces { get; set; } = Array.Empty<string>();
 }

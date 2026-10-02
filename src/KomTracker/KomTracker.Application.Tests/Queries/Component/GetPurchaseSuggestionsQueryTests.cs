@@ -35,11 +35,13 @@ public class GetPurchaseSuggestionsQueryTests
         _componentRepo.GetDistinctPurchaseFieldsAsync("u1").Returns((
             (IReadOnlyList<string>)new[] { "Shimano" },
             (IReadOnlyList<string>)new[] { "XT" },
-            (IReadOnlyList<string>)new[] { "Decathlon" }));
+            (IReadOnlyList<string>)new[] { "Decathlon" },
+            (IReadOnlyList<string>)new[] { "OLX" }));
         _bikeRepo.GetDistinctPurchaseFieldsAsync("u1").Returns((
             (IReadOnlyList<string>)new[] { "Canyon", " shimano " },   // trims + dedupes with "Shimano" case-insensitively
             (IReadOnlyList<string>)new[] { "Ultimate" },
-            (IReadOnlyList<string>)new[] { "decathlon" }));           // dedupes with "Decathlon" case-insensitively
+            (IReadOnlyList<string>)new[] { "decathlon" },             // dedupes with "Decathlon" case-insensitively
+            (IReadOnlyList<string>)new[] { "olx ", "Allegro" }));     // trims + dedupes with "OLX" case-insensitively
 
         var res = await _handler.Handle(new GetPurchaseSuggestionsQuery { UserId = "u1" }, CancellationToken.None);
 
@@ -47,5 +49,6 @@ public class GetPurchaseSuggestionsQueryTests
         res.Brands.Should().Equal("Canyon", "Shimano");
         res.Models.Should().Equal("Ultimate", "XT");
         res.PurchasePlaces.Should().Equal("Decathlon");
+        res.SalePlaces.Should().Equal("Allegro", "OLX");
     }
 }

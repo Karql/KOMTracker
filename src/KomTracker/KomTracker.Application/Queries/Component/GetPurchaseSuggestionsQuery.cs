@@ -5,7 +5,7 @@ using MediatR;
 
 namespace KomTracker.Application.Queries.Component;
 
-/// <summary>Distinct Brand / Model / Purchase place values across the user's bikes and components (autocomplete hints).</summary>
+/// <summary>Distinct Brand / Model / Purchase place / Sale place values across the user's bikes and components (autocomplete hints).</summary>
 public class GetPurchaseSuggestionsQuery : IRequest<PurchaseSuggestionsModel>
 {
     public string UserId { get; set; } = default!;
@@ -30,7 +30,8 @@ public class GetPurchaseSuggestionsQueryHandler : IRequestHandler<GetPurchaseSug
         return new PurchaseSuggestionsModel(
             Merge(components.Brands, bikes.Brands),
             Merge(components.Models, bikes.Models),
-            Merge(components.PurchasePlaces, bikes.PurchasePlaces));
+            Merge(components.PurchasePlaces, bikes.PurchasePlaces),
+            Merge(components.SalePlaces, bikes.SalePlaces));
     }
 
     private static IReadOnlyList<string> Merge(IEnumerable<string> a, IEnumerable<string> b)

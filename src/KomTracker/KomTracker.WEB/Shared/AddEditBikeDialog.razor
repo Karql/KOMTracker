@@ -40,7 +40,8 @@
                         <MudText Typo="Typo.subtitle2">Sale</MudText>
                         <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Class="mt-3" DateFormat="yyyy-MM-dd" Editable="true" />
                         <MudNumericField @bind-Value="_model.SalePrice" Label="Sale price" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
-                        <MudTextField @bind-Value="_model.SalePlace" Label="Sale place" MaxLength="200" Class="mt-3" />
+                        <MudAutocomplete T="string" @bind-Value="_model.SalePlace" Label="Sale place" Class="mt-3"
+                                         SearchFunc="SearchSalePlaces" CoerceValue="true" Clearable="true" MaxItems="@((int?)null)" />
                     }
                 </MudExpansionPanel>
             </MudExpansionPanels>
@@ -148,6 +149,7 @@
     private Task<IEnumerable<string>> SearchBrands(string value, CancellationToken token) => Suggest(_suggestions.Brands, value);
     private Task<IEnumerable<string>> SearchModels(string value, CancellationToken token) => Suggest(_suggestions.Models, value);
     private Task<IEnumerable<string>> SearchPlaces(string value, CancellationToken token) => Suggest(_suggestions.PurchasePlaces, value);
+    private Task<IEnumerable<string>> SearchSalePlaces(string value, CancellationToken token) => Suggest(_suggestions.SalePlaces, value);
 
     private static Task<IEnumerable<string>> Suggest(IEnumerable<string> source, string value)
         => Task.FromResult(string.IsNullOrWhiteSpace(value)

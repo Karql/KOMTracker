@@ -11,6 +11,6 @@ public interface IBikeRepository : IRepository
     void UpdateBike(BikeEntity bike);
     void DeleteBike(BikeEntity bike);
 
-    /// <summary>DB-side DISTINCT of the non-empty Brand / Model / Purchase place values for the user's bikes (autocomplete hints).</summary>
-    Task<(IReadOnlyList<string> Brands, IReadOnlyList<string> Models, IReadOnlyList<string> PurchasePlaces)> GetDistinctPurchaseFieldsAsync(string userId);
+    /// <summary>DB-side DISTINCT of the non-empty Brand / Model / Purchase place / Sale place values for the user's bikes (autocomplete hints).</summary>
+    Task<(IReadOnlyList<string> Brands, IReadOnlyList<string> Models, IReadOnlyList<string> PurchasePlaces, IReadOnlyList<string> SalePlaces)> GetDistinctPurchaseFieldsAsync(string userId);
 }

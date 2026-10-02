@@ -17,6 +17,6 @@ public interface IComponentRepository : IRepository
     /// <summary>Clear the warehouse reference on every component pointing at the given warehouse (used when a warehouse is deleted).</summary>
     Task ClearWarehouseAsync(int warehouseId);
 
-    /// <summary>DB-side DISTINCT of the non-empty Brand / Model / Purchase place values for the user's components (autocomplete hints).</summary>
-    Task<(IReadOnlyList<string> Brands, IReadOnlyList<string> Models, IReadOnlyList<string> PurchasePlaces)> GetDistinctPurchaseFieldsAsync(string userId);
+    /// <summary>DB-side DISTINCT of the non-empty Brand / Model / Purchase place / Sale place values for the user's components (autocomplete hints).</summary>
+    Task<(IReadOnlyList<string> Brands, IReadOnlyList<string> Models, IReadOnlyList<string> PurchasePlaces, IReadOnlyList<string> SalePlaces)> GetDistinctPurchaseFieldsAsync(string userId);
 }

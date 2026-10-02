@@ -4,4 +4,5 @@ namespace KomTracker.Application.Models.Component;
 public record PurchaseSuggestionsModel(
     IReadOnlyList<string> Brands,
     IReadOnlyList<string> Models,
-    IReadOnlyList<string> PurchasePlaces);
+    IReadOnlyList<string> PurchasePlaces,
+    IReadOnlyList<string> SalePlaces);

@@ -11,7 +11,7 @@ namespace KomTracker.API.Controllers;
 [BearerAuthorize()]
 public class SuggestionsController : BaseApiController<SuggestionsController>
 {
-    /// <summary>Distinct Brand / Model / Purchase place hints across the user's bikes + components (autocomplete).</summary>
+    /// <summary>Distinct Brand / Model / Purchase place / Sale place hints across the user's bikes + components (autocomplete).</summary>
     [HttpGet]
     [Route("")]
     [SwaggerResponse(StatusCodes.Status200OK, type: typeof(PurchaseSuggestionsViewModel))]
@@ -29,7 +29,8 @@ public class SuggestionsController : BaseApiController<SuggestionsController>
         {
             Brands = suggestions.Brands,
             Models = suggestions.Models,
-            PurchasePlaces = suggestions.PurchasePlaces
+            PurchasePlaces = suggestions.PurchasePlaces,
+            SalePlaces = suggestions.SalePlaces
         });
     }
 }
