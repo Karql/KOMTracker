@@ -30,7 +30,7 @@ else
         <MudChip T="string" Size="Size.Small" Color="LifecycleColor(_bike.Lifecycle)">@_bike.Lifecycle</MudChip>
         @if (_bike.StravaGearId is not null)
         {
-            <MudChip T="string" Size="Size.Small" Color="Color.Warning" Icon="@Icons.Material.Filled.Link">Strava</MudChip>
+            <MudChip T="string" Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.Link">Strava</MudChip>
         }
         <MudSpacer />
         <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Primary" OnClick="EditAsync">Edit</MudButton>
