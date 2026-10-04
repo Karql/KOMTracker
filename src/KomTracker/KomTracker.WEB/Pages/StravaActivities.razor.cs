@@ -95,7 +95,7 @@ public partial class StravaActivities
 
     private void OpenBike(int id) => Navigation.NavigateTo($"bikes/{id}");
 
-    private static string FormatDate(DateTime local) => local.ToString("MMM d, yyyy", CultureInfo.InvariantCulture);
+    private static string FormatDate(DateTime local) => local.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
     private static string FormatMovingTime(int seconds)
     {
