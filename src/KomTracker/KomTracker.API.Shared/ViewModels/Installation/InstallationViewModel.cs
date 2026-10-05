@@ -11,6 +11,8 @@ public class InstallationViewModel
     public int ComponentId { get; set; }
     public string? ComponentName { get; set; }
     public ComponentCategory? ComponentCategory { get; set; }
+    public string? ComponentBrand { get; set; }
+    public string? ComponentModel { get; set; }
 
     public int? BikeId { get; set; }
     public string? BikeName { get; set; }

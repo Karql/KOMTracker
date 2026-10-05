@@ -45,6 +45,8 @@ public class GetBikeInstallationsQueryHandler : IRequestHandler<GetBikeInstallat
             {
                 installation.ComponentName = component.Name;
                 installation.ComponentCategory = component.Category;
+                installation.ComponentBrand = component.Brand;
+                installation.ComponentModel = component.Model;
             }
         }
 

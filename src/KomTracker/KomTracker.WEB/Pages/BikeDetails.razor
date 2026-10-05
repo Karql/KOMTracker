@@ -132,7 +132,10 @@ else
                     <MudTable Items="_installations" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0"
                               RowStyleFunc="RowStyle">
                         <HeaderContent>
-                            <MudTh>Component</MudTh>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Category</MudTh>
+                            <MudTh>Brand</MudTh>
+                            <MudTh>Model</MudTh>
                             <MudTh>Type</MudTh>
                             <MudTh>Position</MudTh>
                             <MudTh>Period</MudTh>
@@ -140,12 +143,17 @@ else
                             <MudTh Style="text-align: right;">Actions</MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd DataLabel="Component">
+                            <MudTd DataLabel="Name">
+                                <MudLink OnClick="@(() => OpenComponent(context.ComponentId))">@context.ComponentName</MudLink>
+                            </MudTd>
+                            <MudTd DataLabel="Category">
                                 <div class="d-flex align-center" style="gap: 6px;">
                                     <MudIcon Icon="@ComponentCategoryIcons.Icon(context.ComponentCategory ?? ComponentCategory.Other)" Size="Size.Small" />
-                                    <MudLink OnClick="@(() => OpenComponent(context.ComponentId))">@context.ComponentName</MudLink>
+                                    <span>@ComponentCategoryMetadata.DisplayName(context.ComponentCategory ?? ComponentCategory.Other)</span>
                                 </div>
                             </MudTd>
+                            <MudTd DataLabel="Brand">@context.ComponentBrand</MudTd>
+                            <MudTd DataLabel="Model">@context.ComponentModel</MudTd>
                             <MudTd DataLabel="Type">
                                 <div class="d-flex align-center" style="gap: 6px;">
                                     <MudChip T="string" Size="Size.Small" Variant="Variant.Text"

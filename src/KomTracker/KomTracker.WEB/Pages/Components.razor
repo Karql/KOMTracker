@@ -155,7 +155,7 @@ else
                 <MudTh>Brand</MudTh>
                 <MudTh>Model</MudTh>
                 <MudTh>Location</MudTh>
-                <MudTh Style="text-align: right;">Distance</MudTh>
+                <MudTh Style="text-align: right;">Mileage</MudTh>
                 <MudTh>Status</MudTh>
                 <MudTh Style="text-align: right;"></MudTh>
             </HeaderContent>
@@ -206,7 +206,7 @@ else
                         @(context.WarehouseName ?? "—")
                     }
                 </MudTd>
-                <MudTd DataLabel="Distance" Style="text-align: right;">@context.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture) km</MudTd>
+                <MudTd DataLabel="Mileage" Style="text-align: right;">@Mileage(context)</MudTd>
                 <MudTd DataLabel="Status">
                     <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
                 </MudTd>
@@ -217,6 +217,16 @@ else
 }
 
 @code {
+    // Component totals (initial seed + attributed rides) — distance · moving time · elevation, same format as the installations table.
+    private static string Mileage(ComponentViewModel c)
+    {
+        var parts = new List<string>();
+        if (c.TotalDistanceKm > 0) parts.Add($"{c.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture)} km");
+        if (c.TotalMovingHours > 0) parts.Add($"{c.TotalMovingHours.ToString("N1", CultureInfo.InvariantCulture)} h");
+        if (c.TotalElevationM > 0) parts.Add($"{c.TotalElevationM.ToString("N0", CultureInfo.InvariantCulture)} m");
+        return parts.Count == 0 ? "—" : string.Join(" · ", parts);
+    }
+
     private RenderFragment ComponentMenu(ComponentViewModel component) =>@<MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
         <MudMenuItem Icon="@Icons.Material.Filled.Visibility" OnClick="@(() => OpenDetails(component.Id))">Details</MudMenuItem>
         <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditAsync(component))">Edit</MudMenuItem>

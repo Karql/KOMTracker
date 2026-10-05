@@ -52,6 +52,12 @@ public class InstallationEntity : BaseEntity
     public ComponentCategory? ComponentCategory { get; set; }
 
     [NotMapped]
+    public string? ComponentBrand { get; set; }
+
+    [NotMapped]
+    public string? ComponentModel { get; set; }
+
+    [NotMapped]
     public string? BikeName { get; set; }
 
     /// <summary>Parent component's name (when <see cref="ParentComponentId"/> is set), for display. Set by queries.</summary>

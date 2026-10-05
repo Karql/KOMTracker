@@ -13,6 +13,8 @@ public static class InstallationViewModelMappings
         ComponentId = e.ComponentId,
         ComponentName = e.ComponentName,
         ComponentCategory = e.ComponentCategory,
+        ComponentBrand = e.ComponentBrand,
+        ComponentModel = e.ComponentModel,
         BikeId = e.BikeId,
         BikeName = e.BikeName,
         ParentComponentId = e.ParentComponentId,
