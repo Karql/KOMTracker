@@ -47,6 +47,7 @@ public static class ComponentCategoryIcons
         ComponentCategory.TireInsert => TireInsertSvg,
         ComponentCategory.Hub => HubSvg,
         ComponentCategory.Spokes => SpokesSvg,
+        ComponentCategory.Rim => RimSvg,
         ComponentCategory.RimTape => RimTapeSvg,
         ComponentCategory.InnerTube => InnerTubeSvg,
         ComponentCategory.TubelessSealant => DropSvg,
@@ -86,6 +87,7 @@ public static class ComponentCategoryIcons
 
         // Accessories
         ComponentCategory.Computer => ComputerSvg,
+        ComponentCategory.PowerMeter => PowerMeterSvg,
         ComponentCategory.Lights => LightsSvg,
         ComponentCategory.Lock => LockSvg,
         ComponentCategory.Pump => PumpSvg,
@@ -149,6 +151,8 @@ public static class ComponentCategoryIcons
     private const string TireInsertSvg = "<circle cx='12' cy='12' r='8.5'/><circle cx='12' cy='12' r='5' stroke-dasharray='2.2 2.2'/>";
     private const string HubSvg = "<rect x='7' y='9' width='10' height='6' rx='2.5'/><path d='M3 12h4M17 12h4'/><path d='M8.5 9l-1-2M15.5 9l1-2M8.5 15l-1 2M15.5 15l1 2'/>";
     private const string SpokesSvg = "<circle cx='12' cy='12' r='2'/><path d='M12 3v7M12 14v7M3 12h7M14 12h7M5.6 5.6l4.4 4.4M14 14l4.4 4.4M18.4 5.6L14 10M10 14l-4.4 4.4'/>";
+    // Narrow double-walled hoop with spoke-nipple stubs on the inner wall (no hub/spokes — that's Wheel).
+    private const string RimSvg = "<circle cx='12' cy='12' r='8.5'/><circle cx='12' cy='12' r='6.8'/><path d='M12 6.8v1.7M12 15.5v1.7M6.8 12h1.7M15.5 12h1.7M8.2 8.2l1.2 1.2M14.6 14.6l1.2 1.2M15.8 8.2l-1.2 1.2M9.4 14.6l-1.2 1.2'/>";
     private const string RimTapeSvg = "<circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/><path d='M18 12a6 6 0 0 0-6-6'/>";
     private const string InnerTubeSvg = "<circle cx='12' cy='13' r='7'/><rect x='11' y='2' width='2' height='4' rx='0.5'/>";
     private const string DropSvg = "<path d='M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z'/>";
@@ -188,6 +192,8 @@ public static class ComponentCategoryIcons
 
     // ── Accessories ──
     private const string ComputerSvg = "<rect x='7' y='4' width='10' height='16' rx='2'/><path d='M9.5 8h5'/>";
+    // Gauge dial with tick marks and a needle.
+    private const string PowerMeterSvg = "<path d='M4 17a8 8 0 0 1 16 0'/><path d='M12 17l4-5'/><circle cx='12' cy='17' r='1.3'/><path d='M6.3 11.3l1.1 1.1M12 9v1.6M17.7 11.3l-1.1 1.1'/>";
     private const string LightsSvg = "<circle cx='9' cy='12' r='4'/><path d='M13 12h7M14 9l6-2M14 15l6 2'/>";
     private const string LockSvg = "<rect x='6' y='11' width='12' height='9' rx='2'/><path d='M8.5 11V8a3.5 3.5 0 0 1 7 0v3'/>";
     private const string PumpSvg = "<rect x='9' y='6' width='6' height='14' rx='1'/><path d='M12 6V2M9 4h6M15 17h5'/>";

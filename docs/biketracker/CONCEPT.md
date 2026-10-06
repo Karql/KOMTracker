@@ -198,12 +198,12 @@ Road · Mountain · Gravel · Urban · Triathlon · Cyclocross · Hybrid · Indo
 - **Brakes:** Brake · Brake Caliper · Brake Lever · Brake Pads · Brake Rotor
 - **Drivetrain:** Chain · Cassette · Chainring · Crankset · Front Derailleur · Rear Derailleur · Shifter · Pulley · Chainguide · Sprocket
 - **Cockpit:** Handlebar · Bar Tape · Grips · Stem
-- **Wheels:** Wheel · Tire · Tire Insert · Hub · Spokes · Rim Tape · Inner Tube · Tubeless Sealant · Thru Axle
+- **Wheels:** Wheel · Tire · Tire Insert · Hub · Spokes · Rim · Rim Tape · Inner Tube · Tubeless Sealant · Thru Axle
 - **Structure:** Frame · Fork · Headset · Bottom Bracket · Bearing · Bolts · Pedals · Saddle · Seatpost
 - **Suspension:** Suspension Fork · Rear Shock · Dropper Seatpost · Suspension Seatpost
 - **Cables:** Cable · Hydraulic Lines
 - **Electric:** Battery · Motor
 - **Indoor:** Trainer · Indoor Bike · Fan · Mat · Riser
-- **Accessories:** Computer · Lights · Lock · Pump · Rack · Bottle · Bell/Horn · Fenders · Kickstand · Toolset · Apparel · Accessories · **Other**
+- **Accessories:** Computer · Power Meter · Lights · Lock · Pump · Rack · Bottle · Bell/Horn · Fenders · Kickstand · Toolset · Apparel · Accessories · **Other**
 
 Notes: **Frame** is an **optional** category — the **Bike** is the durable *named* identity, and a Frame component lets you track **frame swaps** under it (real case: a cracked / warranty frame replaced while keeping the same named bike). Define it if you want that history; not required. Non-installable categories (Toolset, Apparel, Accessories, Other, consumables) are cost-only via the registry's `installable=false`. Lists are code-side, editable. **Both `Bike.Type` and `Component.Category` always include a mandatory `Other` fallback** (used whenever nothing fits — e.g. an unusual bike or a frame/part not in the list), so nothing is ever un-categorizable.

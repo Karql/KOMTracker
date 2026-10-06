@@ -42,6 +42,7 @@ public enum ComponentCategory
     TireInsert,
     Hub,
     Spokes,
+    Rim,
     RimTape,
     InnerTube,
     TubelessSealant,
@@ -81,6 +82,7 @@ public enum ComponentCategory
 
     // Accessories
     Computer,
+    PowerMeter,
     Lights,
     Lock,
     Pump,

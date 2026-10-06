@@ -29,6 +29,20 @@ public class ComponentCategoryMetadataTests
         grouped.Should().OnlyHaveUniqueItems();
     }
 
+    [Theory]
+    [InlineData(ComponentCategory.Rim, ComponentCategoryGroup.Wheels)]
+    [InlineData(ComponentCategory.PowerMeter, ComponentCategoryGroup.Accessories)]
+    public void Category_maps_to_expected_group(ComponentCategory category, ComponentCategoryGroup expected)
+    {
+        ComponentCategoryMetadata.Group(category).Should().Be(expected);
+    }
+
+    [Fact]
+    public void PowerMeter_has_spaced_display_name()
+    {
+        ComponentCategoryMetadata.DisplayName(ComponentCategory.PowerMeter).Should().Be("Power Meter");
+    }
+
     [Fact]
     public void Other_falls_back_to_accessories_group()
     {

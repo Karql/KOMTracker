@@ -26,7 +26,7 @@ public static class ComponentCategoryMetadata
             or ComponentCategory.Stem => ComponentCategoryGroup.Cockpit,
 
         ComponentCategory.Wheel or ComponentCategory.Tire or ComponentCategory.TireInsert or ComponentCategory.Hub
-            or ComponentCategory.Spokes or ComponentCategory.RimTape or ComponentCategory.InnerTube
+            or ComponentCategory.Spokes or ComponentCategory.Rim or ComponentCategory.RimTape or ComponentCategory.InnerTube
             or ComponentCategory.TubelessSealant or ComponentCategory.ThruAxle => ComponentCategoryGroup.Wheels,
 
         ComponentCategory.Frame or ComponentCategory.Fork or ComponentCategory.Headset
