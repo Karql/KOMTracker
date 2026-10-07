@@ -93,19 +93,19 @@ else
             @foreach (var component in FilteredComponents)
             {
                 <MudItem xs="12" sm="6" md="4">
-                    <MudCard Outlined="true">
+                    <MudCard Outlined="true" Class="card-link">
                         <MudCardHeader>
                             <CardHeaderAvatar>
                                 <MudIcon Icon="@ComponentCategoryIcons.Icon(component.Category)" />
                             </CardHeaderAvatar>
                             <CardHeaderContent>
-                                <MudText Typo="Typo.h6">@component.Name</MudText>
+                                <MudLink Href="@($"components/{component.Id}")" Typo="Typo.h6" Underline="Underline.Hover" Class="card-link__title">@component.Name</MudLink>
                                 <MudText Typo="Typo.body2" Class="mud-text-secondary">
                                     @($"{component.Brand} {component.Model}".Trim())
                                 </MudText>
                             </CardHeaderContent>
                             <CardHeaderActions>
-                                @ComponentMenu(component)
+                                <div class="card-link__above">@ComponentMenu(component)</div>
                             </CardHeaderActions>
                         </MudCardHeader>
                         <MudCardContent>
@@ -138,9 +138,6 @@ else
                                 @component.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture) km
                             </MudText>
                         </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => OpenDetails(component.Id))">Details</MudButton>
-                        </MudCardActions>
                     </MudCard>
                 </MudItem>
             }
@@ -162,7 +159,7 @@ else
             <RowTemplate>
                 <MudTd DataLabel="Name">
                     <div class="d-flex align-center" style="gap: 6px;">
-                        <MudLink OnClick="@(() => OpenDetails(context.Id))">@context.Name</MudLink>
+                        <MudLink Href="@($"components/{context.Id}")">@context.Name</MudLink>
                         @if (context.IsMetaComponent)
                         {
                             <MudTooltip Text="Meta component (can contain other components)">

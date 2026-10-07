@@ -634,3 +634,28 @@
     .lp-strava:hover { transform: none; }
 }
 /* #endregion landing */
+/* Clickable card ("stretched link"): the title is a real <a href> whose ::after covers the whole card, so the
+   entire tile is a click target while keyboard / screen-reader / Ctrl+click still see one ordinary link.
+   Nested controls (menus, clickable chips) go in .card-link__above to stay clickable on top of the overlay. */
+.card-link {
+    position: relative;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.card-link:hover,
+.card-link:focus-within {
+    border-color: var(--mud-palette-primary);
+    box-shadow: var(--mud-elevation-2);
+}
+
+.card-link .card-link__title::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.card-link .card-link__above {
+    position: relative;
+    z-index: 2;
+}

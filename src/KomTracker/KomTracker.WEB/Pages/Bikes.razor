@@ -57,19 +57,19 @@ else
             @foreach (var bike in FilteredBikes)
             {
                 <MudItem xs="12" sm="6" md="4">
-                    <MudCard Outlined="true">
+                    <MudCard Outlined="true" Class="card-link">
                         <MudCardHeader>
                             <CardHeaderAvatar>
                                 <MudIcon Icon="@Icons.Material.Filled.PedalBike" />
                             </CardHeaderAvatar>
                             <CardHeaderContent>
-                                <MudText Typo="Typo.h6">@bike.Name</MudText>
+                                <MudLink Href="@($"bikes/{bike.Id}")" Typo="Typo.h6" Underline="Underline.Hover" Class="card-link__title">@bike.Name</MudLink>
                                 <MudText Typo="Typo.body2" Class="mud-text-secondary">
                                     @($"{bike.Brand} {bike.Model}".Trim())
                                 </MudText>
                             </CardHeaderContent>
                             <CardHeaderActions>
-                                @BikeMenu(bike)
+                                <div class="card-link__above">@BikeMenu(bike)</div>
                             </CardHeaderActions>
                         </MudCardHeader>
                         <MudCardContent>
@@ -79,6 +79,7 @@ else
                                 @if (bike.StravaGearId is not null)
                                 {
                                     <MudChip T="string" Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.Link"
+                                             Class="card-link__above"
                                              OnClick="GoToStravaBikes">@(bike.StravaBikeName is null ? "Strava" : $"Strava: {bike.StravaBikeName}")</MudChip>
                                 }
                             </div>
@@ -86,9 +87,6 @@ else
                                 <MudIcon Icon="@Icons.Material.Filled.Straighten" Size="Size.Small" Class="mr-1" Style="vertical-align: text-bottom;" />@Km(bike.TotalDistanceKm)
                             </MudText>
                         </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => OpenDetails(bike.Id))">Details</MudButton>
-                        </MudCardActions>
                     </MudCard>
                 </MudItem>
             }
@@ -108,7 +106,7 @@ else
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Name">
-                    <MudLink OnClick="@(() => OpenDetails(context.Id))">@context.Name</MudLink>
+                    <MudLink Href="@($"bikes/{context.Id}")">@context.Name</MudLink>
                 </MudTd>
                 <MudTd DataLabel="Type">@context.Type</MudTd>
                 <MudTd DataLabel="Brand">@context.Brand</MudTd>
