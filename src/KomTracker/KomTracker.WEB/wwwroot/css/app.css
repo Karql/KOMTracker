@@ -639,6 +639,7 @@
    Nested controls (menus, clickable chips) go in .card-link__above to stay clickable on top of the overlay. */
 .card-link {
     position: relative;
+    height: 100%; /* fill the grid row, so tiles in a row are equally tall */
     transition: border-color .15s ease, box-shadow .15s ease;
 }
 

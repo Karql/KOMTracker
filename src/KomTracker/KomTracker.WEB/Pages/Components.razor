@@ -5,6 +5,7 @@
 @using KomTracker.API.Shared.ViewModels.Component
 @using KomTracker.API.Shared.ViewModels.Warehouse
 @using KomTracker.Domain.Entities.Component
+@using KomTracker.WEB.Infrastructure
 @using KomTracker.WEB.Models.Component
 @using KomTracker.WEB.Models.Preference
 
@@ -101,7 +102,7 @@ else
                             <CardHeaderContent>
                                 <MudLink Href="@($"components/{component.Id}")" Typo="Typo.h6" Underline="Underline.Hover" Class="card-link__title">@component.Name</MudLink>
                                 <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                                    @($"{component.Brand} {component.Model}".Trim())
+                                    @CardText.BrandModel(component.Brand, component.Model)
                                 </MudText>
                             </CardHeaderContent>
                             <CardHeaderActions>

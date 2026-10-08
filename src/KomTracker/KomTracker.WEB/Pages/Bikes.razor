@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @using KomTracker.API.Shared.ViewModels.Bike
 @using KomTracker.Domain.Entities.Bike
+@using KomTracker.WEB.Infrastructure
 @using KomTracker.WEB.Models.Preference
 
 <PageTitle>Bikes</PageTitle>
@@ -65,7 +66,7 @@ else
                             <CardHeaderContent>
                                 <MudLink Href="@($"bikes/{bike.Id}")" Typo="Typo.h6" Underline="Underline.Hover" Class="card-link__title">@bike.Name</MudLink>
                                 <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                                    @($"{bike.Brand} {bike.Model}".Trim())
+                                    @CardText.BrandModel(bike.Brand, bike.Model)
                                 </MudText>
                             </CardHeaderContent>
                             <CardHeaderActions>
