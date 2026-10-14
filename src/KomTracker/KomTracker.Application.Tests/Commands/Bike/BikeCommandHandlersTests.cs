@@ -117,7 +117,7 @@ public class BikeCommandHandlersTests
     }
 
     [Fact]
-    public async Task ChangeLifecycle_clears_sale_details_when_leaving_sold()
+    public async Task ChangeLifecycle_keeps_sale_details_when_leaving_sold()
     {
         var bike = new BikeEntity
         {
@@ -126,7 +126,8 @@ public class BikeCommandHandlersTests
             Name = "X",
             Lifecycle = BikeLifecycle.Sold,
             SaleDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-            SalePrice = 1200
+            SalePrice = 1200,
+            SalePlace = "OLX"
         };
         _bikeRepository.GetBikeAsync(5).Returns(bike);
         var handler = new ChangeBikeLifecycleCommandHandler(_komUoW);
@@ -140,8 +141,9 @@ public class BikeCommandHandlersTests
 
         result.Should().BeSuccess();
         bike.Lifecycle.Should().Be(BikeLifecycle.Active);
-        bike.SaleDate.Should().BeNull();
-        bike.SalePrice.Should().BeNull();
+        bike.SaleDate.Should().Be(new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        bike.SalePrice.Should().Be(1200);
+        bike.SalePlace.Should().Be("OLX");
     }
 
     [Fact]

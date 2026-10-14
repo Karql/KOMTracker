@@ -157,6 +157,29 @@ public class ComponentCommandHandlersTests
     }
 
     [Fact]
+    public async Task ChangeLifecycle_keeps_sale_details_when_leaving_sold()
+    {
+        var saleDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        _componentRepo.GetComponentAsync(5).Returns(new ComponentEntity
+        {
+            Id = 5, UserId = "u1", Name = "Chain", Lifecycle = ComponentLifecycle.Sold,
+            SaleDate = saleDate, SalePrice = 100, SalePlace = "OLX"
+        });
+
+        var handler = new ChangeComponentLifecycleCommandHandler(_komUoW, _mediator);
+        var res = await handler.Handle(new ChangeComponentLifecycleCommand
+        {
+            Id = 5,
+            UserId = "u1",
+            Lifecycle = ComponentLifecycle.Active
+        }, CancellationToken.None);
+
+        res.Should().BeSuccess();
+        _componentRepo.Received().UpdateComponent(Arg.Is<ComponentEntity>(c =>
+            c.Lifecycle == ComponentLifecycle.Active && c.SaleDate == saleDate && c.SalePrice == 100 && c.SalePlace == "OLX"));
+    }
+
+    [Fact]
     public async Task Delete_other_users_component_is_forbidden()
     {
         _componentRepo.GetComponentAsync(5).Returns(new ComponentEntity { Id = 5, UserId = "other", Name = "Chain" });

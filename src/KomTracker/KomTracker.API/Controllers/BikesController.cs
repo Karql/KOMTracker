@@ -120,7 +120,10 @@ public class BikesController : BaseApiController<BikesController>
             InitialDistanceKm = model.InitialDistanceKm,
             InitialMovingHours = model.InitialMovingHours,
             InitialElevationM = model.InitialElevationM,
-            StravaGearId = model.StravaGearId
+            StravaGearId = model.StravaGearId,
+            SaleDate = model.SaleDate,
+            SalePrice = model.SalePrice,
+            SalePlace = model.SalePlace
         });
 
         return this.ToActionResult(result, bike => bike.ToViewModel());

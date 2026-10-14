@@ -77,13 +77,9 @@ public class ChangeComponentLifecycleCommandHandler : IRequestHandler<ChangeComp
             component.SalePrice = request.SalePrice;
             component.SalePlace = request.SalePlace;
         }
-        else
-        {
-            // Leaving Sold clears the sale details.
-            component.SaleDate = null;
-            component.SalePrice = null;
-            component.SalePlace = null;
-        }
+
+        // Leaving Sold keeps the sale details (only shown while Sold): a component taken back to Active for a while
+        // and re-sold gets them pre-filled in the sell dialog instead of losing them.
 
         repo.UpdateComponent(component);
 
@@ -92,7 +88,7 @@ public class ChangeComponentLifecycleCommandHandler : IRequestHandler<ChangeComp
         {
             await ApplyLifecycleToInstallationsAsync(
                 repo, component.Id, component.SaleDate ?? ComponentDateHelper.EnsureUtc(request.SaleDate)!.Value,
-                cascadeSoldToChildren: true);
+                cascadeSoldToChildren: true, salePlace: component.SalePlace);
         }
         else if (request.Lifecycle == ComponentLifecycle.Archived)
         {
@@ -115,7 +111,8 @@ public class ChangeComponentLifecycleCommandHandler : IRequestHandler<ChangeComp
     /// closed → child becomes unassigned, lifecycle untouched). One-level nesting means one pass suffices.
     /// </summary>
     private async Task ApplyLifecycleToInstallationsAsync(
-        IComponentRepository componentRepo, int componentId, DateTime closeDate, bool cascadeSoldToChildren)
+        IComponentRepository componentRepo, int componentId, DateTime closeDate, bool cascadeSoldToChildren,
+        string? salePlace = null)
     {
         var installationRepo = _komUoW.GetRepository<IInstallationRepository>();
 
@@ -140,6 +137,10 @@ public class ChangeComponentLifecycleCommandHandler : IRequestHandler<ChangeComp
                 {
                     child.Lifecycle = ComponentLifecycle.Sold;
                     child.SaleDate = closeDate;
+                    // Sold together with the parent: no price of its own (it's in the parent's), same buyer/place.
+                    // Set explicitly — a child sold once before keeps its old sale details while Active.
+                    child.SalePrice = null;
+                    child.SalePlace = salePlace;
                     componentRepo.UpdateComponent(child);
                 }
             }
