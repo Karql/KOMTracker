@@ -50,6 +50,12 @@
     protected override async Task OnInitializedAsync()
     {
         _notes = Component.Notes;
+
+        // Re-selling (Sold → Active → Sold): start from the previous sale details, which are kept on the component.
+        _saleDate = Component.SaleDate ?? _saleDate;
+        _salePrice = Component.SalePrice;
+        _salePlace = Component.SalePlace;
+
         _suggestions = await Http.GetFromJsonAsync<PurchaseSuggestionsViewModel>("bike-tracker/suggestions")
             ?? new PurchaseSuggestionsViewModel();
     }

@@ -43,6 +43,12 @@
     protected override async Task OnInitializedAsync()
     {
         _notes = Bike.Notes;
+
+        // Re-selling (Sold → Active → Sold): start from the previous sale details, which are kept on the bike.
+        _saleDate = Bike.SaleDate ?? _saleDate;
+        _salePrice = Bike.SalePrice;
+        _salePlace = Bike.SalePlace;
+
         _suggestions = await Http.GetFromJsonAsync<PurchaseSuggestionsViewModel>("bike-tracker/suggestions")
             ?? new PurchaseSuggestionsViewModel();
     }

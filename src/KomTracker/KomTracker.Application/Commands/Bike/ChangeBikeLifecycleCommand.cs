@@ -74,13 +74,9 @@ public class ChangeBikeLifecycleCommandHandler : IRequestHandler<ChangeBikeLifec
             bike.SalePrice = request.SalePrice;
             bike.SalePlace = request.SalePlace;
         }
-        else
-        {
-            // Leaving Sold clears the sale details.
-            bike.SaleDate = null;
-            bike.SalePrice = null;
-            bike.SalePlace = null;
-        }
+
+        // Leaving Sold keeps the sale details (only shown while Sold): a bike taken back to Active for a while and
+        // re-sold gets them pre-filled in the sell dialog instead of losing them.
 
         repo.UpdateBike(bike);
         await _komUoW.SaveChangesAsync();

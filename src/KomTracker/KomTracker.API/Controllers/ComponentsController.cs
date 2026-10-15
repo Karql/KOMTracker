@@ -121,7 +121,10 @@ public class ComponentsController : BaseApiController<ComponentsController>
             InitialDistanceKm = model.InitialDistanceKm,
             InitialMovingHours = model.InitialMovingHours,
             InitialElevationM = model.InitialElevationM,
-            WarehouseId = model.WarehouseId
+            WarehouseId = model.WarehouseId,
+            SaleDate = model.SaleDate,
+            SalePrice = model.SalePrice,
+            SalePlace = model.SalePlace
         });
 
         return this.ToActionResult(result, component => component.ToViewModel());
