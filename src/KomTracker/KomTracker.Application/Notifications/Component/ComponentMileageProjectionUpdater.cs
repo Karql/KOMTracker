@@ -57,8 +57,10 @@ public class ComponentMileageProjectionUpdater :
 
     public async Task Handle(ActivitySyncedNotification notification, CancellationToken cancellationToken)
     {
-        var componentIds = await ResolveGearComponentIdsAsync(notification.GearId);
-        await RecalculateSafelyAsync(componentIds, $"activity {notification.ActivityId} sync (gear {notification.GearId})", cancellationToken);
+        // The ride's current bike, plus the bike it was on before when it moved (that one has to drop the ride).
+        var componentIds = await ResolveGearComponentIdsAsync(notification.GearId, notification.PreviousGearId);
+        await RecalculateSafelyAsync(componentIds,
+            $"activity {notification.ActivityId} sync (gear {notification.GearId}, previous gear {notification.PreviousGearId})", cancellationToken);
     }
 
     // Athlete → owning user → their bikes → components installed (ever) on those bikes.
@@ -81,21 +83,27 @@ public class ComponentMileageProjectionUpdater :
         return (await _komUoW.GetRepository<IInstallationRepository>().GetComponentIdsByBikesAsync(bikeIds)).ToList();
     }
 
-    // Gear → linked bike → components installed (ever) on that bike.
-    private async Task<IReadOnlyCollection<int>> ResolveGearComponentIdsAsync(string? gearId)
+    // Gear(s) → linked bike(s) → components installed (ever) on those bikes. Empty/unlinked gears are skipped.
+    private async Task<IReadOnlyCollection<int>> ResolveGearComponentIdsAsync(params string?[] gearIds)
     {
-        if (string.IsNullOrEmpty(gearId))
+        var linkRepo = _komUoW.GetRepository<IBikeLinkRepository>();
+        var bikeIds = new List<int>();
+
+        foreach (var gearId in gearIds.Where(g => !string.IsNullOrEmpty(g)).Distinct())
+        {
+            var link = await linkRepo.GetByExternalIdAsync(ExternalService.Strava, gearId!);
+            if (link is not null)
+            {
+                bikeIds.Add(link.BikeId);
+            }
+        }
+
+        if (bikeIds.Count == 0)
         {
             return Array.Empty<int>();
         }
 
-        var link = await _komUoW.GetRepository<IBikeLinkRepository>().GetByExternalIdAsync(ExternalService.Strava, gearId);
-        if (link is null)
-        {
-            return Array.Empty<int>();
-        }
-
-        return (await _komUoW.GetRepository<IInstallationRepository>().GetComponentIdsByBikesAsync(new[] { link.BikeId })).ToList();
+        return (await _komUoW.GetRepository<IInstallationRepository>().GetComponentIdsByBikesAsync(bikeIds.Distinct().ToList())).ToList();
     }
 
     private async Task RecalculateSafelyAsync(IReadOnlyCollection<int> componentIds, string context, CancellationToken cancellationToken)

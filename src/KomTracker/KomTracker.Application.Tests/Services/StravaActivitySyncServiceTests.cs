@@ -59,6 +59,38 @@ public class StravaActivitySyncServiceTests
     }
 
     [Fact]
+    public async Task Sync_of_a_ride_moved_to_another_bike_publishes_the_previous_gear()
+    {
+        SetupToken();
+        _activityRepo.GetAsync(AthleteId, ActivityId).Returns(new ActivityEntity { Id = ActivityId, AthleteId = AthleteId, GearId = "b-old" });
+        var entity = new ActivityEntity { Id = ActivityId, AthleteId = AthleteId, GearId = "b-new" };
+        _activityService.GetAthleteActivityAsync(AthleteId, "t", ActivityId).Returns(Result.Ok(entity));
+
+        var res = await _service.SyncAthleteActivityAsync(AthleteId, ActivityId);
+
+        res.Should().BeSuccess();
+        // The old bike's components still count the ride — the updater needs its gear to recompute them too.
+        await _mediator.Received().Publish(
+            Arg.Is<ActivitySyncedNotification>(n => n.GearId == "b-new" && n.PreviousGearId == "b-old"),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Sync_of_a_new_ride_has_no_previous_gear()
+    {
+        SetupToken();
+        _activityRepo.GetAsync(AthleteId, ActivityId).Returns((ActivityEntity?)null);
+        var entity = new ActivityEntity { Id = ActivityId, AthleteId = AthleteId, GearId = "b1" };
+        _activityService.GetAthleteActivityAsync(AthleteId, "t", ActivityId).Returns(Result.Ok(entity));
+
+        await _service.SyncAthleteActivityAsync(AthleteId, ActivityId);
+
+        await _mediator.Received().Publish(
+            Arg.Is<ActivitySyncedNotification>(n => n.GearId == "b1" && n.PreviousGearId == null),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task Sync_without_token_does_not_fetch_or_upsert()
     {
         _athleteService.GetValidTokenAsync(AthleteId).Returns(Result.Fail<TokenEntity>("no token"));

@@ -98,6 +98,47 @@ public class ComponentMileageProjectionUpdaterTests
     }
 
     [Fact]
+    public async Task Activity_moved_to_another_bike_recomputes_both_bikes_components_in_one_go()
+    {
+        _bikeLinkRepo.GetByExternalIdAsync(ExternalService.Strava, "b-new").Returns(new BikeLinkEntity { BikeId = 3 });
+        _bikeLinkRepo.GetByExternalIdAsync(ExternalService.Strava, "b-old").Returns(new BikeLinkEntity { BikeId = 4 });
+        _installationRepo.GetComponentIdsByBikesAsync(Arg.Is<IReadOnlyCollection<int>>(c => c.Contains(3) && c.Contains(4)))
+            .Returns(new[] { 5, 6 });
+
+        await _updater.Handle(new ActivitySyncedNotification { AthleteId = 7, ActivityId = 99, GearId = "b-new", PreviousGearId = "b-old" },
+            CancellationToken.None);
+
+        await _mediator.Received(1).Send(
+            Arg.Is<RecalculateComponentsMileageCommand>(c => c.ComponentIds.Contains(5) && c.ComponentIds.Contains(6)),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task Activity_sync_with_unchanged_gear_resolves_the_bike_once()
+    {
+        _bikeLinkRepo.GetByExternalIdAsync(ExternalService.Strava, "b1").Returns(new BikeLinkEntity { BikeId = 3 });
+        _installationRepo.GetComponentIdsByBikesAsync(Arg.Any<IReadOnlyCollection<int>>()).Returns(new[] { 5 });
+
+        await _updater.Handle(new ActivitySyncedNotification { AthleteId = 7, ActivityId = 99, GearId = "b1", PreviousGearId = "b1" },
+            CancellationToken.None);
+
+        await _bikeLinkRepo.Received(1).GetByExternalIdAsync(ExternalService.Strava, "b1");
+        await Recompute(5);
+    }
+
+    [Fact]
+    public async Task Activity_moved_off_a_bike_to_no_gear_still_recomputes_the_old_bike()
+    {
+        _bikeLinkRepo.GetByExternalIdAsync(ExternalService.Strava, "b-old").Returns(new BikeLinkEntity { BikeId = 4 });
+        _installationRepo.GetComponentIdsByBikesAsync(Arg.Is<IReadOnlyCollection<int>>(c => c.Contains(4))).Returns(new[] { 6 });
+
+        await _updater.Handle(new ActivitySyncedNotification { AthleteId = 7, ActivityId = 99, GearId = null, PreviousGearId = "b-old" },
+            CancellationToken.None);
+
+        await Recompute(6);
+    }
+
+    [Fact]
     public async Task Activity_sync_without_gear_is_a_no_op()
     {
         await _updater.Handle(new ActivitySyncedNotification { AthleteId = 7, ActivityId = 99, GearId = null }, CancellationToken.None);

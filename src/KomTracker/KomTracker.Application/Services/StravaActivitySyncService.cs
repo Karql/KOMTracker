@@ -50,14 +50,21 @@ public class StravaActivitySyncService : IStravaActivitySyncService
         }
 
         var activity = activityRes.Value;
-        await _komUoW.GetRepository<IActivityRepository>().UpsertActivityAsync(activity);
+        var activityRepo = _komUoW.GetRepository<IActivityRepository>();
 
-        // Announce the sync; the projection updater recomputes the components on this ride's bike (gear → bike → components).
+        // Capture the stored gear BEFORE the upsert — if the ride was moved to another bike on Strava, the old bike's
+        // components still count it and must be recomputed as well.
+        var previousGearId = (await activityRepo.GetAsync(athleteId, activityId))?.GearId;
+
+        await activityRepo.UpsertActivityAsync(activity);
+
+        // Announce the sync; the projection updater recomputes the components on this ride's bike(s) (gear → bike → components).
         await _mediator.Publish(new ActivitySyncedNotification
         {
             AthleteId = athleteId,
             ActivityId = activityId,
-            GearId = activity.GearId
+            GearId = activity.GearId,
+            PreviousGearId = previousGearId
         }, cancellationToken);
 
         return Result.Ok();

@@ -15,4 +15,10 @@ public class ActivitySyncedNotification : INotification
 
     /// <summary>Strava gear id the activity was recorded with; null/empty when the ride had no gear assigned.</summary>
     public string? GearId { get; set; }
+
+    /// <summary>
+    /// Gear the stored activity had before this sync, when known. Differs from <see cref="GearId"/> when the ride was
+    /// moved to another bike on Strava — that bike's components must drop the ride, so they are recomputed too.
+    /// </summary>
+    public string? PreviousGearId { get; set; }
 }
