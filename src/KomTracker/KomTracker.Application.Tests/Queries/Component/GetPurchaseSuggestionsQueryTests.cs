@@ -16,6 +16,7 @@ public class GetPurchaseSuggestionsQueryTests
     private readonly IKOMUnitOfWork _komUoW;
     private readonly IComponentRepository _componentRepo;
     private readonly IBikeRepository _bikeRepo;
+    private readonly IExpenseRepository _expenseRepo;
     private readonly GetPurchaseSuggestionsQueryHandler _handler;
 
     public GetPurchaseSuggestionsQueryTests()
@@ -23,8 +24,13 @@ public class GetPurchaseSuggestionsQueryTests
         _komUoW = Substitute.For<IKOMUnitOfWork>();
         _componentRepo = Substitute.For<IComponentRepository>();
         _bikeRepo = Substitute.For<IBikeRepository>();
+        _expenseRepo = Substitute.For<IExpenseRepository>();
         _komUoW.GetRepository<IComponentRepository>().Returns(_componentRepo);
         _komUoW.GetRepository<IBikeRepository>().Returns(_bikeRepo);
+        _komUoW.GetRepository<IExpenseRepository>().Returns(_expenseRepo);
+        _expenseRepo.GetDistinctPlacesAsync(Arg.Any<string>()).Returns((
+            (IReadOnlyList<string>)new string[0],
+            (IReadOnlyList<string>)new string[0]));
         _handler = new GetPurchaseSuggestionsQueryHandler(_komUoW);
     }
 
@@ -50,5 +56,22 @@ public class GetPurchaseSuggestionsQueryTests
         res.Models.Should().Equal("Ultimate", "XT");
         res.PurchasePlaces.Should().Equal("Decathlon");
         res.SalePlaces.Should().Equal("Allegro", "OLX");
+    }
+
+    [Fact]
+    public async Task Expense_places_join_the_purchase_and_sale_places()
+    {
+        var empty = (IReadOnlyList<string>)new string[0];
+        _componentRepo.GetDistinctPurchaseFieldsAsync("u1").Returns((empty, empty, (IReadOnlyList<string>)new[] { "Biostern" }, empty));
+        _bikeRepo.GetDistinctPurchaseFieldsAsync("u1").Returns((empty, empty, empty, empty));
+        _expenseRepo.GetDistinctPlacesAsync("u1").Returns((
+            (IReadOnlyList<string>)new[] { "Decathlon", "biostern" },   // dedupes with the component's "Biostern"
+            (IReadOnlyList<string>)new[] { "Rafał" }));
+
+        var res = await _handler.Handle(new GetPurchaseSuggestionsQuery { UserId = "u1" }, CancellationToken.None);
+
+        res.PurchasePlaces.Should().Equal("Biostern", "Decathlon");
+        res.SalePlaces.Should().Equal("Rafał");
+        res.Brands.Should().BeEmpty();   // expenses don't feed brands/models
     }
 }

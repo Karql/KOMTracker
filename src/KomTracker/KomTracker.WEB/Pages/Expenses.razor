@@ -1,0 +1,163 @@
+@page "/expenses"
+@attribute [Authorize]
+@using KomTracker.API.Shared.ViewModels.Expense
+@using KomTracker.Domain.Entities.Expense
+@using KomTracker.WEB.Infrastructure
+@using KomTracker.WEB.Models.Expense
+@using KomTracker.WEB.Models.Preference
+
+<PageTitle>Expenses</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (!VisibleExpenses.Any())
+{
+    <MudPaper Outlined="true" Class="pa-8 d-flex flex-column align-center" Style="gap: 12px;">
+        <MudIcon Icon="@Icons.Material.Filled.ReceiptLong" Size="Size.Large" Color="Color.Primary" />
+        <MudText Typo="Typo.h6">No expenses yet</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+            Record cycling purchases that aren't installable parts — clothing, tubes, lube, tools, electronics…
+        </MudText>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add expense</MudButton>
+        @if (!_includeInactive && _expenses.Any())
+        {
+            <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="@(() => _includeInactive = true)">Show archived / sold</MudButton>
+        }
+    </MudPaper>
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudTextField @bind-Value="_searchString" Placeholder="Search"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"
+                      Margin="Margin.Dense" Immediate="true" Style="max-width: 220px; margin-top: 16px;" />
+        <MudSelect T="ExpenseCategoryGroup?" @bind-Value="_groupFilter" @bind-Value:after="OnGroupChanged" Label="Group" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 180px;">
+            @foreach (var group in Enum.GetValues<ExpenseCategoryGroup>())
+            {
+                <MudSelectItem T="ExpenseCategoryGroup?" Value="@group">@ExpenseCategoryMetadata.DisplayName(group)</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect T="ExpenseCategory?" @bind-Value="_categoryFilter" Label="Category" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 180px;">
+            @foreach (var category in CategoryOptions)
+            {
+                <MudSelectItem T="ExpenseCategory?" Value="@category">@ExpenseCategoryMetadata.DisplayName(category)</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect T="int?" @bind-Value="_yearFilter" Label="Year" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 130px;">
+            @foreach (var year in Years)
+            {
+                <MudSelectItem T="int?" Value="@year">@year</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSpacer />
+        <MudSwitch T="bool" @bind-Value="_includeInactive" Color="Color.Primary" Label="Show archived/sold" />
+        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+            <MudIconButton Icon="@Icons.Material.Filled.GridView"
+                           Color="@(_view == ListViewMode.Card ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Card))" />
+            <MudIconButton Icon="@Icons.Material.Filled.TableRows"
+                           Color="@(_view == ListViewMode.Table ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Table))" />
+        </MudButtonGroup>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add expense</MudButton>
+    </div>
+
+    @if (!FilteredExpenses.Any())
+    {
+        <MudAlert Severity="Severity.Info">No expenses match the current filter.</MudAlert>
+    }
+    else if (_view == ListViewMode.Card)
+    {
+        <MudGrid>
+            @foreach (var expense in FilteredExpenses)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Class="card-link">
+                        <MudCardHeader>
+                            <CardHeaderAvatar>
+                                <MudIcon Icon="@ExpenseCategoryIcons.Icon(expense.Category)" />
+                            </CardHeaderAvatar>
+                            <CardHeaderContent>
+                                <MudLink Href="@($"expenses/{expense.Id}")" Typo="Typo.h6" Underline="Underline.Hover" Class="card-link__title">@expense.Name</MudLink>
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                                    @expense.PurchaseDate.ToString("yyyy-MM-dd")@(expense.PurchasePlace is not null ? $" · {expense.PurchasePlace}" : "")
+                                </MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <div class="card-link__above">@ExpenseMenu(expense)</div>
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <div class="d-flex align-center flex-wrap" style="gap: 8px;">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Text">@ExpenseCategoryMetadata.DisplayName(expense.Category)</MudChip>
+                                <MudChip T="string" Size="Size.Small" Color="LifecycleColor(expense.Lifecycle)">@expense.Lifecycle</MudChip>
+                            </div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2" Style="display: flex; align-items: center; gap: 4px;">
+                                <MudIcon Icon="@Icons.Material.Filled.Payments" Size="Size.Small" />
+                                @Currencies.Format(expense.Price, _currency)
+                            </MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudTable Items="FilteredExpenses" Hover="true" Striped="true" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Category</MudTh>
+                <MudTh>Purchase date</MudTh>
+                <MudTh>Purchase place</MudTh>
+                <MudTh Style="text-align: right;">Price</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh Style="text-align: right;"></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">
+                    <MudLink Href="@($"expenses/{context.Id}")">@context.Name</MudLink>
+                </MudTd>
+                <MudTd DataLabel="Category">
+                    <div class="d-flex align-center" style="gap: 6px;">
+                        <MudIcon Icon="@ExpenseCategoryIcons.Icon(context.Category)" Size="Size.Small" />
+                        <span>@ExpenseCategoryMetadata.DisplayName(context.Category)</span>
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="Purchase date">@context.PurchaseDate.ToString("yyyy-MM-dd")</MudTd>
+                <MudTd DataLabel="Purchase place">@(context.PurchasePlace ?? "—")</MudTd>
+                <MudTd DataLabel="Price" Style="text-align: right;">@Currencies.Format(context.Price, _currency)</MudTd>
+                <MudTd DataLabel="Status">
+                    <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
+                </MudTd>
+                <MudTd Style="text-align: right;">@ExpenseMenu(context)</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+}
+
+@code {
+    private RenderFragment ExpenseMenu(ExpenseViewModel expense) =>@<MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditAsync(expense))">Edit</MudMenuItem>
+        @if (expense.Lifecycle == ExpenseLifecycle.Active)
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.Archive" OnClick="@(() => ArchiveAsync(expense))">Archive</MudMenuItem>
+        }
+        else
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.Unarchive" OnClick="@(() => ActivateAsync(expense))">Set active</MudMenuItem>
+        }
+        @if (expense.Lifecycle != ExpenseLifecycle.Sold)
+        {
+            <MudMenuItem Icon="@Icons.Material.Filled.Sell" OnClick="@(() => SellAsync(expense))">Mark as sold</MudMenuItem>
+        }
+        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => DeleteAsync(expense))">Delete</MudMenuItem>
+    </MudMenu>;
+}

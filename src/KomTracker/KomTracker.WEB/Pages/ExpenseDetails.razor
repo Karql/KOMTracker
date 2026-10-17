@@ -1,0 +1,83 @@
+@page "/expenses/{Id:int}"
+@attribute [Authorize]
+@using KomTracker.Domain.Entities.Expense
+@using KomTracker.WEB.Infrastructure
+@using KomTracker.WEB.Models.Expense
+
+<PageTitle>Expense</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_expense is null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">Expense not found.</MudAlert>
+    <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Href="expenses">Back to expenses</MudButton>
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudIcon Icon="@ExpenseCategoryIcons.Icon(_expense.Category)" Size="Size.Large" />
+        <div>
+            <MudText Typo="Typo.h5">@_expense.Name</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">@ExpenseCategoryMetadata.DisplayName(_expense.Category)</MudText>
+        </div>
+        <MudChip T="string" Size="Size.Small" Color="Expenses.LifecycleColor(_expense.Lifecycle)">@_expense.Lifecycle</MudChip>
+        <MudSpacer />
+        <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Primary" OnClick="EditAsync">Edit</MudButton>
+        @if (_expense.Lifecycle == ExpenseLifecycle.Active)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Archive" OnClick="ArchiveAsync">Archive</MudButton>
+        }
+        else
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Unarchive" OnClick="ActivateAsync">Set active</MudButton>
+        }
+        @if (_expense.Lifecycle != ExpenseLifecycle.Sold)
+        {
+            <MudButton StartIcon="@Icons.Material.Filled.Sell" OnClick="SellAsync">Mark as sold</MudButton>
+        }
+        <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="DeleteAsync">Delete</MudButton>
+    </div>
+
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Purchase</MudText>
+                @Field("Category", ExpenseCategoryMetadata.DisplayName(_expense.Category))
+                @Field("Group", ExpenseCategoryMetadata.DisplayName(_expense.CategoryGroup))
+                @Field("Price", Currencies.Format(_expense.Price, _currency))
+                @Field("Place", _expense.PurchasePlace)
+                @Field("Date", _expense.PurchaseDate.ToString("yyyy-MM-dd"))
+            </MudPaper>
+        </MudItem>
+
+        @if (_expense.Lifecycle == ExpenseLifecycle.Sold)
+        {
+            <MudItem xs="12" md="6">
+                <MudPaper Class="pa-4" Outlined="true">
+                    <MudText Typo="Typo.subtitle1" Class="mb-2">Sale</MudText>
+                    @Field("Sale date", _expense.SaleDate?.ToString("yyyy-MM-dd"))
+                    @Field("Sale price", _expense.SalePrice is { } salePrice ? Currencies.Format(salePrice, _currency) : null)
+                    @Field("Sale place", _expense.SalePlace)
+                </MudPaper>
+            </MudItem>
+        }
+
+        <MudItem xs="12">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Notes</MudText>
+                <MudText Typo="Typo.body2" Style="white-space: pre-wrap;"
+                         Class="@(string.IsNullOrWhiteSpace(_expense.Notes) ? "mud-text-secondary" : null)">@(string.IsNullOrWhiteSpace(_expense.Notes) ? "—" : _expense.Notes)</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    private RenderFragment Field(string label, string? value) =>@<div class="d-flex py-1" style="gap: 8px;">
+        <MudText Typo="Typo.body2" Class="mud-text-secondary" Style="min-width: 110px;">@label</MudText>
+        <MudText Typo="Typo.body2">@(string.IsNullOrWhiteSpace(value) ? "—" : value)</MudText>
+    </div>;
+}

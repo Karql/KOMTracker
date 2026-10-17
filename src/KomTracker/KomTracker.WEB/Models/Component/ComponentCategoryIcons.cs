@@ -7,7 +7,8 @@ namespace KomTracker.WEB.Models.Component;
 /// Domain). Each icon is inner SVG markup (24×24 viewBox, stroke = currentColor) that MudIcon wraps in an svg,
 /// so it inherits the theme colour like the built-in icons. Every category has a distinct symbol; the per-group
 /// icon is only a last-resort fallback.
-/// <para>All symbols are <c>const</c> fields; <see cref="Icon"/>/<see cref="GroupSvg"/> only map to them.</para>
+/// <para>All symbols are <c>const</c> fields; <see cref="Icon"/>/<see cref="GroupSvg"/> only map to them. Symbols shared with
+/// <c>ExpenseCategoryIcons</c> (same item, e.g. a pump or a lock) are <c>internal</c>.</para>
 /// </summary>
 public static class ComponentCategoryIcons
 {
@@ -154,8 +155,8 @@ public static class ComponentCategoryIcons
     // Narrow double-walled hoop with spoke-nipple stubs on the inner wall (no hub/spokes — that's Wheel).
     private const string RimSvg = "<circle cx='12' cy='12' r='8.5'/><circle cx='12' cy='12' r='6.8'/><path d='M12 6.8v1.7M12 15.5v1.7M6.8 12h1.7M15.5 12h1.7M8.2 8.2l1.2 1.2M14.6 14.6l1.2 1.2M15.8 8.2l-1.2 1.2M9.4 14.6l-1.2 1.2'/>";
     private const string RimTapeSvg = "<circle cx='12' cy='12' r='6'/><circle cx='12' cy='12' r='2'/><path d='M18 12a6 6 0 0 0-6-6'/>";
-    private const string InnerTubeSvg = "<circle cx='12' cy='13' r='7'/><rect x='11' y='2' width='2' height='4' rx='0.5'/>";
-    private const string DropSvg = "<path d='M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z'/>";
+    internal const string InnerTubeSvg = "<circle cx='12' cy='13' r='7'/><rect x='11' y='2' width='2' height='4' rx='0.5'/>";
+    internal const string DropSvg = "<path d='M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z'/>";
     private const string ThruAxleSvg = "<path d='M3 12h16'/><circle cx='4' cy='12' r='1.6'/><path d='M17 9.5v5M19.5 10.5v3'/>";
 
     // ── Structure ──
@@ -164,7 +165,7 @@ public static class ComponentCategoryIcons
     private const string HeadsetSvg = "<ellipse cx='12' cy='7' rx='7' ry='2'/><ellipse cx='12' cy='12' rx='7' ry='2'/><ellipse cx='12' cy='17' rx='7' ry='2'/>";
     private const string BottomBracketSvg = "<path d='M3 12h18'/><circle cx='8' cy='12' r='2.6'/><circle cx='16' cy='12' r='2.6'/>";
     private const string BearingSvg = "<circle cx='12' cy='12' r='8'/><circle cx='12' cy='12' r='3'/><circle cx='12' cy='5.5' r='1'/><circle cx='12' cy='18.5' r='1'/><circle cx='5.5' cy='12' r='1'/><circle cx='18.5' cy='12' r='1'/>";
-    private const string BoltsSvg = "<circle cx='12' cy='8' r='3.5'/><path d='M10 6.5l4 3M14 6.5l-4 3M12 11.5V20'/>";
+    internal const string BoltsSvg = "<circle cx='12' cy='8' r='3.5'/><path d='M10 6.5l4 3M14 6.5l-4 3M12 11.5V20'/>";
     private const string PedalsSvg = "<rect x='6' y='9.5' width='9' height='5' rx='1'/><path d='M15 12h5'/><path d='M8 9.5v-1.3M11 9.5v-1.3M8 14.5v1.3M11 14.5v1.3'/>";
     private const string SaddleSvg = "<path d='M4 10c5-3 11-3 16 0-2 4-6 5-8 5s-6-1-8-5z'/><path d='M12 15v5'/>";
     private const string SeatpostSvg = "<rect x='10' y='4' width='4' height='16' rx='1.5'/>";
@@ -176,7 +177,7 @@ public static class ComponentCategoryIcons
     private const string SuspensionSeatpostSvg = "<rect x='10' y='3' width='4' height='5' rx='1'/><path d='M10 8l4 2-4 2 4 2-4 2'/><rect x='10' y='18' width='4' height='3' rx='1'/>";
 
     // ── Cables ──
-    private const string CableSvg = "<path d='M4 6q9 0 9 6t7 6'/><circle cx='4' cy='6' r='1.4'/>";
+    internal const string CableSvg = "<path d='M4 6q9 0 9 6t7 6'/><circle cx='4' cy='6' r='1.4'/>";
     private const string HydraulicLinesSvg = "<path d='M5 5q8 1 8 7t6 7'/><circle cx='5' cy='5' r='1.4'/><circle cx='19' cy='19' r='1.4'/>";
 
     // ── Electric ──
@@ -184,26 +185,26 @@ public static class ComponentCategoryIcons
     private const string MotorSvg = "<circle cx='12' cy='12' r='7.2' stroke-dasharray='1.5 1.8'/><path d='M12.5 7.5l-3 5.5h3l-1 4 3.5-6h-3z'/>";
 
     // ── Indoor ──
-    private const string TrainerSvg = "<circle cx='12' cy='9' r='4'/><path d='M6 20l4-8M18 20l-4-8M8 20h8'/>";
+    internal const string TrainerSvg = "<circle cx='12' cy='9' r='4'/><path d='M6 20l4-8M18 20l-4-8M8 20h8'/>";
     private const string IndoorBikeSvg = "<circle cx='7' cy='16' r='3'/><circle cx='17' cy='16' r='2.5'/><path d='M7 16l3-7h5M10 9l5 7M8 9h2'/>";
     private const string FanSvg = "<circle cx='12' cy='12' r='2'/><path d='M12 10c-2.5-3.5.5-6.5 2.5-5.5s.5 5-2.5 5.5M14 12c3.5-2.5 6.5.5 5.5 2.5s-5 .5-5.5-2.5M12 14c2.5 3.5-.5 6.5-2.5 5.5s-.5-5 2.5-5.5M10 12c-3.5 2.5-6.5-.5-5.5-2.5s5-.5 5.5 2.5'/>";
     private const string MatSvg = "<rect x='4' y='9' width='16' height='6' rx='1'/><circle cx='7' cy='12' r='2.2'/>";
     private const string RiserSvg = "<path d='M6 16h12l-1.5-5h-9z'/><path d='M9 11V8h6v3'/>";
 
     // ── Accessories ──
-    private const string ComputerSvg = "<rect x='7' y='4' width='10' height='16' rx='2'/><path d='M9.5 8h5'/>";
+    internal const string ComputerSvg = "<rect x='7' y='4' width='10' height='16' rx='2'/><path d='M9.5 8h5'/>";
     // Gauge dial with tick marks and a needle.
     private const string PowerMeterSvg = "<path d='M4 17a8 8 0 0 1 16 0'/><path d='M12 17l4-5'/><circle cx='12' cy='17' r='1.3'/><path d='M6.3 11.3l1.1 1.1M12 9v1.6M17.7 11.3l-1.1 1.1'/>";
-    private const string LightsSvg = "<circle cx='9' cy='12' r='4'/><path d='M13 12h7M14 9l6-2M14 15l6 2'/>";
-    private const string LockSvg = "<rect x='6' y='11' width='12' height='9' rx='2'/><path d='M8.5 11V8a3.5 3.5 0 0 1 7 0v3'/>";
-    private const string PumpSvg = "<rect x='9' y='6' width='6' height='14' rx='1'/><path d='M12 6V2M9 4h6M15 17h5'/>";
+    internal const string LightsSvg = "<circle cx='9' cy='12' r='4'/><path d='M13 12h7M14 9l6-2M14 15l6 2'/>";
+    internal const string LockSvg = "<rect x='6' y='11' width='12' height='9' rx='2'/><path d='M8.5 11V8a3.5 3.5 0 0 1 7 0v3'/>";
+    internal const string PumpSvg = "<rect x='9' y='6' width='6' height='14' rx='1'/><path d='M12 6V2M9 4h6M15 17h5'/>";
     private const string RackSvg = "<path d='M4 7h16M6 7v10M18 7v10M4 17h16'/>";
-    private const string BottleSvg = "<path d='M10 3h4v2l1 2v11a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V7l1-2z'/><path d='M9 11h6'/>";
+    internal const string BottleSvg = "<path d='M10 3h4v2l1 2v11a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1V7l1-2z'/><path d='M9 11h6'/>";
     private const string BellHornSvg = "<path d='M12 4a5 5 0 0 0-5 5c0 5-2 6-2 6h14s-2-1-2-6a5 5 0 0 0-5-5z'/><path d='M10.5 19a1.5 1.5 0 0 0 3 0'/>";
-    private const string FendersSvg = "<path d='M4 16a8 8 0 0 1 16 0'/><path d='M4 16v2M20 16v2'/>";
+    internal const string FendersSvg = "<path d='M4 16a8 8 0 0 1 16 0'/><path d='M4 16v2M20 16v2'/>";
     private const string KickstandSvg = "<path d='M11 4v11M11 15l-4 5M11 15l3 5M7 20h8'/>";
-    private const string ToolsetSvg = "<path d='M14.5 4a4 4 0 0 0-5 5l-5.5 5.5 2.5 2.5 5.5-5.5a4 4 0 0 0 5-5l-2.6 2.6-2-2z'/>";
-    private const string ApparelSvg = "<path d='M8 4L4 7l2 3 2-1v8h8v-8l2 1 2-3-4-3h-3a2 2 0 0 1-4 0z'/>";
-    private const string TagSvg = "<path d='M4 4h7l9 9-7 7-9-9z'/><circle cx='8' cy='8' r='1.4'/>";
-    private const string OtherSvg = "<circle cx='6' cy='12' r='1.5'/><circle cx='12' cy='12' r='1.5'/><circle cx='18' cy='12' r='1.5'/>";
+    internal const string ToolsetSvg = "<path d='M14.5 4a4 4 0 0 0-5 5l-5.5 5.5 2.5 2.5 5.5-5.5a4 4 0 0 0 5-5l-2.6 2.6-2-2z'/>";
+    internal const string ApparelSvg = "<path d='M8 4L4 7l2 3 2-1v8h8v-8l2 1 2-3-4-3h-3a2 2 0 0 1-4 0z'/>";
+    internal const string TagSvg = "<path d='M4 4h7l9 9-7 7-9-9z'/><circle cx='8' cy='8' r='1.4'/>";
+    internal const string OtherSvg = "<circle cx='6' cy='12' r='1.5'/><circle cx='12' cy='12' r='1.5'/><circle cx='18' cy='12' r='1.5'/>";
 }

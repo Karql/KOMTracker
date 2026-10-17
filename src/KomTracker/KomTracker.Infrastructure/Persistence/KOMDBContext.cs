@@ -20,7 +20,9 @@ using KomTracker.Infrastructure.Persistence.Configurations.Bike;
 using KomTracker.Domain.Entities.Bike;
 using KomTracker.Domain.Entities.Component;
 using KomTracker.Domain.Entities.Warehouse;
+using KomTracker.Domain.Entities.Expense;
 using KomTracker.Infrastructure.Persistence.Configurations.Component;
+using KomTracker.Infrastructure.Persistence.Configurations.Expense;
 using KomTracker.Infrastructure.Persistence.Configurations.Warehouse;
 using KomTracker.Infrastructure.Persistence.Configurations.Strava;
 using KomTracker.Domain.Entities.Strava;
@@ -73,6 +75,8 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
     public virtual DbSet<InstallationEntity> Installation { get; set; }
 
     public virtual DbSet<ComponentMileageEntity> ComponentMileage { get; set; }
+
+    public virtual DbSet<ExpenseEntity> Expense { get; set; }
 
     // Strava
     public virtual DbSet<ActivityEntity> Activity { get; set; }
@@ -134,6 +138,7 @@ public class KOMDBContext : IdentityDbContext<UserEntity, RoleEntity, string, Us
         builder.ApplyConfiguration(new ComponentEntityTypeConfiguration());
         builder.ApplyConfiguration(new InstallationEntityTypeConfiguration());
         builder.ApplyConfiguration(new ComponentMileageEntityTypeConfiguration());
+        builder.ApplyConfiguration(new ExpenseEntityTypeConfiguration());
 
         // Strava
         builder.ApplyConfiguration(new ActivityEntityTypeConfiguration());

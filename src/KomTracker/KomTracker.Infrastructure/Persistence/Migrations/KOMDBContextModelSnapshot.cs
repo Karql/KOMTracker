@@ -611,6 +611,84 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("installation", "bt");
                 });
 
+            modelBuilder.Entity("KomTracker.Domain.Entities.Expense.ExpenseEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AuditCD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_cd");
+
+                    b.Property<DateTime?>("AuditMD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_md");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("category");
+
+                    b.Property<string>("Lifecycle")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("lifecycle");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("notes");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric")
+                        .HasColumnName("price");
+
+                    b.Property<DateTime>("PurchaseDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("purchase_date");
+
+                    b.Property<string>("PurchasePlace")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("purchase_place");
+
+                    b.Property<DateTime?>("SaleDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sale_date");
+
+                    b.Property<string>("SalePlace")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("sale_place");
+
+                    b.Property<decimal?>("SalePrice")
+                        .HasColumnType("numeric")
+                        .HasColumnName("sale_price");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("expense", "bt");
+                });
+
             modelBuilder.Entity("KomTracker.Domain.Entities.Segment.KomTakeoverEntity", b =>
                 {
                     b.Property<int>("Id")
@@ -1855,6 +1933,15 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .HasForeignKey("ParentComponentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("KomTracker.Infrastructure.Identity.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KomTracker.Domain.Entities.Expense.ExpenseEntity", b =>
+                {
                     b.HasOne("KomTracker.Infrastructure.Identity.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")

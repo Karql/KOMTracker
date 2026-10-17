@@ -1,0 +1,100 @@
+@using System.Net.Http.Json
+@using System.Threading
+@using KomTracker.API.Shared.ViewModels.Expense
+@using KomTracker.API.Shared.ViewModels.Suggestions
+@using KomTracker.Domain.Entities.Expense
+@using KomTracker.WEB.Infrastructure
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body2" Class="mb-3">Mark <b>@Expense.Name</b> as sold.</MudText>
+        <MudForm @ref="_form">
+            <MudDatePicker @bind-Date="_saleDate" Label="Sale date" Required="true" RequiredError="Sale date is required" DateFormat="yyyy-MM-dd" Editable="true" />
+            <MudNumericField @bind-Value="_salePrice" Label="Sale price" Min="0" Required="true"
+                             RequiredError="Sale price is required" Class="mt-3" Converter="InputConverters.Decimal" />
+            <MudAutocomplete T="string" @bind-Value="_salePlace" Label="Sale place" Class="mt-3"
+                             SearchFunc="SearchSalePlaces" CoerceValue="true" Clearable="true" MaxItems="@((int?)null)" />
+            <MudTextField @bind-Value="_notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Mark as sold</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public ExpenseViewModel Expense { get; set; } = default!;
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private MudForm _form = default!;
+    private DateTime? _saleDate = DateTime.UtcNow.Date;
+    private decimal? _salePrice;
+    private string? _salePlace;
+    private string? _notes;
+    private bool _saving;
+    private PurchaseSuggestionsViewModel _suggestions = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _notes = Expense.Notes;
+
+        // Re-selling (Sold → Active → Sold): start from the previous sale details, which are kept on the expense.
+        _saleDate = Expense.SaleDate ?? _saleDate;
+        _salePrice = Expense.SalePrice;
+        _salePlace = Expense.SalePlace;
+
+        _suggestions = await Http.GetFromJsonAsync<PurchaseSuggestionsViewModel>("bike-tracker/suggestions")
+            ?? new PurchaseSuggestionsViewModel();
+    }
+
+    private async Task SubmitAsync()
+    {
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            return;
+        }
+
+        _saving = true;
+
+        try
+        {
+            var body = new ChangeExpenseLifecycleViewModel
+            {
+                Lifecycle = ExpenseLifecycle.Sold,
+                SaleDate = _saleDate,
+                SalePrice = _salePrice,
+                SalePlace = _salePlace,
+                Notes = _notes ?? string.Empty
+            };
+
+            var response = await Http.PutAsJsonAsync($"expenses/{Expense.Id}/lifecycle", body);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Expense marked as sold", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+                return;
+            }
+
+            await response.ShowProblemAsync(Snackbar);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private Task<IEnumerable<string>> SearchSalePlaces(string value, CancellationToken token)
+        => Task.FromResult(string.IsNullOrWhiteSpace(value)
+            ? _suggestions.SalePlaces.AsEnumerable()
+            : _suggestions.SalePlaces.Where(s => s.Contains(value, StringComparison.OrdinalIgnoreCase)));
+
+    private void Cancel() => MudDialog.Cancel();
+}

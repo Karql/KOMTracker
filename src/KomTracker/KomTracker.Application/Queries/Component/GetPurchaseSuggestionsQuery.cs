@@ -5,7 +5,10 @@ using MediatR;
 
 namespace KomTracker.Application.Queries.Component;
 
-/// <summary>Distinct Brand / Model / Purchase place / Sale place values across the user's bikes and components (autocomplete hints).</summary>
+/// <summary>
+/// Distinct Brand / Model / Purchase place / Sale place values across the user's bikes and components (autocomplete
+/// hints); purchase/sale places also include the user's expenses (D-EXP-7 — the same shops sell parts and expenses).
+/// </summary>
 public class GetPurchaseSuggestionsQuery : IRequest<PurchaseSuggestionsModel>
 {
     public string UserId { get; set; } = default!;
@@ -26,16 +29,17 @@ public class GetPurchaseSuggestionsQueryHandler : IRequestHandler<GetPurchaseSug
         // per-source lists are then merged in memory (cross-source dedupe is case-insensitive + trimmed + sorted).
         var components = await _komUoW.GetRepository<IComponentRepository>().GetDistinctPurchaseFieldsAsync(request.UserId);
         var bikes = await _komUoW.GetRepository<IBikeRepository>().GetDistinctPurchaseFieldsAsync(request.UserId);
+        var expenses = await _komUoW.GetRepository<IExpenseRepository>().GetDistinctPlacesAsync(request.UserId);
 
         return new PurchaseSuggestionsModel(
             Merge(components.Brands, bikes.Brands),
             Merge(components.Models, bikes.Models),
-            Merge(components.PurchasePlaces, bikes.PurchasePlaces),
-            Merge(components.SalePlaces, bikes.SalePlaces));
+            Merge(components.PurchasePlaces, bikes.PurchasePlaces, expenses.PurchasePlaces),
+            Merge(components.SalePlaces, bikes.SalePlaces, expenses.SalePlaces));
     }
 
-    private static IReadOnlyList<string> Merge(IEnumerable<string> a, IEnumerable<string> b)
-        => a.Concat(b)
+    private static IReadOnlyList<string> Merge(params IEnumerable<string>[] sources)
+        => sources.SelectMany(s => s)
             .Select(v => v.Trim())
             .Where(v => v.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase)
