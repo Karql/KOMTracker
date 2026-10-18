@@ -1,0 +1,241 @@
+@using System.Net.Http.Json
+@using System.Threading
+@using KomTracker.API.Shared.ViewModels.Bike
+@using KomTracker.API.Shared.ViewModels.Component
+@using KomTracker.API.Shared.ViewModels.ServiceRecord
+@using KomTracker.API.Shared.ViewModels.Suggestions
+@using KomTracker.Domain.Entities.Bike
+@using KomTracker.Domain.Entities.Component
+@using KomTracker.Domain.Entities.ServiceRecord
+@using KomTracker.WEB.Infrastructure
+@using KomTracker.WEB.Models.ServiceRecord
+
+<MudDialog>
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudTextField @bind-Value="_model.Name" Label="Name" Required="true" RequiredError="Name is required"
+                          MaxLength="200" Immediate="true" Placeholder="e.g. Shock service, full bike check-up" />
+
+            <div class="d-flex" style="gap: 12px;">
+                <MudDatePicker @bind-Date="_date" Label="Date" Required="true" RequiredError="Date is required"
+                               Class="mt-3" Style="flex: 2;" DateFormat="yyyy-MM-dd" Editable="true" />
+                <MudTimePicker @bind-Time="_time" Label="Time" Class="mt-3" Style="flex: 1;" />
+            </div>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">Mileage is taken from the rides before this moment.</MudText>
+
+            <MudAutocomplete T="string" @bind-Value="_model.Place" Label="Place" Class="mt-3"
+                             SearchFunc="SearchPlaces" CoerceValue="true" Clearable="true" MaxItems="@((int?)null)" />
+            <MudNumericField @bind-Value="_model.Cost" Label="Cost" Min="0" Class="mt-3" Converter="InputConverters.Decimal" />
+
+            <MudText Typo="Typo.subtitle2" Class="mt-4">Covers</MudText>
+            <MudAutocomplete @ref="_targetPicker" T="ServiceTargetOption" Value="_pickedTarget" ValueChanged="AddTargetAsync"
+                             Label="Add a bike or component" Placeholder="Search bike or component"
+                             SearchFunc="SearchTargets" MaxItems="MaxTargetSuggestions" DebounceInterval="200" ResetValueOnEmptyText="true"
+                             CoerceValue="false" SelectValueOnTab="true" Adornment="Adornment.Start"
+                             AdornmentIcon="@Icons.Material.Filled.Add" AdornmentColor="Color.Default"
+                             ToStringFunc="@(t => t is null ? string.Empty : t.Name)">
+                <ItemTemplate Context="option">
+                    <div class="d-flex align-center" style="gap: 8px; width: 100%;">
+                        <MudIcon Icon="@option.Icon" Size="Size.Small" />
+                        <span>@option.Name</span>
+                        <MudSpacer />
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">@option.Caption</MudText>
+                    </div>
+                </ItemTemplate>
+                <MoreItemsTemplate>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary px-4 py-1">More matches — keep typing to narrow down.</MudText>
+                </MoreItemsTemplate>
+            </MudAutocomplete>
+            <div class="d-flex flex-wrap mt-2" style="gap: 4px;">
+                @foreach (var target in _targets)
+                {
+                    <MudChip T="string" Icon="@target.Icon" Color="Color.Primary" Variant="Variant.Outlined"
+                             OnClose="@(() => RemoveTarget(target))">@target.Name</MudChip>
+                }
+            </div>
+            @if (_targetsError)
+            {
+                <MudText Typo="Typo.caption" Color="Color.Error">Pick at least one bike or component.</MudText>
+            }
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                Only what you list — servicing a wheel doesn't cover the tyre on it; add the tyre too if it was serviced.
+            </MudText>
+
+            <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3" MaxLength="2000" Class="mt-3" />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="SubmitAsync" Disabled="_saving">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    /// <summary>Null = add; non-null = edit.</summary>
+    [Parameter] public ServiceRecordViewModel? Service { get; set; }
+
+    /// <summary>Add only: a target to start with (the bike / component whose page the dialog was opened from).</summary>
+    [Parameter] public ServiceTargetRef? Preselect { get; set; }
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private MudForm _form = default!;
+    private MudAutocomplete<ServiceTargetOption> _targetPicker = default!;
+    private SaveServiceRecordViewModel _model = new();
+    private DateTime? _date = DateTime.Today;
+    private TimeSpan? _time = TimeSpan.Zero;
+    private ServiceTargetOption? _pickedTarget;
+    private readonly List<ServiceTargetOption> _targets = new();
+    private List<ServiceTargetOption> _options = new();
+    private PurchaseSuggestionsViewModel _suggestions = new();
+    private bool _targetsError;
+    private bool _saving;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _suggestions = await Http.GetFromJsonAsync<PurchaseSuggestionsViewModel>("bike-tracker/suggestions")
+            ?? new PurchaseSuggestionsViewModel();
+
+        // Any lifecycle — a past service of a since-sold bike or an archived part is still valid.
+        var bikes = await Http.GetFromJsonAsync<BikeViewModel[]>("bikes?include_inactive=true") ?? Array.Empty<BikeViewModel>();
+        var components = await Http.GetFromJsonAsync<ComponentViewModel[]>("components?include_inactive=true") ?? Array.Empty<ComponentViewModel>();
+
+        // Built once per dialog: active bikes, active components, then the archived/sold ones — so the short list shown
+        // before typing (and the top of every match list) is what is usually serviced.
+        _options = bikes
+            .Select(b => new ServiceTargetOption(b.Id, null, b.Name, null,
+                b.Lifecycle == BikeLifecycle.Active ? "Bike" : $"Bike · {b.Lifecycle}", b.Lifecycle == BikeLifecycle.Active))
+            .Concat(components
+                .Select(c => new ServiceTargetOption(null, c.Id, c.Name, c.Category,
+                    c.Lifecycle == ComponentLifecycle.Active
+                        ? ComponentCategoryMetadata.DisplayName(c.Category)
+                        : $"{ComponentCategoryMetadata.DisplayName(c.Category)} · {c.Lifecycle}",
+                    c.Lifecycle == ComponentLifecycle.Active)))
+            .OrderByDescending(o => o.IsActive)
+            .ThenBy(o => o.BikeId is null)
+            .ThenBy(o => o.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (Service is not null)
+        {
+            _model = new SaveServiceRecordViewModel
+            {
+                Name = Service.Name,
+                Date = Service.Date,
+                Place = Service.Place,
+                Cost = Service.Cost,
+                Notes = Service.Notes
+            };
+            _date = Service.Date.Date;
+            _time = Service.Date.TimeOfDay;
+
+            foreach (var target in Service.Targets)
+            {
+                AddExisting(target.BikeId, target.ComponentId);
+            }
+        }
+        else if (Preselect is not null)
+        {
+            AddExisting(Preselect.BikeId, Preselect.ComponentId);
+        }
+    }
+
+    private void AddExisting(int? bikeId, int? componentId)
+    {
+        var option = _options.FirstOrDefault(o => o.BikeId == bikeId && o.ComponentId == componentId);
+        if (option is not null && !_targets.Contains(option))
+        {
+            _targets.Add(option);
+        }
+    }
+
+    private async Task AddTargetAsync(ServiceTargetOption? option)
+    {
+        if (option is not null && !_targets.Contains(option))
+        {
+            _targets.Add(option);
+            _targetsError = false;
+        }
+
+        // Picker is an "add" box, not a field — clear it for the next pick.
+        _pickedTarget = null;
+        await _targetPicker.ClearAsync();
+    }
+
+    private void RemoveTarget(ServiceTargetOption option) => _targets.Remove(option);
+
+    private async Task SubmitAsync()
+    {
+        await _form.Validate();
+        _targetsError = _targets.Count == 0;
+        if (!_form.IsValid || _targetsError)
+        {
+            return;
+        }
+
+        _model.Date = _date!.Value.Date + (_time ?? TimeSpan.Zero);
+        _model.Targets = _targets
+            .Select(t => new ServiceTargetRef { BikeId = t.BikeId, ComponentId = t.ComponentId })
+            .ToList();
+        _saving = true;
+
+        try
+        {
+            var response = Service is null
+                ? await Http.PostAsJsonAsync("services", _model)
+                : await Http.PutAsJsonAsync($"services/{Service.Id}", _model);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var saved = await response.Content.ReadFromJsonAsync<ServiceRecordViewModel>();
+                Snackbar.Add(Service is null ? "Service added" : "Service updated", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(saved));
+                return;
+            }
+
+            await response.ShowProblemAsync(Snackbar);
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    // Only this many suggestions are rendered (each is a list item with an SVG icon — rendering hundreds of them is what
+    // made the picker sluggish); the rest are reached by typing more.
+    private const int MaxTargetSuggestions = 30;
+
+    private Task<IEnumerable<ServiceTargetOption>> SearchTargets(string value, CancellationToken token)
+    {
+        var picked = _targets.ToHashSet();
+        var available = _options.Where(o => !picked.Contains(o));
+
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            var text = value.Trim();
+
+            // Name matches first (prefix before infix), then category/kind-only matches; within a rank the prebuilt order.
+            available = available
+                .Select(o => (Option: o, Rank: o.Name.StartsWith(text, StringComparison.OrdinalIgnoreCase) ? 0
+                    : o.Name.Contains(text, StringComparison.OrdinalIgnoreCase) ? 1
+                    : o.Caption.Contains(text, StringComparison.OrdinalIgnoreCase) ? 2
+                    : -1))
+                .Where(x => x.Rank >= 0)
+                .OrderBy(x => x.Rank)
+                .Select(x => x.Option);
+        }
+
+        return Task.FromResult(available);
+    }
+
+    private Task<IEnumerable<string>> SearchPlaces(string value, CancellationToken token)
+        => Task.FromResult(string.IsNullOrWhiteSpace(value)
+            ? _suggestions.PurchasePlaces.AsEnumerable()
+            : _suggestions.PurchasePlaces.Where(s => s.Contains(value, StringComparison.OrdinalIgnoreCase)));
+
+    private void Cancel() => MudDialog.Cancel();
+}

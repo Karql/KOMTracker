@@ -1052,6 +1052,114 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.ToTable("segment", (string)null);
                 });
 
+            modelBuilder.Entity("KomTracker.Domain.Entities.ServiceRecord.ServiceRecordEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AuditCD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_cd");
+
+                    b.Property<DateTime?>("AuditMD")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("audit_md");
+
+                    b.Property<decimal?>("Cost")
+                        .HasColumnType("numeric")
+                        .HasColumnName("cost");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("Place")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("place");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("service", "bt");
+                });
+
+            modelBuilder.Entity("KomTracker.Domain.Entities.ServiceRecord.ServiceTargetEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("BikeId")
+                        .HasColumnType("integer")
+                        .HasColumnName("bike_id");
+
+                    b.Property<int?>("ComponentId")
+                        .HasColumnType("integer")
+                        .HasColumnName("component_id");
+
+                    b.Property<DateTime?>("ComputedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("computed_at");
+
+                    b.Property<decimal?>("DistanceKm")
+                        .HasColumnType("numeric")
+                        .HasColumnName("distance_km");
+
+                    b.Property<decimal?>("ElevationM")
+                        .HasColumnType("numeric")
+                        .HasColumnName("elevation_m");
+
+                    b.Property<decimal?>("MovingHours")
+                        .HasColumnType("numeric")
+                        .HasColumnName("moving_hours");
+
+                    b.Property<int>("ServiceId")
+                        .HasColumnType("integer")
+                        .HasColumnName("service_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BikeId");
+
+                    b.HasIndex("ComponentId");
+
+                    b.HasIndex("ServiceId", "BikeId")
+                        .IsUnique();
+
+                    b.HasIndex("ServiceId", "ComponentId")
+                        .IsUnique();
+
+                    b.ToTable("service_target", "bt", t =>
+                        {
+                            t.HasCheckConstraint("CK_service_target_bike_xor_component", "(bike_id IS NULL) <> (component_id IS NULL)");
+                        });
+                });
+
             modelBuilder.Entity("KomTracker.Domain.Entities.Strava.ActivityEntity", b =>
                 {
                     b.Property<long>("Id")
@@ -1983,6 +2091,36 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("KomTracker.Domain.Entities.ServiceRecord.ServiceRecordEntity", b =>
+                {
+                    b.HasOne("KomTracker.Infrastructure.Identity.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("KomTracker.Domain.Entities.ServiceRecord.ServiceTargetEntity", b =>
+                {
+                    b.HasOne("KomTracker.Domain.Entities.Bike.BikeEntity", null)
+                        .WithMany()
+                        .HasForeignKey("BikeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("KomTracker.Domain.Entities.Component.ComponentEntity", null)
+                        .WithMany()
+                        .HasForeignKey("ComponentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("KomTracker.Domain.Entities.ServiceRecord.ServiceRecordEntity", "Service")
+                        .WithMany("Targets")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Service");
+                });
+
             modelBuilder.Entity("KomTracker.Domain.Entities.Strava.ActivityEntity", b =>
                 {
                     b.HasOne("KomTracker.Domain.Entities.Athlete.AthleteEntity", null)
@@ -2106,6 +2244,11 @@ namespace KomTracker.Infrastructure.Persistence.Migrations
                     b.Navigation("Stats");
 
                     b.Navigation("Token");
+                });
+
+            modelBuilder.Entity("KomTracker.Domain.Entities.ServiceRecord.ServiceRecordEntity", b =>
+                {
+                    b.Navigation("Targets");
                 });
 #pragma warning restore 612, 618
         }

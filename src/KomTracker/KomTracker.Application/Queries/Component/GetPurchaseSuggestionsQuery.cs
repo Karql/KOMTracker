@@ -7,7 +7,8 @@ namespace KomTracker.Application.Queries.Component;
 
 /// <summary>
 /// Distinct Brand / Model / Purchase place / Sale place values across the user's bikes and components (autocomplete
-/// hints); purchase/sale places also include the user's expenses (D-EXP-7 — the same shops sell parts and expenses).
+/// hints); purchase/sale places also include the user's expenses (D-EXP-7 — the same shops sell parts and expenses),
+/// and purchase places the places of their services (the same shops service the bikes).
 /// </summary>
 public class GetPurchaseSuggestionsQuery : IRequest<PurchaseSuggestionsModel>
 {
@@ -30,11 +31,12 @@ public class GetPurchaseSuggestionsQueryHandler : IRequestHandler<GetPurchaseSug
         var components = await _komUoW.GetRepository<IComponentRepository>().GetDistinctPurchaseFieldsAsync(request.UserId);
         var bikes = await _komUoW.GetRepository<IBikeRepository>().GetDistinctPurchaseFieldsAsync(request.UserId);
         var expenses = await _komUoW.GetRepository<IExpenseRepository>().GetDistinctPlacesAsync(request.UserId);
+        var servicePlaces = await _komUoW.GetRepository<IServiceRecordRepository>().GetDistinctPlacesAsync(request.UserId);
 
         return new PurchaseSuggestionsModel(
             Merge(components.Brands, bikes.Brands),
             Merge(components.Models, bikes.Models),
-            Merge(components.PurchasePlaces, bikes.PurchasePlaces, expenses.PurchasePlaces),
+            Merge(components.PurchasePlaces, bikes.PurchasePlaces, expenses.PurchasePlaces, servicePlaces),
             Merge(components.SalePlaces, bikes.SalePlaces, expenses.SalePlaces));
     }
 

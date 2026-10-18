@@ -33,6 +33,7 @@ else
         }
         <MudSpacer />
         <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Primary" OnClick="EditAsync">Edit</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Handyman" OnClick="@(() => _servicesPanel!.AddAsync())">Add service</MudButton>
         @if (_component.Lifecycle == ComponentLifecycle.Active)
         {
             <MudButton StartIcon="@Icons.Material.Filled.Archive" OnClick="ArchiveAsync">Archive</MudButton>
@@ -290,6 +291,8 @@ else
                 </MudPaper>
             </MudItem>
         }
+
+        <ServicesPanel @ref="_servicesPanel" ComponentId="@_component.Id" />
     </MudGrid>
 }
 

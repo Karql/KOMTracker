@@ -17,6 +17,7 @@ public class GetPurchaseSuggestionsQueryTests
     private readonly IComponentRepository _componentRepo;
     private readonly IBikeRepository _bikeRepo;
     private readonly IExpenseRepository _expenseRepo;
+    private readonly IServiceRecordRepository _serviceRepo;
     private readonly GetPurchaseSuggestionsQueryHandler _handler;
 
     public GetPurchaseSuggestionsQueryTests()
@@ -25,6 +26,9 @@ public class GetPurchaseSuggestionsQueryTests
         _componentRepo = Substitute.For<IComponentRepository>();
         _bikeRepo = Substitute.For<IBikeRepository>();
         _expenseRepo = Substitute.For<IExpenseRepository>();
+        _serviceRepo = Substitute.For<IServiceRecordRepository>();
+        _komUoW.GetRepository<IServiceRecordRepository>().Returns(_serviceRepo);
+        _serviceRepo.GetDistinctPlacesAsync(Arg.Any<string>()).Returns((IReadOnlyList<string>)new string[0]);
         _komUoW.GetRepository<IComponentRepository>().Returns(_componentRepo);
         _komUoW.GetRepository<IBikeRepository>().Returns(_bikeRepo);
         _komUoW.GetRepository<IExpenseRepository>().Returns(_expenseRepo);
@@ -73,5 +77,19 @@ public class GetPurchaseSuggestionsQueryTests
         res.PurchasePlaces.Should().Equal("Biostern", "Decathlon");
         res.SalePlaces.Should().Equal("Rafał");
         res.Brands.Should().BeEmpty();   // expenses don't feed brands/models
+    }
+
+    [Fact]
+    public async Task Service_places_join_the_purchase_places()
+    {
+        var empty = (IReadOnlyList<string>)new string[0];
+        _componentRepo.GetDistinctPurchaseFieldsAsync("u1").Returns((empty, empty, (IReadOnlyList<string>)new[] { "Biostern" }, empty));
+        _bikeRepo.GetDistinctPurchaseFieldsAsync("u1").Returns((empty, empty, empty, empty));
+        _serviceRepo.GetDistinctPlacesAsync("u1").Returns((IReadOnlyList<string>)new[] { "Bike RS", "BIOSTERN" });
+
+        var res = await _handler.Handle(new GetPurchaseSuggestionsQuery { UserId = "u1" }, CancellationToken.None);
+
+        res.PurchasePlaces.Should().Equal("Bike RS", "Biostern");
+        res.SalePlaces.Should().BeEmpty();
     }
 }

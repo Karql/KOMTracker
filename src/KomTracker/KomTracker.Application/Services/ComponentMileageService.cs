@@ -12,6 +12,8 @@ namespace KomTracker.Application.Services;
 /// Effective window of a Tracked installation: on a bike → its own [DateFrom, DateTo); in a parent component →
 /// the overlap of that with each of the parent's Tracked on-bike windows (one-level nesting ⇒ ≤2 hops).
 /// Half-open on the activity's UTC StartDate; DateTo == null = open. Manual rows contribute their static totals only.
+/// The <c>...At</c> variants compute the same totals <em>as of</em> an instant (mileage at a service date): the windows
+/// are clipped at it; seed + Manual baselines always count.
 /// <para>
 /// All DB work is batched into <see cref="BuildContextAsync"/> (a handful of set-based queries), then windowing runs
 /// in memory — so recomputing many components, or resolving a page of installation rows, is a constant number of
@@ -26,6 +28,7 @@ public class ComponentMileageService
     private IComponentRepository ComponentRepo => _komUoW.GetRepository<IComponentRepository>();
     private IBikeLinkRepository BikeLinkRepo => _komUoW.GetRepository<IBikeLinkRepository>();
     private IActivityRepository ActivityRepo => _komUoW.GetRepository<IActivityRepository>();
+    private IBikeRepository BikeRepo => _komUoW.GetRepository<IBikeRepository>();
 
     public ComponentMileageService(IKOMUnitOfWork komUoW)
     {
@@ -84,6 +87,122 @@ public class ComponentMileageService
             }
 
             result[component.Id] = total;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Component totals <em>as of</em> given instants (mileage at a service date, D-SRV-4): seed + all Manual baselines
+    /// (dateless = historical) + the Tracked windows clipped at the instant (rides with <c>StartDate &lt; at</c>).
+    /// One batch of queries for all points, then in-memory windowing. Points for unknown components are left out.
+    /// </summary>
+    public async Task<IReadOnlyDictionary<(int ComponentId, DateTime At), Totals>> ComputeTotalsAtAsync(
+        IReadOnlyCollection<(int ComponentId, DateTime At)> points)
+    {
+        var result = new Dictionary<(int ComponentId, DateTime At), Totals>();
+        if (points is null || points.Count == 0)
+        {
+            return result;
+        }
+
+        var componentIds = points.Select(p => p.ComponentId).Distinct().ToList();
+        var installationsByComponent = (await InstallationRepo.GetByComponentsAsync(componentIds))
+            .GroupBy(i => i.ComponentId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var ctx = await BuildContextAsync(installationsByComponent.Values.SelectMany(x => x).ToList());
+        var components = (await ComponentRepo.GetByIdsAsync(componentIds)).ToDictionary(c => c.Id);
+
+        foreach (var point in points.Distinct())
+        {
+            if (!components.TryGetValue(point.ComponentId, out var component))
+            {
+                continue;
+            }
+
+            var total = new Totals(
+                component.InitialDistanceKm,
+                component.InitialMovingHours ?? 0m,
+                component.InitialElevationM ?? 0m,
+                0);
+
+            if (installationsByComponent.TryGetValue(component.Id, out var installs))
+            {
+                foreach (var installation in installs)
+                {
+                    total = installation.Type == ComponentInstallationType.Manual
+                        ? total.Add(new Totals(
+                            installation.ManualDistanceKm ?? 0m,
+                            installation.ManualMovingHours ?? 0m,
+                            installation.ManualElevationM ?? 0m,
+                            0))
+                        : total.Add(RowTotals(installation, ctx, point.At));
+                }
+            }
+
+            result[point] = total;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Bike totals <em>as of</em> given instants (mileage at a service date, D-SRV-4): the bike's seed + its Strava gears'
+    /// rides with <c>StartDate &lt; at</c>, via the same <see cref="BikeTotalsCalculator"/> as the live bike totals.
+    /// One batch of queries for all points. Points for unknown bikes are left out.
+    /// </summary>
+    public async Task<IReadOnlyDictionary<(int BikeId, DateTime At), Totals>> ComputeBikeTotalsAtAsync(
+        IReadOnlyCollection<(int BikeId, DateTime At)> points)
+    {
+        var result = new Dictionary<(int BikeId, DateTime At), Totals>();
+        if (points is null || points.Count == 0)
+        {
+            return result;
+        }
+
+        var bikeIds = points.Select(p => p.BikeId).Distinct().ToList();
+        var bikes = (await BikeRepo.GetByIdsAsync(bikeIds)).ToDictionary(b => b.Id);
+        var linksByBike = (await BikeLinkRepo.GetByBikeIdsAsync(bikeIds))
+            .GroupBy(l => l.BikeId)
+            .ToDictionary(g => g.Key, g => (IReadOnlyList<BikeLinkEntity>)g.ToList());
+
+        var gearIds = linksByBike.Values.SelectMany(x => x)
+            .Where(l => l.ExternalService == ExternalService.Strava)
+            .Select(l => l.ExternalId)
+            .Distinct()
+            .ToList();
+        var activitiesByGear = gearIds.Count == 0
+            ? Enumerable.Empty<ActivityAttributionModel>().ToLookup(a => a.GearId)
+            : (await ActivityRepo.GetActivitiesByGearAsync(gearIds)).ToLookup(a => a.GearId);
+
+        foreach (var point in points.Distinct())
+        {
+            if (!bikes.TryGetValue(point.BikeId, out var bike))
+            {
+                continue;
+            }
+
+            bike.Links = linksByBike.TryGetValue(bike.Id, out var links) ? links : Array.Empty<BikeLinkEntity>();
+
+            var totalsByGear = bike.Links
+                .Select(l => l.ExternalId)
+                .Distinct()
+                .ToDictionary(gearId => gearId, gearId =>
+                {
+                    var rides = activitiesByGear[gearId].Where(a => a.StartDate < point.At).ToList();
+                    return new GearTotalsModel
+                    {
+                        GearId = gearId,
+                        DistanceMeters = rides.Sum(a => a.DistanceMeters),
+                        MovingTimeSeconds = rides.Sum(a => (long)a.MovingTimeSeconds),
+                        ElevationMeters = rides.Sum(a => a.ElevationMeters),
+                        ActivityCount = rides.Count
+                    };
+                });
+
+            var totals = BikeTotalsCalculator.Compute(bike, totalsByGear);
+            result[point] = new Totals(totals.DistanceKm, totals.MovingHours, totals.ElevationM, totals.ActivityCount);
         }
 
         return result;
@@ -162,8 +281,9 @@ public class ComponentMileageService
         return new AttributionContext(gearIdsByBike, parentBikeInstalls, activitiesByGear);
     }
 
-    // Pure: sum the activities that fall in this Tracked row's effective window(s).
-    private static Totals RowTotals(InstallationEntity installation, AttributionContext ctx)
+    // Pure: sum the activities that fall in this Tracked row's effective window(s). With a cutoff, every effective
+    // window is clipped to end at it (mileage "as of" that instant).
+    private static Totals RowTotals(InstallationEntity installation, AttributionContext ctx, DateTime? cutoff = null)
     {
         if (installation.Type != ComponentInstallationType.Tracked || installation.DateFrom is null)
         {
@@ -176,7 +296,11 @@ public class ComponentMileageService
 
         if (installation.BikeId is int bikeId)
         {
-            totals = totals.Add(SumWindow(bikeId, from, to, ctx));
+            var window = Clip(from, to, cutoff);
+            if (window is not null)
+            {
+                totals = totals.Add(SumWindow(bikeId, window.Value.From, window.Value.To, ctx));
+            }
         }
         else if (installation.ParentComponentId is int parentId
             && ctx.ParentBikeInstalls.TryGetValue(parentId, out var parentInstalls))
@@ -184,15 +308,20 @@ public class ComponentMileageService
             foreach (var parentInstall in parentInstalls)
             {
                 var overlap = Overlap(from, to, parentInstall.DateFrom!.Value, parentInstall.DateTo);
-                if (overlap is not null)
+                var window = overlap is null ? null : Clip(overlap.Value.From, overlap.Value.To, cutoff);
+                if (window is not null)
                 {
-                    totals = totals.Add(SumWindow(parentInstall.BikeId!.Value, overlap.Value.From, overlap.Value.To, ctx));
+                    totals = totals.Add(SumWindow(parentInstall.BikeId!.Value, window.Value.From, window.Value.To, ctx));
                 }
             }
         }
 
         return totals;
     }
+
+    // The window cut to end at the cutoff (no cutoff = unchanged); null = nothing left before it.
+    private static (DateTime From, DateTime? To)? Clip(DateTime from, DateTime? to, DateTime? cutoff)
+        => cutoff is null ? (from, to) : Overlap(from, to, DateTime.MinValue, cutoff);
 
     private static Totals SumWindow(int bikeId, DateTime from, DateTime? to, AttributionContext ctx)
     {

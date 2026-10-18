@@ -3,6 +3,7 @@ using KomTracker.Application.Commands.Account;
 using KomTracker.Application.Commands.Club;
 using KomTracker.Application.Commands.Component;
 using KomTracker.Application.Commands.Segment;
+using KomTracker.Application.Commands.ServiceRecord;
 using KomTracker.Application.Commands.Stats;
 using KomTracker.Application.Commands.Strava;
 using KomTracker.Application.Commands.Tracking;
@@ -82,6 +83,19 @@ public class AdminController : BaseApiController<AdminController>
     public async Task<ActionResult> RecalculateComponentMileage([FromBody] IReadOnlyCollection<int> componentIds, CancellationToken cancellationToken)
     {
         await _mediator.Send(new RecalculateComponentsMileageCommand { ComponentIds = componentIds ?? Array.Empty<int>() }, cancellationToken);
+
+        return new NoContentResult();
+    }
+
+    /// <summary>
+    /// Backfill/rebuild the stored mileage at the service date of the given services' targets — an empty body (or [])
+    /// rebuilds every service of every user (e.g. after a raw-SQL import).
+    /// </summary>
+    [HttpPut("recalculate-service-mileage")]
+    public async Task<ActionResult> RecalculateServiceMileage([FromBody] IReadOnlyCollection<int>? serviceIds, CancellationToken cancellationToken)
+    {
+        var all = serviceIds is null || serviceIds.Count == 0;
+        await _mediator.Send(new RecalculateServiceMileageCommand { ServiceIds = serviceIds ?? Array.Empty<int>(), All = all }, cancellationToken);
 
         return new NoContentResult();
     }

@@ -4,6 +4,7 @@ using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Domain.Entities.Bike;
+using KomTracker.Application.Notifications.Bike;
 using MediatR;
 
 namespace KomTracker.Application.Commands.Bike;
@@ -61,10 +62,12 @@ public class SaveBikeCommandValidator : AbstractValidator<SaveBikeCommand>
 public class SaveBikeCommandHandler : IRequestHandler<SaveBikeCommand, Result<BikeEntity>>
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator;
 
-    public SaveBikeCommandHandler(IKOMUnitOfWork komUoW)
+    public SaveBikeCommandHandler(IKOMUnitOfWork komUoW, IMediator mediator)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task<Result<BikeEntity>> Handle(SaveBikeCommand request, CancellationToken cancellationToken)
@@ -131,6 +134,9 @@ public class SaveBikeCommandHandler : IRequestHandler<SaveBikeCommand, Result<Bi
         }
 
         await _komUoW.SaveChangesAsync();
+
+        // The seed (initial metrics) or a new Strava link may have changed → refresh the mileage computed from them.
+        await _mediator.Publish(new BikeChangedNotification { BikeId = bike.Id }, cancellationToken);
 
         return Result.Ok(bike);
     }

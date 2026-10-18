@@ -37,6 +37,14 @@ public static class HttpResponseMessageExtensions
         }
     }
 
+    /// <summary>
+    /// True when a 409 is the "covered by a service" delete guard (D-SRV-6) — a block no "delete anyway" can lift, so
+    /// the caller should just show the reason. Matches the marker in the API's <c>DeleteBlockMessages</c>.
+    /// </summary>
+    public static async Task<bool> IsServiceDeleteBlockAsync(this HttpResponseMessage response)
+        => response.StatusCode == HttpStatusCode.Conflict
+            && (await TryReadDetailAsync(response))?.Contains("covered by a service", StringComparison.OrdinalIgnoreCase) == true;
+
     private static async Task<string?> TryReadDetailAsync(HttpResponseMessage response)
     {
         try

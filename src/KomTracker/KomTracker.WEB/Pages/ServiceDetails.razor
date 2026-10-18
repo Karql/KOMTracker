@@ -1,0 +1,84 @@
+@page "/services/{Id:int}"
+@attribute [Authorize]
+@using KomTracker.Domain.Entities.Component
+@using KomTracker.WEB.Infrastructure
+@using KomTracker.WEB.Models.ServiceRecord
+
+<PageTitle>Service</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_service is null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">Service not found.</MudAlert>
+    <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Href="services">Back to services</MudButton>
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudIcon Icon="@Icons.Material.Filled.Handyman" Size="Size.Large" />
+        <div>
+            <MudText Typo="Typo.h5">@_service.Name</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">@ServiceTargetDisplay.Date(_service.Date)</MudText>
+        </div>
+        <MudSpacer />
+        <MudButton StartIcon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Color="Color.Primary" OnClick="EditAsync">Edit</MudButton>
+        <MudButton StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="DeleteAsync">Delete</MudButton>
+    </div>
+
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Details</MudText>
+                @Field("Date", ServiceTargetDisplay.Date(_service.Date))
+                @Field("Place", _service.Place)
+                @Field("Cost", _service.Cost is { } cost ? Currencies.Format(cost, _currency) : null)
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Notes</MudText>
+                <MudText Typo="Typo.body2" Style="white-space: pre-wrap;"
+                         Class="@(string.IsNullOrWhiteSpace(_service.Notes) ? "mud-text-secondary" : null)">@(string.IsNullOrWhiteSpace(_service.Notes) ? "—" : _service.Notes)</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Class="pa-4" Outlined="true">
+                <MudText Typo="Typo.subtitle1" Class="mb-2">Covers</MudText>
+                <MudTable Items="_service.Targets" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+                    <HeaderContent>
+                        <MudTh>Bike / component</MudTh>
+                        <MudTh>Type</MudTh>
+                        <MudTh Style="text-align: right;">Mileage at service</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Bike / component">
+                            <div class="d-flex align-center" style="gap: 6px;">
+                                <MudIcon Icon="@ServiceTargetDisplay.Icon(context)" Size="Size.Small" />
+                                <MudLink Href="@ServiceTargetDisplay.Href(context)">@context.Name</MudLink>
+                            </div>
+                        </MudTd>
+                        <MudTd DataLabel="Type">
+                            @(context.BikeId is not null ? "Bike" : ComponentCategoryMetadata.DisplayName(context.Category ?? ComponentCategory.Other))
+                        </MudTd>
+                        <MudTd DataLabel="Mileage at service" Style="text-align: right;">@ServiceTargetDisplay.Mileage(context)</MudTd>
+                    </RowTemplate>
+                </MudTable>
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                    Mileage of each one at the service date — its initial seed + manual usage + the rides before that moment.
+                </MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    private RenderFragment Field(string label, string? value) =>@<div class="d-flex py-1" style="gap: 8px;">
+        <MudText Typo="Typo.body2" Class="mud-text-secondary" Style="min-width: 110px;">@label</MudText>
+        <MudText Typo="Typo.body2">@(string.IsNullOrWhiteSpace(value) ? "—" : value)</MudText>
+    </div>;
+}

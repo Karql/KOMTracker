@@ -1,0 +1,107 @@
+@using System.Net.Http.Json
+@using KomTracker.API.Shared.ViewModels.ServiceRecord
+@using KomTracker.Domain.Entities.ServiceRecord
+@using KomTracker.WEB.Infrastructure
+@using KomTracker.WEB.Infrastructure.Services.Currency
+@using KomTracker.WEB.Models.ServiceRecord
+
+@* "Services" panel of a bike / component detail page — the services covering it, with ITS mileage at each service.
+   Rendered (as a full-width grid item) only when there are some; the page's "Add service" button calls AddAsync. *@
+@if (_loaded && _services.Any())
+{
+    <MudItem xs="12">
+        <MudPaper Class="pa-4" Outlined="true">
+            <div class="d-flex align-center mb-2" style="gap: 8px; flex-wrap: wrap;">
+                <MudText Typo="Typo.subtitle1">Services</MudText>
+                <MudSpacer />
+                <MudButton StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary"
+                           OnClick="AddAsync">Add service</MudButton>
+            </div>
+
+            <MudTable Items="_services" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+                <HeaderContent>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Date</MudTh>
+                    <MudTh>Place</MudTh>
+                    <MudTh Style="text-align: right;">Cost</MudTh>
+                    <MudTh Style="text-align: right;">Mileage at service</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">
+                        <MudLink Href="@($"services/{context.Id}")">@context.Name</MudLink>
+                        @if (context.Targets.Count > 1)
+                        {
+                            <MudTooltip Text="@string.Join(", ", context.Targets.Select(t => t.Name))">
+                                <MudChip T="string" Size="Size.Small" Variant="Variant.Text">+@(context.Targets.Count - 1)</MudChip>
+                            </MudTooltip>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Date">@ServiceTargetDisplay.Date(context.Date)</MudTd>
+                    <MudTd DataLabel="Place">@(context.Place ?? "—")</MudTd>
+                    <MudTd DataLabel="Cost" Style="text-align: right;">@(context.Cost is { } cost ? Currencies.Format(cost, _currency) : "—")</MudTd>
+                    <MudTd DataLabel="Mileage at service" Style="text-align: right;">@ServiceTargetDisplay.Mileage(This(context))</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudItem>
+}
+
+@code {
+    /// <summary>The bike whose page this is (set exactly one of BikeId / ComponentId).</summary>
+    [Parameter] public int? BikeId { get; set; }
+
+    /// <summary>The component whose page this is.</summary>
+    [Parameter] public int? ComponentId { get; set; }
+
+    [Inject] private HttpClient Http { get; set; } = default!;
+    [Inject] private IDialogService DialogService { get; set; } = default!;
+    [Inject] private ICurrencyPreference CurrencyPreference { get; set; } = default!;
+
+    private bool _loaded;
+    private string _currency = Currencies.Default;
+    private IReadOnlyList<ServiceRecordViewModel> _services = Array.Empty<ServiceRecordViewModel>();
+    private (int? BikeId, int? ComponentId) _loadedFor;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // The same page component is reused when navigating between detail pages — reload only for another target.
+        if (_loaded && _loadedFor == (BikeId, ComponentId))
+        {
+            return;
+        }
+
+        _currency = await CurrencyPreference.GetAsync();
+        await LoadAsync();
+    }
+
+    /// <summary>Reloads the list.</summary>
+    public async Task LoadAsync()
+    {
+        _loadedFor = (BikeId, ComponentId);
+        var query = BikeId is not null ? $"bikeId={BikeId}" : $"componentId={ComponentId}";
+        _services = await Http.GetFromJsonAsync<ServiceRecordViewModel[]>($"services?{query}") ?? Array.Empty<ServiceRecordViewModel>();
+        _loaded = true;
+        StateHasChanged();
+    }
+
+    /// <summary>Opens the add dialog with this bike / component pre-selected; reloads on save.</summary>
+    public async Task AddAsync()
+    {
+        var parameters = new DialogParameters<AddEditServiceDialog>
+        {
+            { x => x.Preselect, new ServiceTargetRef { BikeId = BikeId, ComponentId = ComponentId } }
+        };
+        var options = new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true, CloseButton = true };
+        var dialog = await DialogService.ShowAsync<AddEditServiceDialog>("Add service", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not null && !result.Canceled)
+        {
+            await LoadAsync();
+        }
+    }
+
+    // This page's own target within the service (its mileage is what the panel shows).
+    private ServiceTargetViewModel? This(ServiceRecordViewModel service)
+        => service.Targets.FirstOrDefault(t => BikeId is not null ? t.BikeId == BikeId : t.ComponentId == ComponentId);
+}

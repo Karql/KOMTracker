@@ -6,6 +6,7 @@ using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Domain.Entities.Bike;
+using MediatR;
 using NSubstitute;
 using System;
 using System.Threading;
@@ -20,6 +21,7 @@ public class BikeCommandHandlersTests
     private const string OtherUserId = "user-2";
 
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator = Substitute.For<IMediator>();
     private readonly IBikeRepository _bikeRepository;
 
     public BikeCommandHandlersTests()
@@ -32,7 +34,7 @@ public class BikeCommandHandlersTests
     [Fact]
     public async Task SaveBike_creates_active_bike_when_id_is_null()
     {
-        var handler = new SaveBikeCommandHandler(_komUoW);
+        var handler = new SaveBikeCommandHandler(_komUoW, _mediator);
 
         var result = await handler.Handle(new SaveBikeCommand
         {
@@ -56,7 +58,7 @@ public class BikeCommandHandlersTests
     public async Task SaveBike_update_fails_with_not_found()
     {
         _bikeRepository.GetBikeAsync(5).Returns((BikeEntity?)null);
-        var handler = new SaveBikeCommandHandler(_komUoW);
+        var handler = new SaveBikeCommandHandler(_komUoW, _mediator);
 
         var result = await handler.Handle(new SaveBikeCommand { Id = 5, UserId = UserId, Name = "X", Type = BikeType.Road }, CancellationToken.None);
 
@@ -69,7 +71,7 @@ public class BikeCommandHandlersTests
     public async Task SaveBike_update_fails_with_forbidden_for_other_users_bike()
     {
         _bikeRepository.GetBikeAsync(5).Returns(new BikeEntity { Id = 5, UserId = OtherUserId, Name = "X" });
-        var handler = new SaveBikeCommandHandler(_komUoW);
+        var handler = new SaveBikeCommandHandler(_komUoW, _mediator);
 
         var result = await handler.Handle(new SaveBikeCommand { Id = 5, UserId = UserId, Name = "Y", Type = BikeType.Road }, CancellationToken.None);
 
@@ -83,7 +85,7 @@ public class BikeCommandHandlersTests
     {
         var bike = new BikeEntity { Id = 5, UserId = UserId, Name = "Old", Type = BikeType.Road };
         _bikeRepository.GetBikeAsync(5).Returns(bike);
-        var handler = new SaveBikeCommandHandler(_komUoW);
+        var handler = new SaveBikeCommandHandler(_komUoW, _mediator);
 
         var result = await handler.Handle(new SaveBikeCommand { Id = 5, UserId = UserId, Name = "New", Type = BikeType.Gravel }, CancellationToken.None);
 
@@ -172,5 +174,20 @@ public class BikeCommandHandlersTests
         result.Should().BeSuccess();
         _bikeRepository.Received().DeleteBike(bike);
         await _komUoW.Received().SaveChangesAsync();
+    }
+
+    [Fact]
+    public async Task DeleteBike_covered_by_a_service_is_blocked()
+    {
+        _bikeRepository.GetBikeAsync(5).Returns(new BikeEntity { Id = 5, UserId = UserId, Name = "X" });
+        var serviceRepo = Substitute.For<IServiceRecordRepository>();
+        serviceRepo.AnyByBikeAsync(5).Returns(true);
+        _komUoW.GetRepository<IServiceRecordRepository>().Returns(serviceRepo);
+        var handler = new DeleteBikeCommandHandler(_komUoW);
+
+        var result = await handler.Handle(new DeleteBikeCommand { Id = 5, UserId = UserId }, CancellationToken.None);
+
+        result.HasError<ConflictError>().Should().BeTrue();
+        _bikeRepository.DidNotReceive().DeleteBike(Arg.Any<BikeEntity>());
     }
 }

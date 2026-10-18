@@ -228,7 +228,8 @@ public partial class Components
         {
             // A meta component may hold parts whose history a force-delete must not wipe — never force those from here
             // (a non-meta component can never be a parent, so it's safe to offer). Precise handling is on the detail page.
-            if (component.IsMetaComponent)
+            // Same for a component a service covers (D-SRV-6) — no "delete anyway" lifts that.
+            if (component.IsMetaComponent || await response.IsServiceDeleteBlockAsync())
             {
                 await response.ShowProblemAsync(Snackbar);
                 return;

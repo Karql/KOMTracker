@@ -164,4 +164,99 @@ public class ComponentMileageServiceTests
         child.WindowDistanceKm.Should().Be(2m);
         child.WindowActivityCount.Should().Be(1);
     }
+
+    // ---- mileage as of an instant (service date, D-SRV-4) -------------------
+
+    [Fact]
+    public async Task At_date_clips_an_open_window_and_still_counts_seed_and_manual()
+    {
+        Component(5, seedKm: 100);
+        InstallsFor(5,
+            OnBike(3, new DateTime(2026, 1, 1), null),
+            new InstallationEntity { ComponentId = 5, Type = ComponentInstallationType.Manual, ManualDistanceKm = 50 });
+        GearForBike(3, "b1");
+        Activities(
+            Ride("b1", new DateTime(2026, 2, 1), 10000, 3600, 100),   // before the service → counts
+            Ride("b1", new DateTime(2026, 3, 1), 20000, 3600, 100));  // after the service → excluded
+
+        var at = new DateTime(2026, 2, 15);
+        var totals = (await _service.ComputeTotalsAtAsync(new[] { (5, at) }))[(5, at)];
+
+        totals.DistanceKm.Should().Be(160m);   // seed 100 + manual 50 + 10 km before the date
+        totals.ActivityCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task At_date_before_a_window_counts_nothing_from_it_and_after_it_counts_all_of_it()
+    {
+        Component(5);
+        InstallsFor(5, OnBike(3, new DateTime(2026, 2, 1), new DateTime(2026, 3, 1)));
+        GearForBike(3, "b1");
+        Activities(Ride("b1", new DateTime(2026, 2, 10), 10000, 3600, 100));
+
+        var before = new DateTime(2026, 1, 15);
+        var after = new DateTime(2026, 6, 1);
+        var totals = await _service.ComputeTotalsAtAsync(new[] { (5, before), (5, after) });
+
+        totals[(5, before)].DistanceKm.Should().Be(0m);
+        totals[(5, after)].DistanceKm.Should().Be(10m);
+    }
+
+    [Fact]
+    public async Task At_date_the_ride_exactly_at_the_instant_is_excluded()
+    {
+        Component(5);
+        InstallsFor(5, OnBike(3, new DateTime(2026, 1, 1), null));
+        GearForBike(3, "b1");
+        var at = new DateTime(2026, 2, 1, 8, 0, 0);
+        Activities(Ride("b1", at, 10000, 3600, 100));
+
+        var totals = (await _service.ComputeTotalsAtAsync(new[] { (5, at) }))[(5, at)];
+
+        totals.DistanceKm.Should().Be(0m);
+    }
+
+    [Fact]
+    public async Task At_date_clips_the_in_component_overlap()
+    {
+        // Tyre 5 in wheel 8 from Jan (open); wheel 8 on bike 3 from Jan (open). Service on Feb 15.
+        GearForBike(3, "b1");
+        _installationRepo.GetByComponentsAsync(Arg.Is<IReadOnlyCollection<int>>(c => c.Contains(8))).Returns(new[]
+        {
+            new InstallationEntity { ComponentId = 8, BikeId = 3, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1) }
+        });
+        Component(5);
+        InstallsFor(5, new InstallationEntity
+        {
+            ComponentId = 5, ParentComponentId = 8, Type = ComponentInstallationType.Tracked, DateFrom = new DateTime(2026, 1, 1)
+        });
+        Activities(
+            Ride("b1", new DateTime(2026, 2, 1), 2000, 720, 30),
+            Ride("b1", new DateTime(2026, 3, 1), 9000, 720, 30));
+
+        var at = new DateTime(2026, 2, 15);
+        var totals = (await _service.ComputeTotalsAtAsync(new[] { (5, at) }))[(5, at)];
+
+        totals.DistanceKm.Should().Be(2m);
+    }
+
+    [Fact]
+    public async Task Bike_at_date_is_its_seed_plus_rides_before_the_instant()
+    {
+        var bikeRepo = Substitute.For<IBikeRepository>();
+        _komUoW.GetRepository<IBikeRepository>().Returns(bikeRepo);
+        bikeRepo.GetByIdsAsync(Arg.Any<IReadOnlyCollection<int>>())
+            .Returns(new[] { new BikeEntity { Id = 3, UserId = "u1", Name = "Trutka", InitialDistanceKm = 1000 } });
+        GearForBike(3, "b1");
+        Activities(
+            Ride("b1", new DateTime(2026, 2, 1), 10000, 3600, 100),
+            Ride("b1", new DateTime(2026, 3, 1), 20000, 3600, 100));
+
+        var at = new DateTime(2026, 2, 15);
+        var totals = (await _service.ComputeBikeTotalsAtAsync(new[] { (3, at) }))[(3, at)];
+
+        totals.DistanceKm.Should().Be(1010m);
+        totals.MovingHours.Should().Be(1m);
+        totals.ActivityCount.Should().Be(1);
+    }
 }

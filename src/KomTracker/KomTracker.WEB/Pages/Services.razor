@@ -1,0 +1,141 @@
+@page "/services"
+@attribute [Authorize]
+@using KomTracker.API.Shared.ViewModels.ServiceRecord
+@using KomTracker.WEB.Infrastructure
+@using KomTracker.WEB.Models.Preference
+@using KomTracker.WEB.Models.ServiceRecord
+
+<PageTitle>Services</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (!_services.Any())
+{
+    <MudPaper Outlined="true" Class="pa-8 d-flex flex-column align-center" Style="gap: 12px;">
+        <MudIcon Icon="@Icons.Material.Filled.Handyman" Size="Size.Large" Color="Color.Primary" />
+        <MudText Typo="Typo.h6">No services yet</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+            Log maintenance — a check-up, a shock service, a wheel rebuild… One service can cover several bikes and components.
+        </MudText>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add service</MudButton>
+    </MudPaper>
+}
+else
+{
+    <div class="d-flex align-center mb-4" style="gap: 12px; flex-wrap: wrap;">
+        <MudTextField @bind-Value="_searchString" Placeholder="Search"
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"
+                      Margin="Margin.Dense" Immediate="true" Style="max-width: 220px; margin-top: 16px;" />
+        <MudSelect T="string" @bind-Value="_targetFilter" Label="Covers" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 220px;">
+            @foreach (var target in TargetOptions)
+            {
+                <MudSelectItem T="string" Value="@target.Key">@target.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect T="int?" @bind-Value="_yearFilter" Label="Year" Clearable="true"
+                   Margin="Margin.Dense" Dense="true" Style="max-width: 130px;">
+            @foreach (var year in Years)
+            {
+                <MudSelectItem T="int?" Value="@year">@year</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSpacer />
+        <MudButtonGroup Variant="Variant.Outlined" Size="Size.Small">
+            <MudIconButton Icon="@Icons.Material.Filled.GridView"
+                           Color="@(_view == ListViewMode.Card ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Card))" />
+            <MudIconButton Icon="@Icons.Material.Filled.TableRows"
+                           Color="@(_view == ListViewMode.Table ? Color.Primary : Color.Default)"
+                           OnClick="@(() => SetViewAsync(ListViewMode.Table))" />
+        </MudButtonGroup>
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                   OnClick="AddAsync">Add service</MudButton>
+    </div>
+
+    @if (!FilteredServices.Any())
+    {
+        <MudAlert Severity="Severity.Info">No services match the current filter.</MudAlert>
+    }
+    else if (_view == ListViewMode.Card)
+    {
+        <MudGrid>
+            @foreach (var service in FilteredServices)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Outlined="true" Class="card-link">
+                        <MudCardHeader>
+                            <CardHeaderAvatar>
+                                <MudIcon Icon="@Icons.Material.Filled.Handyman" />
+                            </CardHeaderAvatar>
+                            <CardHeaderContent>
+                                <MudLink Href="@($"services/{service.Id}")" Typo="Typo.h6" Underline="Underline.Hover" Class="card-link__title">@service.Name</MudLink>
+                                <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                                    @ServiceTargetDisplay.Date(service.Date)@(service.Place is not null ? $" · {service.Place}" : "")
+                                </MudText>
+                            </CardHeaderContent>
+                            <CardHeaderActions>
+                                <div class="card-link__above">@ServiceMenu(service)</div>
+                            </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <div class="d-flex align-center flex-wrap" style="gap: 8px;">
+                                @foreach (var target in service.Targets)
+                                {
+                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Icon="@ServiceTargetDisplay.Icon(target)">@target.Name</MudChip>
+                                }
+                            </div>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2" Style="display: flex; align-items: center; gap: 4px;">
+                                <MudIcon Icon="@Icons.Material.Filled.Payments" Size="Size.Small" />
+                                @(service.Cost is { } cost ? Currencies.Format(cost, _currency) : "—")
+                            </MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudTable Items="FilteredServices" Hover="true" Striped="true" Dense="true" Breakpoint="Breakpoint.Sm">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Date</MudTh>
+                <MudTh>Place</MudTh>
+                <MudTh>Covers</MudTh>
+                <MudTh Style="text-align: right;">Cost</MudTh>
+                <MudTh Style="text-align: right;"></MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">
+                    <MudLink Href="@($"services/{context.Id}")">@context.Name</MudLink>
+                </MudTd>
+                <MudTd DataLabel="Date">@ServiceTargetDisplay.Date(context.Date)</MudTd>
+                <MudTd DataLabel="Place">@(context.Place ?? "—")</MudTd>
+                <MudTd DataLabel="Covers">
+                    <div class="d-flex align-center flex-wrap" style="gap: 6px;">
+                        @foreach (var target in context.Targets)
+                        {
+                            <span class="d-flex align-center" style="gap: 4px;">
+                                <MudIcon Icon="@ServiceTargetDisplay.Icon(target)" Size="Size.Small" />
+                                <MudLink Href="@ServiceTargetDisplay.Href(target)">@target.Name</MudLink>
+                            </span>
+                        }
+                    </div>
+                </MudTd>
+                <MudTd DataLabel="Cost" Style="text-align: right;">@(context.Cost is { } cost ? Currencies.Format(cost, _currency) : "—")</MudTd>
+                <MudTd Style="text-align: right;">@ServiceMenu(context)</MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+}
+
+@code {
+    private RenderFragment ServiceMenu(ServiceRecordViewModel service) =>@<MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
+        <MudMenuItem Icon="@Icons.Material.Filled.Edit" OnClick="@(() => EditAsync(service))">Edit</MudMenuItem>
+        <MudMenuItem Icon="@Icons.Material.Filled.Delete" IconColor="Color.Error" OnClick="@(() => DeleteAsync(service))">Delete</MudMenuItem>
+    </MudMenu>;
+}

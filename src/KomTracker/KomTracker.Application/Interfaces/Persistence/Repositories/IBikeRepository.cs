@@ -7,6 +7,9 @@ public interface IBikeRepository : IRepository
 {
     Task<IEnumerable<BikeEntity>> GetBikesAsync(string userId, bool includeInactive);
     Task<BikeEntity?> GetBikeAsync(int id);
+
+    /// <summary>Bikes by id (untracked; any user, any lifecycle) — batch lookups for mileage computation.</summary>
+    Task<IEnumerable<BikeEntity>> GetByIdsAsync(IReadOnlyCollection<int> bikeIds);
     void AddBike(BikeEntity bike);
     void UpdateBike(BikeEntity bike);
     void DeleteBike(BikeEntity bike);

@@ -6,6 +6,7 @@ using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Domain.Entities.Bike;
 using KomTracker.Domain.Entities.Strava;
+using MediatR;
 using NSubstitute;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace KomTracker.Application.Tests.Commands.Strava;
 public class LinkStravaBikeCommandHandlerTests
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator = Substitute.For<IMediator>();
     private readonly IBikeRepository _bikeRepo;
     private readonly IStravaBikeRepository _stravaBikeRepo;
     private readonly IBikeLinkRepository _bikeLinkRepo;
@@ -32,7 +34,7 @@ public class LinkStravaBikeCommandHandlerTests
         _komUoW.GetRepository<IStravaBikeRepository>().Returns(_stravaBikeRepo);
         _komUoW.GetRepository<IBikeLinkRepository>().Returns(_bikeLinkRepo);
 
-        _handler = new LinkStravaBikeCommandHandler(_komUoW);
+        _handler = new LinkStravaBikeCommandHandler(_komUoW, _mediator);
     }
 
     private LinkStravaBikeCommand Command() => new()

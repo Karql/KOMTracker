@@ -1,5 +1,6 @@
 #nullable enable
 using KomTracker.Application.Commands.Component;
+using KomTracker.Application.Commands.ServiceRecord;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Application.Interfaces.Services.Identity;
@@ -136,6 +137,58 @@ public class ComponentMileageProjectionUpdaterTests
             CancellationToken.None);
 
         await Recompute(6);
+    }
+
+    private Task RecomputeServices(System.Func<RecalculateServiceMileageCommand, bool> match) => _mediator.Received().Send(
+        Arg.Is<RecalculateServiceMileageCommand>(c => match(c)), Arg.Any<CancellationToken>());
+
+    [Fact]
+    public async Task Component_change_also_recomputes_the_services_covering_it()
+    {
+        await _updater.Handle(new ComponentChangedNotification { ComponentId = 5 }, CancellationToken.None);
+
+        await RecomputeServices(c => c.ComponentIds.Contains(5));
+    }
+
+    [Fact]
+    public async Task Activity_sync_recomputes_services_of_the_bike_and_its_components()
+    {
+        _bikeLinkRepo.GetByExternalIdAsync(ExternalService.Strava, "b1").Returns(new BikeLinkEntity { BikeId = 3 });
+        _installationRepo.GetComponentIdsByBikesAsync(Arg.Is<IReadOnlyCollection<int>>(c => c.Contains(3))).Returns(new[] { 5 });
+
+        await _updater.Handle(new ActivitySyncedNotification { AthleteId = 7, ActivityId = 99, GearId = "b1" }, CancellationToken.None);
+
+        await RecomputeServices(c => c.BikeIds.Contains(3) && c.ComponentIds.Contains(5));
+    }
+
+    [Fact]
+    public async Task Bike_change_recomputes_its_components_and_services()
+    {
+        _installationRepo.GetComponentIdsByBikesAsync(Arg.Is<IReadOnlyCollection<int>>(c => c.Contains(3))).Returns(new[] { 5 });
+
+        await _updater.Handle(new KomTracker.Application.Notifications.Bike.BikeChangedNotification { BikeId = 3 }, CancellationToken.None);
+
+        await Recompute(5);
+        await RecomputeServices(c => c.BikeIds.Contains(3) && c.ComponentIds.Contains(5));
+    }
+
+    [Fact]
+    public async Task Bike_change_without_components_still_recomputes_its_services()
+    {
+        _installationRepo.GetComponentIdsByBikesAsync(Arg.Any<IReadOnlyCollection<int>>()).Returns(System.Array.Empty<int>());
+
+        await _updater.Handle(new KomTracker.Application.Notifications.Bike.BikeChangedNotification { BikeId = 3 }, CancellationToken.None);
+
+        await _mediator.DidNotReceive().Send(Arg.Any<RecalculateComponentsMileageCommand>(), Arg.Any<CancellationToken>());
+        await RecomputeServices(c => c.BikeIds.Contains(3));
+    }
+
+    [Fact]
+    public async Task Service_change_recomputes_that_service()
+    {
+        await _updater.Handle(new KomTracker.Application.Notifications.ServiceRecord.ServiceRecordChangedNotification { ServiceId = 4 }, CancellationToken.None);
+
+        await RecomputeServices(c => c.ServiceIds.Contains(4));
     }
 
     [Fact]

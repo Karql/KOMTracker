@@ -45,6 +45,12 @@ public class DeleteComponentCommandHandler : IRequestHandler<DeleteComponentComm
             return Result.Fail(new ForbiddenError("Component does not belong to the current user."));
         }
 
+        // D-SRV-6: service history must not silently lose what it covered. Checked first, and Force never overrides it.
+        if (await _komUoW.GetRepository<IServiceRecordRepository>().AnyByComponentAsync(component.Id))
+        {
+            return Result.Fail(new ConflictError(DeleteBlockMessages.CoveredByService("Component")));
+        }
+
         var installationRepo = _komUoW.GetRepository<IInstallationRepository>();
 
         // D-18: as-parent rows are the CHILDREN's history (deleting them would silently wipe a part's in-this-component

@@ -17,6 +17,7 @@ public partial class BikeDetails
     [Parameter] public int Id { get; set; }
 
     private bool _loaded;
+    private ServicesPanel? _servicesPanel;
     private BikeViewModel? _bike;
     private IReadOnlyList<InstallationViewModel> _installations = Array.Empty<InstallationViewModel>();
     private string _currency = Currencies.Default;
@@ -59,6 +60,13 @@ public partial class BikeDetails
 
         _installations = await Http.GetFromJsonAsync<InstallationViewModel[]>($"installations?bikeId={Id}")
             ?? Array.Empty<InstallationViewModel>();
+
+        // A change made on this page (seed, link) can move the mileage at past services — refresh the panel too
+        // (null on the first load: the panel loads itself when it first renders).
+        if (_servicesPanel is not null)
+        {
+            await _servicesPanel.LoadAsync();
+        }
     }
 
     private void OpenComponent(int componentId) => Navigation.NavigateTo($"components/{componentId}");

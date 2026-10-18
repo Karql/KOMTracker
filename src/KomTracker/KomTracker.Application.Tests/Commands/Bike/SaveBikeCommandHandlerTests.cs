@@ -5,6 +5,7 @@ using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Domain.Entities.Bike;
+using MediatR;
 using NSubstitute;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace KomTracker.Application.Tests.Commands.Bike;
 public class SaveBikeCommandHandlerTests
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator = Substitute.For<IMediator>();
     private readonly IBikeRepository _bikeRepo;
     private readonly IBikeLinkRepository _bikeLinkRepo;
     private readonly SaveBikeCommandHandler _handler;
@@ -28,7 +30,7 @@ public class SaveBikeCommandHandlerTests
         _komUoW.GetRepository<IBikeRepository>().Returns(_bikeRepo);
         _komUoW.GetRepository<IBikeLinkRepository>().Returns(_bikeLinkRepo);
 
-        _handler = new SaveBikeCommandHandler(_komUoW);
+        _handler = new SaveBikeCommandHandler(_komUoW, _mediator);
     }
 
     private static SaveBikeCommand CreateCommand(string? gearId) => new()

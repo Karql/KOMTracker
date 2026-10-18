@@ -16,6 +16,7 @@ public partial class ComponentDetails
     [Parameter] public int Id { get; set; }
 
     private bool _loaded;
+    private ServicesPanel? _servicesPanel;
     private ComponentViewModel? _component;
     private IReadOnlyList<InstallationViewModel> _installations = Array.Empty<InstallationViewModel>();
     private InstallationViewModel? _current;
@@ -79,6 +80,13 @@ public partial class ComponentDetails
             .ThenByDescending(i => i.DateFrom)
             .ToArray();
         _current = _installations.FirstOrDefault(i => i.IsCurrent);
+
+        // An installation change made on this page can move the mileage at past services — refresh the panel too
+        // (null on the first load: the panel loads itself when it first renders).
+        if (_servicesPanel is not null)
+        {
+            await _servicesPanel.LoadAsync();
+        }
     }
 
     private void OpenComponent(int componentId) => Navigation.NavigateTo($"components/{componentId}");
@@ -293,8 +301,9 @@ public partial class ComponentDetails
         if (response.StatusCode == HttpStatusCode.Conflict)
         {
             // A component that holds/held parts can't be force-deleted — that would wipe the parts' own history.
-            // Only offer the force path when the block is about the component's OWN installation history.
-            if (_component.Children.Any())
+            // Neither can one a service covers. Only offer the force path when the block is about the component's OWN
+            // installation history.
+            if (_component.Children.Any() || await response.IsServiceDeleteBlockAsync())
             {
                 await response.ShowProblemAsync(Snackbar);
                 return;

@@ -202,4 +202,19 @@ public class ComponentCommandHandlersTests
         res.Should().BeSuccess();
         _componentRepo.Received().DeleteComponent(Arg.Any<ComponentEntity>());
     }
+
+    [Fact]
+    public async Task Delete_of_a_component_covered_by_a_service_is_blocked_even_with_force()
+    {
+        _componentRepo.GetComponentAsync(5).Returns(new ComponentEntity { Id = 5, UserId = "u1", Name = "Chain" });
+        var serviceRepo = Substitute.For<IServiceRecordRepository>();
+        serviceRepo.AnyByComponentAsync(5).Returns(true);
+        _komUoW.GetRepository<IServiceRecordRepository>().Returns(serviceRepo);
+
+        var handler = new DeleteComponentCommandHandler(_komUoW);
+        var res = await handler.Handle(new DeleteComponentCommand { Id = 5, UserId = "u1", Force = true }, CancellationToken.None);
+
+        res.Should().BeFailure().Which.HasError<ConflictError>();
+        _componentRepo.DidNotReceive().DeleteComponent(Arg.Any<ComponentEntity>());
+    }
 }

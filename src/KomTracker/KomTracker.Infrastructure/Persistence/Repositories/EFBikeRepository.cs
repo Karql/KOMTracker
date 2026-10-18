@@ -31,6 +31,14 @@ public class EFBikeRepository : EFBaseRepository, IBikeRepository
         return await _context.Bike.FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task<IEnumerable<BikeEntity>> GetByIdsAsync(IReadOnlyCollection<int> bikeIds)
+    {
+        return await _context.Bike
+            .AsNoTracking()
+            .Where(x => bikeIds.Contains(x.Id))
+            .ToListAsync();
+    }
+
     public void AddBike(BikeEntity bike)
     {
         _context.Bike.Add(bike);

@@ -3,6 +3,7 @@ using KomTracker.Application.Errors;
 using KomTracker.Application.Interfaces.Persistence;
 using KomTracker.Application.Interfaces.Persistence.Repositories;
 using KomTracker.Domain.Entities.Bike;
+using KomTracker.Application.Notifications.Bike;
 using MediatR;
 
 namespace KomTracker.Application.Commands.Strava;
@@ -19,10 +20,12 @@ public class UnlinkStravaBikeCommand : IRequest<Result>
 public class UnlinkStravaBikeCommandHandler : IRequestHandler<UnlinkStravaBikeCommand, Result>
 {
     private readonly IKOMUnitOfWork _komUoW;
+    private readonly IMediator _mediator;
 
-    public UnlinkStravaBikeCommandHandler(IKOMUnitOfWork komUoW)
+    public UnlinkStravaBikeCommandHandler(IKOMUnitOfWork komUoW, IMediator mediator)
     {
         _komUoW = komUoW ?? throw new ArgumentNullException(nameof(komUoW));
+        _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
     public async Task<Result> Handle(UnlinkStravaBikeCommand request, CancellationToken cancellationToken)
@@ -45,6 +48,9 @@ public class UnlinkStravaBikeCommandHandler : IRequestHandler<UnlinkStravaBikeCo
 
         bikeLinkRepo.Remove(link);
         await _komUoW.SaveChangesAsync();
+
+        // That gear's rides no longer count toward the bike → refresh its components' and services' mileage.
+        await _mediator.Publish(new BikeChangedNotification { BikeId = bike.Id }, cancellationToken);
 
         return Result.Ok();
     }

@@ -36,6 +36,12 @@ public class DeleteBikeCommandHandler : IRequestHandler<DeleteBikeCommand, Resul
             return Result.Fail(new ForbiddenError("Bike does not belong to the current user."));
         }
 
+        // D-SRV-6: service history must not silently lose what it covered.
+        if (await _komUoW.GetRepository<IServiceRecordRepository>().AnyByBikeAsync(bike.Id))
+        {
+            return Result.Fail(new ConflictError(DeleteBlockMessages.CoveredByService("Bike")));
+        }
+
         // Remove the bike's installations first (frees the components) — mirrors ClearWarehouseAsync (D-2b1-6).
         await _komUoW.GetRepository<IInstallationRepository>().DeleteByBikeAsync(bike.Id);
 
