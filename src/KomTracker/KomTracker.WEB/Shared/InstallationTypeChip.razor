@@ -1,0 +1,12 @@
+@using KomTracker.Domain.Entities.Component
+
+@* Compact installation type for the tables: "T" / "M", the full meaning in the tooltip. *@
+<MudTooltip Text="@(Manual ? "Manual — hand-entered totals, no dates" : "Tracked — mileage from the rides in its window")">
+    <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="@(Manual ? Color.Info : Color.Default)">@(Manual ? "M" : "T")</MudChip>
+</MudTooltip>
+
+@code {
+    [Parameter, EditorRequired] public ComponentInstallationType Type { get; set; }
+
+    private bool Manual => Type == ComponentInstallationType.Manual;
+}

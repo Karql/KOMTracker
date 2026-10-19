@@ -78,9 +78,9 @@ else
         <MudItem xs="12" md="6">
             <MudPaper Class="pa-4" Outlined="true">
                 <MudText Typo="Typo.subtitle1" Class="mb-2">Mileage</MudText>
-                @Field("Distance", $"{_bike.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture)} km")
-                @Field("Moving time", $"{_bike.TotalMovingHours.ToString("N1", CultureInfo.InvariantCulture)} h")
-                @Field("Elevation", $"{_bike.TotalElevationM.ToString("N0", CultureInfo.InvariantCulture)} m")
+                @Field("Distance", Numbers.Km(_bike.TotalDistanceKm))
+                @Field("Moving time", Numbers.Hours(_bike.TotalMovingHours))
+                @Field("Elevation", Numbers.Meters(_bike.TotalElevationM))
                 <MudText Typo="Typo.caption" Class="mud-text-secondary">
                     @(_bike.AttributedActivityCount > 0
                         ? $"incl. {_bike.AttributedActivityCount} Strava ride(s)"
@@ -148,31 +148,21 @@ else
                                 <MudLink OnClick="@(() => OpenComponent(context.ComponentId))">@context.ComponentName</MudLink>
                             </MudTd>
                             <MudTd DataLabel="Category">
-                                <div class="d-flex align-center" style="gap: 6px;">
+                                <div class="d-flex align-center nowrap" style="gap: 6px;">
                                     <MudIcon Icon="@ComponentCategoryIcons.Icon(context.ComponentCategory ?? ComponentCategory.Other)" Size="Size.Small" />
                                     <span>@ComponentCategoryMetadata.DisplayName(context.ComponentCategory ?? ComponentCategory.Other)</span>
                                 </div>
                             </MudTd>
                             <MudTd DataLabel="Brand">@context.ComponentBrand</MudTd>
                             <MudTd DataLabel="Model">@context.ComponentModel</MudTd>
+                            @* The current row is already highlighted green — no separate "Current" chip. *@
                             <MudTd DataLabel="Type">
-                                <div class="d-flex align-center" style="gap: 6px;">
-                                    <MudChip T="string" Size="Size.Small" Variant="Variant.Text"
-                                             Color="@(context.Type == ComponentInstallationType.Manual ? Color.Info : Color.Default)">@context.Type</MudChip>
-                                    @if (context.IsCurrent)
-                                    {
-                                        <MudChip T="string" Size="Size.Small" Color="Color.Success" Icon="@Icons.Material.Filled.CheckCircle">Current</MudChip>
-                                    }
-                                </div>
+                                <InstallationTypeChip Type="context.Type" />
                             </MudTd>
                             <MudTd DataLabel="Position">@(context.Position?.ToString() ?? "—")</MudTd>
-                            <MudTd DataLabel="Period">
-                                @(context.Type == ComponentInstallationType.Manual
-                                    ? "—"
-                                    : $"{context.DateFrom?.ToString("yyyy-MM-dd HH:mm") ?? "?"} → {context.DateTo?.ToString("yyyy-MM-dd HH:mm") ?? "…"}")
-                            </MudTd>
-                            <MudTd DataLabel="Mileage" Style="text-align: right;">@Mileage(context)</MudTd>
-                            <MudTd Style="text-align: right;">
+                            <MudTd DataLabel="Period"><InstallationPeriod Installation="context" /></MudTd>
+                            <MudTd DataLabel="Mileage" Class="nowrap" Style="text-align: right;">@Mileage(context)</MudTd>
+                            <MudTd Class="nowrap" Style="text-align: right;">
                                 <MudTooltip Text="Edit">
                                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => EditInstallationAsync(context))" />
                                 </MudTooltip>
@@ -216,11 +206,7 @@ else
             return "—";
         }
 
-        var parts = new List<string>();
-        if (i.ManualDistanceKm is { } km) parts.Add($"{km.ToString("N0", CultureInfo.InvariantCulture)} km");
-        if (i.ManualMovingHours is { } h) parts.Add($"{h.ToString("N1", CultureInfo.InvariantCulture)} h");
-        if (i.ManualElevationM is { } m) parts.Add($"{m.ToString("N0", CultureInfo.InvariantCulture)} m");
-        return parts.Count == 0 ? "—" : string.Join(" · ", parts);
+        return Numbers.Mileage(i.ManualDistanceKm, i.ManualMovingHours, i.ManualElevationM);
     }
 
     // Per-window computed mileage for a Tracked row; static hand-entered totals for a Manual row.
@@ -231,10 +217,6 @@ else
             return ManualUsage(i);
         }
 
-        var parts = new List<string>();
-        if (i.WindowDistanceKm > 0) parts.Add($"{i.WindowDistanceKm.ToString("N0", CultureInfo.InvariantCulture)} km");
-        if (i.WindowMovingHours > 0) parts.Add($"{i.WindowMovingHours.ToString("N1", CultureInfo.InvariantCulture)} h");
-        if (i.WindowElevationM > 0) parts.Add($"{i.WindowElevationM.ToString("N0", CultureInfo.InvariantCulture)} m");
-        return parts.Count == 0 ? "—" : string.Join(" · ", parts);
+        return Numbers.Mileage(i.WindowDistanceKm, i.WindowMovingHours, i.WindowElevationM);
     }
 }

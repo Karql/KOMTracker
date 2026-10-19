@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net.Http.Json;
 using KomTracker.API.Shared.ViewModels.Bike;
 using KomTracker.Domain.Entities.Bike;
+using KomTracker.WEB.Infrastructure;
 using KomTracker.WEB.Infrastructure.Services.Preference;
 using KomTracker.WEB.Models.Preference;
 using KomTracker.WEB.Shared;
@@ -211,7 +212,7 @@ public partial class Bikes
         }
     }
 
-    private static string Km(decimal km) => $"{km.ToString("N0", CultureInfo.InvariantCulture)} km";
+    private static string Km(decimal km) => Numbers.Km(km);
 
     private static Color LifecycleColor(BikeLifecycle lifecycle) => lifecycle switch
     {

@@ -2,6 +2,7 @@
 @attribute [Authorize]
 @using System.Globalization
 @using KomTracker.API.Shared.ViewModels.BikeTracker
+@using KomTracker.WEB.Infrastructure
 
 <PageTitle>Strava activities</PageTitle>
 
@@ -66,10 +67,10 @@ else
                     <div>@context.Name</div>
                     <MudText Typo="Typo.caption" Class="mud-text-secondary">@context.SportType</MudText>
                 </MudTd>
-                <MudTd DataLabel="Distance">@context.DistanceKm.ToString("N1", CultureInfo.InvariantCulture) km</MudTd>
+                <MudTd DataLabel="Distance">@Numbers.Format(context.DistanceKm, 1) km</MudTd>
                 <MudTd DataLabel="Time">@FormatMovingTime(context.MovingTimeSeconds)</MudTd>
-                <MudTd DataLabel="Avg speed">@context.AverageSpeedKmh.ToString("N1", CultureInfo.InvariantCulture) km/h</MudTd>
-                <MudTd DataLabel="Elevation">@context.ElevationM.ToString("N0", CultureInfo.InvariantCulture) m</MudTd>
+                <MudTd DataLabel="Avg speed">@Numbers.Format(context.AverageSpeedKmh, 1) km/h</MudTd>
+                <MudTd DataLabel="Elevation">@Numbers.Meters((decimal)context.ElevationM)</MudTd>
                 <MudTd DataLabel="Bike">
                     @if (!context.IsBikeRide)
                     {

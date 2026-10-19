@@ -1,6 +1,7 @@
 using System.Globalization;
 using KomTracker.API.Shared.ViewModels.ServiceRecord;
 using KomTracker.Domain.Entities.Component;
+using KomTracker.WEB.Infrastructure;
 using KomTracker.WEB.Models.Component;
 using MudBlazor;
 
@@ -32,11 +33,8 @@ public static class ServiceTargetDisplay
             return "—";
         }
 
-        var parts = new List<string>();
-        if (target.DistanceKm > 0) parts.Add($"{target.DistanceKm.Value.ToString("N0", CultureInfo.InvariantCulture)} km");
-        if (target.MovingHours > 0) parts.Add($"{target.MovingHours.Value.ToString("N1", CultureInfo.InvariantCulture)} h");
-        if (target.ElevationM > 0) parts.Add($"{target.ElevationM.Value.ToString("N0", CultureInfo.InvariantCulture)} m");
-        return parts.Count == 0 ? "0 km" : string.Join(" · ", parts);
+        var text = Numbers.Mileage(target.DistanceKm, target.MovingHours, target.ElevationM);
+        return text == "—" ? "0 km" : text;
     }
 
     /// <summary>"yyyy-MM-dd", plus the time when it isn't midnight.</summary>

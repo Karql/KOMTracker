@@ -32,7 +32,7 @@ public static class Currencies
     public static string Format(decimal amount, string? code)
     {
         var c = Get(code);
-        var number = amount.ToString("0.##", CultureInfo.InvariantCulture);
+        var number = Numbers.Amount(amount);
         return c.SymbolAfter ? $"{number} {c.Symbol}" : $"{c.Symbol}{number}";
     }
 }

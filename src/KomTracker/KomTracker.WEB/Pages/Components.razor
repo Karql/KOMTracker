@@ -136,7 +136,7 @@ else
                             </div>
                             <MudText Typo="Typo.body2" Class="mud-text-secondary mt-2" Style="display: flex; align-items: center; gap: 4px;">
                                 <MudIcon Icon="@Icons.Material.Filled.Straighten" Size="Size.Small" />
-                                @component.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture) km
+                                @Numbers.Km(component.TotalDistanceKm)
                             </MudText>
                         </MudCardContent>
                     </MudCard>
@@ -218,11 +218,7 @@ else
     // Component totals (initial seed + attributed rides) — distance · moving time · elevation, same format as the installations table.
     private static string Mileage(ComponentViewModel c)
     {
-        var parts = new List<string>();
-        if (c.TotalDistanceKm > 0) parts.Add($"{c.TotalDistanceKm.ToString("N0", CultureInfo.InvariantCulture)} km");
-        if (c.TotalMovingHours > 0) parts.Add($"{c.TotalMovingHours.ToString("N1", CultureInfo.InvariantCulture)} h");
-        if (c.TotalElevationM > 0) parts.Add($"{c.TotalElevationM.ToString("N0", CultureInfo.InvariantCulture)} m");
-        return parts.Count == 0 ? "—" : string.Join(" · ", parts);
+        return Numbers.Mileage(c.TotalDistanceKm, c.TotalMovingHours, c.TotalElevationM);
     }
 
     private RenderFragment ComponentMenu(ComponentViewModel component) =>@<MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">

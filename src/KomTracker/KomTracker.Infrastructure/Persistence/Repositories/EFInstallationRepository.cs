@@ -10,9 +10,10 @@ namespace KomTracker.Infrastructure.Persistence.Repositories;
 
 public class EFInstallationRepository : EFBaseRepository, IInstallationRepository
 {
-    // Current (DateTo null) first, then most-recent by DateFrom/audit.
+    // Current Tracked windows first, then the Tracked history (most recent by DateFrom/audit), Manual (dateless) rows last.
+    // Manual rows also have DateTo == null, so the type has to be checked before the "open window" test.
     private static IOrderedQueryable<InstallationEntity> Ordered(IQueryable<InstallationEntity> q)
-        => q.OrderBy(x => x.DateTo == null ? 0 : 1)
+        => q.OrderBy(x => x.Type == ComponentInstallationType.Manual ? 2 : x.DateTo == null ? 0 : 1)
             .ThenByDescending(x => x.DateFrom)
             .ThenByDescending(x => x.AuditCD);
 

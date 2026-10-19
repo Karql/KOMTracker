@@ -101,7 +101,7 @@ else
                 <MudTh>Type</MudTh>
                 <MudTh>Brand</MudTh>
                 <MudTh>Model</MudTh>
-                <MudTh>Distance</MudTh>
+                <MudTh Style="text-align: right;">Mileage</MudTh>
                 <MudTh>Status</MudTh>
                 <MudTh Style="text-align: right;"></MudTh>
             </HeaderContent>
@@ -112,7 +112,7 @@ else
                 <MudTd DataLabel="Type">@context.Type</MudTd>
                 <MudTd DataLabel="Brand">@context.Brand</MudTd>
                 <MudTd DataLabel="Model">@context.Model</MudTd>
-                <MudTd DataLabel="Distance">@Km(context.TotalDistanceKm)</MudTd>
+                <MudTd DataLabel="Mileage" Class="nowrap" Style="text-align: right;">@Numbers.Mileage(context.TotalDistanceKm, context.TotalMovingHours, context.TotalElevationM)</MudTd>
                 <MudTd DataLabel="Status">
                     <MudChip T="string" Size="Size.Small" Color="LifecycleColor(context.Lifecycle)">@context.Lifecycle</MudChip>
                     @if (context.StravaGearId is not null)

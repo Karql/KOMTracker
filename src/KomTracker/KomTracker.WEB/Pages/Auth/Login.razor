@@ -26,6 +26,11 @@
             <section class="lp-hero">
                 <div class="lp-hero__bg" aria-hidden="true"></div>
                 <div class="lp-hero__inner">
+                    <a class="lp-announce reveal" href="#garage" data-scroll-to="garage">
+                        <span class="lp-announce__tag">New in 2.0</span>
+                        <span class="lp-announce__text">Bike Tracker — your garage, every kilometre accounted for</span>
+                        <span class="lp-announce__arrow" aria-hidden="true">→</span>
+                    </a>
                     <p class="lp-eyebrow reveal">For riders who don't let go</p>
                     <h1 class="lp-hero__title reveal">
                         Someone just took your KOM.
@@ -40,7 +45,7 @@
                         <a class="lp-strava" href="authentication/login" aria-label="Connect with Strava">
                             <img src="img/btn_strava_connectwith_orange.svg" alt="Connect with Strava" />
                         </a>
-                        <a class="lp-scroll-cue" href="#story">See how it works ↓</a>
+                        <a class="lp-scroll-cue" href="#story" data-scroll-to="story">See how it works ↓</a>
                     </div>
                 </div>
             </section>
@@ -263,6 +268,126 @@
                 </div>
             </section>
 
+            @* 7. Bike Tracker — the second act: a dark band so it reads as something new, not one more KOM feature. *@
+            <section class="lp-garage" id="garage">
+                <div class="lp-garage__bg" aria-hidden="true"></div>
+
+                <div class="lp-garage__intro reveal">
+                    <div class="lp-kicker lp-kicker--dark"><MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Small" /> New · Bike Tracker</div>
+                    <h2 class="lp-h2 lp-garage__title">
+                        The crowns are yours.
+                        <span class="lp-accent">So is every kilometre behind them.</span>
+                    </h2>
+                    <p class="lp-lead lp-garage__lead">
+                        KOM Tracker 2.0 opens the garage. Link your Strava bikes and every ride lands on the right one —
+                        then on the right chain, cassette, tyre and wheel. No spreadsheet, no guessing how old that chain
+                        really is.
+                    </p>
+                </div>
+
+                <div class="lp-feature lp-garage__feature reveal">
+                    <div class="lp-feature__text">
+                        <div class="lp-odo">
+                            <div class="lp-odo__bike"><MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Small" /> White Lady</div>
+                            <div class="lp-odo__main">
+                                <span class="lp-odo__value" data-count="12418">12 418</span>
+                                <span class="lp-odo__unit">km</span>
+                            </div>
+                            <div class="lp-odo__sub">
+                                <span><strong data-count="486">486</strong> h moving</span>
+                                <span class="lp-odo__dot">·</span>
+                                <span><strong data-count="98200">98 200</strong> m climbed</span>
+                            </div>
+                            <div class="lp-odo__note">Seed + every ride Strava knows about, recomputed whenever a ride changes.</div>
+                        </div>
+                    </div>
+                    <div class="lp-feature__visual">
+                        <div class="lp-browser">
+                            <div class="lp-browser__bar"><span></span><span></span><span></span></div>
+                            <div class="lp-appbar"><img src="img/logo-crown.png" alt="" /> White Lady · Installed components</div>
+                            <div class="lp-mock lp-mock--parts">
+                                <div class="lp-mock__row lp-mock__row--head"><span></span><span>Component</span><span>Position</span><span>Mileage</span></div>
+                                <div class="lp-mock__row">
+                                    <span class="lp-part__icon"><MudIcon Icon="@Icons.Material.Filled.Link" Size="Size.Small" /></span>
+                                    <span class="lp-mock__seg">Chain KMC X11</span><span class="lp-part__pos">—</span>
+                                    <span class="lp-part__km"><span data-count="2414">2 414</span> km</span>
+                                </div>
+                                <div class="lp-mock__row">
+                                    <span class="lp-part__icon"><MudIcon Icon="@Icons.Material.Filled.Settings" Size="Size.Small" /></span>
+                                    <span class="lp-mock__seg">Cassette Shimano 11-34</span><span class="lp-part__pos">—</span>
+                                    <span class="lp-part__km"><span data-count="6120">6 120</span> km</span>
+                                </div>
+                                <div class="lp-mock__row">
+                                    <span class="lp-part__icon"><MudIcon Icon="@Icons.Material.Filled.TripOrigin" Size="Size.Small" /></span>
+                                    <span class="lp-mock__seg">Wheel DT Swiss P1850 <span class="lp-meta">Meta</span></span><span class="lp-part__pos">Rear</span>
+                                    <span class="lp-part__km"><span data-count="9870">9 870</span> km</span>
+                                </div>
+                                <div class="lp-mock__row lp-mock__row--child">
+                                    <span class="lp-part__icon lp-part__icon--child"><MudIcon Icon="@Icons.Material.Filled.SubdirectoryArrowRight" Size="Size.Small" /></span>
+                                    <span class="lp-mock__seg">Tyre Pathfinder 42</span><span class="lp-part__pos">in wheel</span>
+                                    <span class="lp-part__km"><span data-count="3318">3 318</span> km</span>
+                                </div>
+                                <div class="lp-mock__row">
+                                    <span class="lp-part__icon"><MudIcon Icon="@Icons.Material.Filled.Handyman" Size="Size.Small" /></span>
+                                    <span class="lp-mock__seg">Brake pads L05A</span><span class="lp-part__pos">Front</span>
+                                    <span class="lp-part__km"><span data-count="1500">1 500</span> km</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lp-garage__cards">
+                    <div class="lp-gcard reveal">
+                        <div class="lp-gcard__icon"><MudIcon Icon="@Icons.Material.Filled.CloudSync" /></div>
+                        <h3 class="lp-gcard__title">Synced, not typed</h3>
+                        <p class="lp-gcard__text">
+                            Connect once and your Strava bikes come over — retired ones too. New rides arrive within
+                            moments and are credited to the bike they were ridden on. Private rides only if you say so.
+                        </p>
+                        <div class="lp-gcard__mini">
+                            <span class="lp-gpill"><MudIcon Icon="@Icons.Material.Filled.DirectionsBike" Size="Size.Small" /> Morning loop</span>
+                            <span class="lp-gcard__flow" aria-hidden="true">→</span>
+                            <span class="lp-gpill lp-gpill--hot"><MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Small" /> White Lady</span>
+                        </div>
+                    </div>
+
+                    <div class="lp-gcard reveal">
+                        <div class="lp-gcard__icon"><MudIcon Icon="@Icons.Material.Filled.SwapHoriz" /></div>
+                        <h3 class="lp-gcard__title">Parts that move</h3>
+                        <p class="lp-gcard__text">
+                            Swap wheels between bikes, mount a tyre in a wheel, run one computer on three bikes. Mileage
+                            follows the part — distance, hours and elevation through the whole chain. Strava can't do that.
+                        </p>
+                        <div class="lp-gcard__mini">
+                            <span class="lp-gpill">Tyre</span>
+                            <span class="lp-gcard__flow" aria-hidden="true">→</span>
+                            <span class="lp-gpill">Wheel</span>
+                            <span class="lp-gcard__flow" aria-hidden="true">→</span>
+                            <span class="lp-gpill lp-gpill--hot">Bike</span>
+                        </div>
+                    </div>
+
+                    <div class="lp-gcard reveal">
+                        <div class="lp-gcard__icon"><MudIcon Icon="@Icons.Material.Filled.ReceiptLong" /></div>
+                        <h3 class="lp-gcard__title">Services &amp; costs</h3>
+                        <p class="lp-gcard__text">
+                            Log one workshop visit for the fork, the wheels, the whole bike — and see each part's mileage
+                            on the day. What you paid, what you sold it for, every tube and pot of wax in between.
+                        </p>
+                        <div class="lp-ticket">
+                            <div class="lp-ticket__row"><strong>Fork service</strong><span>650 zł</span></div>
+                            <div class="lp-ticket__row lp-ticket__row--muted"><span>Termi · 2023-11-28</span><span>at 2 399 km</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="lp-garage__next reveal">
+                    <MudIcon Icon="@Icons.Material.Filled.NotificationsActive" Size="Size.Small" />
+                    Next on the roadmap: wear alerts — a nudge when that chain is due.
+                </p>
+            </section>
+
             @* Final CTA *@
             <section class="lp-cta">
                 <div class="lp-cta__inner reveal">
@@ -270,7 +395,7 @@
                     <a class="lp-strava lp-strava--lg" href="authentication/login" aria-label="Connect with Strava">
                         <img src="img/btn_strava_connectwith_orange.svg" alt="Connect with Strava" />
                     </a>
-                    <p class="lp-cta__note">Free. Connects in seconds with your Strava account.</p>
+                    <p class="lp-cta__note">Free. Connects in seconds with your Strava account — KOMs and garage included.</p>
                 </div>
             </section>
 

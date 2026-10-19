@@ -113,7 +113,7 @@ public partial class StravaBikes
             : !string.IsNullOrWhiteSpace(bike.Nickname) ? bike.Nickname!
             : bike.Id;
 
-    private static string FormatKm(double km) => $"{km:N0} km";
+    private static string FormatKm(double km) => $"{Numbers.Format(km)} km";
 
     private void OpenBike(int id) => Navigation.NavigateTo($"bikes/{id}");
 

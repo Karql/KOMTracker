@@ -1,0 +1,22 @@
+@using KomTracker.API.Shared.ViewModels.Installation
+@using KomTracker.Domain.Entities.Component
+
+@* Installation window as dates only ("2026-08-15 → …"); the full date + time is in the tooltip. Manual rows have no window. *@
+@if (Installation.Type == ComponentInstallationType.Manual)
+{
+    <span>—</span>
+}
+else
+{
+    <MudTooltip Text="@($"{Full(Installation.DateFrom, "?")} → {Full(Installation.DateTo, "still installed")}")">
+        <span class="nowrap">@Short(Installation.DateFrom, "?") → @Short(Installation.DateTo, "…")</span>
+    </MudTooltip>
+}
+
+@code {
+    [Parameter, EditorRequired] public InstallationViewModel Installation { get; set; } = default!;
+
+    private static string Short(DateTime? date, string missing) => date?.ToString("yyyy-MM-dd") ?? missing;
+
+    private static string Full(DateTime? date, string missing) => date?.ToString("yyyy-MM-dd HH:mm") ?? missing;
+}
