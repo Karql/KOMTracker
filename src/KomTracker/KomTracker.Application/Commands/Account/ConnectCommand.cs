@@ -86,6 +86,9 @@ public class ConnectCommandHandler : IRequestHandler<ConnectCommand, Result<Conn
 
         await _komUoW.SaveChangesAsync();
 
+        // Every sign-in goes through this Strava exchange — remember when (the athlete/token rows can't tell: jobs rewrite them).
+        await _userService.RecordLoginAsync(athlete.AthleteId);
+
         return Result.Ok(new ConnectCommandResult
         {
             AthleteId = athlete.AthleteId,

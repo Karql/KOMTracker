@@ -113,6 +113,23 @@ public class ConnectCommandTests
     }
 
     [Fact]
+    public async Task Connect_records_the_login()
+    {
+        var res = await _connectCommandHandler.Handle(new ConnectCommand(TEST_EXISTING_ATHLETE_CODE, TEST_VALID_SCOPE), _cancellationToken);
+
+        res.Should().BeSuccess();
+        await _userService.Received(1).RecordLoginAsync(TestExistingAthlete.AthleteId);
+    }
+
+    [Fact]
+    public async Task Failed_connect_does_not_record_a_login()
+    {
+        await _connectCommandHandler.Handle(new ConnectCommand(TEST_INVALID_CODE, TEST_VALID_SCOPE), _cancellationToken);
+
+        await _userService.DidNotReceive().RecordLoginAsync(Arg.Any<int>());
+    }
+
+    [Fact]
     public async Task Connect_updates_exsisting_athlete()
     {
         // Act

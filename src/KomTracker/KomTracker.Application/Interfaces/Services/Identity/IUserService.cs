@@ -12,6 +12,9 @@ public interface IUserService
     Task<Result<string>> GenerateChangeEmailUrlAsync(int athleteId, string newEmail);
     Task<Result> ConfirmEmailChangeAsync(int athleteId, string newEmail, string token);
     Task<Result> UpdateCurrencyAsync(int athleteId, string currency);
+
+    /// <summary>Stamps the user's last sign-in time (now, UTC) — called when the Strava login completes.</summary>
+    Task RecordLoginAsync(int athleteId);
 }
 
 public class GenerateChangeEmailUrlError : FluentResults.Error

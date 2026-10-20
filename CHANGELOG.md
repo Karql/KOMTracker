@@ -1,4 +1,9 @@
-﻿## 2.0.0 (2026-10-19)
+﻿## 2.0.1 (2026-10-20)
+
+### Features
+- The app now remembers when each user last signed in (`last_login_at` on the user), so it's easy to see who's been around lately.
+
+## 2.0.0 (2026-10-19)
 
 ### Features
 - **Bike Tracker** — a brand-new part of KOM Tracker: a garage and maintenance log for your bikes, fed by your Strava rides. Find it under **Bike Tracker** in the menu.

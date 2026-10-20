@@ -75,5 +75,8 @@ public class UserEntityTypeConfiguration
             .HasMaxLength(3)
             .IsRequired()
             .HasDefaultValue("PLN");
+
+        builder.Property(x => x.LastLoginAt)
+            .HasColumnName("last_login_at");
     }
 }

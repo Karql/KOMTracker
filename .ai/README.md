@@ -117,6 +117,7 @@ Dashboard, Koms, Map, Ranking, Koms changes, Battle Field, Account, FAQ, Login. 
 
 - **Repo = English; chat = Polish.** Plans live in `.ai/plans/` (dated, checklist format with a Decisions section). This file is the canonical overview.
 - Shared **`DbContext`/`IKOMUnitOfWork` scope per Quartz run** — mind cross-athlete state (`ClearChangeTracker`).
+- **Last sign-in = `user.last_login_at`** (UTC, nullable — set from 2.0.1 on), stamped by `ConnectCommand` via `IUserService.RecordLoginAsync` on every completed Strava login. Don't read activity from `athlete.audit_md` / `token.audit_md` — `RefreshAthletesJob` and token refreshes rewrite them daily.
 - `EFAthleteRepository` writes (athlete/token/stats) use immediate FlexLabs `Upsert().RunAsync()` (not tracked).
 - Audit columns auto-stamped in `EFKOMUnitOfWork.SaveChangesAsync`.
 - `GetLastKomsChangesAsync` orders by `koms_summary_id` (PK index), not the unindexed `audit_cd` — do not "fix" back.

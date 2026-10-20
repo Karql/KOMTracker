@@ -108,6 +108,19 @@ public class UserService : IUserService
             : Result.Fail(string.Join("; ", res.Errors.Select(e => e.Description)));
     }
 
+    public async Task RecordLoginAsync(int athleteId)
+    {
+        var user = await GetUserByAthleteIdAsync(athleteId);
+
+        if (user == null)
+        {
+            return;
+        }
+
+        user.LastLoginAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+    }
+
     private Task<UserEntity> GetUserByAthleteIdAsync(int athleteId)
     {
         return _userManager.Users.FirstOrDefaultAsync(x => x.AthleteId == athleteId);

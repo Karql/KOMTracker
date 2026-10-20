@@ -14,4 +14,7 @@ public class UserEntity : IdentityUser
 
     /// <summary>Preferred display currency (ISO code, e.g. "PLN"). NOT NULL, defaults to PLN.</summary>
     public string Currency { get; set; } = "PLN";
+
+    /// <summary>When the user last signed in (completed the Strava login), UTC. Null = not since this was introduced.</summary>
+    public DateTime? LastLoginAt { get; set; }
 }
