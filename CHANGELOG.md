@@ -1,4 +1,9 @@
-﻿## 2.0.1 (2026-10-20)
+﻿## 2.1.0 (2026-10-20)
+
+### Features
+- **Bike Tracker → Costs** — what cycling really costs you: net cost, cost per km and per year, a drill-down donut and year-by-year bars (source → group → category → item), totals per bike, parts' cost per 1000 km and a full list of every cost. Filter by period, bike and source, net or gross of sales. Parts used on several bikes are split by the km they did on each. Also on the landing page.
+
+## 2.0.1 (2026-10-20)
 
 ### Features
 - The app now remembers when each user last signed in (`last_login_at` on the user), so it's easy to see who's been around lately.

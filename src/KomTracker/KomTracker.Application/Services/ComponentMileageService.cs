@@ -209,6 +209,93 @@ public class ComponentMileageService
     }
 
     /// <summary>
+    /// Distance each component did <em>on each bike</em> (cost attribution, D-COST-2): Tracked windows on a bike, the
+    /// in-parent overlaps credited to the parent's bike, Manual rows on a bike, and Manual rows in a parent split by the
+    /// parent's own per-bike distance. A bike the component was installed on but rode 0 km on is still listed (0), so
+    /// callers can fall back to an equal split. The initial seed (km before the purchase) belongs to no bike.
+    /// Components never on a bike get an empty map. One batch of queries for the whole set.
+    /// </summary>
+    public async Task<IReadOnlyDictionary<int, IReadOnlyDictionary<int, decimal>>> ComputeKmByBikeAsync(IReadOnlyCollection<int> componentIds)
+    {
+        var result = new Dictionary<int, IReadOnlyDictionary<int, decimal>>();
+        if (componentIds is null || componentIds.Count == 0)
+        {
+            return result;
+        }
+
+        var installationsByComponent = (await InstallationRepo.GetByComponentsAsync(componentIds))
+            .GroupBy(i => i.ComponentId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var ctx = await BuildContextAsync(installationsByComponent.Values.SelectMany(x => x).ToList());
+
+        foreach (var componentId in componentIds.Distinct())
+        {
+            var byBike = new Dictionary<int, decimal>();
+            void Add(int bikeId, decimal km) => byBike[bikeId] = byBike.GetValueOrDefault(bikeId) + km;
+
+            foreach (var installation in installationsByComponent.GetValueOrDefault(componentId) ?? new List<InstallationEntity>())
+            {
+                if (installation.Type == ComponentInstallationType.Manual)
+                {
+                    var manualKm = installation.ManualDistanceKm ?? 0m;
+                    if (installation.BikeId is int manualBike)
+                    {
+                        Add(manualBike, manualKm);
+                    }
+                    else if (installation.ParentComponentId is int manualParent
+                        && ctx.ParentBikeInstalls.TryGetValue(manualParent, out var parentRows))
+                    {
+                        foreach (var (bikeId, share) in BikeShares(parentRows, ctx))
+                        {
+                            Add(bikeId, manualKm * share);
+                        }
+                    }
+
+                    continue;
+                }
+
+                if (installation.DateFrom is null)
+                {
+                    continue;
+                }
+
+                if (installation.BikeId is int bike)
+                {
+                    Add(bike, SumWindow(bike, installation.DateFrom.Value, installation.DateTo, ctx).DistanceKm);
+                }
+                else if (installation.ParentComponentId is int parentId
+                    && ctx.ParentBikeInstalls.TryGetValue(parentId, out var parentInstalls))
+                {
+                    foreach (var parentInstall in parentInstalls)
+                    {
+                        var overlap = Overlap(installation.DateFrom.Value, installation.DateTo, parentInstall.DateFrom!.Value, parentInstall.DateTo);
+                        if (overlap is not null)
+                        {
+                            Add(parentInstall.BikeId!.Value, SumWindow(parentInstall.BikeId!.Value, overlap.Value.From, overlap.Value.To, ctx).DistanceKm);
+                        }
+                    }
+                }
+            }
+
+            result[componentId] = byBike;
+        }
+
+        return result;
+    }
+
+    // A parent's own split across its bikes (by distance; equal when it has no km) — for Manual rows inside it.
+    private static IEnumerable<(int BikeId, decimal Share)> BikeShares(IReadOnlyCollection<InstallationEntity> parentOnBikeRows, AttributionContext ctx)
+    {
+        var km = parentOnBikeRows
+            .GroupBy(r => r.BikeId!.Value)
+            .ToDictionary(g => g.Key, g => g.Sum(r => SumWindow(g.Key, r.DateFrom!.Value, r.DateTo, ctx).DistanceKm));
+        var total = km.Values.Sum();
+
+        return km.Select(kv => (kv.Key, total > 0 ? kv.Value / total : 1m / km.Count));
+    }
+
+    /// <summary>
     /// Set each Tracked row's per-window mileage in place (detail views). One batch of queries for the whole set.
     /// Manual rows are left at zero (the UI shows their static Manual* values instead).
     /// </summary>
@@ -245,9 +332,10 @@ public class ComponentMileageService
 
     private async Task<AttributionContext> BuildContextAsync(IReadOnlyCollection<InstallationEntity> installations)
     {
-        // Parent components referenced by any comp-in-comp Tracked row → their on-bike windows (one batch).
+        // Parent components referenced by any comp-in-comp row → their on-bike windows (one batch). Manual rows in a
+        // parent are included too: the per-bike split (ComputeKmByBikeAsync) follows the parent's bikes for them.
         var parentIds = installations
-            .Where(i => i.Type == ComponentInstallationType.Tracked && i.ParentComponentId is not null)
+            .Where(i => i.ParentComponentId is not null)
             .Select(i => i.ParentComponentId!.Value)
             .Distinct()
             .ToList();

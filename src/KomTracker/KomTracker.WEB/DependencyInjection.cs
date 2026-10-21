@@ -1,4 +1,5 @@
-﻿using Blazored.LocalStorage;
+﻿using ApexCharts;
+using Blazored.LocalStorage;
 using FisSst.BlazorMaps.DependencyInjection;
 using KomTracker.WEB.Infrastructure;
 using KomTracker.WEB.Infrastructure.Services.Currency;
@@ -70,6 +71,12 @@ public static class DependencyInjection
         services.AddMudServices();
 
         services.AddBlazorLeafletMaps();
+
+        // Charts for the cost analysis (D-COST-7); app-wide defaults so every chart matches the MudBlazor look.
+        services.AddApexCharts(e => e.GlobalOptions = new ApexChartBaseOptions
+        {
+            Chart = new Chart { FontFamily = "Roboto, sans-serif", Toolbar = new Toolbar { Show = false } }
+        });
 
         return builder;
     }

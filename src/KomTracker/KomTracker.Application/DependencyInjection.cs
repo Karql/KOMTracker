@@ -29,6 +29,7 @@ public static class DependencyInjection
 
         // Per-request so its bike-gear / parent-window caches are reused across a single list/recompute pass.
         services.AddScoped<ComponentMileageService>();
+        services.AddScoped<CostAnalysisService>();
 
         return services;
     }

@@ -132,7 +132,10 @@ Precomputed totals per bike/component (mileage/hours/elevation), maintained by j
 ## 7. Rules & alerts (later phase)
 An alert **rule** attaches to **one bike or component** (no propagation — D-17). Threshold on **distance / moving-time hours / calendar time / lifespan**; **due = usage-or-time since the last *reset* ≥ threshold**. A **reset** is logging the maintenance was done (a Service, or a lightweight "mark done") → the interval **restarts** (recurring rules auto-restart on each reset; one-off rules fire once). Crucially, a reset is a **timestamp marker** and "since reset" is **derived from source** — no stored counter, so it stays correct after history edits (D-14). E.g. wheel: *"tubeless sealant every 6 months"* → refill = reset → counts from zero again; replacing a tyre is a separate swap, and if you refreshed sealant then you reset the wheel's rule. (D-19) *(OQ-13: notification channel — email / PWA / in-app.)*
 
-## 8. Cost analysis (later phase)
+## 8. Cost analysis (built 2026-10 — `.ai/plans/2026-10-20-biketracker-cost-analysis.md`)
+**Rollup rules (OQ-16, resolved):** cash basis (a cost counts on its date, a resale is negative on the sale date; net by default, gross on a switch); a multi-bike component's price and resale are split by its km on each bike; a service's cost is split across its targets and a component target goes to the bike it was on that day; expenses belong to no bike ("General"); bike purchases are a toggleable source; per-km uses the selected bikes' ride km in the period (seed km only in "All time"). The page aggregates the attributed ledger client-side: drill-down source → group → category → item, a per-year (or per-month) timeline with its own drill-down, per-bike totals, a category treemap, parts' spend per 1000 km in the selected scope and a full ledger.
+
+*Original notes:*
 Per component/bike and per athlete: purchase + services − resale = **net cost**; cost/km; cost/period. Bike-level rollups may include attached components. Also unions standalone **expenses** (`bt.expense`, D-20). *(OQ-16: rollup rules.)*
 
 ## 9. Constraints / NFR
@@ -162,8 +165,8 @@ Per component/bike and per athlete: purchase + services − resale = **net cost*
 - **D-8 Strava's public API (v3) exposes only bikes + activities** — no components at all, and even bike `weight` is web-only (`DetailedGear` = brand/model/frame_type/description; the `weight` in the spec is the *athlete's*). Strava's newer **web** UI added a *basic* components feature, but it's **per-bike, non-movable, and not in the API** — so it validates our differentiators (moving components between bikes, meta-components) rather than threatening them. Import stays **bikes + activities**; the component / installation / mileage-attribution layer is fully ours. We do **not** replicate Strava's auto-generated "Frame" component — our Bike is that top level.
 
 ## 11. Open questions
-OQ-3 shared base for Bike/Component (defer) · OQ-8 service fields (labour/parts, post-v1) · OQ-10 computed-projection storage (columns vs tables) · OQ-11a webhook job runner (Hangfire vs existing Quartz) · OQ-11b polling cadence + public webhook callback hosting · OQ-13 alert channel (with alerts, post-v1) · OQ-16 cost rollup rules (post-v1) · OQ-17 which rides count toward wear (trainer / virtual / manual / flagged) · OQ-18 attachments/documents (receipts/photos) · OQ-19 bike health/condition score.
-*(Resolved: OQ-1 vision, OQ-2 D-2, OQ-4/OQ-12 D-3, OQ-5 Manual installation, OQ-6 D-6, OQ-7/OQ-9 D-4/D-5, OQ-14 scope, OQ-15 D-5 cascade.)*
+OQ-3 shared base for Bike/Component (defer) · OQ-8 service fields (labour/parts, post-v1) · OQ-10 computed-projection storage (columns vs tables) · OQ-11a webhook job runner (Hangfire vs existing Quartz) · OQ-11b polling cadence + public webhook callback hosting · OQ-13 alert channel (with alerts, post-v1) · OQ-17 which rides count toward wear (trainer / virtual / manual / flagged) · OQ-18 attachments/documents (receipts/photos) · OQ-19 bike health/condition score.
+*(Resolved: OQ-16 cost rollups — §8, OQ-1 vision, OQ-2 D-2, OQ-4/OQ-12 D-3, OQ-5 Manual installation, OQ-6 D-6, OQ-7/OQ-9 D-4/D-5, OQ-14 scope, OQ-15 D-5 cascade.)*
 
 ## 12. Phasing (rough → becomes `.ai/plans/`)
 **v1:**
@@ -175,7 +178,7 @@ OQ-3 shared base for Bike/Component (defer) · OQ-8 service fields (labour/parts
 **Post-v1:**
 - **Expenses** — standalone cost entries: `bt.expense` CRUD + own list + detail pages (D-20). Name/Category/Price/PurchaseDate/PurchasePlace?/Notes? + Active/Archived/Sold lifecycle, no bike link, no totals. *(Built 2026-10; the Excel backlog is imported via one-off SQL outside the repo.)*
 - **Services** — maintenance records (`bt.service` + `bt.service_target`): Name / Date / Place / Cost / Notes, covering N bikes/components, each with its stored mileage at the service date; Services page + detail + a Services panel on bike/component details. Feeds Phase 4 (cost) and Phase 5 (reset-on-service alerts). *(Built 2026-10; the Excel "Serwisowe" rows are imported via one-off SQL outside the repo.)*
-- **Phase 4** — Service, purchase & resale cost analysis (unions component costs + `bt.expense`).
+- **Phase 4** — Service, purchase & resale cost analysis (unions component costs + `bt.expense`). *(Built 2026-10: the **Costs** page, §8.)*
 - **Phase 5** — Alerts (channel TBD — OQ-13).
 - **Phase 6 (optimization)** — Strava webhooks: push + inbox + async worker for lower-latency recalcs. No new logic — same command path as Phase 1's polling; only freshness improves. *(Step 1 inbox + Step 2 activity worker done 2026-09; remaining: athlete/deauthorization events, `attempts`/`error` retries, polling backstop.)*
 

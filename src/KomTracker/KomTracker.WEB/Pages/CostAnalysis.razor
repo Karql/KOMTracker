@@ -1,0 +1,494 @@
+@page "/costs"
+@attribute [Authorize]
+@using KomTracker.API.Shared.CostAnalysis
+@using KomTracker.Domain.Entities.Component
+@using KomTracker.Domain.Entities.CostAnalysis
+@using KomTracker.Domain.Entities.Expense
+@using KomTracker.WEB.Infrastructure
+@using KomTracker.WEB.Models.Component
+@using KomTracker.WEB.Models.Expense
+
+<PageTitle>Costs</PageTitle>
+
+@if (!_loaded)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (_report.Lines.Count == 0)
+{
+    <MudPaper Outlined="true" Class="pa-8 d-flex flex-column align-center" Style="gap: 12px;">
+        <MudIcon Icon="@Icons.Material.Filled.Insights" Size="Size.Large" Color="Color.Primary" />
+        <MudText Typo="Typo.h6">Nothing to analyse yet</MudText>
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mud-text-secondary">
+            Add prices to your <MudLink Href="bikes">bikes</MudLink>, <MudLink Href="components">components</MudLink>,
+            <MudLink Href="services">services</MudLink> and <MudLink Href="expenses">expenses</MudLink> and their costs show up here.
+        </MudText>
+    </MudPaper>
+}
+else
+{
+    <div class="costs">
+
+        @* ---- Filter bar ---- *@
+        <MudPaper Outlined="true" Class="costs-filters pa-3 mb-4">
+            <div class="d-flex align-center flex-wrap" style="gap: 10px 16px;">
+                <div class="costs-periods">
+                    <button class="costs-pill @(_period == "all" ? "is-on" : null)" @onclick="@(() => SetPeriod("all"))">All time</button>
+                    @foreach (var year in _years.Take(6))
+                    {
+                        <button class="costs-pill @(_period == year.ToString() ? "is-on" : null)" @onclick="@(() => SetPeriod(year.ToString()))">@year</button>
+                    }
+                    <button class="costs-pill @(_period == "range" ? "is-on" : null)" @onclick="@(() => SetPeriod("range"))">Range…</button>
+                </div>
+                @if (_period == "range")
+                {
+                    <div class="d-flex align-center" style="gap: 8px;">
+                        <MudSelect T="int?" Value="_fromYear" ValueChanged="@(v => SetRange(v, _toYear))" Label="From" Dense="true"
+                                   Margin="Margin.Dense" Clearable="true" Style="width: 110px;">
+                            @foreach (var year in _years.OrderBy(y => y))
+                            {
+                                <MudSelectItem T="int?" Value="@year">@year</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudSelect T="int?" Value="_toYear" ValueChanged="@(v => SetRange(_fromYear, v))" Label="To" Dense="true"
+                                   Margin="Margin.Dense" Clearable="true" Style="width: 110px;">
+                            @foreach (var year in _years.OrderBy(y => y))
+                            {
+                                <MudSelectItem T="int?" Value="@year">@year</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </div>
+                }
+
+                <MudSelect T="int?" Value="_bikeId" ValueChanged="SetBike" Label="Bike" Dense="true" Margin="Margin.Dense"
+                           Style="min-width: 190px; max-width: 240px;">
+                    <MudSelectItem T="int?" Value="@((int?)null)">All bikes</MudSelectItem>
+                    @foreach (var bike in _report.Bikes.OrderBy(b => b.Lifecycle).ThenBy(b => b.Name))
+                    {
+                        <MudSelectItem T="int?" Value="@bike.Id">@bike.Name@(bike.Lifecycle != Domain.Entities.Bike.BikeLifecycle.Active ? $" ({bike.Lifecycle})" : "")</MudSelectItem>
+                    }
+                    <MudSelectItem T="int?" Value="@((int?)CostFilter.NoBike)">@CostAggregator.NoBikeName (general + unmounted)</MudSelectItem>
+                </MudSelect>
+
+                <MudSpacer />
+
+                <div class="costs-sources">
+                    @foreach (var source in Enum.GetValues<CostSource>())
+                    {
+                        var on = _sources.Contains(source);
+                        <button class="costs-source @(on ? "is-on" : null)" style="--c: @SourceColors[source];" @onclick="@(() => ToggleSource(source))"
+                                aria-pressed="@on.ToString().ToLowerInvariant()">
+                            <span class="costs-source__dot"></span>@source
+                        </button>
+                    }
+                </div>
+
+                <MudTooltip Text="Net: sales are subtracted. Gross: only what you spent.">
+                    <MudSwitch T="bool" Value="_net" ValueChanged="SetNet" Color="Color.Primary" Label="@(_net ? "Net of sales" : "Gross")" />
+                </MudTooltip>
+            </div>
+        </MudPaper>
+
+        @* ---- KPIs ---- *@
+        <div class="costs-kpis mb-4">
+            <div class="costs-kpi costs-kpi--hero">
+                <div class="costs-kpi__label">@(_net ? "Net cost" : "Spent") · @PeriodLabel · @BikeLabel</div>
+                <div class="costs-kpi__value">@Money(_kpis.Net)</div>
+                @if (_net && _kpis.Recovered > 0)
+                {
+                    <div class="costs-kpi__sub">@Money(_kpis.Spent) spent − @Money(_kpis.Recovered) back from sales</div>
+                }
+            </div>
+            <div class="costs-kpi">
+                <div class="costs-kpi__label">Per km</div>
+                <div class="costs-kpi__value">@(_kpis.PerKm is { } perKm ? MoneyPrecise(perKm) : "—")</div>
+                <div class="costs-kpi__sub">@(_kpis.Km > 0 ? $"{Numbers.Km(_kpis.Km)} ridden" : "no ride km in scope")</div>
+            </div>
+            <div class="costs-kpi">
+                <div class="costs-kpi__label">Per 1000 km</div>
+                <div class="costs-kpi__value">@(_kpis.Per1000Km is { } per1000 ? Money(per1000) : "—")</div>
+                <div class="costs-kpi__sub">the classic running-cost figure</div>
+            </div>
+            <div class="costs-kpi">
+                <div class="costs-kpi__label">Per year</div>
+                <div class="costs-kpi__value">@(_kpis.PerYear is { } perYear ? Money(perYear) : "—")</div>
+                <div class="costs-kpi__sub">@(_kpis.PerMonth is { } perMonth ? $"≈ {Money(perMonth)} a month · {_kpis.Years} yr" : "")</div>
+            </div>
+            <div class="costs-kpi">
+                <div class="costs-kpi__label">Recovered from sales</div>
+                <div class="costs-kpi__value costs-kpi__value--good">@Money(_kpis.Recovered)</div>
+                <div class="costs-kpi__sub">@(_kpis.Spent > 0 ? $"{Math.Round(_kpis.Recovered / _kpis.Spent * 100)} % of what you spent" : "")</div>
+            </div>
+        </div>
+
+        <MudGrid Spacing="3">
+            @* ---- Breakdown with drill-down ---- *@
+            <MudItem xs="12" lg="7">
+                <MudPaper Outlined="true" Class="pa-4 costs-card">
+                    <div class="costs-card__head">
+                        <div>
+                            <div class="costs-card__title">Where the money went</div>
+                            <div class="costs-crumbs">
+                                @foreach (var (label, level, link) in Crumbs(_drill))
+                                {
+                                    @if (link)
+                                    {
+                                        <a class="costs-crumb" @onclick="@(() => DrillTo(level))">@label</a><span class="costs-crumb__sep">›</span>
+                                    }
+                                    else if (level < _drill.Level)
+                                    {
+                                        <span class="costs-crumb">@label</span><span class="costs-crumb__sep">›</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="costs-crumb costs-crumb--here">@label</span>
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <MudToggleIconButton @bind-Toggled="_breakdownTable" Icon="@Icons.Material.Filled.DonutLarge" ToggledIcon="@Icons.Material.Filled.TableRows"
+                                             Size="Size.Small" title="Chart / table" />
+                    </div>
+
+                    @if (!_slices.Any(s => s.Amount > 0))
+                    {
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary py-6" Align="Align.Center">Nothing in this selection.</MudText>
+                    }
+                    else if (!_breakdownTable)
+                    {
+                        <div class="costs-breakdown">
+                            <div class="costs-breakdown__chart">
+                                <RenderOnChange Version="_breakdownVersion">
+                                    <ApexCharts.ApexChart @key="@($"donut-{_breakdownVersion}")" TItem="CostSlice" Options="_donutOptions" Height="300"
+                                               OnDataPointSelection="OnSliceSelected">
+                                        <ApexCharts.ApexPointSeries TItem="CostSlice" Items="@(_slices.Where(s => s.Amount > 0).ToList())" Name="Cost" SeriesType="ApexCharts.SeriesType.Donut"
+                                                         XValue="@(s => s.Label)" YValue="@(s => (decimal?)Math.Round(s.Amount, 2))" PointColor="SliceColorOf" />
+                                    </ApexCharts.ApexChart>
+                                </RenderOnChange>
+                            </div>
+                            <div class="costs-legend">
+                                @foreach (var (slice, i) in _slices.Select((s, i) => (s, i)))
+                                {
+                                    var clickable = _drill.Level < 3 && slice.Amount > 0;
+                                    <div class="costs-legend__row @(clickable ? "is-clickable" : null)" @onclick="@(() => { if (clickable) DrillInto(slice); })">
+                                        <span class="costs-legend__dot" style="background: @SliceColor(slice, i);"></span>
+                                        <span class="costs-legend__label">@slice.Label</span>
+                                        <span class="costs-legend__pct">@(slice.Percent > 0 ? $"{Math.Round(slice.Percent)} %" : "")</span>
+                                        <span class="costs-legend__amount @(slice.Amount < 0 ? "is-negative" : null)">@Money(slice.Amount)</span>
+                                        @if (clickable)
+                                        {
+                                            <MudIcon Icon="@Icons.Material.Filled.ChevronRight" Size="Size.Small" Class="costs-legend__chev" />
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary">Click a slice to drill down: source → group → category → items.</MudText>
+                    }
+                    else
+                    {
+                        <MudSimpleTable Dense="true" Hover="true" Elevation="0">
+                            <thead><tr><th>@(_drill.Level switch { 0 => "Source", 1 => "Group", 2 => "Category", _ => "Item" })</th><th class="text-right">Share</th><th class="text-right">Items</th><th class="text-right">Amount</th></tr></thead>
+                            <tbody>
+                                @foreach (var slice in _slices)
+                                {
+                                    <tr class="@(_drill.Level < 3 ? "costs-row-link" : null)" @onclick="@(() => { if (_drill.Level < 3) DrillInto(slice); })">
+                                        <td>@slice.Label</td>
+                                        <td class="text-right">@(slice.Percent > 0 ? $"{Math.Round(slice.Percent, 1)} %" : "—")</td>
+                                        <td class="text-right">@slice.Lines</td>
+                                        <td class="text-right nowrap">@Money(slice.Amount)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </MudSimpleTable>
+                    }
+                </MudPaper>
+            </MudItem>
+
+            @* ---- Bikes (or the category treemap when one bike is selected) ---- *@
+            <MudItem xs="12" lg="5">
+                @if (_bikeId is null)
+                {
+                    <MudPaper Outlined="true" Class="pa-4 costs-card">
+                        <div class="costs-card__head">
+                            <div class="costs-card__title">Per bike</div>
+                            <MudToggleIconButton @bind-Toggled="_bikesTable" Icon="@Icons.Material.Filled.BarChart" ToggledIcon="@Icons.Material.Filled.TableRows"
+                                                 Size="Size.Small" title="Chart / table" />
+                        </div>
+                        @if (!_bikesTable)
+                        {
+                            <div class="costs-chart">
+                                <RenderOnChange Version="_cardsVersion">
+                                    <ApexCharts.ApexChart @key="@($"bikes-{_cardsVersion}")" TItem="CostBikeTotal" Options="_bikesOptions"
+                                               Height="@(Math.Max(220, _bikeTotals.Count * 38 + 60))">
+                                        <ApexCharts.ApexPointSeries TItem="CostBikeTotal" Items="@(_bikeTotals.Where(b => b.Net > 0).ToList())" Name="Net cost" SeriesType="ApexCharts.SeriesType.Bar" ShowDataLabels="true"
+                                                         XValue="@(b => b.Name)" YValue="@(b => (decimal?)Math.Round(b.Net))"
+                                                         PointColor="@(b => b.BikeId is null ? "#9e9e9e" : b.Inactive ? "#90caf9" : "#1e88e5")" />
+                                    </ApexCharts.ApexChart>
+                                </RenderOnChange>
+                            </div>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Lighter bars: archived / sold bikes. Grey: costs with no bike.</MudText>
+                        }
+                        else
+                        {
+                            <MudSimpleTable Dense="true" Hover="true" Elevation="0">
+                                <thead><tr><th>Bike</th><th class="text-right">Km</th><th class="text-right">Per km</th><th class="text-right">Net</th></tr></thead>
+                                <tbody>
+                                    @foreach (var bike in _bikeTotals)
+                                    {
+                                        <tr class="@(bike.BikeId is not null ? "costs-row-link" : null)" @onclick="@(() => SetBike(bike.BikeId ?? CostFilter.NoBike))">
+                                            <td>@bike.Name@(bike.Inactive ? " ·" : "")</td>
+                                            <td class="text-right nowrap">@(bike.Km > 0 ? Numbers.Km(bike.Km) : "—")</td>
+                                            <td class="text-right nowrap">@(bike.PerKm is { } pk ? MoneyPrecise(pk) : "—")</td>
+                                            <td class="text-right nowrap">@Money(bike.Net)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </MudSimpleTable>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Click a bike to focus the whole page on it.</MudText>
+                        }
+                    </MudPaper>
+                }
+                else
+                {
+                    <MudPaper Outlined="true" Class="pa-4 costs-card">
+                        <div class="costs-card__head">
+                            <div>
+                                <div class="costs-card__title">Biggest categories</div>
+                                <div class="costs-card__sub">running costs · without the bike purchase</div>
+                            </div>
+                        </div>
+                        @if (_categories.Count == 0)
+                        {
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary py-6" Align="Align.Center">No running costs in this selection.</MudText>
+                        }
+                        else
+                        {
+                            <div class="costs-chart">
+                                <RenderOnChange Version="_cardsVersion">
+                                    <ApexCharts.ApexChart @key="@($"tree-{_cardsVersion}")" TItem="CategoryTile" Options="_treemapOptions" Height="320">
+                                        <ApexCharts.ApexPointSeries TItem="CategoryTile" Items="@(_categories.ToList())" Name="Cost" SeriesType="ApexCharts.SeriesType.Treemap" ShowDataLabels="true"
+                                                         XValue="@(c => c.Label)" YValue="@(c => (decimal?)Math.Round(c.Amount))" PointColor="@(c => c.Color)" />
+                                    </ApexCharts.ApexChart>
+                                </RenderOnChange>
+                            </div>
+                        }
+                    </MudPaper>
+                }
+            </MudItem>
+
+            @* ---- Timeline (with its own drill-down: sources → groups → categories) ---- *@
+            <MudItem xs="12" lg="8">
+                <MudPaper Outlined="true" Class="pa-4 costs-card">
+                    <div class="costs-card__head">
+                        <div>
+                            <div class="costs-card__title">@(_filter.FromYear is not null && _filter.FromYear == _filter.ToYear ? $"{_filter.FromYear} month by month" : "Year by year")</div>
+                            <div class="costs-crumbs">
+                                @foreach (var (label, level, link) in Crumbs(_timelineDrill))
+                                {
+                                    @if (link)
+                                    {
+                                        <a class="costs-crumb" @onclick="@(() => TimelineTo(level))">@label</a><span class="costs-crumb__sep">›</span>
+                                    }
+                                    else if (level < _timelineDrill.Level)
+                                    {
+                                        <span class="costs-crumb">@label</span><span class="costs-crumb__sep">›</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="costs-crumb costs-crumb--here">@label</span>
+                                    }
+                                }
+                            </div>
+                        </div>
+                        <MudToggleIconButton @bind-Toggled="_timelineTable" Icon="@Icons.Material.Filled.StackedBarChart" ToggledIcon="@Icons.Material.Filled.TableRows"
+                                             Size="Size.Small" title="Chart / table" />
+                    </div>
+                    @if (_timeline.Periods.Count == 0 || _timeline.Series.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary py-6" Align="Align.Center">No dated costs in this selection.</MudText>
+                    }
+                    else if (!_timelineTable)
+                    {
+                        <div class="costs-chart">
+                            <RenderOnChange Version="_timelineVersion">
+                                <ApexCharts.ApexChart @key="@($"timeline-{_timelineVersion}")" TItem="TimelineCell" Options="_timelineOptions" Height="420"
+                                                      OnDataPointSelection="OnTimelineSelected">
+                                    @foreach (var series in _timeline.Series)
+                                    {
+                                        <ApexCharts.ApexPointSeries TItem="TimelineCell" Items="@Cells(_timeline, series)" Name="@series.Label" SeriesType="ApexCharts.SeriesType.Bar"
+                                                                    XValue="@(c => c.Period)" YValue="@(c => (decimal?)c.Value)" Color="@TimelineColor(series)" />
+                                    }
+                                </ApexCharts.ApexChart>
+                            </RenderOnChange>
+                        </div>
+                        @if (_timelineDrill.Level < 3)
+                        {
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary">Click a bar segment to see how it splits: source → group → category → items.</MudText>
+                        }
+                    }
+                    else
+                    {
+                        <MudSimpleTable Dense="true" Hover="true" Elevation="0">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    @foreach (var series in _timeline.Series)
+                                    {
+                                        <th class="text-right @(_timelineDrill.Level < 3 && series.Key != CostAggregator.OtherSeries ? "costs-row-link" : null)"
+                                            @onclick="@(() => { if (_timelineDrill.Level < 3) DrillTimeline(series.Key); })">@series.Label</th>
+                                    }
+                                    <th class="text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (var p = 0; p < _timeline.Periods.Count; p++)
+                                {
+                                    var period = p;
+                                    if (_timeline.Total(period) == 0 && _timeline.Series.All(s => s.Values[period] == 0))
+                                    {
+                                        continue;
+                                    }
+                                    <tr>
+                                        <td>@_timeline.Periods[period]</td>
+                                        @foreach (var series in _timeline.Series)
+                                        {
+                                            <td class="text-right nowrap">@(series.Values[period] != 0 ? Money(series.Values[period]) : "—")</td>
+                                        }
+                                        <td class="text-right nowrap"><strong>@Money(_timeline.Total(period))</strong></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </MudSimpleTable>
+                    }
+                </MudPaper>
+            </MudItem>
+
+            @* ---- Parts' running cost per 1000 km (follows every filter) ---- *@
+            <MudItem xs="12" lg="4">
+                <MudPaper Outlined="true" Class="pa-4 costs-card">
+                    <div class="costs-card__head">
+                        <div>
+                            <div class="costs-card__title">Parts per 1000 km</div>
+                            <div class="costs-card__sub">spent on each category ÷ km ridden · @PeriodLabel · @BikeLabel</div>
+                        </div>
+                    </div>
+                    @if (_per1000.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary py-6" Align="Align.Center">
+                            @(_kpis.Km > 0 ? "No parts or services in this selection." : "No ride km in this selection.")
+                        </MudText>
+                    }
+                    else
+                    {
+                        var max = _per1000.Max(p => p.Per1000Km);
+                        @foreach (var item in _per1000)
+                        {
+                            <div class="costs-wear">
+                                <MudIcon Icon="@ComponentCategoryIcons.Icon(item.Icon ?? ComponentCategory.Other)" Size="Size.Small" />
+                                <div class="costs-wear__body">
+                                    <div class="costs-wear__top">
+                                        <span>@item.Category</span>
+                                        <strong>@Money(item.Per1000Km)</strong>
+                                    </div>
+                                    <div class="costs-wear__bar"><span style="width: @((item.Per1000Km / max * 100m).ToString("0", System.Globalization.CultureInfo.InvariantCulture))%;"></span></div>
+                                    <div class="costs-wear__sub">@Bought(item) · @Money(item.Amount) over @Numbers.Km(_kpis.Km)</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </MudPaper>
+            </MudItem>
+
+            @* ---- Ledger ---- *@
+            <MudItem xs="12">
+                <MudPaper Outlined="true" Class="pa-4 costs-card">
+                    <div class="costs-card__head">
+                        <div>
+                            <div class="costs-card__title">Every cost · @PeriodLabel · @BikeLabel</div>
+                            <div class="costs-card__sub">Split items show their share; sales are negative.</div>
+                        </div>
+                    </div>
+                    @if (_ledger.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary py-6" Align="Align.Center">Nothing in this selection.</MudText>
+                    }
+                    else
+                    {
+                        <MudExpansionPanels MultiExpansion="true" Elevation="0" Class="costs-ledger">
+                            @foreach (var group in _ledger)
+                            {
+                                <MudExpansionPanel Dense="true">
+                                    <TitleContent>
+                                        <div class="d-flex align-center" style="gap: 10px;">
+                                            <span class="costs-legend__dot" style="background: @SourceColors[group.Source];"></span>
+                                            <span><strong>@group.Group</strong> <span class="mud-text-secondary">· @group.Source · @group.Lines.Count</span></span>
+                                            <MudSpacer />
+                                            <strong class="nowrap @(group.Total < 0 ? "is-negative" : null)">@Money(group.Total)</strong>
+                                        </div>
+                                    </TitleContent>
+                                    <ChildContent>
+                                        <MudSimpleTable Dense="true" Hover="true" Elevation="0">
+                                            <tbody>
+                                                @foreach (var line in group.Lines)
+                                                {
+                                                    <tr>
+                                                        <td class="nowrap mud-text-secondary" style="width: 100px;">@(line.Date?.ToString("yyyy-MM-dd") ?? "—")</td>
+                                                        <td>
+                                                            <div class="d-flex align-center" style="gap: 6px;">
+                                                                @if (line.ComponentCategory is { } cc)
+                                                                {
+                                                                    <MudIcon Icon="@ComponentCategoryIcons.Icon(cc)" Size="Size.Small" />
+                                                                }
+                                                                else if (line.ExpenseCategory is { } ec)
+                                                                {
+                                                                    <MudIcon Icon="@ExpenseCategoryIcons.Icon(ec)" Size="Size.Small" />
+                                                                }
+                                                                <MudLink Href="@ItemHref(line)">@line.ItemName</MudLink>
+                                                                @if (line.Kind == CostKind.Resale)
+                                                                {
+                                                                    <MudChip T="string" Size="Size.Small" Color="Color.Success" Variant="Variant.Text">sold</MudChip>
+                                                                }
+                                                            </div>
+                                                            @if (line.Note is not null || (_bikeId is null && BikeName(line.BikeId) is not null))
+                                                            {
+                                                                <div class="costs-ledger__note">
+                                                                    @if (_bikeId is null && BikeName(line.BikeId) is { } bikeName)
+                                                                    {
+                                                                        <span>@bikeName</span>@(line.Note is not null ? " · " : "")
+                                                                    }
+                                                                    @line.Note
+                                                                </div>
+                                                            }
+                                                        </td>
+                                                        <td class="mud-text-secondary">@line.Category</td>
+                                                        <td class="text-right nowrap">
+                                                            @if (line.Share < 1m)
+                                                            {
+                                                                <span class="mud-text-secondary costs-ledger__share">@Math.Round(line.Share * 100) % of @Money(line.FullAmount)</span>
+                                                            }
+                                                            <strong class="@(line.Amount < 0 ? "is-negative" : null)">@MoneyPrecise(line.Amount)</strong>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </MudSimpleTable>
+                                    </ChildContent>
+                                </MudExpansionPanel>
+                            }
+                        </MudExpansionPanels>
+                        <div class="costs-ledger__total">
+                            <span>Total</span><strong>@Money(_kpis.Net)</strong>
+                        </div>
+                        @if (_kpis.PerKm is { } perKmTotal)
+                        {
+                            <div class="costs-ledger__total costs-ledger__total--sub">
+                                <span>@Numbers.Km(_kpis.Km) · @PeriodLabel</span><span>@MoneyPrecise(perKmTotal) / km</span>
+                            </div>
+                        }
+                    }
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </div>
+}

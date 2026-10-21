@@ -1,0 +1,14 @@
+@* Re-renders its content only when Version changes. A parent re-render otherwise pushes fresh parameters into every
+   chart below it, and ApexCharts redraws (and re-animates) them — e.g. all cards flickering on one card's drill-down. *@
+@ChildContent
+
+@code {
+    [Parameter, EditorRequired] public object Version { get; set; } = default!;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private object? _rendered;
+
+    protected override bool ShouldRender() => !Equals(_rendered, Version);
+
+    protected override void OnAfterRender(bool firstRender) => _rendered = Version;
+}

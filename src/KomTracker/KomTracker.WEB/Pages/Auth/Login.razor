@@ -26,9 +26,9 @@
             <section class="lp-hero">
                 <div class="lp-hero__bg" aria-hidden="true"></div>
                 <div class="lp-hero__inner">
-                    <a class="lp-announce reveal" href="#garage" data-scroll-to="garage">
-                        <span class="lp-announce__tag">New in 2.0</span>
-                        <span class="lp-announce__text">Bike Tracker — your garage, every kilometre accounted for</span>
+                    <a class="lp-announce reveal" href="#costs" data-scroll-to="costs">
+                        <span class="lp-announce__tag">New in 2.1</span>
+                        <span class="lp-announce__text">Costs — what cycling really costs you, down to the last chain</span>
                         <span class="lp-announce__arrow" aria-hidden="true">→</span>
                     </a>
                     <p class="lp-eyebrow reveal">For riders who don't let go</p>
@@ -378,6 +378,51 @@
                         <div class="lp-ticket">
                             <div class="lp-ticket__row"><strong>Fork service</strong><span>650 zł</span></div>
                             <div class="lp-ticket__row lp-ticket__row--muted"><span>Termi · 2023-11-28</span><span>at 2 399 km</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                @* 2.1 — Costs *@
+                <div class="lp-feature lp-feature--reverse lp-costs reveal" id="costs">
+                    <div class="lp-feature__text">
+                        <div class="lp-kicker"><MudIcon Icon="@Icons.Material.Filled.PieChart" Size="Size.Small" /> New in 2.1 · Costs</div>
+                        <h2 class="lp-h2">What does cycling <span class="lp-accent">really cost you?</span></h2>
+                        <p class="lp-lead lp-costs__lead">
+                            Bikes, parts, services, every tube and pair of socks — added up, minus what you sold. Per km,
+                            per year, per bike. A wheel that rode on two bikes is split by the kilometres it did on each.
+                        </p>
+                        <p class="lp-lead lp-costs__lead">
+                            Click any slice to dig in — from "components" to drivetrain to that one chain — and see what
+                            tyres, chains and pads really cost you per 1000 km.
+                        </p>
+                        <div class="lp-gcard__mini">
+                            <span class="lp-gpill">Net of sales</span>
+                            <span class="lp-gpill">Per bike</span>
+                            <span class="lp-gpill">Year by year</span>
+                            <span class="lp-gpill lp-gpill--hot">Per 1000 km</span>
+                        </div>
+                    </div>
+                    <div class="lp-feature__visual">
+                        <div class="lp-odo lp-costs__card">
+                            <div class="lp-odo__bike"><MudIcon Icon="@Icons.Material.Filled.PedalBike" Size="Size.Small" /> All bikes · 2025</div>
+                            <div class="lp-costs__top">
+                                <div class="lp-costs__donut" aria-hidden="true">
+                                    <div class="lp-costs__hole"><span>Net</span><strong><span data-count="12640">12 640</span> zł</strong></div>
+                                </div>
+                                <ul class="lp-costs__legend">
+                                    <li><i style="background:#fc4c02"></i>Components<b>5 480 zł</b></li>
+                                    <li><i style="background:#1e88e5"></i>Bikes<b>3 900 zł</b></li>
+                                    <li><i style="background:#00897b"></i>Expenses<b>2 610 zł</b></li>
+                                    <li><i style="background:#8e24aa"></i>Services<b>650 zł</b></li>
+                                </ul>
+                            </div>
+                            <div class="lp-odo__sub"><span><strong>0.98 zł</strong> per km</span><span class="lp-odo__dot">·</span><span><strong data-count="12950">12 950</strong> km ridden</span></div>
+                            <div class="lp-costs__wear">
+                                <div class="lp-costs__wear-head">Parts per 1000 km</div>
+                                <div class="lp-costs__bar"><span>Tyres <em>4 parts</em></span><b>34 zł</b><i style="width:100%"></i></div>
+                                <div class="lp-costs__bar"><span>Chains <em>3 parts</em></span><b>12 zł</b><i style="width:35%"></i></div>
+                                <div class="lp-costs__bar"><span>Brake pads <em>6 parts</em></span><b>10 zł</b><i style="width:29%"></i></div>
+                            </div>
                         </div>
                     </div>
                 </div>
