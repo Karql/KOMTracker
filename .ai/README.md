@@ -118,7 +118,7 @@ Dashboard, Koms, Map, Ranking, Koms changes, Battle Field, Account, FAQ, Login. 
 
 - **Repo = English; chat = Polish.** Plans live in `.ai/plans/` (dated, checklist format with a Decisions section). This file is the canonical overview.
 - Shared **`DbContext`/`IKOMUnitOfWork` scope per Quartz run** — mind cross-athlete state (`ClearChangeTracker`).
-- **Last sign-in = `user.last_login_at`** (UTC, nullable — set from 2.0.1 on), stamped by `ConnectCommand` via `IUserService.RecordLoginAsync` on every completed Strava login. Don't read activity from `athlete.audit_md` / `token.audit_md` — `RefreshAthletesJob` and token refreshes rewrite them daily.
+- **Last sign-in = `user.last_login_at`** (UTC, nullable — set from 2.0.1 on), stamped by `ConnectCommand` via `IUserService.RecordLoginAsync` on every completed Strava login. That is rare: the IdP cookie is persistent (ASP.NET Identity default, 14 days sliding), so returning users re-login silently without Strava. **Last activity = `user.last_seen_at`** (from 2.1.1): `Identity/Services/ProfileService` (IdentityServer's profile service) stamps it from `IsActiveAsync` — called on every token issued / refreshed, silent re-logins included — at most hourly, best effort. Don't read activity from `athlete.audit_md` / `token.audit_md` — `RefreshAthletesJob` and token refreshes rewrite them daily.
 - `EFAthleteRepository` writes (athlete/token/stats) use immediate FlexLabs `Upsert().RunAsync()` (not tracked).
 - Audit columns auto-stamped in `EFKOMUnitOfWork.SaveChangesAsync`.
 - `GetLastKomsChangesAsync` orders by `koms_summary_id` (PK index), not the unindexed `audit_cd` — do not "fix" back.

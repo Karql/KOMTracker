@@ -1,4 +1,9 @@
-﻿## 2.1.0 (2026-10-20)
+﻿## 2.1.1 (2026-10-20)
+
+### Features
+- The app now also remembers when each user was **last active** (`last_seen_at`, updated at most hourly) — unlike the last sign-in, it moves even when a remembered session skips the Strava login for weeks.
+
+## 2.1.0 (2026-10-20)
 
 ### Features
 - **Bike Tracker → Costs** — what cycling really costs you: net cost, cost per km and per year, a drill-down donut and year-by-year bars (source → group → category → item), totals per bike, parts' cost per 1000 km and a full list of every cost. Filter by period, bike and source, net or gross of sales. Parts used on several bikes are split by the km they did on each. Also on the landing page.

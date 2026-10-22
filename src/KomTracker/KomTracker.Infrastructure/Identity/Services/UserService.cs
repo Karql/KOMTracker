@@ -117,7 +117,7 @@ public class UserService : IUserService
             return;
         }
 
-        user.LastLoginAt = DateTime.UtcNow;
+        user.LastLoginAt = user.LastSeenAt = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
     }
 

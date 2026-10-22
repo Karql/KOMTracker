@@ -78,5 +78,8 @@ public class UserEntityTypeConfiguration
 
         builder.Property(x => x.LastLoginAt)
             .HasColumnName("last_login_at");
+
+        builder.Property(x => x.LastSeenAt)
+            .HasColumnName("last_seen_at");
     }
 }

@@ -53,6 +53,7 @@ public static class IdentityDependencyInjection
             .AddInMemoryApiScopes(GetApiScopes())
             .AddInMemoryClients(GetClients(configuration))
             .AddAspNetIdentity<UserEntity>()
+            .AddProfileService<ProfileService>()
             .AddEndpoint<LoginEndpoint>(EndpointNames.Login, ProtocolRoutePaths.Loing)
             .AddEndpoint<LogoutEndpoint>(EndpointNames.Logout, ProtocolRoutePaths.Logout)
             .AddEndpoint<ConnectEndpoint>(EndpointNames.Connect, ProtocolRoutePaths.Connect)

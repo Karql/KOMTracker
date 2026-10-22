@@ -17,4 +17,10 @@ public class UserEntity : IdentityUser
 
     /// <summary>When the user last signed in (completed the Strava login), UTC. Null = not since this was introduced.</summary>
     public DateTime? LastLoginAt { get; set; }
+
+    /// <summary>
+    /// When the user was last active, UTC — refreshed (at most hourly) whenever a token is issued or refreshed, incl. the
+    /// silent re-logins that never reach Strava, so it moves even when <see cref="LastLoginAt"/> doesn't for weeks.
+    /// </summary>
+    public DateTime? LastSeenAt { get; set; }
 }
