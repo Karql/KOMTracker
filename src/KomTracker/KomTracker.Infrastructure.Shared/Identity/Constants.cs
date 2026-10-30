@@ -50,6 +50,12 @@ public static class Constants
         public const string Password = "password";
     }
 
+    /// <summary>Role names as the WEB sees them in the ID token (the same values as <c>Application.Constants.Roles</c>).</summary>
+    public static class Roles
+    {
+        public const string Admin = "admin";
+    }
+
     public static class OAuth2
     {
         public const string ClientId = "kom-tracker";

@@ -7,7 +7,10 @@ using KomTracker.Application.Commands.ServiceRecord;
 using KomTracker.Application.Commands.Stats;
 using KomTracker.Application.Commands.Strava;
 using KomTracker.Application.Commands.Tracking;
+using KomTracker.Application.Queries.SystemStats;
+using KomTracker.Domain.Entities.SystemStats;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using static KomTracker.Application.Constants;
 
 namespace KomTracker.API.Controllers;
@@ -24,6 +27,12 @@ public class AdminController : BaseApiController<AdminController>
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
     }
+
+    /// <summary>The System → Stats snapshot: counts, people, Bike Tracker usage, sync health (D-SYS-1).</summary>
+    [HttpGet("system-stats")]
+    [SwaggerResponse(StatusCodes.Status200OK, type: typeof(SystemStatsReport))]
+    public async Task<IActionResult> GetSystemStats(CancellationToken cancellationToken)
+        => Ok(await _mediator.Send(new GetSystemStatsQuery(), cancellationToken));
 
     [HttpPut("track-koms")]
     public async Task<ActionResult> TrackKoms(CancellationToken cancellationToken)

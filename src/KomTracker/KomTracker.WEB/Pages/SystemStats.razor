@@ -1,0 +1,206 @@
+@page "/system/stats"
+@attribute [Authorize(Roles = KomTracker.Infrastructure.Shared.Identity.Constants.Roles.Admin)]
+@using KomTracker.Domain.Entities.SystemStats
+@using KomTracker.WEB.Infrastructure
+
+<PageTitle>System stats</PageTitle>
+
+@if (!_loaded || _report is null)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    var c = _report.Counts;
+    var h = _report.Health;
+
+    <div class="sys">
+        <div class="sys-head">
+            <MudText Typo="Typo.h5">What's happening in KOM Tracker</MudText>
+            <span class="sys-muted" title="@Exact(_report.GeneratedAt)">Snapshot @Exact(_report.GeneratedAt) · "new" = last @SystemStatsReport.RecentDays days</span>
+        </div>
+
+        @* ---- App ---- *@
+        <div class="sys-section">App</div>
+        <div class="sys-tiles">
+            <div class="sys-tile sys-tile--hero">
+                <div class="sys-tile__label">Users</div>
+                <div class="sys-tile__value">@N(c.Users.Total)</div>
+                <div class="sys-tile__sub">@Recent(c.Users)</div>
+                <div class="sys-active">
+                    <span><b>@N(c.ActiveDay)</b> today</span><span><b>@N(c.ActiveWeek)</b> this week</span><span><b>@N(c.ActiveMonth)</b> in 30 days</span>
+                </div>
+            </div>
+            <div class="sys-tile"><div class="sys-tile__label">Segments</div><div class="sys-tile__value">@N(c.Segments.Total)</div><div class="sys-tile__sub">@Recent(c.Segments)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">KOMs held now</div><div class="sys-tile__value">@N(c.KomsHeld)</div><div class="sys-tile__sub">by all users together</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Activities</div><div class="sys-tile__value">@N(c.Activities.Total)</div><div class="sys-tile__sub">@Numbers.Km(c.ActivityKm) · +@N(c.Activities.Recent) rides (@Numbers.Km(c.RecentActivityKm)) in 30 days</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Clubs</div><div class="sys-tile__value">@N(c.Clubs.Total)</div><div class="sys-tile__sub">@Recent(c.Clubs)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Strava bikes</div><div class="sys-tile__value">@N(c.StravaBikes.Total)</div><div class="sys-tile__sub">@Recent(c.StravaBikes)</div></div>
+        </div>
+
+        @* ---- KOMs in the last 30 days ---- *@
+        <div class="sys-section">KOMs · last @SystemStatsReport.RecentDays days</div>
+        <div class="sys-tiles sys-tiles--small">
+            <div class="sys-tile"><div class="sys-tile__label">New</div><div class="sys-tile__value sys-good">+@N(c.NewKoms)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Improved</div><div class="sys-tile__value sys-good">@N(c.ImprovedKoms)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Returned</div><div class="sys-tile__value sys-good">@N(c.ReturnedKoms)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Lost</div><div class="sys-tile__value sys-bad">−@N(c.LostKoms)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Taken from users</div><div class="sys-tile__value">@N(c.Takeovers)</div><div class="sys-tile__sub">takeovers between app users</div></div>
+        </div>
+
+        @* ---- Bike Tracker ---- *@
+        <div class="sys-section">Bike Tracker · @N(_report.BikeTrackerUsers.Count) of @N(c.Users.Total) users</div>
+        <div class="sys-tiles sys-tiles--small">
+            <div class="sys-tile"><div class="sys-tile__label">Bikes</div><div class="sys-tile__value">@N(c.Bikes.Total)</div><div class="sys-tile__sub">@Recent(c.Bikes)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Components</div><div class="sys-tile__value">@N(c.Components.Total)</div><div class="sys-tile__sub">@Recent(c.Components)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Installations</div><div class="sys-tile__value">@N(c.Installations.Total)</div><div class="sys-tile__sub">@Recent(c.Installations)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Services</div><div class="sys-tile__value">@N(c.Services.Total)</div><div class="sys-tile__sub">@Recent(c.Services)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Expenses</div><div class="sys-tile__value">@N(c.Expenses.Total)</div><div class="sys-tile__sub">@Recent(c.Expenses)</div></div>
+            <div class="sys-tile"><div class="sys-tile__label">Warehouses</div><div class="sys-tile__value">@N(c.Warehouses.Total)</div><div class="sys-tile__sub">@Recent(c.Warehouses)</div></div>
+        </div>
+
+        <MudGrid Spacing="3" Class="mt-1">
+            @* ---- People ---- *@
+            <MudItem xs="12" md="6">
+                <MudPaper Outlined="true" Class="pa-4 sys-card">
+                    <div class="sys-card__title">New users</div>
+                    @foreach (var user in _report.NewUsers)
+                    {
+                        <div class="sys-person">
+                            <MudAvatar Size="Size.Small"><MudImage Src="@user.Avatar" /></MudAvatar>
+                            <span class="sys-person__name">@user.Name</span>
+                            <span class="sys-person__meta" title="@Exact(user.Joined)">joined @Ago(user.Joined)</span>
+                            <span class="sys-person__meta" title="@Exact(user.LastSeen)">seen @Ago(user.LastSeen)</span>
+                        </div>
+                    }
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudPaper Outlined="true" Class="pa-4 sys-card">
+                    <div class="sys-card__title">Recently active</div>
+                    @if (_report.ActiveUsers.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="sys-muted py-4">Nobody seen yet — activity is recorded from 2.1.1 on.</MudText>
+                    }
+                    @foreach (var user in _report.ActiveUsers)
+                    {
+                        <div class="sys-person">
+                            <MudAvatar Size="Size.Small"><MudImage Src="@user.Avatar" /></MudAvatar>
+                            <span class="sys-person__name">@user.Name</span>
+                            <span class="sys-person__meta" title="@Exact(user.LastSeen)">seen @Ago(user.LastSeen)</span>
+                            <span class="sys-person__meta" title="@Exact(user.LastLogin)">Strava login @Ago(user.LastLogin)</span>
+                        </div>
+                    }
+                </MudPaper>
+            </MudItem>
+
+            @* ---- Bike Tracker users ---- *@
+            <MudItem xs="12" lg="7">
+                <MudPaper Outlined="true" Class="pa-4 sys-card">
+                    <div class="sys-card__title">Who uses Bike Tracker</div>
+                    <div class="sys-scroll">
+                        <MudSimpleTable Dense="true" Hover="true" Elevation="0">
+                            <thead>
+                                <tr><th>User</th><th class="text-right">Bikes</th><th class="text-right">Components</th><th class="text-right">Installs</th>
+                                    <th class="text-right">Services</th><th class="text-right">Expenses</th><th class="text-right">Warehouses</th><th class="text-right">Last change</th></tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in _report.BikeTrackerUsers)
+                                {
+                                    <tr>
+                                        <td class="nowrap">@user.Name</td>
+                                        <td class="text-right">@N(user.Bikes)</td>
+                                        <td class="text-right">@N(user.Components)</td>
+                                        <td class="text-right">@N(user.Installations)</td>
+                                        <td class="text-right">@N(user.Services)</td>
+                                        <td class="text-right">@N(user.Expenses)</td>
+                                        <td class="text-right">@N(user.Warehouses)</td>
+                                        <td class="text-right nowrap" title="@Exact(user.LastChange)">@Ago(user.LastChange)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </MudSimpleTable>
+                    </div>
+                </MudPaper>
+            </MudItem>
+
+            @* ---- Recently added ---- *@
+            <MudItem xs="12" lg="5">
+                <MudPaper Outlined="true" Class="pa-4 sys-card">
+                    <div class="sys-card__title">Just added in Bike Tracker</div>
+                    @if (_report.RecentItems.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="sys-muted py-4">Nothing new in the last @SystemStatsReport.RecentDays days.</MudText>
+                    }
+                    @foreach (var item in _report.RecentItems)
+                    {
+                        <div class="sys-feed">
+                            <MudIcon Icon="@ItemIcon(item.Type)" Size="Size.Small" Class="sys-feed__icon" />
+                            <div class="sys-feed__body">
+                                <div class="sys-feed__name">@item.Name</div>
+                                <div class="sys-feed__meta">@item.Type@(item.Detail is null ? "" : $" · {item.Detail}") · @item.User</div>
+                            </div>
+                            <span class="sys-person__meta" title="@Exact(item.Added)">@Ago(item.Added)</span>
+                        </div>
+                    }
+                </MudPaper>
+            </MudItem>
+
+            @* ---- Health ---- *@
+            <MudItem xs="12" md="6">
+                <MudPaper Outlined="true" Class="pa-4 sys-card">
+                    <div class="sys-card__title">System health</div>
+                    @foreach (var f in Freshnesses(h))
+                    {
+                        var stale = IsStale(f);
+                        <div class="sys-health">
+                            <span class="sys-dot @(stale ? "is-stale" : "is-ok")"></span>
+                            <span class="sys-health__label">@f.Label <span class="sys-muted">· @f.Note</span></span>
+                            <span class="sys-health__value" title="@Exact(f.At)">@Ago(f.At)</span>
+                        </div>
+                    }
+                    <div class="sys-health">
+                        <span class="sys-dot @(h.WebhooksPending > 0 && h.OldestPendingWebhook < _report.GeneratedAt.AddHours(-2) ? "is-stale" : "is-ok")"></span>
+                        <span class="sys-health__label">Strava webhooks <span class="sys-muted">· @N(h.WebhooksDay) today, @N(h.WebhooksWeek) this week</span></span>
+                        <span class="sys-health__value" title="@Exact(h.OldestPendingWebhook)">@(h.WebhooksPending == 0 ? "queue empty" : $"{N(h.WebhooksPending)} waiting · oldest {Ago(h.OldestPendingWebhook)}")</span>
+                    </div>
+
+                    <div class="sys-subtitle">Activity syncs · last 7 days</div>
+                    @if (h.Syncs.Count == 0)
+                    {
+                        <MudText Typo="Typo.body2" Class="sys-muted">No sync runs in the last 7 days.</MudText>
+                    }
+                    <div class="d-flex flex-wrap" style="gap: 6px;">
+                        @foreach (var sync in h.Syncs)
+                        {
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined" Color="@SyncColor(sync.Status)">@sync.Type · @sync.Status · @N(sync.Count)</MudChip>
+                        }
+                    </div>
+
+                    @if (h.LostStravaAccess.Count > 0)
+                    {
+                        <div class="sys-subtitle">Lost Strava access (latest sync had no valid token)</div>
+                        <div class="d-flex flex-wrap" style="gap: 6px;">
+                            @foreach (var user in h.LostStravaAccess)
+                            {
+                                <MudChip T="string" Size="Size.Small" Color="Color.Error" Variant="Variant.Text">@user.Name</MudChip>
+                            }
+                        </div>
+                    }
+                </MudPaper>
+            </MudItem>
+
+            @* ---- Growth ---- *@
+            <MudItem xs="12" md="6">
+                <MudPaper Outlined="true" Class="pa-4 sys-card">
+                    <div class="sys-card__title">Users over time</div>
+                    <div class="sys-muted mb-2">all users by the month they first connected · last 24 months</div>
+                    <ApexCharts.ApexChart TItem="SystemMonth" Options="_growthOptions" Height="280">
+                        <ApexCharts.ApexPointSeries TItem="SystemMonth" Items="_report.UsersByMonth" Name="Users" SeriesType="ApexCharts.SeriesType.Area"
+                                                    XValue="@(m => m.Month.ToString("MMM yy"))" YValue="@(m => (decimal?)m.Total)" />
+                    </ApexCharts.ApexChart>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </div>
+}

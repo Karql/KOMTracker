@@ -34,6 +34,7 @@ public static class PersistenceDependencyInjection
         services.AddScoped<IAthleteSyncRepository, EFAthleteSyncRepository>();
         services.AddScoped<IActivitySyncHistoryRepository, EFActivitySyncHistoryRepository>();
         services.AddScoped<IWebhookEventRepository, EFWebhookEventRepository>();
+        services.AddScoped<ISystemStatsRepository, EFSystemStatsRepository>();
         services.AddDbContext<KOMDBContext>(options => options.UseNpgsql(configuration.GetConnectionString("DB")));
 
         return services;

@@ -94,6 +94,7 @@ public static class IdentityDependencyInjection
         profile.UserClaims.Add(Claims.LastName);
         profile.UserClaims.Add(Claims.Username);
         profile.UserClaims.Add(Claims.Avatar);
+        profile.UserClaims.Add(JwtClaimTypes.Role);   // into the ID token too, so the WEB can show admin-only menus (D-SYS-2)
 
         return new IdentityResource[]
         {

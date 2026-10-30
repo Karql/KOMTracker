@@ -45,6 +45,9 @@ public static class DependencyInjection
             options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.Scopes.Profile);
             options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.Scopes.Api);
             options.ProviderOptions.DefaultScopes.Add(IdentityConstants.OAuth2.Scopes.OfflineAccess);
+
+            // The ID token carries "role" (D-SYS-2) — map it so [Authorize(Roles)] / AuthorizeView Roles work.
+            options.UserOptions.RoleClaim = "role";
         });
 
         services.AddScoped<ReauthenticateOnFailureHandler>();

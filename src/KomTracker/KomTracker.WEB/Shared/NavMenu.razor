@@ -17,5 +17,10 @@
         <MudNavLink Href="bike-tracker/strava-bikes" Icon="@Icons.Material.Filled.CloudSync">Strava bikes</MudNavLink>
         <MudNavLink Href="bike-tracker/strava-activities" Icon="@Icons.Material.Filled.DirectionsBike">Strava activities</MudNavLink>
     </MudNavGroup>
+    <AuthorizeView Roles="@KomTracker.Infrastructure.Shared.Identity.Constants.Roles.Admin">
+        <MudNavGroup Title="System" Icon="@Icons.Material.Filled.AdminPanelSettings" Expanded="true">
+            <MudNavLink Href="system/stats" Icon="@Icons.Material.Filled.QueryStats">Stats</MudNavLink>
+        </MudNavGroup>
+    </AuthorizeView>
     <MudNavLink Href="faq" Icon="@Icons.Material.Filled.QuestionAnswer">FAQ</MudNavLink>
 </MudNavMenu>

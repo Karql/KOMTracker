@@ -1,4 +1,9 @@
-﻿## 2.1.1 (2026-10-20)
+﻿## UPCOMMING
+
+### Features
+- **System → Stats** (admins only) — one page to see what's happening in the app: users, segments, KOMs, activities, clubs and Bike Tracker totals with what's new in the last 30 days, newest and recently active users, who uses Bike Tracker and what was just added, plus the health of the Strava syncs, webhooks and scheduled refreshes.
+
+## 2.1.1 (2026-10-20)
 
 ### Features
 - The app now also remembers when each user was **last active** (`last_seen_at`, updated at most hourly) — unlike the last sign-in, it moves even when a remembered session skips the Strava login for weeks.
